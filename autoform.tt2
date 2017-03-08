@@ -1,0 +1,55 @@
+<head>
+<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+</head>
+
+<center>
+<div style = "margin: 50px ">
+
+<form action = "" method = "POST" name = "dataform">
+
+<table>
+
+[% IF last_error_text %]
+	<tr><td colspan="2">[% last_error_text %]<br><br></td></tr>
+[% END %]
+
+[% content_text %]
+
+<tr><td colspan="2">
+[% IF step > 1 %]
+	<input type="button" value="<- prev" onclick="prev_button();">
+	&nbsp;
+[% END %]
+[% IF (step < max_step) && (step > 0) %]
+	<input type="button" value="next ->" onclick="next_button();">
+[% END %]
+[% IF step == 0 %]
+	<input type="button" value="new application ->" onclick="new_button();">
+[% END %]
+</td></tr></table>
+
+</form>
+
+<script>
+
+function next_button() {
+	document.dataform.action = '[% addr %]?t=[% token %]&a=forward';
+	document.dataform.submit();
+};
+
+function prev_button() {
+	document.dataform.action = '[% addr %]?t=[% token %]&a=back';
+	document.dataform.submit();
+};
+
+function new_button() {
+	document.dataform.action = '[% addr %]';
+	document.dataform.submit();
+};
+
+[% IF last_error_name %]
+	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
+[% END %]
+</script>
+
+</div>
