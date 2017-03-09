@@ -29,6 +29,11 @@ sub get_content_rules
 					'table' => 'Appointments',
 					'name' => 'CenterID',
 					},
+				'auto_db' => {
+					'table' => 'AutoAppointments',
+					'name' => 'CenterID',
+					'transfer' => 'simple',
+				},
 			},
 		],
 		'2' => [
@@ -43,6 +48,11 @@ sub get_content_rules
 					'table' => 'AppData',
 					'name' => 'LName',
 					},
+				'auto_db' => {
+					'table' => 'AutoAppData',
+					'name' => 'LName',
+					'transfer' => 'simple',
+				},
 			},
 			{
 				'model' => 'primitive',
@@ -55,6 +65,11 @@ sub get_content_rules
 					'table' => 'AppData',
 					'name' => 'FName',
 					},
+				'auto_db' => {
+					'table' => 'AutoAppData',
+					'name' => 'FName',
+					'transfer' => 'simple',
+				},
 			},
 			#{
 			#	'model' => 'primitive',
@@ -83,6 +98,11 @@ sub get_content_rules
 					'table' => 'AppData',
 					'name' => 'RLName',
 					},
+				'auto_db' => {
+					'table' => 'AutoAppData',
+					'name' => 'RLName',
+					'transfer' => 'simple',
+				},
 			},
 			{
 				'model' => 'primitive',
@@ -95,6 +115,11 @@ sub get_content_rules
 					'table' => 'AppData',
 					'name' => 'RFName',
 					},
+				'auto_db' => {
+					'table' => 'AutoAppData',
+					'name' => 'RFName',
+					'transfer' => 'simple',
+				},
 			},
 			{
 				'model' => 'primitive',
@@ -104,11 +129,15 @@ sub get_content_rules
 				'comment' => '',
 				'check' => 'zN',
 				'db' => {
-					'auto_tbl' => '',
-					
 					'table' => 'AppData',
 					'name' => 'RMName',
 					},
+				'auto_db' => {
+					'table' => 'AutoAppData',
+					'name' => 'RMName',
+					'transfer' => 'simple',
+					# 'transfer' => 'x|x|x|1|x|x|x', <= visa, mezzi
+				},
 			},
 			#{	type => 'radio',
 			#	params => {
@@ -231,7 +260,7 @@ sub get_token_and_create_new_form_if_need
 	# возможные ошибки
 	else {
 		my ($token_exist, $finished) = $vars->db->sel1("
-			SELECT ID, Finished FROM AutoformToken WHERE Token = ?", $token);
+			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token);
 	
 		if (length($token) != 64) {
 			$token = '01';
@@ -255,23 +284,20 @@ sub create_clear_form
 	my $centerid = shift;
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments',$vars);
-	my $maxnum = $appobj->getLastAppNum($vars, $centerid);
-	
 	$vars->db->query("
-		INSERT INTO Appointments (AppNum, RDate, Login, Draft) VALUES (?, now(), ?, 1)", {}, 
-		$maxnum, $vars->get_session->{'login'});
+		INSERT INTO AutoAppointments (RDate, Login, Draft) VALUES (now(), ?, 1)", {}, 
+		$vars->get_session->{'login'});
 		
 	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
 	
 	$vars->db->query("
-		INSERT INTO AppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
+		INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
 		$app_id);
 		
 	my $appdata_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
 	
 	$vars->db->query("
-		UPDATE AutoformToken SET AppID = ?, AppDataID = ? WHERE Token = ?", {}, 
+		UPDATE AutoToken SET AutoAppID = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
 		$app_id, $appdata_id, $token);
 }
 	
@@ -283,7 +309,7 @@ sub save_new_token_in_db
 	my $vars = $self->{'VCS::Vars'};
 
 	$vars->db->query("
-		INSERT INTO AutoformToken (Token, AppID, AppDataID, Step, LastError, Finished, Draft) VALUES (?, 0, 0, 1, '', 0, 0)", {}, 
+		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, Step, LastError, Finished, Draft) VALUES (?, 0, 0, 1, '', 0, 0)", {}, 
 		$token);
 	
 	return $token;
@@ -304,7 +330,7 @@ sub token_generation
 			$token .= @alph[int(rand(15))];
 		}
 		$token_existing = $vars->db->sel1("
-			SELECT ID FROM AutoformToken WHERE Token = ?", $token) || 0;
+			SELECT ID FROM AutoToken WHERE Token = ?", $token) || 0;
 	} while ($token_existing);
 	
 	return $token;
@@ -338,7 +364,7 @@ sub get_autoform_content
 	my $vars = $self->{'VCS::Vars'};
 	
 	my $step = $vars->db->sel1("
-		SELECT Step FROM AutoformToken WHERE Token = ?", $token);
+		SELECT Step FROM AutoToken WHERE Token = ?", $token);
 	
 	my $back_forward = $vars->getparam('a');
 	$back_forward = lc($back_forward);
@@ -348,18 +374,18 @@ sub get_autoform_content
 		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
 		$step--;
 		$vars->db->query("
-			UPDATE AutoformToken SET Step = ?, LastError = '' WHERE Token = ?", {}, 
+			UPDATE AutoToken SET Step = ?, LastError = '' WHERE Token = ?", {}, 
 			$step, $token);
 	}
 
 	if ( ($back_forward eq 'forward') and ($step < $self->get_content_rules('length')) ) {
 		my $app_existing = $self->get_current_table_id($step, $token);
-		$self->create_clear_form($token, $self->get_center_id()) if !$app_existing->{Appointments};
+		$self->create_clear_form($token, $self->get_center_id()) if !$app_existing->{AutoAppointments};
 		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
 		$last_error = $self->check_data_from_form($step);
 		$step++ if !$last_error;
 		$vars->db->query("
-			UPDATE AutoformToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
+			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
 			$step, $last_error, $token);
 	}	
 	
@@ -568,11 +594,11 @@ sub get_names_db_for_save_or_get
 	my $self = shift;
 	my $page_content = shift;
 	my $request_tables = {};
-	
+
 	for my $element (@$page_content) {
-		$request_tables->{ $element->{db}->{table} }->{ $element->{db}->{name} } = $element->{name};
+		$request_tables->{ $element->{auto_db}->{table} }->{ $element->{auto_db}->{name} } = $element->{name};
 	}
-	
+
 	return $request_tables;
 }
 
@@ -588,21 +614,21 @@ sub get_current_table_id
 	my $request_tables = '';
 	my $tables_list = [];
 	
-	my $tables_controled_by_autoformtoken = {
-		'Appointments' => 'AppID',
-		'AppData' => 'AppDataID',
+	my $tables_controled_by_AutoToken = {
+		'AutoAppointments' => 'AutoAppID',
+		'AutoAppData' => 'AutoAppDataID',
 	};
 	
-	for my $table_controlled (keys %$tables_controled_by_autoformtoken) {
-		$request_tables .= $tables_controled_by_autoformtoken->{$table_controlled} . ', ';
+	for my $table_controlled (keys %$tables_controled_by_AutoToken) {
+		$request_tables .= $tables_controled_by_AutoToken->{$table_controlled} . ', ';
 		push @$tables_list, $table_controlled;
 	}
 	$request_tables =~ s/,\s$//;
 
 	my @ids = $vars->db->sel1("
-		SELECT $request_tables FROM AutoformToken WHERE Token = ?", $token);
+		SELECT $request_tables FROM AutoToken WHERE Token = ?", $token);
 	
-	my $max_index = scalar( keys %$tables_controled_by_autoformtoken ) - 1;
+	my $max_index = scalar( keys %$tables_controled_by_AutoToken ) - 1;
 	
 	for my $id (0..$max_index) {
 		$tables_id->{ $tables_list->[$id] } = $ids[$id];
