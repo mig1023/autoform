@@ -4,31 +4,32 @@
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
 [% END %]
+[% IF masks %]
+	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
+[% END %]
 </head>
 
 <center>
 <div style = "margin: 50px ">
 
-<form action = "" method = "POST" name = "dataform">
+<form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
+<input type = "hidden" value = "nothing" name = "action" id = "action">
 
 <table>
 
 [% IF last_error_text %]
-	<tr><td colspan="2">[% last_error_text %]<br><br></td></tr>
+	<tr><td colspan="3">[% last_error_text %]<br><br></td></tr>
 [% END %]
 
 [% content_text %]
 
-<tr><td colspan="2">
+<tr><td colspan="3">
 [% IF step > 1 %]
 	<input type="button" value="<- prev" onclick="prev_button();">
 	&nbsp;
 [% END %]
 [% IF (step < max_step) && (step > 0) %]
 	<input type="button" value="next ->" onclick="next_button();">
-[% END %]
-[% IF step == 0 %]
-	<input type="button" value="new application ->" onclick="new_button();">
 [% END %]
 </td></tr></table>
 
@@ -37,17 +38,12 @@
 <script>
 
 function next_button() {
-	document.dataform.action = '[% addr %]?t=[% token %]&a=forward';
+	$('#action').val('forward');
 	document.dataform.submit();
 };
 
 function prev_button() {
-	document.dataform.action = '[% addr %]?t=[% token %]&a=back';
-	document.dataform.submit();
-};
-
-function new_button() {
-	document.dataform.action = '[% addr %]';
+	$('#action').val('back');
 	document.dataform.submit();
 };
 
@@ -70,9 +66,6 @@ function new_button() {
 				btn.appendTo( buttonPane );  
 			}, 1 );  
 		}, 
-		onSelect: function(date) {
-			alert('ok');
-		},
 		showOn: 'both',
 		buttonImage: '/vcs/static/images/calendar.png',
 		buttonImageOnly:true
@@ -81,6 +74,10 @@ function new_button() {
 			$.datepicker._clearDate(this);
 		}
 	});
+[% END %]
+
+[% FOREACH mask IN masks %]
+	$("#[% mask %]").mask("99.99.9999");
 [% END %]
 </script>
 

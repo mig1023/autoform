@@ -54,10 +54,24 @@ sub get_content_rules
 					'table' => 'AppData',
 					'name' => 'BirthDate',
 				},
-				'datepicker' => 'enabled',
+				#'special' => 'enabled',
+				'special' => 'mask',
 				'relation' => {},
 			},
-			
+			{
+				'type' => 'input',
+				'name' => 'app_date',
+				'label' => 'Дата записи',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'AppDate',
+				},
+				'special' => 'datepicker',
+				#'special' => 'mask',
+				'relation' => {},
+			},
 		],
 		'2' => [
 			{
@@ -229,13 +243,14 @@ sub autoform
 	my $step = 0;
 	my $last_error = '';
 	my $datepickers;
+	my $masks;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
 	if ($token =~ /^\d\d$/) {
 		$page_content = $self->get_error($token);
 	} else {
-		($step, $page_content, $last_error, $datepickers) = $self->get_autoform_content($token);
+		($step, $page_content, $last_error, $datepickers, $masks) = $self->get_autoform_content($token);
 	}
 	
 	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
@@ -259,6 +274,7 @@ sub autoform
 		'last_error_name' => $last_error_name,
 		'last_error_text' => $last_error_text,
 		'datepickers' => $datepickers,
+		'masks' => $masks,
 	};
 	$template->process('autoform.tt2',$tvars);
 }
@@ -422,7 +438,7 @@ sub get_autoform_content
 	my $step = $vars->db->sel1("
 		SELECT Step FROM AutoToken WHERE Token = ?", $token);
 	
-	my $back_forward = $vars->getparam('a');
+	my $back_forward = $vars->getparam('action');
 	$back_forward = lc($back_forward);
 	$back_forward =~ s/[^a-z]//g;
 	
@@ -454,9 +470,9 @@ sub get_autoform_content
 	
 	my $content = $self->get_html_page($step, $token);
 	
-	my $datepickers = $self->get_datepickers($step);
+	my ($datepickers, $masks) = $self->get_specials_of_element($step);
 	
-	return ($step, $content, $last_error, $datepickers);
+	return ($step, $content, $last_error, $datepickers, $masks);
 }
 
 sub get_html_page
@@ -478,20 +494,23 @@ sub get_html_page
 	return $content;
 }
 
-sub get_datepickers
+sub get_specials_of_element
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
 	my $page_content = $self->get_content_rules(shift);
 	
-	my $list = '';
+	my $datepickers = '';
+	my $masks = '';
 	
 	for my $element (@$page_content) {
-		$list .= $element->{name} . ',' if $element->{datepicker};
+		$datepickers .= $element->{name} . ',' if $element->{special} eq 'datepicker';
+		$masks .= $element->{name} . ',' if $element->{special} eq 'mask';
 	}
-	$list =~ s/,$//;
+	$datepickers =~ s/,$//;
+	$masks =~ s/,$//;
 	
-	return $list;
+	return ($datepickers, $masks);
 }
 
 sub get_html_line
@@ -523,6 +542,11 @@ sub get_html_line
 	$content .= $self->get_cell(
 			$self->get_html_for_element(
 				'label', 'text', $element->{label}
+			) 
+		) .
+		$self->get_cell(
+			$self->get_html_for_element(
+				'helper', 'helper',  $element->{label}
 			)
 		) .
 		$self->get_cell(
@@ -565,9 +589,10 @@ sub get_html_for_element
 		'checkbox' 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked]>',
 		'select'	=> '<select size = "1" name="[name]">[options]</select>',
 		'radiolist'	=> '[options]',
-		'text'		=> '<td colspan="2">[value]</td>',
+		'text'		=> '<td colspan="3">[value]</td>',
 		'checklist'	=> '[options]',
 		
+		'helper'	=> '[?] ', # value вписать в текст хелпа
 		'label'		=> '<label id="[name]">[value]</label>',
 		'label_for'	=> '<label for="[name]">[value]</label>',
 	};
