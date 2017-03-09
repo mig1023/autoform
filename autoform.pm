@@ -19,8 +19,7 @@ sub get_content_rules
 	
 		'1' => [
 			{
-				'model' => 'primitive',
-				'type' => 'input',
+				'type' => 'select',
 				'name' => 'center',
 				'label' => 'Визовый центр',
 				'comment' => '',
@@ -28,17 +27,40 @@ sub get_content_rules
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'CenterID',
-					},
-				'auto_db' => {
-					'table' => 'AutoAppointments',
-					'name' => 'CenterID',
-					'transfer' => 'simple',
 				},
+				'param' => '[centers_from_db]',
 			},
+			{
+				'type' => 'checkbox',
+				'name' => 'pers_info',
+				'label' => 'Согласие',
+				'label_for' => 'я согласен на обраточку персональных данных',
+				'comment' => '',
+				'check' => 'true',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PersonalDataPermission',
+					'transfer' => 'nope',
+				},
+				'relation' => {},
+			},
+			{
+				'type' => 'input',
+				'name' => 'bth_date',
+				'label' => 'Дата рождения',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'BirthDate',
+				},
+				'datepicker' => 'enabled',
+				'relation' => {},
+			},
+			
 		],
 		'2' => [
 			{
-				'model' => 'primitive',
 				'type' => 'input',
 				'name' => 'lname',
 				'label' => 'Фамилия',
@@ -47,15 +69,9 @@ sub get_content_rules
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'LName',
-					},
-				'auto_db' => {
-					'table' => 'AutoAppData',
-					'name' => 'LName',
-					'transfer' => 'simple',
 				},
 			},
 			{
-				'model' => 'primitive',
 				'type' => 'input',
 				'name' => 'fname',
 				'label' => 'Имя',
@@ -64,95 +80,98 @@ sub get_content_rules
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FName',
-					},
-				'auto_db' => {
-					'table' => 'AutoAppData',
-					'name' => 'FName',
-					'transfer' => 'simple',
 				},
 			},
-			#{
-			#	'model' => 'primitive',
-			#	'type' => 'checkbox',
-			#	'name' => 'child',
-			#	'label' => '',
-			#	'label_for' => 'ребёнок',
-			#	'comment' => '',
-			#	'check' => 'zN',
-			#	'db' => {
-			#		'table' => 'AppData',
-			#		'name' => 'isChild',
-			#		},
-			#	'relation' => {},
-			#},
+			{
+				'type' => 'text',
+				'name' => 'visa_text',
+				'label' => 'Это просто текст, который расположен в анкете. Это просто текст, который расположен в анкете.',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'visa_type',
+				'label' => 'Тип визы',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'VType',
+				},
+				'param' => '[visas_from_db]',
+			},
 		],
 		'3' => [
 			{
-				'model' => 'primitive',
 				'type' => 'input',
 				'name' => 'rulname',
 				'label' => 'Фамилия на русском',
 				'comment' => '',
-				'check' => 'zN',
+				'check' => 'zЁ',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RLName',
-					},
-				'auto_db' => {
-					'table' => 'AutoAppData',
-					'name' => 'RLName',
-					'transfer' => 'simple',
 				},
 			},
 			{
-				'model' => 'primitive',
 				'type' => 'input',
 				'name' => 'rufname',
 				'label' => 'Имя на русском',
 				'comment' => '',
-				'check' => 'zN',
+				'check' => 'zЁ',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RFName',
-					},
-				'auto_db' => {
-					'table' => 'AutoAppData',
-					'name' => 'RFName',
-					'transfer' => 'simple',
 				},
 			},
 			{
-				'model' => 'primitive',
 				'type' => 'input',
 				'name' => 'rumname',
 				'label' => 'Отчество на русском',
 				'comment' => '',
-				'check' => 'zN',
+				'check' => 'zЁ',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RMName',
-					},
-				'auto_db' => {
-					'table' => 'AutoAppData',
-					'name' => 'RMName',
-					'transfer' => 'simple',
-					# 'transfer' => 'x|x|x|1|x|x|x', <= visa, mezzi
 				},
 			},
-			#{	type => 'radio',
-			#	params => {
-			#			items => [ 'Russia', 'USA' ]
-			#			????
-			#			70 => 'Russia',
-			#			1 => 'Afghanistan' .... наверное лучше вынести куда-нибудь и подгружать
-			#		}
-			#	label;= > ./...
-			#	subelem => {
-			#		'1' =>	{
-			#				'model' => 'primitive',
-			#
+			{
+				'type' => 'checklist',
+				'name' => 'mezzi',
+				'label' => 'Варианты оплаты',
+				'comment' => '',
+				'check' => 'at_least_one',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'complex'
+				},
+				'param' => {
+					'mezzi1' => { 'db' => 'Mezzi1', 'label_for' => 'вариант 1' },
+					'mezzi2' => { 'db' => 'Mezzi2', 'label_for' => 'вариант 2' },
+					'mezzi3' => { 'db' => 'Mezzi3', 'label_for' => 'вариант 3' },
+					'mezzi4' => { 'db' => 'Mezzi4', 'label_for' => 'вариант 4' },
+					'mezzi5' => { 'db' => 'Mezzi5', 'label_for' => 'вариант 5' },
+					'mezzi6' => { 'db' => 'Mezzi6', 'label_for' => 'вариант 6' },
+					'mezzi7' => { 'db' => 'Mezzi7', 'label_for' => 'вариант 7' },
+				},
+			},
+
+		],
+		'4' => [
+			{
+				'type' => 'text',
+				'name' => 'end_text',
+				'label' => 'Дальше ничего нет.',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
+			},
 		],
 	};
+	
+	$content_rules = $self->init_add_param($content_rules);
 	
 	if (!$page) {
 		return $content_rules;
@@ -209,13 +228,14 @@ sub autoform
 	my $page_content;
 	my $step = 0;
 	my $last_error = '';
+	my $datepickers;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
 	if ($token =~ /^\d\d$/) {
 		$page_content = $self->get_error($token);
 	} else {
-		($step, $page_content, $last_error) = $self->get_autoform_content($token);
+		($step, $page_content, $last_error, $datepickers) = $self->get_autoform_content($token);
 	}
 	
 	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
@@ -238,9 +258,45 @@ sub autoform
 		'addr' => $vars->getform('fullhost').$self->{'autoform'}->{'addr'},
 		'last_error_name' => $last_error_name,
 		'last_error_text' => $last_error_text,
+		'datepickers' => $datepickers,
 	};
 	$template->process('autoform.tt2',$tvars);
 }
+
+sub init_add_param
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $content_rules = shift;
+	my $vars = $self->{'VCS::Vars'};
+	
+	my $centers = $vars->db->selall("
+		SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0");
+	
+	my $visas = $vars->db->selall("
+		SELECT ID, VName FROM VisaTypes WHERE OnSite = 1");
+	
+	my $info_from_db = {
+		'[centers_from_db]' => $centers,
+		'[visas_from_db]' => $visas,
+	};
+	
+	for my $page ( keys %$content_rules ) {
+		for my $element ( @{ $content_rules->{$page} } ) {
+			if ( ref($element->{param}) ne 'HASH' ) {
+				my $param_array = $info_from_db->{ $element->{param} };
+				my $param_result = {};
+				
+				for my $row (@$param_array) {
+					$param_result->{ $row->[0] } = $row->[1];
+				};
+				$element->{param} = $param_result;
+			}
+		}
+	}
+
+	return $content_rules;
+}	
 
 sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
@@ -374,7 +430,7 @@ sub get_autoform_content
 		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
 		$step--;
 		$vars->db->query("
-			UPDATE AutoToken SET Step = ?, LastError = '' WHERE Token = ?", {}, 
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 			$step, $token);
 	}
 
@@ -384,14 +440,23 @@ sub get_autoform_content
 		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
 		$last_error = $self->check_data_from_form($step);
 		$step++ if !$last_error;
-		$vars->db->query("
-			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, $last_error, $token);
+		
+		if ($last_error) {
+			$vars->db->query("
+				UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
+				$step, $last_error, $token);
+		} else {
+			$vars->db->query("
+				UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
+				$step, $token);
+		}
 	}	
 	
-	my $content = $self->get_html_page($step, $token, $self->get_content_rules($step));
+	my $content = $self->get_html_page($step, $token);
 	
-	return ($step, $content, $last_error);
+	my $datepickers = $self->get_datepickers($step);
+	
+	return ($step, $content, $last_error, $datepickers);
 }
 
 sub get_html_page
@@ -400,10 +465,10 @@ sub get_html_page
 	my $self = shift;
 	my $step = shift;
 	my $token = shift;
-	my $page_content = shift;
 	
 	my $content = '';
 	
+	my $page_content = $self->get_content_rules($step);
 	my $current_values = $self->get_all_values($step, $self->get_current_table_id($step, $token));
 	
 	for my $element (@$page_content) {
@@ -411,6 +476,22 @@ sub get_html_page
 	}
 	
 	return $content;
+}
+
+sub get_datepickers
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $page_content = $self->get_content_rules(shift);
+	
+	my $list = '';
+	
+	for my $element (@$page_content) {
+		$list .= $element->{name} . ',' if $element->{datepicker};
+	}
+	$list =~ s/,$//;
+	
+	return $list;
 }
 
 sub get_html_line
@@ -422,7 +503,22 @@ sub get_html_line
 	
 	my $content = $self->get_html_for_element('start_line');
 	
+	if ( $element->{type} eq 'text' ) {
+		$content .= $self->get_html_for_element('text', $element->{name}, $element->{label});
+		$content .= $self->get_html_for_element('end_line');
+	
+		return $content;
+	}	
+	
 	my $label_for_need = ( $element->{label_for} ? $self->get_html_for_element( 'label_for', $element->{name}, $element->{label_for} ) : '' );
+	
+	my $current_value = $values->{ $element->{name} };
+
+	if ( $element->{db}->{name} eq 'complex' ) {
+		for my $sub_value ( keys %{ $element->{param} } ) {
+			$current_value->{$sub_value} = $values->{ $sub_value };
+		}
+	}
 	
 	$content .= $self->get_cell(
 			$self->get_html_for_element(
@@ -431,12 +527,12 @@ sub get_html_line
 		) .
 		$self->get_cell(
 			$self->get_html_for_element(
-				$element->{type}, $element->{name}, $values->{ $element->{name} }
+				$element->{type}, $element->{name}, $current_value, $element->{param},
 			) . $label_for_need
 		);
 	
 	$content .= $self->get_html_for_element('end_line');
-	
+
 	return $content;
 }
 
@@ -453,9 +549,11 @@ sub get_html_for_element
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $type_of_element = shift;
-	my $name_of_element = shift;
-	my $value_of_element = shift;
+	
+	my $type = shift;
+	my $name = shift;
+	my $value = shift;
+	my $param = shift;
 	
 	my $elements = {
 		'start_line'	=> '<tr>',
@@ -465,17 +563,54 @@ sub get_html_for_element
 		
 		'input' 	=> '<input type="text" value="[value]" name="[name]" id="[name]">',
 		'checkbox' 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked]>',
+		'select'	=> '<select size = "1" name="[name]">[options]</select>',
+		'radiolist'	=> '[options]',
+		'text'		=> '<td colspan="2">[value]</td>',
+		'checklist'	=> '[options]',
 		
 		'label'		=> '<label id="[name]">[value]</label>',
 		'label_for'	=> '<label for="[name]">[value]</label>',
 	};
 	
-	my $content = $elements->{$type_of_element};
+	my $content = $elements->{$type};
 	
-	$content =~ s/\[name\]/$name_of_element/gi;
-	$content =~ s/\[value\]/$value_of_element/gi;
-	if ($type_of_element eq 'checkbox') {
-		$content =~ s/\[checked\]/checked/gi if $value_of_element;
+	$content =~ s/\[name\]/$name/gi;
+	$content =~ s/\[value\]/$value/gi;
+	
+	if ($type eq 'checkbox') {
+		$content =~ s/\[checked\]/checked/gi if $value;
+	}
+	
+	if ($type eq 'select') {
+		my $list = '';
+		for my $opt (sort keys %$param) {
+			my $selected = ( $value == $opt ? 'selected' : '' );
+			$list .= '<option ' . $selected . ' value=' . $opt . '>' . $param->{$opt} . '</option>'; 
+		}
+		$content =~ s/\[options\]/$list/gi;
+	}
+	
+	if ($type eq 'radiolist') {
+		my $list = '';
+		for my $opt (sort keys %$param) {
+			my $checked = ( $value == $opt ? 'checked' : '' );
+			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' . $checked . '>' . $param->{$opt} . '<br>';
+		}
+		$content =~ s/\[options\]/$list/gi;
+		
+	}
+	
+	if ($type eq 'checklist') {
+		my $list = '';
+
+		for my $opt (sort {$a cmp $b} keys %$param) {
+			
+			my $checked = ( $value->{$opt} ? 'checked' : '' );
+			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
+			'<label for="' . $opt . '">' . $param->{$opt}->{label_for} . '</label><br>';
+		}
+		$content =~ s/\[options\]/$list/gi;
+		
 	}
 	
 	return $content;
@@ -514,7 +649,7 @@ sub save_data_from_form
 
 			$request .=  "$row = ?, ";
 			my $value = $vars->getparam($request_tables->{$table}->{$row});
-			push (@values, $self->encode_data_for_db($step, $request_tables->{$table}->{$value}, $value));
+			push (@values, $self->encode_data_for_db($step, $request_tables->{$table}->{$row}, $value));
 		}
 		$request =~ s/,\s$//;			
 
@@ -552,7 +687,7 @@ sub get_all_values
 				$self->decode_data_from_db($step, $request_tables->{$table}->{$value}, $result->{$value});
 		}
 	}
-	
+
 	return $all_values;
 }
 
@@ -568,6 +703,8 @@ sub decode_data_from_db
 	
 	# ici l'information change pour montre sur l'ecrane
 	
+	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
+	
 	return $value;
 }
 
@@ -579,13 +716,47 @@ sub encode_data_for_db
 	my $element_name = shift;
 	my $value = shift;
 	
-	my $page_content = $self->get_content_rules($step);
+	my $element = $self->get_element_by_name( $step, $element_name );
 	
 	$value =~ s/^\s+|\s+$//g;
+
+	if ($element->{type} =~ /checkbox|checklist/) {
+		if ($value eq $element_name) {
+			$value = 1;
+		} else {
+			$value = 0;
+		};
+	};
 	
-	# ici l'information change pour registre dans db
+	$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 	
 	return $value;
+}
+
+sub get_element_by_name
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $step = shift;
+	my $element_name = shift;
+	
+	my $page_content = $self->get_content_rules($step);
+	my $element;
+	for my $element_search  (@$page_content) {
+		if ($element_search->{name} eq $element_name) {
+			$element = $element_search;
+		};
+		
+		if ( $element_search->{db}->{name} eq 'complex' ) {
+			for my $sub_element (keys %{ $element_search->{param} }) {
+				if ($sub_element eq $element_name) {
+					$element = $element_search;
+				}
+			}
+		};
+	};
+	
+	return $element;
 }
 
 sub get_names_db_for_save_or_get
@@ -596,9 +767,15 @@ sub get_names_db_for_save_or_get
 	my $request_tables = {};
 
 	for my $element (@$page_content) {
-		$request_tables->{ $element->{auto_db}->{table} }->{ $element->{auto_db}->{name} } = $element->{name};
+		if ( $element->{db}->{name} eq 'complex' ) {
+			for my $sub_element (keys %{ $element->{param} }) {
+			$request_tables->{ 'Auto' . $element->{db}->{table} }->{ $element->{param}->{$sub_element}->{db} } = $sub_element;
+			}
+		}
+		else { 
+			$request_tables->{ 'Auto' . $element->{db}->{table} }->{ $element->{db}->{name} } = $element->{name};
+		}
 	}
-
 	return $request_tables;
 }
 
@@ -650,11 +827,30 @@ sub check_data_from_form
 	
 	for my $element (@$page_content) {
 		last if $first_error;
+		next if !$element->{check};
 		
-		$first_error = $self->check_param( $element ) if ($element->{type} eq 'input');
+		if ( $element->{type} =~ /checkbox/ ) {
+			$first_error = $self->check_chkbox( $element );
+		}
+		else {
+			$first_error = $self->check_param( $element );
+		}
 	}
 	
 	return $first_error;
+}
+
+sub check_chkbox
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $element = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	my $value = $vars->getparam($element->{name});
+	my $rules = $element->{check};
+	
+	return $self->text_error(3, $element) if ( ($element->{check} =~ /true/) and ($value eq '') );
 }
 
 sub check_param
@@ -705,12 +901,16 @@ sub text_error
 				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
 	
 	my $text = [
-		'не заполнено',
-		'неверная дата',
-		'- недопустимые символы',
+		'Поле "[name]" не заполнено',
+		'В поле "[name]" указана неверная дата',
+		'В поле "[name]" введены недопустимые символы',
+		'Вы должны дать указать поле "[name]"',
 	];
 	
-	my $text_error = "$element->{name}|Поле '$name_of_element' $text->[$error_code]";
+	my $current_error = $text->[$error_code];
+	$current_error =~ s/\[name\]/$name_of_element/;
+	
+	my $text_error = "$element->{name}|$current_error";
 	$text_error .= ': ' . $incorrect_symbols if $error_code == 2;
 
 	return $text_error;	
