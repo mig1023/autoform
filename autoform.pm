@@ -46,20 +46,6 @@ sub get_content_rules
 			},
 			{
 				'type' => 'input',
-				'name' => 'bth_date',
-				'label' => 'Дата рождения',
-				'comment' => '',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'BirthDate',
-				},
-				#'special' => 'enabled',
-				'special' => 'mask',
-				'relation' => {},
-			},
-			{
-				'type' => 'input',
 				'name' => 'app_date',
 				'label' => 'Дата записи',
 				'comment' => '',
@@ -73,7 +59,9 @@ sub get_content_rules
 				'relation' => {},
 			},
 		],
-		'2' => [
+		'2' => 		'[list_of_applicants]',
+		
+		'3' => [
 			{
 				'type' => 'input',
 				'name' => 'lname',
@@ -97,6 +85,20 @@ sub get_content_rules
 				},
 			},
 			{
+				'type' => 'input',
+				'name' => 'bth_date',
+				'label' => 'Дата рождения',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'BirthDate',
+				},
+				#'special' => 'enabled',
+				'special' => 'mask',
+				'relation' => {},
+			},
+			{
 				'type' => 'text',
 				'name' => 'visa_text',
 				'label' => 'Это просто текст, который расположен в анкете. Это просто текст, который расположен в анкете.',
@@ -117,7 +119,7 @@ sub get_content_rules
 				'param' => '[visas_from_db]',
 			},
 		],
-		'3' => [
+		'4' => [
 			{
 				'type' => 'input',
 				'name' => 'rulname',
@@ -173,7 +175,7 @@ sub get_content_rules
 			},
 
 		],
-		'4' => [
+		'5' => [
 			{
 				'type' => 'text',
 				'name' => 'end_text',
@@ -219,7 +221,6 @@ sub getContent
   
     	my $dispathcher = {
     		'index' => \&autoform,
-		'check_data' => \&check_data,
     	};
     	
     	my $disp_link = $dispathcher->{$id};
@@ -244,13 +245,14 @@ sub autoform
 	my $last_error = '';
 	my $datepickers;
 	my $masks;
+	my $template_file;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
 	if ($token =~ /^\d\d$/) {
 		$page_content = $self->get_error($token);
 	} else {
-		($step, $page_content, $last_error, $datepickers, $masks) = $self->get_autoform_content($token);
+		($step, $page_content, $last_error, $template_file, $datepickers, $masks) = $self->get_autoform_content($token);
 	}
 	
 	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
@@ -276,7 +278,7 @@ sub autoform
 		'datepickers' => $datepickers,
 		'masks' => $masks,
 	};
-	$template->process('autoform.tt2',$tvars);
+	$template->process($template_file, $tvars);
 }
 
 sub init_add_param
@@ -298,6 +300,7 @@ sub init_add_param
 	};
 	
 	for my $page ( keys %$content_rules ) {
+		next if $content_rules->{$page} =~ /^\[/;
 		for my $element ( @{ $content_rules->{$page} } ) {
 			if ( ref($element->{param}) ne 'HASH' ) {
 				my $param_array = $info_from_db->{ $element->{param} };
@@ -362,11 +365,11 @@ sub create_clear_form
 		
 	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
 	
-	$vars->db->query("
-		INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
-		$app_id);
+	#$vars->db->query("
+	#	INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
+	#	$app_id);
 		
-	my $appdata_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+	my $appdata_id = 0; #$vars->db->sel1('SELECT last_insert_id()') || 0;
 	
 	$vars->db->query("
 		UPDATE AutoToken SET AutoAppID = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
@@ -435,14 +438,14 @@ sub get_autoform_content
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $step = $vars->db->sel1("
-		SELECT Step FROM AutoToken WHERE Token = ?", $token);
+	my ($step, $app_id) = $vars->db->sel1("
+		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token);
 	
-	my $back_forward = $vars->getparam('action');
-	$back_forward = lc($back_forward);
-	$back_forward =~ s/[^a-z]//g;
+	my $action = $vars->getparam('action');
+	$action = lc($action);
+	$action =~ s/[^a-z]//g;
 	
-	if ( ($back_forward eq 'back') and ($step > 1) ) {
+	if ( ($action eq 'back') and ($step > 1) ) {
 		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
 		$step--;
 		$vars->db->query("
@@ -450,7 +453,7 @@ sub get_autoform_content
 			$step, $token);
 	}
 
-	if ( ($back_forward eq 'forward') and ($step < $self->get_content_rules('length')) ) {
+	if ( ($action eq 'forward') and ($step < $self->get_content_rules('length')) ) {
 		my $app_existing = $self->get_current_table_id($step, $token);
 		$self->create_clear_form($token, $self->get_center_id()) if !$app_existing->{AutoAppointments};
 		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
@@ -466,13 +469,57 @@ sub get_autoform_content
 				UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 				$step, $token);
 		}
-	}	
+	}
+
+	if ($action eq 'edit') {
+		my $appdata_id = $vars->getparam('person');
+		$appdata_id =~ s/[^0-9]//g;
 	
-	my $content = $self->get_html_page($step, $token);
+		$vars->db->query("
+			UPDATE AutoToken SET Step = 3, AutoAppDataID = ? WHERE Token = ?", {}, 
+			$appdata_id, $token);
+		
+		$step = 3;
+	}
+	
+	if ($action eq 'delapp') {
+		my $appdata_id = $vars->getparam('person');
+		$appdata_id =~ s/[^0-9]//g;
+	
+		my $list_of_app_in_token = $vars->db->selallkeys("
+			SELECT AutoAppData.ID FROM AutoToken 
+			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+			WHERE Token = ?", $token );
+		
+		for my $app (@$list_of_app_in_token) {
+			if ($app->{ID} == $appdata_id) {
+				$vars->db->query("
+					DELETE FROM AutoAppData WHERE ID = ?", {}, 
+					$appdata_id);
+			}
+		}
+	}
+	
+	if ($action eq 'addapp') {
+		$vars->db->query("
+			INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
+			$app_id);
+		
+		my $appdata_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+		
+		$vars->db->query("
+			UPDATE AutoToken SET Step = 3, AutoAppDataID = ? WHERE Token = ?", {}, 
+			$appdata_id, $token);
+		
+		$step = 3;
+	}
+	
+	my ($content, $template) = $self->get_html_page($step, $token);
 	
 	my ($datepickers, $masks) = $self->get_specials_of_element($step);
 	
-	return ($step, $content, $last_error, $datepickers, $masks);
+	return ($step, $content, $last_error, $template, $datepickers, $masks);
 }
 
 sub get_html_page
@@ -482,16 +529,34 @@ sub get_html_page
 	my $step = shift;
 	my $token = shift;
 	
+	my $vars = $self->{'VCS::Vars'};
+	
 	my $content = '';
+	my $template = 'autoform.tt2';
 	
 	my $page_content = $self->get_content_rules($step);
+
+	if ( $page_content eq '[list_of_applicants]') {
+		
+		my $content = $vars->db->selallkeys("
+			SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate 
+			FROM AutoToken 
+			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+			WHERE Token = ?", $token );
+		
+		$template = 'autoform_list.tt2';
+		
+		return ($content, $template);
+	}
+	
 	my $current_values = $self->get_all_values($step, $self->get_current_table_id($step, $token));
 	
 	for my $element (@$page_content) {
 		$content .= $self->get_html_line($element, $current_values);
 	}
 	
-	return $content;
+	return ($content, $template);
 }
 
 sub get_specials_of_element
@@ -499,6 +564,8 @@ sub get_specials_of_element
 {
 	my $self = shift;
 	my $page_content = $self->get_content_rules(shift);
+	
+	return if $page_content =~ /^\[/;
 	
 	my $datepickers = '';
 	my $masks = '';
@@ -791,6 +858,8 @@ sub get_names_db_for_save_or_get
 	my $page_content = shift;
 	my $request_tables = {};
 
+	return if $page_content =~ /^\[/;
+	
 	for my $element (@$page_content) {
 		if ( $element->{db}->{name} eq 'complex' ) {
 			for my $sub_element (keys %{ $element->{param} }) {
@@ -847,6 +916,8 @@ sub check_data_from_form
 	
 	my $vars = $self->{'VCS::Vars'};
 	my $page_content = $self->get_content_rules($step);
+warn "WE CHEK PAGE $step";
+	return if $page_content =~ /^\[/;
 	
 	my $first_error = '';
 	
