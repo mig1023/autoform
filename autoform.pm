@@ -15,8 +15,6 @@ sub get_content_rules
 	
 	my $content_rules = {
 	
-		# ord по вн параметру, название по типу страниц
-	
 		'1' => [
 			{
 				'type' => 'select',
@@ -31,20 +29,6 @@ sub get_content_rules
 				'param' => '[centers_from_db]',
 			},
 			{
-				'type' => 'checkbox',
-				'name' => 'pers_info',
-				'label' => 'Согласие',
-				'label_for' => 'я согласен на обраточку персональных данных',
-				'comment' => '',
-				'check' => 'true',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'PersonalDataPermission',
-					'transfer' => 'nope',
-				},
-				'relation' => {},
-			},
-			{
 				'type' => 'input',
 				'name' => 'app_date',
 				'label' => 'Дата записи',
@@ -55,8 +39,43 @@ sub get_content_rules
 					'name' => 'AppDate',
 				},
 				'special' => 'datepicker',
-				#'special' => 'mask',
 				'relation' => {},
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'pers_info',
+				'label' => '',
+				'label_for' => 'я согласен на обработку персональных данных',
+				'comment' => '',
+				'check' => 'true',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PersonalDataPermission',
+					'transfer' => 'nope',
+				},
+				'relation' => {},
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'mobil_info',
+				'label' => '',
+				'label_for' => 'я согласен на условия работы с мобильными',
+				'comment' => '',
+				'check' => 'true',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'MobilPermission',
+					'transfer' => 'nope',
+				},
+				'relation' => {},
+			},
+			{
+				'type' => 'text',
+				'name' => 'visa_text',
+				'label' => 'Ближайшее доступное время...',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
 			},
 		],
 		'2' => 		'[list_of_applicants]',
@@ -94,7 +113,6 @@ sub get_content_rules
 					'table' => 'AppData',
 					'name' => 'BirthDate',
 				},
-				#'special' => 'enabled',
 				'special' => 'mask',
 				'relation' => {},
 			},
@@ -175,15 +193,39 @@ sub get_content_rules
 			},
 
 		],
-		'5' => [
+		'5' =>  	'[app_finish]',
+		
+		'6' => [
 			{
 				'type' => 'text',
-				'name' => 'end_text',
-				'label' => 'Дальше ничего нет.',
+				'name' => 'visa_text',
+				'label' => 'Это уже информация по паспорту.',
 				'comment' => '',
 				'check' => '',
 				'db' => {},
 			},
+		],
+		
+		'7' => [
+			{
+				'type' => 'text',
+				'name' => 'visa_text',
+				'label' => 'Это платные услуги.',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
+			}
+		],
+		
+		'8' => [
+			{
+				'type' => 'text',
+				'name' => 'visa_text',
+				'label' => 'Выбор времени записи и подтверждение',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
+			}
 		],
 	};
 	
@@ -365,15 +407,9 @@ sub create_clear_form
 		
 	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
 	
-	#$vars->db->query("
-	#	INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
-	#	$app_id);
-		
-	my $appdata_id = 0; #$vars->db->sel1('SELECT last_insert_id()') || 0;
-	
 	$vars->db->query("
-		UPDATE AutoToken SET AutoAppID = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
-		$app_id, $appdata_id, $token);
+		UPDATE AutoToken SET AutoAppID = ? WHERE Token = ?", {}, 
+		$app_id, $token);
 }
 	
 sub save_new_token_in_db
@@ -445,74 +481,36 @@ sub get_autoform_content
 	$action = lc($action);
 	$action =~ s/[^a-z]//g;
 	
+	my $appdata_id = $vars->getparam('person');
+	$appdata_id =~ s/[^0-9]//g;
+	
 	if ( ($action eq 'back') and ($step > 1) ) {
-		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
-		$step--;
-		$vars->db->query("
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-			$step, $token);
+		$step = $self->get_back($step, $token);
 	}
 
 	if ( ($action eq 'forward') and ($step < $self->get_content_rules('length')) ) {
-		my $app_existing = $self->get_current_table_id($step, $token);
-		$self->create_clear_form($token, $self->get_center_id()) if !$app_existing->{AutoAppointments};
-		$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
-		$last_error = $self->check_data_from_form($step);
-		$step++ if !$last_error;
-		
-		if ($last_error) {
-			$vars->db->query("
-				UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-				$step, $last_error, $token);
-		} else {
-			$vars->db->query("
-				UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-				$step, $token);
-		}
+		($step, $last_error) = $self->get_forward($step, $token);
 	}
 
-	if ($action eq 'edit') {
-		my $appdata_id = $vars->getparam('person');
-		$appdata_id =~ s/[^0-9]//g;
-	
-		$vars->db->query("
-			UPDATE AutoToken SET Step = 3, AutoAppDataID = ? WHERE Token = ?", {}, 
-			$appdata_id, $token);
-		
-		$step = 3;
+	if ( ($action eq 'edit') and $appdata_id ) {
+		$step = $self->get_edit($step, $appdata_id, $token);
 	}
 	
-	if ($action eq 'delapp') {
-		my $appdata_id = $vars->getparam('person');
-		$appdata_id =~ s/[^0-9]//g;
-	
-		my $list_of_app_in_token = $vars->db->selallkeys("
-			SELECT AutoAppData.ID FROM AutoToken 
-			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-			WHERE Token = ?", $token );
-		
-		for my $app (@$list_of_app_in_token) {
-			if ($app->{ID} == $appdata_id) {
-				$vars->db->query("
-					DELETE FROM AutoAppData WHERE ID = ?", {}, 
-					$appdata_id);
-			}
-		}
+	if ( ($action eq 'delapp') and $appdata_id ) {
+		$self->get_delete($appdata_id, $token);
 	}
 	
 	if ($action eq 'addapp') {
-		$vars->db->query("
-			INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
-			$app_id);
-		
-		my $appdata_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
-		
-		$vars->db->query("
-			UPDATE AutoToken SET Step = 3, AutoAppDataID = ? WHERE Token = ?", {}, 
-			$appdata_id, $token);
-		
-		$step = 3;
+		$step = $self->get_add($app_id, $token);
+	}
+	
+	if ($action eq 'tofinish') {
+		# make current app finished
+		$step = $self->get_step_by_content($token, '[app_finish]', 'next');
+	}
+	
+	if ($action eq 'tolist') {
+		$step = $self->get_step_by_content($token, '[list_of_applicants]');
 	}
 	
 	my ($content, $template) = $self->get_html_page($step, $token);
@@ -520,6 +518,170 @@ sub get_autoform_content
 	my ($datepickers, $masks) = $self->get_specials_of_element($step);
 	
 	return ($step, $content, $last_error, $template, $datepickers, $masks);
+}
+
+sub get_forward
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $step = shift;
+	my $token = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	my $app_existing = $self->get_current_table_id($step, $token);
+	$self->create_clear_form($token, $self->get_center_id()) if !$app_existing->{AutoAppointments};
+	$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
+	my $last_error = $self->check_data_from_form($step);
+	$step++ if !$last_error;
+	
+	if ($last_error) {
+		$vars->db->query("
+			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
+			$step, $last_error, $token);
+	} else {
+		$vars->db->query("
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
+			$step, $token);
+	}
+	
+	return ($step, $last_error);
+}
+
+sub get_step_by_content
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
+	my $content = shift;
+	my $next = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+
+	my $page_content = $self->get_content_rules();
+	my $step;
+
+	for my $page (keys %$page_content) {
+		$step = $page if ( $page_content->{$page} eq $content);
+	}
+
+	$step++ if $next;
+	
+	$vars->db->query("
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
+			$step, $token);
+			
+	return $step;
+}
+
+
+sub get_edit
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $step = shift;
+	my $appdata_id = shift; 
+	my $token = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	if ( $self->check_existing_id_in_token($appdata_id, $token) ) {
+		
+		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');;
+		
+		$vars->db->query("
+			UPDATE AutoToken SET Step = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
+			$step, $appdata_id, $token);
+	}
+	
+	return $step;
+}
+
+sub get_delete
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $appdata_id = shift; 
+	my $token = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	if ( $self->check_existing_id_in_token($appdata_id, $token) ) {
+		$vars->db->query("
+			DELETE FROM AutoAppData WHERE ID = ?", {}, 
+			$appdata_id);
+	}
+}
+
+sub check_existing_id_in_token
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $appdata_id = shift; 
+	my $token = shift;
+	
+	my $exist = 0;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	my $list_of_app_in_token = $vars->db->selallkeys("
+		SELECT AutoAppData.ID FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+		WHERE Token = ?", $token );
+		
+	for my $app (@$list_of_app_in_token) {
+		$exist = 1 if ($app->{ID} == $appdata_id);
+	}
+	
+	return $exist;
+}
+
+sub get_add
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $app_id = shift;
+	my $token = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	$vars->db->query("
+		INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
+		$app_id);
+	
+	my $appdata_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+	
+	my $step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');
+	
+	$vars->db->query("
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
+		$step, $appdata_id, $token);
+	
+	return $step;
+}
+
+sub get_back
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $step = shift;
+	my $token = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
+	$step--;
+	
+	if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
+		$step = $self->get_step_by_content($token, '[list_of_applicants]');
+	}
+	
+	$vars->db->query("
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
+		$step, $token);
+		
+	return $step;
 }
 
 sub get_html_page
@@ -545,9 +707,19 @@ sub get_html_page
 			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 			WHERE Token = ?", $token );
 		
+		if (scalar(@$content) < 1) {
+			$content->[0]->{ID} = 'X';
+		}
+		
 		$template = 'autoform_list.tt2';
 		
 		return ($content, $template);
+	}
+	
+	if ( $page_content eq '[app_finish]') {
+		
+		$template = 'autoform_finish.tt2';
+		return ('', $template);
 	}
 	
 	my $current_values = $self->get_all_values($step, $self->get_current_table_id($step, $token));
@@ -916,7 +1088,7 @@ sub check_data_from_form
 	
 	my $vars = $self->{'VCS::Vars'};
 	my $page_content = $self->get_content_rules($step);
-warn "WE CHEK PAGE $step";
+
 	return if $page_content =~ /^\[/;
 	
 	my $first_error = '';

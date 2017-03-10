@@ -10,14 +10,20 @@
 <input type = "hidden" value = "" name = "person" id = "person">
 
 <table>
-[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
-<tr>
-<td>[% i %].</td>
-<td>[% person.FName %] [% person.LName %]</td>
-<td>[% person.BirthDate %]</td>
-<td><input type="button" value="edit" onclick="edit_button([% person.ID %]);"></td>
-<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
-</tr>
+[% IF content_text.0.ID == "X" %]
+	<tr><td colspan="5">
+	No applicant has been added yet
+	</td></tr>
+[% ELSE %]
+	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
+	<tr>
+	<td>[% i %].</td>
+	<td>[% person.FName %] [% person.LName %]</td>
+	<td>[% person.BirthDate %]</td>
+	<td><input type="button" value="edit" onclick="edit_button([% person.ID %]);"></td>
+	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
+	</tr>
+	[% END %]
 [% END %]
 
 <tr><td colspan="5">
@@ -30,7 +36,7 @@
 <tr><td colspan="5">
 	<input type="button" value="<- prev" onclick="prev_button();">
 	&nbsp;
-	<input type="button" value="finish app ->" onclick="next_button();">
+	<input type="button" value="finish app ->" onclick="finish_button();">
 </td></tr>
 </table>
 
@@ -57,6 +63,11 @@ function delapp_button(id) {
 
 function prev_button() {
 	$('#action').val('back');
+	document.dataform.submit();
+};
+
+function finish_button(id) {
+	$('#action').val('tofinish');
 	document.dataform.submit();
 };
 

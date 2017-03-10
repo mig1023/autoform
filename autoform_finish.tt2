@@ -1,0 +1,42 @@
+<head>
+<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+</head>
+
+<center>
+<div style = "margin: 50px ">
+
+<form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
+<input type = "hidden" value = "nothing" name = "action" id = "action">
+
+<table>
+<tr><td>
+	Ready. Another or finish? 
+</td></tr>
+
+<tr><td>&nbsp;
+</td></tr>
+
+<tr><td>
+	<input type="button" value="<- back to list" onclick="back_button();">
+	&nbsp;
+	<input type="button" value="finish app ->" onclick="finish_button();">
+</td></tr>
+</table>
+
+</form>
+
+<script>
+
+function finish_button(id) {
+	$('#action').val('tofinish');
+	document.dataform.submit();
+};
+
+function back_button() {
+	$('#action').val('tolist');
+	document.dataform.submit();
+};
+
+</script>
+
+</div>
