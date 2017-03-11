@@ -505,12 +505,16 @@ sub get_autoform_content
 	}
 	
 	if ($action eq 'tofinish') {
-		# make current app finished
-		$step = $self->get_step_by_content($token, '[app_finish]', 'next');
+		if ( $self->check_all_app_finished($token) ) {
+			$step = $self->set_step_by_content($token, '[app_finish]', 'next');
+		} else {
+			$step = $self->set_step_by_content($token, '[list_of_applicants]');
+			$last_error = $self->text_error(4, undef, undef);
+		}
 	}
 	
 	if ($action eq 'tolist') {
-		$step = $self->get_step_by_content($token, '[list_of_applicants]');
+		$step = $self->set_step_by_content($token, '[list_of_applicants]');
 	}
 	
 	my ($content, $template) = $self->get_html_page($step, $token);
@@ -529,23 +533,42 @@ sub get_forward
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $app_existing = $self->get_current_table_id($step, $token);
-	$self->create_clear_form($token, $self->get_center_id()) if !$app_existing->{AutoAppointments};
-	$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
+	my $current_table_id = $self->get_current_table_id($step, $token);
+	$self->create_clear_form($token, $self->get_center_id()) if !$current_table_id->{AutoAppointments};
+	$self->save_data_from_form($step, $current_table_id);
+	
 	my $last_error = $self->check_data_from_form($step);
-	$step++ if !$last_error;
 	
 	if ($last_error) {
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
 			$step, $last_error, $token);
 	} else {
+		$step++;
+		
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 			$step, $token);
 	}
+
+	if (!$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
+		$self->set_current_app_finished( $current_table_id->{AutoAppData} );
+	}
 	
 	return ($step, $last_error);
+}
+
+sub set_current_app_finished
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $appdata_id = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	$vars->db->query("
+		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, 
+		$appdata_id);
 }
 
 sub get_step_by_content
@@ -566,14 +589,28 @@ sub get_step_by_content
 	}
 
 	$step++ if $next;
+			
+	return $step;
+}
+
+sub set_step_by_content
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
+	my $content = shift;
+	my $next = shift;
 	
+	my $vars = $self->{'VCS::Vars'};
+
+	my $step = $self->get_step_by_content($token, $content, $next);
+
 	$vars->db->query("
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 			$step, $token);
 			
 	return $step;
 }
-
 
 sub get_edit
 # //////////////////////////////////////////////////
@@ -592,6 +629,10 @@ sub get_edit
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
 			$step, $appdata_id, $token);
+		
+		$vars->db->query("
+			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
+			$appdata_id);
 	}
 	
 	return $step;
@@ -637,6 +678,29 @@ sub check_existing_id_in_token
 	return $exist;
 }
 
+sub check_all_app_finished
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
+	
+	my $all_finished = 1;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	my $list_of_app_in_token = $vars->db->selallkeys("
+		SELECT AutoAppData.Finished FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+		WHERE Token = ?", $token );
+		
+	for my $app (@$list_of_app_in_token) {
+		$all_finished = 0 if ( $app->{Finished} == 0 );
+	}
+	
+	return $all_finished;
+}
+
 sub get_add
 # //////////////////////////////////////////////////
 {
@@ -674,7 +738,7 @@ sub get_back
 	$step--;
 	
 	if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
-		$step = $self->get_step_by_content($token, '[list_of_applicants]');
+		$step = $self->set_step_by_content($token, '[list_of_applicants]');
 	}
 	
 	$vars->db->query("
@@ -699,27 +763,11 @@ sub get_html_page
 	my $page_content = $self->get_content_rules($step);
 
 	if ( $page_content eq '[list_of_applicants]') {
-		
-		my $content = $vars->db->selallkeys("
-			SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate 
-			FROM AutoToken 
-			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-			WHERE Token = ?", $token );
-		
-		if (scalar(@$content) < 1) {
-			$content->[0]->{ID} = 'X';
-		}
-		
-		$template = 'autoform_list.tt2';
-		
-		return ($content, $template);
+		return $self->get_list_of_app($token);
 	}
 	
 	if ( $page_content eq '[app_finish]') {
-		
-		$template = 'autoform_finish.tt2';
-		return ('', $template);
+		return $self->get_finish();
 	}
 	
 	my $current_values = $self->get_all_values($step, $self->get_current_table_id($step, $token));
@@ -729,6 +777,39 @@ sub get_html_page
 	}
 	
 	return ($content, $template);
+}
+
+sub get_list_of_app
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
+	my $vars = $self->{'VCS::Vars'};
+	
+	my $content = $vars->db->selallkeys("
+			SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
+			FROM AutoToken 
+			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+			WHERE Token = ?", $token );
+		
+	if (scalar(@$content) < 1) {
+		$content->[0]->{ID} = 'X';
+	}
+		
+	my $template = 'autoform_list.tt2';
+	
+	return ($content, $template);
+}
+
+sub get_finish
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $template = 'autoform_finish.tt2';
+	
+	return (undef, $template);
 }
 
 sub get_specials_of_element
@@ -1164,16 +1245,21 @@ sub text_error
 	my $error_code = shift;
 	my $element = shift;
 	my $incorrect_symbols = shift;
-
-	my $name_of_element = (	$element->{label} ? $element->{label} : ( 
-				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
 	
 	my $text = [
 		'Поле "[name]" не заполнено',
 		'В поле "[name]" указана неверная дата',
 		'В поле "[name]" введены недопустимые символы',
 		'Вы должны дать указать поле "[name]"',
+		'Вы должны полностью закончить все анкеты',
 	];
+	
+	if (!defined($element)) {
+		return "|$text->[$error_code]";
+	}
+	
+	my $name_of_element = (	$element->{label} ? $element->{label} : ( 
+				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
 	
 	my $current_error = $text->[$error_code];
 	$current_error =~ s/\[name\]/$name_of_element/;

@@ -10,6 +10,10 @@
 <input type = "hidden" value = "" name = "person" id = "person">
 
 <table>
+[% IF last_error_text %]
+	<tr><td colspan="5">[% last_error_text %]<br><br></td></tr>
+[% END %]
+
 [% IF content_text.0.ID == "X" %]
 	<tr><td colspan="5">
 	No applicant has been added yet
@@ -18,7 +22,7 @@
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
 	<tr>
 	<td>[% i %].</td>
-	<td>[% person.FName %] [% person.LName %]</td>
+	<td>[% IF !person.Finished %][draft][% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% person.BirthDate %]</td>
 	<td><input type="button" value="edit" onclick="edit_button([% person.ID %]);"></td>
 	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
