@@ -208,24 +208,32 @@ sub get_content_rules
 		
 		'7' => [
 			{
-				'type' => 'text',
-				'name' => 'visa_text',
-				'label' => 'Это платные услуги.',
+				'type' => 'captcha',
+				'name' => 'captcha_picture',
+				'label' => '',
 				'comment' => '',
 				'check' => '',
 				'db' => {},
-			}
+			},
+			{
+				'type' => 'input',
+				'name' => 'captcha',
+				'label' => 'Введите текст с картинки',
+				'comment' => '',
+				'check' => 'captcha_input',
+				'db' => {},
+			},
 		],
 		
 		'8' => [
 			{
 				'type' => 'text',
 				'name' => 'visa_text',
-				'label' => 'Выбор времени записи и подтверждение',
+				'label' => 'Всё, запись создана!',
 				'comment' => '',
 				'check' => '',
 				'db' => {},
-			}
+			},
 		],
 	};
 	
@@ -260,6 +268,7 @@ sub getContent
 	my $vars = $self->{'VCS::Vars'};
 	
 	$self->{'autoform'}->{'addr'} = '/autoform/';
+	$self->{'autoform'}->{'addr_captcha'} = '/vcs/static/files/';
   
     	my $dispathcher = {
     		'index' => \&autoform,
@@ -292,7 +301,7 @@ sub autoform
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
 	if ($token =~ /^\d\d$/) {
-		$page_content = $self->get_error($token);
+		$page_content = $self->get_token_error($token);
 	} else {
 		($step, $page_content, $last_error, $template_file, $datepickers, $masks) = $self->get_autoform_content($token);
 	}
@@ -367,7 +376,7 @@ sub get_token_and_create_new_form_if_need
 	
 	my $token = $vars->getparam('t');
 	$token = lc($token);
-	$token =~ s/[^a-h0-9]//g;
+	$token =~ s/[^a-z0-9]//g;
 	
 	# новая запись
 	if ($token eq '') {
@@ -420,7 +429,8 @@ sub save_new_token_in_db
 	my $vars = $self->{'VCS::Vars'};
 
 	$vars->db->query("
-		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, Step, LastError, Finished, Draft) VALUES (?, 0, 0, 1, '', 0, 0)", {}, 
+		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, Step, LastError, Finished, Draft) 
+		VALUES (?, 0, 0, 1, '', 0, 0)", {}, 
 		$token);
 	
 	return $token;
@@ -436,9 +446,9 @@ sub token_generation
 	my $token = '';
 	
 	do {
-		my @alph = (0,1,2,3,4,5,6,7,8,9,'a','b','c','d','e','f');
+		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
 		for (1..64) {
-			$token .= @alph[int(rand(15))];
+			$token .= @alph[int(rand(35))];
 		}
 		$token_existing = $vars->db->sel1("
 			SELECT ID FROM AutoToken WHERE Token = ?", $token) || 0;
@@ -447,7 +457,7 @@ sub token_generation
 	return $token;
 }
 
-sub get_error
+sub get_token_error
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
@@ -505,11 +515,18 @@ sub get_autoform_content
 	}
 	
 	if ($action eq 'tofinish') {
-		if ( $self->check_all_app_finished($token) ) {
+		my $app_status = $self->check_all_app_finished_and_not_empty($token);
+		
+		if ( $app_status == 0 ) {
 			$step = $self->set_step_by_content($token, '[app_finish]', 'next');
 		} else {
 			$step = $self->set_step_by_content($token, '[list_of_applicants]');
-			$last_error = $self->text_error(4, undef, undef);
+			
+			if ( $app_status == 1 ) {	
+				$last_error = $self->text_error(4, undef, undef);
+			} else {
+				$last_error = $self->text_error(5, undef, undef);
+			}
 		}
 	}
 	
@@ -678,25 +695,25 @@ sub check_existing_id_in_token
 	return $exist;
 }
 
-sub check_all_app_finished
+sub check_all_app_finished_and_not_empty
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
 	my $token = shift;
 	
-	my $all_finished = 1;
+	my $all_finished = 0;
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $list_of_app_in_token = $vars->db->selallkeys("
-		SELECT AutoAppData.Finished FROM AutoToken 
+	my ( $app_count, $app_finished ) = $vars->db->sel1("
+		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $token );
 		
-	for my $app (@$list_of_app_in_token) {
-		$all_finished = 0 if ( $app->{Finished} == 0 );
-	}
+	$all_finished = 1 if $app_finished < $app_count;
+	
+	$all_finished = 2 if $app_count < 1;
 	
 	return $all_finished;
 }
@@ -899,6 +916,8 @@ sub get_html_for_element
 	my $value = shift;
 	my $param = shift;
 	
+	my $vars = $self->{'VCS::Vars'};
+	
 	my $elements = {
 		'start_line'	=> '<tr>',
 		'end_line'	=> '</tr>',
@@ -911,6 +930,7 @@ sub get_html_for_element
 		'radiolist'	=> '[options]',
 		'text'		=> '<td colspan="3">[value]</td>',
 		'checklist'	=> '[options]',
+		'captcha'	=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]">',
 		
 		'helper'	=> '[?] ', # value вписать в текст хелпа
 		'label'		=> '<label id="[name]">[value]</label>',
@@ -955,7 +975,17 @@ sub get_html_for_element
 			'<label for="' . $opt . '">' . $param->{$opt}->{label_for} . '</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
+	}
+
+	if ($type eq 'captcha') {
+		my $config = $vars->getConfig('captcha');
+		my $addr_captcha = $self->{'autoform'}->{'addr_captcha'};
 		
+		my $captcha = $vars->getcaptcha();
+		my $ccode = $captcha->generate_code($config->{'code_nums'});
+	
+		$content =~ s!\[captcha_file\]!$addr_captcha$ccode.png!;
+		$content =~ s/\[captcha_code\]/$ccode/;
 	}
 	
 	return $content;
@@ -1045,8 +1075,6 @@ sub decode_data_from_db
 	my $value = shift;
 	
 	my $page_content = $self->get_content_rules($step);
-	
-	# ici l'information change pour montre sur l'ecrane
 	
 	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
 	
@@ -1177,13 +1205,16 @@ sub check_data_from_form
 	for my $element (@$page_content) {
 		last if $first_error;
 		next if !$element->{check};
-		
 		if ( $element->{type} =~ /checkbox/ ) {
 			$first_error = $self->check_chkbox( $element );
 		}
+		elsif ( ( $element->{type} =~ /input/ ) and ( $element->{check} =~ /captcha_input/ ) ) {
+			$first_error = $self->check_captcha( $element );
+			$first_error = "$element->{name}|$first_error" if $first_error;
+			}
 		else {
 			$first_error = $self->check_param( $element );
-		}
+			}
 	}
 	
 	return $first_error;
@@ -1237,7 +1268,24 @@ sub check_param
 		}
 	}
 }
+
+sub check_captcha
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $element = shift;
 	
+	my $vars = $self->{'VCS::Vars'};
+	my $config = $vars->getConfig('captcha');
+	my $captcha = $vars->getcaptcha();
+	
+	my $capverify = $vars->getparam( $element->{name} ) || '';
+	my $rcode = $vars->getparam('code') || '';
+	my $c_status = $captcha->check_code( $capverify, $rcode );
+	
+	return $vars->getCaptchaErr($c_status);
+}
+
 sub text_error
 # //////////////////////////////////////////////////
 {
@@ -1252,6 +1300,7 @@ sub text_error
 		'В поле "[name]" введены недопустимые символы',
 		'Вы должны дать указать поле "[name]"',
 		'Вы должны полностью закончить все анкеты',
+		'Вы должны добавить по меньшей мере одного заявителя',
 	];
 	
 	if (!defined($element)) {
