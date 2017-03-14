@@ -42,7 +42,6 @@ sub get_content_rules_hash
 					'name' => 'AppDate',
 				},
 				'special' => 'datepicker',
-				'relation' => {},
 			},
 			{
 				'type' => 'checkbox',
@@ -56,7 +55,6 @@ sub get_content_rules_hash
 					'name' => 'PersonalDataPermission',
 					'transfer' => 'nope',
 				},
-				'relation' => {},
 			},
 			{
 				'type' => 'checkbox',
@@ -125,7 +123,6 @@ sub get_content_rules_hash
 					'name' => 'BirthDate',
 				},
 				'special' => 'mask',
-				'relation' => {},
 			},
 			{
 				'type' => 'text',
@@ -215,7 +212,7 @@ sub get_content_rules_hash
 
 		],
 		
-		'Вы успешно добавили заявителя. Что теперь?' => 	[	
+		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
 				'page_ord' => 5,
 				'replacer' => '[app_finish]',
@@ -606,16 +603,77 @@ sub get_autoform_content
 	
 	my $page = $self->get_content_rules($step, 'full');
 
+	if (exists $page->[0]->{relation}) {
+		($step, $page) = $self->check_relation($step, $page, $step, $token);
+	}
+	
 	if ($page !~ /\[/) { 
 		$title = $page->[0]->{page_name};
 	}
-	
+
 	my ($content, $template) = $self->get_html_page($step, $token);
 	
 	my ($datepickers, $masks) = $self->get_specials_of_element($step);
 	
 	
 	return ($step, $title, $content, $last_error, $template, $datepickers, $masks);
+}
+
+sub check_relation
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $step = shift;
+	my $page = shift;
+	my $step = shift; 
+	my $token = shift;
+	
+	my $skip_this_page;
+	
+	do {
+	
+	$skip_this_page = 0;
+
+	for my $relation (keys %{ $page->[0]->{relation} }) {
+		$skip_this_page = $self->skip_page_by_relation( $relation, $page->[0]->{relation}->{$relation}, $step, $token );
+	}
+	
+	if ($skip_this_page) {
+		
+		$step++;
+		$page = $self->get_content_rules($step, 'full');
+	}
+	
+	} while ($skip_this_page);
+	
+	return ($step, $page);
+}
+
+sub skip_page_by_relation
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $condition = shift;
+	my $relation = shift;
+	my $step = shift;
+	my $token = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	my $skip_this = 0;
+
+	my $current_table_id = $self->get_current_table_id($step, $token); 
+	
+	my $value = $vars->db->sel1("
+		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?", $current_table_id->{ 'Auto'. $relation->{table} });
+	if ($condition eq 'only_if') {
+		$skip_this = 1 if $value != $relation->{value};
+	}
+	
+	if ($condition eq 'only_if_not') {
+		$skip_this = 1 if $value == $relation->{value};
+	}
+	return $skip_this;
 }
 
 sub get_forward
