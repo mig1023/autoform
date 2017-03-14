@@ -7,7 +7,7 @@ use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
 
 
-sub get_content_rules
+sub get_content_rules_hash
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
@@ -15,7 +15,10 @@ sub get_content_rules
 	
 	my $content_rules = {
 	
-		'1' => [
+		'Начало записи' => [
+			{
+				'page_ord' => 1,
+			},
 			{
 				'type' => 'select',
 				'name' => 'center',
@@ -78,9 +81,17 @@ sub get_content_rules
 				'db' => {},
 			},
 		],
-		'2' => 		'[list_of_applicants]',
+		'Спикок заявителей' => [	
+			{
+				'page_ord' => 2,
+				'replacer' => '[list_of_applicants]',
+			},
+		],
 		
-		'3' => [
+		'Данные загранпаспорта' => [
+			{
+				'page_ord' => 3,
+			},
 			{
 				'type' => 'input',
 				'name' => 'lname',
@@ -137,7 +148,17 @@ sub get_content_rules
 				'param' => '[visas_from_db]',
 			},
 		],
-		'4' => [
+		'Дополнительные данные' => [
+			{
+				'page_ord' => 4,
+				'relation' => {
+					'only_if' => {
+						'table' => 'Appointments',
+						'name' => 'PersonalDataPermission',
+						'value' => '1',
+					}
+				},
+			},
 			{
 				'type' => 'input',
 				'name' => 'rulname',
@@ -193,9 +214,18 @@ sub get_content_rules
 			},
 
 		],
-		'5' =>  	'[app_finish]',
 		
-		'6' => [
+		'Вы успешно добавили заявителя. Что теперь?' => 	[	
+			{
+				'page_ord' => 5,
+				'replacer' => '[app_finish]',
+			},
+		],
+		
+		'Данные внутреннего паспорта' => [
+			{
+				'page_ord' => 6,
+			},
 			{
 				'type' => 'text',
 				'name' => 'visa_text',
@@ -206,7 +236,10 @@ sub get_content_rules
 			},
 		],
 		
-		'7' => [
+		'Подтверждение записи' => [
+			{
+				'page_ord' => 7,
+			},
 			{
 				'type' => 'captcha',
 				'name' => 'captcha_picture',
@@ -225,7 +258,10 @@ sub get_content_rules
 			},
 		],
 		
-		'8' => [
+		'Поздравляем!' => [
+			{
+				'page_ord' => 8,
+			},
 			{
 				'type' => 'text',
 				'name' => 'visa_text',
@@ -236,15 +272,45 @@ sub get_content_rules
 			},
 		],
 	};
+}
+
+sub get_content_rules
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $page = shift;
+	my $full = shift;
 	
-	$content_rules = $self->init_add_param($content_rules);
+	my $content = $self->get_content_rules_hash();
+	
+	
+	my $new_content = {};
+	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content) {
+		
+		my $page_ord = $content->{$page}->[0]->{page_ord};
+		
+		$new_content->{ $page_ord } = $content->{$page};
+		if (!$full) {
+			if ( $content->{ $page }->[0]->{replacer} ) {
+				$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
+			} else {
+				delete $new_content->{ $page_ord }->[0];
+				@{ $new_content->{ $page_ord } } = grep defined, @{ $new_content->{ $page_ord } };
+			}
+		} else {
+			$new_content->{ $page_ord }->[0]->{ page_name } = $page;
+		}
+	}
+	$content = $new_content;
+
+	$content = $self->init_add_param($content);
 	
 	if (!$page) {
-		return $content_rules;
+		return $content;
 	} elsif ($page =~ /length/i) {
-		return scalar(keys %$content_rules);
+		return scalar(keys %$content);
 	} else {
-		return $content_rules->{$page};
+		return $content->{$page};
 	};
 }
 
@@ -297,13 +363,14 @@ sub autoform
 	my $datepickers;
 	my $masks;
 	my $template_file;
+	my $title;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
 	if ($token =~ /^\d\d$/) {
-		$page_content = $self->get_token_error($token);
+		($title, $page_content) = $self->get_token_error($token);
 	} else {
-		($step, $page_content, $last_error, $template_file, $datepickers, $masks) = $self->get_autoform_content($token);
+		($step, $title, $page_content, $last_error, $template_file, $datepickers, $masks) = $self->get_autoform_content($token);
 	}
 	
 	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
@@ -318,7 +385,7 @@ sub autoform
 		'form' => {
 				'action' => $vars->getform('action')
 				},
-				
+		'title' => $title,
 		'content_text' => $page_content,
 		'token' => $token,
 		'step' => $step,
@@ -471,8 +538,9 @@ sub get_token_error
 	];
 	
 	my $content = 'your token has error: ' . $error_type->[$error_num];
+	my $title = 'token error';
 	
-	return $content;
+	return ($title, $content);
 }
 
 sub get_autoform_content
@@ -481,6 +549,7 @@ sub get_autoform_content
 	my $self = shift;
 	my $token = shift;
 	my $last_error = '';
+	my $title;
 	
 	my $vars = $self->{'VCS::Vars'};
 	
@@ -534,11 +603,19 @@ sub get_autoform_content
 		$step = $self->set_step_by_content($token, '[list_of_applicants]');
 	}
 	
+	
+	my $page = $self->get_content_rules($step, 'full');
+
+	if ($page !~ /\[/) { 
+		$title = $page->[0]->{page_name};
+	}
+	
 	my ($content, $template) = $self->get_html_page($step, $token);
 	
 	my ($datepickers, $masks) = $self->get_specials_of_element($step);
 	
-	return ($step, $content, $last_error, $template, $datepickers, $masks);
+	
+	return ($step, $title, $content, $last_error, $template, $datepickers, $masks);
 }
 
 sub get_forward

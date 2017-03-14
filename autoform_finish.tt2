@@ -9,6 +9,7 @@
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 
 <table>
+<tr><td colspan="3"><h2>[% title %]</h2><br></td></tr>
 <tr><td>
 	Ready. Another or finish? 
 </td></tr>
