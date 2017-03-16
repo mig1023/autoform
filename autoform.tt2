@@ -1,10 +1,10 @@
 <head>
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
-[% IF datepickers %]
+[% IF special.datepickers %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
 [% END %]
-[% IF masks %]
+[% IF special.masks %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 [% END %]
 </head>
@@ -16,21 +16,21 @@
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 
 <table>
-<tr><td colspan="3"><h2>[% title %]</h2><br></td></tr>
+<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% IF last_error_text %]
-	<tr><td colspan="3">[% last_error_text %]<br><br></td></tr>
+	<tr><td colspan="3">[% langreq(last_error_text) %]<br><br></td></tr>
 [% END %]
 
 [% content_text %]
 
 <tr><td colspan="3">
 [% IF step > 1 %]
-	<input type="button" value="<- prev" onclick="prev_button();">
+	<input type="button" value="◁ [% langreq('Назад') %]" onclick="prev_button();">
 	&nbsp;
 [% END %]
 [% IF (step < max_step) && (step > 0) %]
-	<input type="button" value="next ->" onclick="next_button();">
+	<input type="button" value="[% langreq('Далее') %] ▷" onclick="next_button();">
 [% END %]
 </td></tr></table>
 
@@ -52,7 +52,7 @@ function prev_button() {
 	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
 [% END %]
 
-[% FOREACH picker IN datepickers %]
+[% FOREACH picker IN special.datepickers %]
 	$('#[% picker %]').datepicker({
 		dateFormat: 'dd.mm.yy',
 		
@@ -77,8 +77,50 @@ function prev_button() {
 	});
 [% END %]
 
-[% FOREACH mask IN masks %]
+[% FOREACH mask IN special.masks %]
 	$("#[% mask %]").mask("99.99.9999");
+[% END %]
+
+[% FOREACH near IN special.nearest_date %]
+	update_nearest_date_[% near %]();
+			
+	function update_nearest_date_[% near %]()
+	{	
+		$("#[% near %]").html("<img src='/files/wait.gif'>");
+		$.get("[% vcs_tools %]get_nearest.htm", {
+			'center': $('#center').val(), 
+			'persons': 1, 
+			'urgent':0 }, 
+			function(data) {
+				$("#[% near %]").html(data);
+			}
+		);
+		
+		var selected_el = $('#vtype').val();
+		var restore_el = 0;
+		
+		$('#vtype').hide();
+		$('#vtype').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>")
+		$('#vtype').find('option').remove();
+		
+		$.get("[% vcs_tools %]get_vtypes.htm", 
+			{ 'center': $('#center').val() }, 
+			function(xml) {
+				$(xml).find('node').each( function() {
+					$('#vtype').append('<option value="' + $(this).find('id').text() + '"'+(parseInt($(this).find('default').text()) ? ' selected'  : '')+'>'+$(this).find('title').text() + '</option>');
+					
+					if ($(this).find('title').text() == selected_el) { restore_el = 1; };
+				});
+				
+				if (restore_el) {
+					$('#vtype').val(selected_el);
+				}
+				$('#tmp_img').remove();
+				$('#vtype').show();
+				
+			}, 
+		'xml');
+	}
 [% END %]
 </script>
 

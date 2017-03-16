@@ -11,16 +11,16 @@
 <table>
 <tr><td colspan="3"><h2>[% title %]</h2><br></td></tr>
 <tr><td>
-	Ready. Another or finish? 
+	Заполнить ещё одну или оформить запись?
 </td></tr>
 
 <tr><td>&nbsp;
 </td></tr>
 
 <tr><td>
-	<input type="button" value="<- back to list" onclick="back_button();">
+	<input type="button" value="◁ [% langreq('Вернуться к списку') %]" onclick="back_button();">
 	&nbsp;
-	<input type="button" value="finish app ->" onclick="finish_button();">
+	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="finish_button();">
 </td></tr>
 </table>
 

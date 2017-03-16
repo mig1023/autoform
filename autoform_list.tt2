@@ -10,15 +10,15 @@
 <input type = "hidden" value = "" name = "person" id = "person">
 
 <table>
-<tr><td colspan="3"><h2>[% title %]</h2><br></td></tr>
+<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% IF last_error_text %]
-	<tr><td colspan="5">[% last_error_text %]<br><br></td></tr>
+	<tr><td colspan="5">[% langreq(last_error_text) %]<br><br></td></tr>
 [% END %]
 
 [% IF content_text.0.ID == "X" %]
 	<tr><td colspan="5">
-	No applicant has been added yet
+	[% langreq('Ни один заявитель ещё не добавлен') %]
 	</td></tr>
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
@@ -26,23 +26,23 @@
 	<td>[% i %].</td>
 	<td>[% IF !person.Finished %][draft][% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% person.BirthDate %]</td>
-	<td><input type="button" value="edit" onclick="edit_button([% person.ID %]);"></td>
+	<td><input type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
 	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
 	</tr>
 	[% END %]
 [% END %]
 
 <tr><td colspan="5">
-	<input type="button" value="add new applicant" onclick="add_button();">
+	<input type="button" value="[% langreq('Добавить заявителя') %]" onclick="add_button();">
 </td></tr>
 
 <tr><td colspan="5">&nbsp;
 </td></tr>
 
 <tr><td colspan="5">
-	<input type="button" value="<- prev" onclick="prev_button();">
+	<input type="button" value="◁ [% langreq('Назад') %]" onclick="prev_button();">
 	&nbsp;
-	<input type="button" value="finish app ->" onclick="finish_button();">
+	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="finish_button();">
 </td></tr>
 </table>
 

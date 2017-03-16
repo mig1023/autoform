@@ -30,18 +30,28 @@ sub get_content_rules_hash
 					'name' => 'CenterID',
 				},
 				'param' => '[centers_from_db]',
+				'uniq_code' => 'onchange="update_nearest_date_free_date();"',
 			},
 			{
-				'type' => 'input',
-				'name' => 'app_date',
-				'label' => 'Дата записи',
+				'type' => 'select',
+				'name' => 'vtype',
+				'label' => 'Тип визы',
 				'comment' => '',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
-					'name' => 'AppDate',
+					'name' => 'VType',
 				},
-				'special' => 'datepicker',
+				'param' => '[visas_from_db]',
+			},
+			{
+				'type' => 'info',
+				'name' => 'free_date',
+				'label' => 'Ближайшее доступное время',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
+				'special' => 'nearest_date',
 			},
 			{
 				'type' => 'checkbox',
@@ -70,25 +80,41 @@ sub get_content_rules_hash
 				},
 				'relation' => {},
 			},
-			{
-				'type' => 'text',
-				'name' => 'visa_text',
-				'label' => 'Ближайшее доступное время...',
-				'comment' => '',
-				'check' => '',
-				'db' => {},
-			},
 		],
-		'Спикок заявителей' => [	
+		'Список заявителей' => [
 			{
 				'page_ord' => 2,
 				'replacer' => '[list_of_applicants]',
 			},
 		],
 		
-		'Данные загранпаспорта' => [
+		'Данные поездки' => [
 			{
 				'page_ord' => 3,
+			},
+			{
+				'type' => 'input',
+				'name' => 's_date',
+				'label' => 'Дата начала поездки',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'SDate',
+				},
+				'special' => 'datepicker',
+			},
+			{
+				'type' => 'input',
+				'name' => 'f_date',
+				'label' => 'Дата окончания поездки',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'FDate',
+				},
+				'special' => 'datepicker',
 			},
 			{
 				'type' => 'input',
@@ -125,24 +151,24 @@ sub get_content_rules_hash
 				'special' => 'mask',
 			},
 			{
+				'type' => 'select',
+				'name' => 'vtype',
+				'label' => 'Гражданство',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Citizenship',
+				},
+				'param' => '[citizenship_countries]',
+			},
+			{
 				'type' => 'text',
 				'name' => 'visa_text',
 				'label' => 'Это просто текст, который расположен в анкете. Это просто текст, который расположен в анкете.',
 				'comment' => '',
 				'check' => '',
 				'db' => {},
-			},
-			{
-				'type' => 'radiolist',
-				'name' => 'visa_type',
-				'label' => 'Тип визы',
-				'comment' => '',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'VType',
-				},
-				'param' => '[visas_from_db]',
 			},
 		],
 		'Дополнительные данные' => [
@@ -209,6 +235,18 @@ sub get_content_rules_hash
 					'mezzi7' => { 'db' => 'Mezzi7', 'label_for' => 'вариант 7' },
 				},
 			},
+			{
+				'type' => 'radiolist',
+				'name' => 'visa_type',
+				'label' => 'Тип визы',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'VType',
+				},
+				'param' => '[visas_from_db]',
+			},
 
 		],
 		
@@ -236,6 +274,26 @@ sub get_content_rules_hash
 		'Подтверждение записи' => [
 			{
 				'page_ord' => 7,
+			},
+			{
+				'type' => 'input',
+				'name' => 'app_date',
+				'label' => 'Дата записи',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'AppDate',
+				},
+				'special' => 'datepicker',
+			},
+			{
+				'type' => 'text',
+				'name' => 'visa_text',
+				'label' => 'Это просто текст, который расположен в анкете. Это просто текст, который расположен в анкете.',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
 			},
 			{
 				'type' => 'captcha',
@@ -332,6 +390,7 @@ sub getContent
 	
 	$self->{'autoform'}->{'addr'} = '/autoform/';
 	$self->{'autoform'}->{'addr_captcha'} = '/vcs/static/files/';
+	$self->{'autoform'}->{'addr_vcs'} = '/vcs/';
   
     	my $dispathcher = {
     		'index' => \&autoform,
@@ -357,8 +416,7 @@ sub autoform
 	my $page_content;
 	my $step = 0;
 	my $last_error = '';
-	my $datepickers;
-	my $masks;
+	my $special;
 	my $template_file;
 	my $title;
 	
@@ -367,7 +425,7 @@ sub autoform
 	if ($token =~ /^\d\d$/) {
 		($title, $page_content) = $self->get_token_error($token);
 	} else {
-		($step, $title, $page_content, $last_error, $template_file, $datepickers, $masks) = $self->get_autoform_content($token);
+		($step, $title, $page_content, $last_error, $template_file, $special) = $self->get_autoform_content($token);
 	}
 	
 	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
@@ -390,8 +448,8 @@ sub autoform
 		'addr' => $vars->getform('fullhost').$self->{'autoform'}->{'addr'},
 		'last_error_name' => $last_error_name,
 		'last_error_text' => $last_error_text,
-		'datepickers' => $datepickers,
-		'masks' => $masks,
+		'special' => $special,
+		'vcs_tools' => $self->{'autoform'}->{'addr_vcs'},
 	};
 	$template->process($template_file, $tvars);
 }
@@ -402,25 +460,46 @@ sub init_add_param
 	my $self = shift;
 	my $content_rules = shift;
 	my $vars = $self->{'VCS::Vars'};
-	
-	my $centers = $vars->db->selall("
-		SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0");
-	
-	my $visas = $vars->db->selall("
-		SELECT ID, VName FROM VisaTypes WHERE OnSite = 1");
+	my $country_code='RUS';
 	
 	my $info_from_db = {
-		'[centers_from_db]' => $centers,
-		'[visas_from_db]' => $visas,
+		'[centers_from_db]' => [],
+		'[visas_from_db]' => [],
+		'[brh_countries]' => [],
+		'[citizenship_countries]' => [],
+		'[prevcitizenship_countries]' => [],
+		'[first_countries]' => [],
+		'[schengen_provincies]' => [],
 	};
 	
+	$info_from_db->{'[centers_from_db]'} = $vars->db->selall("
+		SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0");
+	$info_from_db->{'[visas_from_db]'} = $vars->db->selall("
+		SELECT ID, VName FROM VisaTypes WHERE OnSite = 1");
+	$info_from_db->{'[brh_countries]'} = [
+		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?,"SUN")', $country_code) },
+		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE not in(?,"SUN") ORDER BY EnglishName', $country_code) }
+	];
+	$info_from_db->{'[citizenship_countries]'} = [
+		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?) AND Ex=0', $country_code) },	    
+		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE Ex=0 AND CODE NOT in(?) ORDER BY EnglishName', $country_code) },
+	];
+	$info_from_db->{'[prevcitizenship_countries]'} = [
+		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?,"SUN")', $country_code) },
+		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE not in(?,"SUN")', $country_code) },
+	];
+	$info_from_db->{'[first_countries]'} = $vars->db->selallkeys("
+		SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName");
+	$info_from_db->{'[schengen_provincies]'} = $vars->db->selallkeys("
+		SELECT ID, Name FROM SchengenProvinces");
+warn Dumper($info_from_db->{'[citizenship_countries]'});	
 	for my $page ( keys %$content_rules ) {
 		next if $content_rules->{$page} =~ /^\[/;
 		for my $element ( @{ $content_rules->{$page} } ) {
 			if ( ref($element->{param}) ne 'HASH' ) {
 				my $param_array = $info_from_db->{ $element->{param} };
 				my $param_result = {};
-				
+warn "param=$element->{param}";
 				for my $row (@$param_array) {
 					$param_result->{ $row->[0] } = $row->[1];
 				};
@@ -442,12 +521,10 @@ sub get_token_and_create_new_form_if_need
 	$token = lc($token);
 	$token =~ s/[^a-z0-9]//g;
 	
-	# новая запись
 	if ($token eq '') {
 		$token = $self->token_generation();
 		$token = $self->save_new_token_in_db($token);
 	}
-	# возможные ошибки
 	else {
 		my ($token_exist, $finished) = $vars->db->sel1("
 			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token);
@@ -603,7 +680,7 @@ sub get_autoform_content
 	
 	my $page = $self->get_content_rules($step, 'full');
 
-	if (exists $page->[0]->{relation}) {
+	if ( !$last_error and (exists $page->[0]->{relation}) ) {
 		($step, $page) = $self->check_relation($step, $page, $step, $token);
 	}
 	
@@ -613,10 +690,9 @@ sub get_autoform_content
 
 	my ($content, $template) = $self->get_html_page($step, $token);
 	
-	my ($datepickers, $masks) = $self->get_specials_of_element($step);
+	my ($special) = $self->get_specials_of_element($step);
 	
-	
-	return ($step, $title, $content, $last_error, $template, $datepickers, $masks);
+	return ($step, $title, $content, $last_error, $template, $special);
 }
 
 sub check_relation
@@ -627,8 +703,10 @@ sub check_relation
 	my $page = shift;
 	my $step = shift; 
 	my $token = shift;
+	my $last_error = shift;
 	
 	my $skip_this_page;
+	my $current_table_id = $self->get_current_table_id($step, $token); 
 	
 	do {
 	
@@ -642,6 +720,12 @@ sub check_relation
 		
 		$step++;
 		$page = $self->get_content_rules($step, 'full');
+		
+		my $current_table_id = $self->get_current_table_id($step, $token); 
+		
+		if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
+			$self->set_current_app_finished( $current_table_id->{AutoAppData} );
+	}
 	}
 	
 	} while ($skip_this_page);
@@ -703,7 +787,7 @@ sub get_forward
 			$step, $token);
 	}
 
-	if (!$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
+	if ( !$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
 		$self->set_current_app_finished( $current_table_id->{AutoAppData} );
 	}
 	
@@ -947,8 +1031,12 @@ sub get_list_of_app
 		
 	if (scalar(@$content) < 1) {
 		$content->[0]->{ID} = 'X';
+	} else {
+		for my $app (@$content) {
+			$app->{BirthDate} =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+		}
 	}
-		
+	
 	my $template = 'autoform_list.tt2';
 	
 	return ($content, $template);
@@ -972,17 +1060,19 @@ sub get_specials_of_element
 	
 	return if $page_content =~ /^\[/;
 	
-	my $datepickers = '';
-	my $masks = '';
+	my $special = {
+		'datepickers' => [],
+		'masks' => [],
+		'nearest_date' => [],
+	};
 	
 	for my $element (@$page_content) {
-		$datepickers .= $element->{name} . ',' if $element->{special} eq 'datepicker';
-		$masks .= $element->{name} . ',' if $element->{special} eq 'mask';
+		push( $special->{datepickers}, $element->{name} ) if $element->{special} eq 'datepicker';
+		push( $special->{masks}, $element->{name} ) if $element->{special} eq 'mask';
+		push( $special->{nearest_date}, $element->{name} ) if $element->{special} eq 'nearest_date';
 	}
-	$datepickers =~ s/,$//;
-	$masks =~ s/,$//;
 	
-	return ($datepickers, $masks);
+	return ($special);
 }
 
 sub get_html_line
@@ -1023,7 +1113,7 @@ sub get_html_line
 		) .
 		$self->get_cell(
 			$self->get_html_for_element(
-				$element->{type}, $element->{name}, $current_value, $element->{param},
+				$element->{type}, $element->{name}, $current_value, $element->{param}, $element->{uniq_code}
 			) . $label_for_need
 		);
 	
@@ -1050,32 +1140,35 @@ sub get_html_for_element
 	my $name = shift;
 	my $value = shift;
 	my $param = shift;
+	my $uniq_code = shift;
 	
 	my $vars = $self->{'VCS::Vars'};
 	
 	my $elements = {
-		'start_line'	=> '<tr>',
+		'start_line'	=> '<tr [u]>',
 		'end_line'	=> '</tr>',
-		'start_cell'	=> '<td>',
+		'start_cell'	=> '<td [u]>',
 		'end_cell'	=> '</td>',
 		
-		'input' 	=> '<input type="text" value="[value]" name="[name]" id="[name]">',
-		'checkbox' 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked]>',
-		'select'	=> '<select size = "1" name="[name]">[options]</select>',
+		'input' 	=> '<input type="text" value="[value]" name="[name]" id="[name]" [u]>',
+		'checkbox' 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
+		'select'	=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'	=> '[options]',
-		'text'		=> '<td colspan="3">[value]</td>',
+		'text'		=> '<td colspan="3" [u]>[value]</td>',
+		'info'		=> '<label id="[name]" [u]></label>',
 		'checklist'	=> '[options]',
-		'captcha'	=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]">',
+		'captcha'	=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
 		
 		'helper'	=> '[?] ', # value вписать в текст хелпа
-		'label'		=> '<label id="[name]">[value]</label>',
-		'label_for'	=> '<label for="[name]">[value]</label>',
+		'label'		=> '<label id="[name]" [u]>[value]</label>',
+		'label_for'	=> '<label for="[name]" [u]>[value]</label>',
 	};
 	
 	my $content = $elements->{$type};
 	
 	$content =~ s/\[name\]/$name/gi;
 	$content =~ s/\[value\]/$value/gi;
+	$content =~ s/\[u\]/$uniq_code/gi;
 	
 	if ($type eq 'checkbox') {
 		$content =~ s/\[checked\]/checked/gi if $value;
