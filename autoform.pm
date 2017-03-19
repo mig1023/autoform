@@ -54,6 +54,17 @@ sub get_content_rules_hash
 				'special' => 'nearest_date',
 			},
 			{
+				'type' => 'input',
+				'name' => 'email',
+				'label' => 'Email',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'EMail',
+				},
+			},
+			{
 				'type' => 'checkbox',
 				'name' => 'pers_info',
 				'label' => '',
@@ -81,16 +92,10 @@ sub get_content_rules_hash
 				'relation' => {},
 			},
 		],
-		'Список заявителей' => [
-			{
-				'page_ord' => 2,
-				'replacer' => '[list_of_applicants]',
-			},
-		],
 		
 		'Данные поездки' => [
 			{
-				'page_ord' => 3,
+				'page_ord' => 2,
 			},
 			{
 				'type' => 'input',
@@ -116,6 +121,104 @@ sub get_content_rules_hash
 				},
 				'special' => 'datepicker',
 			},
+		],
+		
+		'Список заявителей' => [
+			{
+				'page_ord' => 3,
+				'replacer' => '[list_of_applicants]',
+			},
+		],
+		
+		'Данные внутреннего паспорта' => [
+			{
+				'page_ord' => 4,
+			},
+			{
+				'type' => 'input',
+				'name' => 'rulname',
+				'label' => 'Фамилия',
+				'comment' => '',
+				'check' => 'zЁ',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RLName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'rufname',
+				'label' => 'Имя',
+				'comment' => '',
+				'check' => 'zЁ',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RFName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'rumname',
+				'label' => 'Отчество',
+				'comment' => '',
+				'check' => 'zЁ',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RMName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'birthdate',
+				'label' => 'Дата рождения',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'BirthDate',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'rupassnum',
+				'label' => '№ паспорта',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RPassNum',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'passdate',
+				'label' => 'Дата выдачи',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RPWhen',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'rupasswhere',
+				'label' => 'Выдан',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RPWhere',
+				},
+			},
+		],
+		
+		'Данные загрнпаспорта' => [
+			{
+				'page_ord' => 5,
+			},	
 			{
 				'type' => 'input',
 				'name' => 'lname',
@@ -140,20 +243,109 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'bth_date',
-				'label' => 'Дата рождения',
+				'name' => 'rupassnum',
+				'label' => '№ загранпаспорта',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PassNum',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'passdate',
+				'label' => 'Дата выдачи',
 				'comment' => '',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'BirthDate',
+					'name' => 'PassDate',
 				},
 				'special' => 'mask',
 			},
 			{
+				'type' => 'input',
+				'name' => 'passtill',
+				'label' => 'Действителен до',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PassTill',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'passwhere',
+				'label' => 'Выдан',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PassWhom',
+				},
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'ischild',
+				'label' => '',
+				'label_for' => 'вписан в паспорт',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'isChild',
+				},
+				'relation' => {},
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'nres',
+				'label' => '',
+				'label_for' => 'не резидент',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'NRes',
+				},
+				'relation' => {},
+			},
+		],
+		
+		'Персональные данные' => [
+			{
+				'page_ord' => 6,
+			},
+			{
+				'type' => 'input',
+				'name' => 'brhplace',
+				'label' => 'Место рождения',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'BrhPlace',
+				},
+			},
+			{
 				'type' => 'select',
-				'name' => 'vtype',
-				'label' => 'Гражданство',
+				'name' => 'brhcountry',
+				'label' => 'Страна рождения',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'BrhCountry',
+				},
+				'param' => '[brh_countries]',
+			},
+			{
+				'type' => 'select',
+				'name' => 'сitizenshipype',
+				'label' => 'Гражданство в настоящее время',
 				'comment' => '',
 				'check' => 'zN',
 				'db' => {
@@ -163,57 +355,299 @@ sub get_content_rules_hash
 				'param' => '[citizenship_countries]',
 			},
 			{
-				'type' => 'text',
-				'name' => 'visa_text',
-				'label' => 'Это просто текст, который расположен в анкете. Это просто текст, который расположен в анкете.',
+				'type' => 'select',
+				'name' => 'prev_сitizenshipype',
+				'label' => 'Гражданство при рождении',
 				'comment' => '',
-				'check' => '',
-				'db' => {},
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PrevCitizenship',
+				},
+				'param' => '[prevcitizenship_countries]',
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'gender',
+				'label' => 'Пол',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Gender',
+				},
+				'param' => { 
+					1 => 'мужской', 
+					2 => 'женский', 
+				},
+			},
+			{
+				'type' => 'select',
+				'name' => 'family',
+				'label' => 'Семейное положение',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Family',
+				},
+				'param' => {
+					0 => 'Не указано',
+					1 => 'Холост/не замужем',
+					2 => 'Женат/замужем',
+					3 => 'Не проживает с супругом',
+					4 => 'Разведен/-а',
+					5 => 'Вдовец/вдова',
+					6 => 'Иное'
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'phone',
+				'label' => 'Телефон',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppPhone',
+				},
 			},
 		],
-		'Дополнительные данные' => [
+		
+		'Уточнение по семейному положению' => [
 			{
-				'page_ord' => 4,
+				'page_ord' => 7,
 				'relation' => {
 					'only_if' => {
-						'table' => 'Appointments',
-						'name' => 'PersonalDataPermission',
-						'value' => '1',
+						'table' => 'AppData',
+						'name' => 'Family',
+						'value' => '6',
 					}
 				},
 			},
 			{
 				'type' => 'input',
-				'name' => 'rulname',
-				'label' => 'Фамилия на русском',
+				'name' => 'familyother',
+				'label' => 'Семейное положение',
 				'comment' => '',
-				'check' => 'zЁ',
+				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'RLName',
+					'name' => 'FamilyOther',
+				},
+			},
+		],
+		
+		'Персональные данные по адресам' => [
+			{
+				'page_ord' => 8,
+			},
+			{
+				'type' => 'input',
+				'name' => 'kinderdata',
+				'label' => 'Для несовершеннолетних',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'KinderData',
 				},
 			},
 			{
 				'type' => 'input',
-				'name' => 'rufname',
-				'label' => 'Имя на русском',
+				'name' => 'workdata',
+				'label' => 'Профессиональная деятельность',
 				'comment' => '',
-				'check' => 'zЁ',
+				'check' => '',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'RFName',
+					'name' => 'ProfActivity',
 				},
 			},
 			{
 				'type' => 'input',
-				'name' => 'rumname',
-				'label' => 'Отчество на русском',
+				'name' => 'workaddr',
+				'label' => 'Работодатель: адрес, телефон',
 				'comment' => '',
-				'check' => 'zЁ',
+				'check' => '',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'RMName',
+					'name' => 'WorkOrg',
 				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'brhplace',
+				'label' => 'Домашний адрес',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FullAddress',
+				},
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'n_rezident',
+				'label' => 'Страна пребывания',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'CountryLive',
+				},
+				'param' => { 
+					1 => 'страна гражданства', 
+					2 => 'не является страной гражданства', 
+				},
+			},
+			
+		],
+		
+		'Уточнение по стране пребывания' => [
+			{
+				'page_ord' => 9,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'CountryLive',
+						'value' => '2',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'vidno',
+				'label' => 'Вид на жительство №',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'VidNo',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'brhplace',
+				'label' => 'Действителен до',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FamilyOther',
+				},
+				'special' => 'mask',
+			},
+		],
+		
+		'Информация о поездке' => [
+			{
+				'page_ord' => 10,
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'purpose',
+				'label' => 'Основная цель поездки',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'VisaPurpose1',
+				},
+				'param' => { 
+					1 => 'Туризм', 
+					2 => 'Деловая',
+					3 => 'Учёба',
+					4 => 'Официальная',
+					5 => 'Культура',
+					6 => 'Спорт',
+					7 => 'Транзит',
+					8 => 'Лечение',
+					9 => 'Посещение родственников',
+					10 => 'Иная',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'calc',
+				'label' => 'Продолжительность пребывания',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'CalcDuration',
+				},
+			},
+			
+		],
+		
+		'Иная цель посещения' => [
+			{
+				'page_ord' => 11,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'VisaPurpose1',
+						'value' => '10',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'visaother',
+				'label' => 'Основная цель поездки',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'VisaOther',
+				},
+			},
+		],
+		
+		'Страна и город назначения' => [
+			{
+				'page_ord' => 12,
+			},
+			{
+				'type' => 'input',
+				'name' => 'city',
+				'label' => 'Город назначения',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'City',
+				},
+			},
+			{
+				'type' => 'select',
+				'name' => 'nulla',
+				'label' => 'Страна первого въезда',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Nulla',
+				},
+				'param' => '[first_countries]',
+			},
+			{
+				'type' => 'input',
+				'name' => 'nullacity',
+				'label' => 'Город первого въезда',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'NullaCity',
+				},
+			},
+		],
+		
+		'Дополнительные данные' => [
+			{
+				'page_ord' => 13,
 			},
 			{
 				'type' => 'checklist',
@@ -252,14 +686,14 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				'page_ord' => 5,
+				'page_ord' => 14,
 				'replacer' => '[app_finish]',
 			},
 		],
 		
-		'Данные внутреннего паспорта' => [
+		'Данные3внутреннего3паспорта' => [
 			{
-				'page_ord' => 6,
+				'page_ord' => 15,
 			},
 			{
 				'type' => 'text',
@@ -273,7 +707,7 @@ sub get_content_rules_hash
 		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 7,
+				'page_ord' => 16,
 			},
 			{
 				'type' => 'input',
@@ -315,7 +749,7 @@ sub get_content_rules_hash
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 8,
+				'page_ord' => 17,
 			},
 			{
 				'type' => 'text',
@@ -337,7 +771,6 @@ sub get_content_rules
 	my $full = shift;
 	
 	my $content = $self->get_content_rules_hash();
-	
 	
 	my $new_content = {};
 	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content) {
@@ -427,7 +860,7 @@ sub autoform
 	} else {
 		($step, $title, $page_content, $last_error, $template_file, $special) = $self->get_autoform_content($token);
 	}
-	
+
 	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
 	
 	$vars->get_system->pheader($vars);
@@ -488,18 +921,18 @@ sub init_add_param
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?,"SUN")', $country_code) },
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE not in(?,"SUN")', $country_code) },
 	];
-	$info_from_db->{'[first_countries]'} = $vars->db->selallkeys("
+	$info_from_db->{'[first_countries]'} = $vars->db->selall("
 		SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName");
-	$info_from_db->{'[schengen_provincies]'} = $vars->db->selallkeys("
+	$info_from_db->{'[schengen_provincies]'} = $vars->db->selall("
 		SELECT ID, Name FROM SchengenProvinces");
-warn Dumper($info_from_db->{'[citizenship_countries]'});	
+	
 	for my $page ( keys %$content_rules ) {
 		next if $content_rules->{$page} =~ /^\[/;
 		for my $element ( @{ $content_rules->{$page} } ) {
 			if ( ref($element->{param}) ne 'HASH' ) {
 				my $param_array = $info_from_db->{ $element->{param} };
 				my $param_result = {};
-warn "param=$element->{param}";
+
 				for my $row (@$param_array) {
 					$param_result->{ $row->[0] } = $row->[1];
 				};
@@ -629,7 +1062,7 @@ sub get_autoform_content
 	
 	my ($step, $app_id) = $vars->db->sel1("
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token);
-	
+
 	my $action = $vars->getparam('action');
 	$action = lc($action);
 	$action =~ s/[^a-z]//g;
@@ -679,9 +1112,10 @@ sub get_autoform_content
 	
 	
 	my $page = $self->get_content_rules($step, 'full');
-
+	my $back = ($action eq 'back' ? 'back' : '');
+	
 	if ( !$last_error and (exists $page->[0]->{relation}) ) {
-		($step, $page) = $self->check_relation($step, $page, $step, $token);
+		($step, $page) = $self->check_relation($step, $page, $step, $token, $back);
 	}
 	
 	if ($page !~ /\[/) { 
@@ -703,33 +1137,50 @@ sub check_relation
 	my $page = shift;
 	my $step = shift; 
 	my $token = shift;
-	my $last_error = shift;
-	
+	my $moonwalk = shift;
+
+	my $vars = $self->{'VCS::Vars'};
+
 	my $skip_this_page;
+	my $at_least_one_page_skipped = 0;
+	
 	my $current_table_id = $self->get_current_table_id($step, $token); 
 	
 	do {
 	
-	$skip_this_page = 0;
+		$skip_this_page = 0;
 
-	for my $relation (keys %{ $page->[0]->{relation} }) {
-		$skip_this_page = $self->skip_page_by_relation( $relation, $page->[0]->{relation}->{$relation}, $step, $token );
-	}
-	
-	if ($skip_this_page) {
+		for my $relation (keys %{ $page->[0]->{relation} }) {
+			$skip_this_page = $self->skip_page_by_relation( $relation, $page->[0]->{relation}->{$relation}, $step, $token );
+		}
 		
-		$step++;
-		$page = $self->get_content_rules($step, 'full');
+		if ($skip_this_page) {
 		
-		my $current_table_id = $self->get_current_table_id($step, $token); 
-		
-		if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
-			$self->set_current_app_finished( $current_table_id->{AutoAppData} );
-	}
-	}
+			$at_least_one_page_skipped = 1;
+			
+			if ($moonwalk) {
+				$step--;
+			} else {
+				$step++;
+			}
+			
+			$page = $self->get_content_rules($step, 'full');
+			
+			my $current_table_id = $self->get_current_table_id($step, $token); 
+			
+			if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
+				$self->set_current_app_finished( $current_table_id->{AutoAppData} );
+			}
+		}
 	
 	} while ($skip_this_page);
-	
+
+	if ($at_least_one_page_skipped) {
+		$vars->db->query("
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
+			$step, $token);
+	}
+
 	return ($step, $page);
 }
 
