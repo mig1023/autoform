@@ -205,12 +205,34 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'rupasswhere',
-				'label' => 'Выдан',
+				'label' => 'Кем выдан',
 				'comment' => '',
 				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RPWhere',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'phone',
+				'label' => 'Телефон',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppPhone',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'address',
+				'label' => 'Адрес',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FullAddress',
 				},
 			},
 		],
@@ -401,17 +423,6 @@ sub get_content_rules_hash
 					6 => 'Иное'
 				},
 			},
-			{
-				'type' => 'input',
-				'name' => 'phone',
-				'label' => 'Телефон',
-				'comment' => '',
-				'check' => 'z',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'AppPhone',
-				},
-			},
 		],
 		
 		'Уточнение по семейному положению' => [
@@ -473,17 +484,6 @@ sub get_content_rules_hash
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'WorkOrg',
-				},
-			},
-			{
-				'type' => 'input',
-				'name' => 'brhplace',
-				'label' => 'Домашний адрес',
-				'comment' => '',
-				'check' => '',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'FullAddress',
 				},
 			},
 			{
@@ -832,6 +832,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'PermessoED',
 				},
+				'special' => 'mask',
 			},
 		],
 		
@@ -1334,8 +1335,6 @@ sub get_content_rules_hash
 			},
 		],
 		
-		# ===================================================================
-		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
 				'page_ord' => 30,
@@ -1343,23 +1342,188 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Данные3внутреннего3паспорта' => [
+		'Выберите лицо на которое будет оформлен договор' => [
 			{
 				'page_ord' => 31,
+				
 			},
 			{
-				'type' => 'text',
+				'type' => 'select',
 				'name' => 'visa_text',
-				'label' => 'Это уже информация по паспорту.',
+				'label' => 'Выберите на кого оформляется',
 				'comment' => '',
-				'check' => '',
-				'db' => {},
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PersonForAgreements',
+					},
+				'param' => '[persons_in_app]',
 			},
 		],
 		
-		'Подтверждение записи' => [
+		'Укажите данные данные доверенного лица' => [
 			{
 				'page_ord' => 32,
+				'relation' => {
+					'only_if' => {
+						'table' => 'Appointments',
+						'name' => 'PersonForAgreements',
+						'value' => '0',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovlname',
+				'label' => 'Фамилия',
+				'comment' => '',
+				'check' => 'zЁ',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'LName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovfname',
+				'label' => 'Имя',
+				'comment' => '',
+				'check' => 'zЁ',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'FName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovmname',
+				'label' => 'Отчество',
+				'comment' => '',
+				'check' => 'zЁ',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'MName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovpassnum',
+				'label' => '№ паспорта',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PassNum',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovpassdate',
+				'label' => 'Дата выдачи',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PassDate',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovpasswhere',
+				'label' => 'Кем выдан',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PassWhom',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovphone',
+				'label' => 'Телефон',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'Phone',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovaddress',
+				'label' => 'Адрес',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'Address',
+				},
+			},
+		],
+		
+		'Дополнительные услуги' => [
+			{
+				'page_ord' => 33,
+			},
+			{
+				'type' => 'input',
+				'name' => 'sms',
+				'label' => 'SMS уведомление',
+				'comment' => '',
+				'check' => 'N',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'Mobile',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'shipping',
+				'label' => 'Адрес доставки',
+				'comment' => '',
+				'check' => 'Ё',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'ShAddress',
+				},
+			},
+		],
+				
+		'Предпочтительный офис выдачи документов' => [
+			{
+				'page_ord' => 34,
+				'relation' => {
+					'only_if' => {
+						'table' => 'Appointments',
+						'name' => 'CenterID',
+						'value' => '1',
+					}
+				},
+				
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'mezziwhom',
+				'label' => 'Выберите офис выдачи документов',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'OfficeToReceive',
+				},
+				'param' => { 
+					0 => 'Малый Толмачёвский, д.6 стр.1',
+					1 => 'ул. Киевская, вл. 2, 3 этаж',
+				},
+			},
+		],
+		
+		'Дата и время записи' => [
+			{
+				'page_ord' => 35,
+				
 			},
 			{
 				'type' => 'input',
@@ -1373,13 +1537,11 @@ sub get_content_rules_hash
 				},
 				'special' => 'datepicker',
 			},
+		],
+		
+		'Подтверждение записи' => [
 			{
-				'type' => 'text',
-				'name' => 'visa_text',
-				'label' => 'Это просто текст, который расположен в анкете. Это просто текст, который расположен в анкете.',
-				'comment' => '',
-				'check' => '',
-				'db' => {},
+				'page_ord' => 36,
 			},
 			{
 				'type' => 'captcha',
@@ -1401,7 +1563,7 @@ sub get_content_rules_hash
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 33,
+				'page_ord' => 37,
 			},
 			{
 				'type' => 'text',
@@ -1421,6 +1583,7 @@ sub get_content_rules
 	my $self = shift;
 	my $page = shift;
 	my $full = shift;
+	my $token = shift;
 	
 	my $content = $self->get_content_rules_hash();
 	
@@ -1441,9 +1604,8 @@ sub get_content_rules
 			$new_content->{ $page_ord }->[0]->{ page_name } = $page;
 		}
 	}
-	$content = $new_content;
 
-	$content = $self->init_add_param($content);
+	$content = $self->init_add_param($new_content, $token);
 	
 	if (!$page) {
 		return $content;
@@ -1544,6 +1706,8 @@ sub init_add_param
 {
 	my $self = shift;
 	my $content_rules = shift;
+	my $token = shift;
+	
 	my $vars = $self->{'VCS::Vars'};
 	my $country_code='RUS';
 	
@@ -1555,29 +1719,46 @@ sub init_add_param
 		'[prevcitizenship_countries]' => [],
 		'[first_countries]' => [],
 		'[schengen_provincies]' => [],
+		'[persons_in_app]' => [],
 	};
 	
 	$info_from_db->{'[centers_from_db]'} = $vars->db->selall("
 		SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0");
+	
 	$info_from_db->{'[visas_from_db]'} = $vars->db->selall("
 		SELECT ID, VName FROM VisaTypes WHERE OnSite = 1");
+	
 	$info_from_db->{'[brh_countries]'} = [
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?,"SUN")', $country_code) },
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE not in(?,"SUN") ORDER BY EnglishName', $country_code) }
 	];
+	
 	$info_from_db->{'[citizenship_countries]'} = [
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?) AND Ex=0', $country_code) },	    
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE Ex=0 AND CODE NOT in(?) ORDER BY EnglishName', $country_code) },
 	];
+	
 	$info_from_db->{'[prevcitizenship_countries]'} = [
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?,"SUN")', $country_code) },
 		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE not in(?,"SUN")', $country_code) },
 	];
+	
 	$info_from_db->{'[first_countries]'} = $vars->db->selall("
 		SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName");
+	
 	$info_from_db->{'[schengen_provincies]'} = $vars->db->selall("
 		SELECT ID, Name FROM SchengenProvinces");
-	
+
+	if ($token) {
+		$info_from_db->{'[persons_in_app]'} = $vars->db->selall("
+			SELECT AutoAppData.ID, CONCAT(RFName, ' ', RLName, ' ', BirthDate) as person
+			FROM AutoToken 
+			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
+			WHERE AutoToken.Token = ?", $token);
+			
+		push $info_from_db->{'[persons_in_app]'}, [ 0, 'на доверенное лицо' ];
+	}
+		
 	for my $page ( keys %$content_rules ) {
 		next if $content_rules->{$page} =~ /^\[/;
 		for my $element ( @{ $content_rules->{$page} } ) {
@@ -2130,7 +2311,7 @@ sub get_html_page
 	my $content = '';
 	my $template = 'autoform.tt2';
 	
-	my $page_content = $self->get_content_rules($step);
+	my $page_content = $self->get_content_rules($step, '', $token);
 
 	if ( $page_content eq '[list_of_applicants]') {
 		return $self->get_list_of_app($token);
@@ -2311,16 +2492,19 @@ sub get_html_for_element
 		my $list = '';
 		for my $opt (sort keys %$param) {
 			my $selected = ( $value == $opt ? 'selected' : '' );
-			$list .= '<option ' . $selected . ' value=' . $opt . '>' . $param->{$opt} . '</option>'; 
+			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{$opt} . '</option>'; 
 		}
 		$content =~ s/\[options\]/$list/gi;
 	}
 	
 	if ($type eq 'radiolist') {
 		my $list = '';
+		my $uniq_id = 0;
 		for my $opt (sort keys %$param) {
 			my $checked = ( $value == $opt ? 'checked' : '' );
-			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' . $checked . '>' . $param->{$opt} . '<br>';
+			$uniq_id++;
+			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' . $checked . ' id="'.$name.$uniq_id.'">'.
+				'<label for="'.$name.$uniq_id.'">'.$param->{$opt}.'</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
 		
@@ -2395,10 +2579,10 @@ sub save_data_from_form
 		
 	}
 	
-	$self->check_special_in_rules($step, $table_id);
+	$self->check_special_in_rules_for_save($step, $table_id);
 }
 
-sub check_special_in_rules
+sub check_special_in_rules_for_save
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
@@ -2452,7 +2636,7 @@ sub get_all_values
 				$self->decode_data_from_db($step, $request_tables->{$table}->{$value}, $result->{$value});
 		}
 	}
-
+	
 	return $all_values;
 }
 
@@ -2467,6 +2651,8 @@ sub decode_data_from_db
 	my $page_content = $self->get_content_rules($step);
 	
 	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
+	
+	$value = '' if ($value eq '00.00.0000');
 	
 	return $value;
 }

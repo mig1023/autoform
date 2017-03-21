@@ -18,6 +18,7 @@ CREATE TABLE AutoAppointments (
 	ID INT(8) UNSIGNED NOT NULL AUTO_INCREMENT,
 	PersonalDataPermission TINYINT(1),
 	MobilPermission TINYINT(1),
+	PersonForAgreements INT(11),
 	AppDate DATE NOT NULL,
 	TimeslotID INT(10) UNSIGNED NOT NULL,
 	RDate DATETIME NOT NULL,
