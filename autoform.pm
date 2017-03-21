@@ -215,7 +215,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Данные загрнпаспорта' => [
+		'Данные загранпаспорта' => [
 			{
 				'page_ord' => 5,
 			},	
@@ -566,19 +566,8 @@ sub get_content_rules_hash
 					9 => 'Посещение родственников',
 					10 => 'Иная',
 				},
+				'special' => 'save_info_about_hastdatatype',
 			},
-			{
-				'type' => 'input',
-				'name' => 'calc',
-				'label' => 'Продолжительность пребывания',
-				'comment' => '',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'CalcDuration',
-				},
-			},
-			
 		],
 		
 		'Иная цель посещения' => [
@@ -645,14 +634,541 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Дополнительные данные' => [
+		'Данные для визы' => [
 			{
 				'page_ord' => 13,
 			},
 			{
+				'type' => 'select',
+				'name' => 'visanum',
+				'label' => 'Виза запрашивается для',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'VisaNum',
+				},
+				'param' => {
+					0 => 'Однократного въезда',
+					1 => 'Двукратного въезда',
+					2 => 'Многократного въезда',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'apps_date',
+				'label' => 'Дата начала поездки',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppSDate',
+				},
+				'special' => 'datepicker',
+			},
+			{
+				'type' => 'input',
+				'name' => 'appf_date',
+				'label' => 'Дата окончания поездки',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppFDate',
+				},
+				'special' => 'datepicker',
+			},
+			{
+				'type' => 'input',
+				'name' => 'calcdur',
+				'label' => 'Продолжительность пребывания',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'CalcDuration',
+				},
+			},
+		],
+		
+		'Шенгенские визы' => [
+			{
+				'page_ord' => 14,
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'prevvisa',
+				'label' => 'Шенгенские визы, выданные за последние три года',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PrevVisa',
+				},
+				'param' => { 
+					1 => 'Нет', 
+					2 => 'Да',
+				},
+			},
+		],
+		
+		'Сроки действия последней визы' => [
+			{
+				'page_ord' => 15,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'PrevVisa',
+						'value' => '2',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'prevvisafd',
+				'label' => 'Дата начала',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PrevVisaFD',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'prevvised',
+				'label' => 'Дата окончания',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PrevVisaED',
+				},
+				'special' => 'mask',
+			},
+		],
+		
+		'Отпечатки пальцев' => [
+			{
+				'page_ord' => 16,
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'fingers',
+				'label' => 'Предоставлены при прошлой визе',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Fingers',
+				},
+				'param' => { 
+					0 => 'Нет', 
+					1 => 'Да',
+				},
+			},
+		],
+		
+		'Дата сдачи отпечатков' => [
+			{
+				'page_ord' => 17,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'Fingers',
+						'value' => '1',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'prevvisafd',
+				'label' => 'Дата сдачи отпечатков, если известна',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FingersDate',
+				},
+				'special' => 'mask',
+			},
+		],
+		
+		'Разрешение на въезд, если необходимо' => [
+			{
+				'page_ord' => 18,
+			},
+			{
+				'type' => 'input',
+				'name' => 'premesso',
+				'label' => 'Кем выдано',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Permesso',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'premessofd',
+				'label' => 'Действительно с',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PermessoFD',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'premessoed',
+				'label' => 'Действительно по',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PermessoED',
+				},
+			},
+		],
+		
+		'Проживание' => [
+			{
+				'page_ord' => 19,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'VisaPurpose1',
+						'value' => '1',
+					}
+				},
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'hostdatatype',
+				'label' => 'Вариант проживания',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataType',
+				},
+				'param' => { 
+					'H' => 'Гостиница/аренда/собственность', 
+					'P' => 'Приглашение',
+				},
+			},
+		],
+		
+		'Гостиница' => [
+			{
+				'page_ord' => 20,
+				'relation' => {
+					'only_if_not' => {
+						'table' => 'SchengenAppData',
+						'name' => 'HostDataType',
+						'value' => 'P',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotels',
+				'label' => 'Название гостиницы или ФИО приглашающего',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Hotels',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotelsaddr',
+				'label' => 'Адрес ',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'HotelAdresses',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotelpho',
+				'label' => 'Телефон',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'HotelPhone',
+				},
+			},
+		],
+		
+		'Приглашение' => [
+			{
+				'page_ord' => 21,
+				'relation' => {
+					'only_if_not' => {
+						'table' => 'SchengenAppData',
+						'name' => 'HostDataType',
+						'value' => 'H',
+					},
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'VisaPurpose1',
+						'value' => '1',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'p_name',
+				'label' => 'Имя',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'p_last_name',
+				'label' => 'Фамилия',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataDenomination',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'p_birthdate',
+				'label' => 'Дата рождения',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataDateOfBirth',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'select',
+				'name' => 'p_province',
+				'label' => 'Провинция',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataProvince',
+				},
+				'param' => '[schengen_provincies]',
+			},
+			{
+				'type' => 'input',
+				'name' => 'p_city',
+				'label' => 'Город',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataCity',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'p_adress',
+				'label' => 'Адрес (без города)',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataAddress',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'p_phone',
+				'label' => 'Телефон',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataPhoneNumber',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'p_email',
+				'label' => 'Email',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataEmail',
+				},
+			},
+		],
+	
+		'Приглашение организации' => [
+			{
+				'page_ord' => 22,
+				'relation' => {
+					'only_if_not' => {
+						'table' => 'AppData',
+						'name' => 'VisaPurpose1',
+						'value' => '1',
+					}
+				},
+			},
+			{
+				'type' => 'select',
+				'name' => 'a_province',
+				'label' => 'Провинция',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataProvince',
+				},
+				'param' => '[schengen_provincies]',
+			},
+			{
+				'type' => 'input',
+				'name' => 'a_city',
+				'label' => 'Город',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'SchengenAppData',
+					'name' => 'HostDataCity',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'a_company',
+				'label' => 'Название приглашающей компании',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'ACompanyName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'a_companyaddr',
+				'label' => 'Адрес приглашающей компании',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'ACompanyAddress',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'a_phone',
+				'label' => 'Телефон компании',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'ACompanyPhone',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'a_fax',
+				'label' => 'Факс компании',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'ACompanyFax',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'a_person',
+				'label' => 'ФИО, адрес, телефон, email контактного лица',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'ACopmanyPerson',
+				},
+			},
+		],
+		
+		'Расходы заявителя' => [
+			{
+				'page_ord' => 23,
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'mezziwhom',
+				'label' => 'Расходы заявителя оплачивает',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'MezziWhom',
+				},
+				'param' => { 
+					0 => 'сам заявитель', 
+					1 => 'упомянутый ранее спонсор (приглашающее лицо, компания)',
+					2 => 'иной спонсор',
+				},
+			},
+		],
+		
+		'Уточните спонсора' => [
+			{
+				'page_ord' => 24,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'MezziWhom',
+						'value' => '2',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'mezziwhomother',
+				'label' => 'Спонсор',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'MezziWhomOther',
+				},
+			},
+		],
+		
+		'Средства заявителя' => [
+			{
+				'page_ord' => 25,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'MezziWhom',
+						'value' => '0',
+					}
+				},
+			},
+			{
 				'type' => 'checklist',
 				'name' => 'mezzi',
-				'label' => 'Варианты оплаты',
+				'label' => 'Средства',
 				'comment' => '',
 				'check' => 'at_least_one',
 				'db' => {
@@ -660,40 +1176,176 @@ sub get_content_rules_hash
 					'name' => 'complex'
 				},
 				'param' => {
-					'mezzi1' => { 'db' => 'Mezzi1', 'label_for' => 'вариант 1' },
-					'mezzi2' => { 'db' => 'Mezzi2', 'label_for' => 'вариант 2' },
-					'mezzi3' => { 'db' => 'Mezzi3', 'label_for' => 'вариант 3' },
-					'mezzi4' => { 'db' => 'Mezzi4', 'label_for' => 'вариант 4' },
-					'mezzi5' => { 'db' => 'Mezzi5', 'label_for' => 'вариант 5' },
-					'mezzi6' => { 'db' => 'Mezzi6', 'label_for' => 'вариант 6' },
-					'mezzi7' => { 'db' => 'Mezzi7', 'label_for' => 'вариант 7' },
+					'mezzi1' => { 'db' => 'Mezzi1', 'label_for' => 'Наличные деньги' },
+					'mezzi2' => { 'db' => 'Mezzi2', 'label_for' => 'Кредитаня карточка' },
+					'mezzi3' => { 'db' => 'Mezzi3', 'label_for' => 'Предоплаченный транспорт' },
+					'mezzi4' => { 'db' => 'Mezzi4', 'label_for' => 'Дорожные чеки' },
+					'mezzi5' => { 'db' => 'Mezzi5', 'label_for' => 'Предоплачено место проживания' },
+					'mezzi6' => { 'db' => 'Mezzi6', 'label_for' => 'Иные' },
 				},
+			},
+		],
+		
+		'Средства спонсора' => [
+			{
+				'page_ord' => 26,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'MezziWhom',
+						'value' => '1,2',
+					}
+				},
+			},
+			{
+				'type' => 'checklist',
+				'name' => 'sponsor_mezzi',
+				'label' => 'Средства',
+				'comment' => '',
+				'check' => 'at_least_one',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'complex'
+				},
+				'param' => {
+					'mezzi1' => { 'db' => 'Mezzi1', 'label_for' => 'Наличные деньги' },
+					'mezzi2' => { 'db' => 'Mezzi2', 'label_for' => 'Оплачиваются все расходы' },
+					'mezzi3' => { 'db' => 'Mezzi3', 'label_for' => 'Оплачивается транспорт' },
+					'mezzi5' => { 'db' => 'Mezzi4', 'label_for' => 'Оплачивается место проживания' },
+					'mezzi6' => { 'db' => 'Mezzi6', 'label_for' => 'Иные' },
+				},
+			},
+		],
+		
+		'Уточните иные средства' => [
+			{
+				'page_ord' => 27,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'Mezzi6',
+						'value' => '1',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'whomothersrc',
+				'label' => 'Иные средства',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'MezziOtherSrc',
+				},
+			},
+		],
+				
+		'Родственники в ЕС' => [
+			{
+				'page_ord' => 28,
 			},
 			{
 				'type' => 'radiolist',
-				'name' => 'visa_type',
-				'label' => 'Тип визы',
+				'name' => 'femrel',
+				'label' => 'Степень родства',
 				'comment' => '',
 				'check' => 'zN',
 				'db' => {
-					'table' => 'Appointments',
-					'name' => 'VType',
+					'table' => 'AppData',
+					'name' => 'FamRel',
 				},
-				'param' => '[visas_from_db]',
+				'param' => { 
+					0 => 'Нет', 
+					1 => 'Супруг',
+					2 => 'Ребёнок',
+					3 => 'Иные близкие родственники',
+					4 => 'Иждивенец',
+				},
 			},
-
 		],
+		
+		'Данные родственника' => [
+			{
+				'page_ord' => 29,
+				'relation' => {
+					'only_if_not' => {
+						'table' => 'AppData',
+						'name' => 'FamRel',
+						'value' => '0',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'eu_lname',
+				'label' => 'Фамилия',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'EuLName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'eu_fname',
+				'label' => 'Имя',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'EuFName',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'eu_bdate',
+				'label' => 'Дата рождения',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'EuBDate',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'eu_citizenship',
+				'label' => 'Гражданство',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'EuCitizen',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'eu_idnum',
+				'label' => 'Номер паспорта',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'EuPassNum',
+				},
+			},
+		],
+		
+		# ===================================================================
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				'page_ord' => 14,
+				'page_ord' => 30,
 				'replacer' => '[app_finish]',
 			},
 		],
 		
 		'Данные3внутреннего3паспорта' => [
 			{
-				'page_ord' => 15,
+				'page_ord' => 31,
 			},
 			{
 				'type' => 'text',
@@ -707,7 +1359,7 @@ sub get_content_rules_hash
 		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 16,
+				'page_ord' => 32,
 			},
 			{
 				'type' => 'input',
@@ -749,7 +1401,7 @@ sub get_content_rules_hash
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 17,
+				'page_ord' => 33,
 			},
 			{
 				'type' => 'text',
@@ -1003,8 +1655,8 @@ sub save_new_token_in_db
 	my $vars = $self->{'VCS::Vars'};
 
 	$vars->db->query("
-		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, Step, LastError, Finished, Draft) 
-		VALUES (?, 0, 0, 1, '', 0, 0)", {}, 
+		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
+		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, 
 		$token);
 	
 	return $token;
@@ -1151,7 +1803,7 @@ sub check_relation
 		$skip_this_page = 0;
 
 		for my $relation (keys %{ $page->[0]->{relation} }) {
-			$skip_this_page = $self->skip_page_by_relation( $relation, $page->[0]->{relation}->{$relation}, $step, $token );
+			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{relation}->{$relation}, $step, $token );
 		}
 		
 		if ($skip_this_page) {
@@ -1195,20 +1847,35 @@ sub skip_page_by_relation
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $skip_this = 0;
-
 	my $current_table_id = $self->get_current_table_id($step, $token); 
 	
 	my $value = $vars->db->sel1("
 		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?", $current_table_id->{ 'Auto'. $relation->{table} });
+	
+	return $self->skip_by_condition( $value, $relation->{value}, $condition ); 
+}
+
+sub skip_by_condition
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $value = shift;
+	my $relation = shift;
+	my $condition = shift;
+	
+	my $skip_it = 0;
+	
+	my %relation = map { $_ => 1 } split /,/, $relation; 
+
 	if ($condition eq 'only_if') {
-		$skip_this = 1 if $value != $relation->{value};
+		$skip_it = 1 unless exists $relation{$value};
 	}
 	
 	if ($condition eq 'only_if_not') {
-		$skip_this = 1 if $value == $relation->{value};
+		$skip_it = 1 if exists $relation{$value};
 	}
-	return $skip_this;
+	
+	return $skip_it;
 }
 
 sub get_forward
@@ -1313,9 +1980,12 @@ sub get_edit
 		
 		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');;
 		
+		my $sch_id = $vars->db->sel1("
+			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id);
+		
 		$vars->db->query("
-			UPDATE AutoToken SET Step = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
-			$step, $appdata_id, $token);
+			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
+			$step, $appdata_id, $sch_id, $token);
 		
 		$vars->db->query("
 			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
@@ -1335,9 +2005,17 @@ sub get_delete
 	my $vars = $self->{'VCS::Vars'};
 	
 	if ( $self->check_existing_id_in_token($appdata_id, $token) ) {
+	
+		my $sch_id = $vars->db->sel1("
+			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id);
+	
 		$vars->db->query("
 			DELETE FROM AutoAppData WHERE ID = ?", {}, 
 			$appdata_id);
+		
+		$vars->db->query("
+			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, 
+			$sch_id);
 	}
 }
 
@@ -1398,16 +2076,21 @@ sub get_add
 	my $vars = $self->{'VCS::Vars'};
 	
 	$vars->db->query("
-		INSERT INTO AutoAppData (AnkDate, AppID) VALUES (now(), ?)", {}, 
-		$app_id);
+		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);");
+		
+	my $sch_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+	
+	$vars->db->query("
+		INSERT INTO AutoAppData (AnkDate, AppID, SchengenAppDataID) VALUES (now(), ?, ?)", {}, 
+		$app_id, $sch_id);
 	
 	my $appdata_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
 	
 	my $step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');
 	
 	$vars->db->query("
-		UPDATE AutoToken SET Step = ?, AutoAppDataID = ? WHERE Token = ?", {}, 
-		$step, $appdata_id, $token);
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID =? WHERE Token = ?", {}, 
+		$step, $appdata_id, $sch_id, $token);
 	
 	return $step;
 }
@@ -1462,7 +2145,6 @@ sub get_html_page
 	for my $element (@$page_content) {
 		$content .= $self->get_html_line($element, $current_values);
 	}
-	
 	return ($content, $template);
 }
 
@@ -1691,7 +2373,7 @@ sub save_data_from_form
 	my $vars = $self->{'VCS::Vars'};
 
 	my $request_tables = $self->get_names_db_for_save_or_get($self->get_content_rules($step));
-
+	
 	for my $table (keys %$request_tables) {
 		
 		next if !$table_id->{$table};
@@ -1711,6 +2393,35 @@ sub save_data_from_form
 			UPDATE $table SET $request WHERE ID = ?", {}, 
 			@values, $table_id->{$table});
 		
+	}
+	
+	$self->check_special_in_rules($step, $table_id);
+}
+
+sub check_special_in_rules
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $step = shift;
+	my $table_id = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	my $elements = $self->get_content_rules($step);
+	
+	return if $elements =~ /\[/;
+	
+	for my $element (@$elements) {
+		if ($element->{special} eq 'save_info_about_hastdatatype') {
+			
+			my $visa_type = $vars->db->sel1("
+				SELECT VisaPurpose1 FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData});
+
+				if ($visa_type != 1) {
+				$vars->db->query("
+					UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {}, 
+					$table_id->{AutoSchengenAppData});
+			}
+		}
 	}
 }
 
@@ -1848,6 +2559,7 @@ sub get_current_table_id
 	my $tables_controled_by_AutoToken = {
 		'AutoAppointments' => 'AutoAppID',
 		'AutoAppData' => 'AutoAppDataID',
+		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
 	};
 	
 	for my $table_controlled (keys %$tables_controled_by_AutoToken) {
