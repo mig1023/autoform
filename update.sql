@@ -6,6 +6,7 @@ CREATE TABLE AutoToken (
 	AutoAppID INT(11),
 	AutoAppDataID INT(11),
 	AutoSchengenAppDataID INT(11),
+	Insurance VARCHAR(256),
 	Step INT (2) DEFAULT 0,
 	LastError VARCHAR(256),
 	Finished INT(2) DEFAULT 0,

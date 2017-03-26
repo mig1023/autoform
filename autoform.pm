@@ -1520,9 +1520,43 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Дата и время записи' => [
+		
+		'Страховка' => [
 			{
 				'page_ord' => 35,
+				
+			},
+			{
+				'type' => 'checklist_insurer',
+				'name' => 'insurance',
+				'label' => 'Включить заявителей в полис',
+				'comment' => '',
+				'check' => 'N',
+				'db' => {
+					'table' => 'Token',
+					'name' => 'Insurance',
+					'transfer' => 'nope',
+					},
+				'param' => '[persons_in_app_for_insurance]',
+				'special' => 'insurer_many_id',
+			},
+			{
+				'type' => 'input',
+				'name' => 'ins_days',
+				'label' => 'Количество дней страховки',
+				'comment' => '',
+				'check' => 'N',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'Duration',
+				},
+			},
+			
+		],
+		
+		'Дата и время записи' => [
+			{
+				'page_ord' => 36,
 				
 			},
 			{
@@ -1541,7 +1575,7 @@ sub get_content_rules_hash
 		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 36,
+				'page_ord' => 37,
 			},
 			{
 				'type' => 'captcha',
@@ -1563,7 +1597,7 @@ sub get_content_rules_hash
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 37,
+				'page_ord' => 38,
 			},
 			{
 				'type' => 'text',
@@ -1720,6 +1754,7 @@ sub init_add_param
 		'[first_countries]' => [],
 		'[schengen_provincies]' => [],
 		'[persons_in_app]' => [],
+		'[persons_in_app_for_insurance]' => [],
 	};
 	
 	$info_from_db->{'[centers_from_db]'} = $vars->db->selall("
@@ -1751,10 +1786,16 @@ sub init_add_param
 
 	if ($token) {
 		$info_from_db->{'[persons_in_app]'} = $vars->db->selall("
-			SELECT AutoAppData.ID, CONCAT(RFName, ' ', RLName, ' ', BirthDate) as person
+			SELECT AutoAppData.ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 			WHERE AutoToken.Token = ?", $token);
+		
+		for my $person (@{ $info_from_db->{'[persons_in_app]'} }) {
+			$person->[1] =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+		}
+			
+		$info_from_db->{'[persons_in_app_for_insurance]'} = $self->simple_array_clone( $info_from_db->{'[persons_in_app]'} );
 			
 		push $info_from_db->{'[persons_in_app]'}, [ 0, 'на доверенное лицо' ];
 	}
@@ -1776,6 +1817,18 @@ sub init_add_param
 
 	return $content_rules;
 }	
+
+sub simple_array_clone
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $old_array = shift;
+	my $new_array = [];
+	
+	push $new_array, $_ for @$old_array;
+	
+	return $new_array;
+}
 
 sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
@@ -2256,6 +2309,9 @@ sub get_add
 	
 	my $vars = $self->{'VCS::Vars'};
 	
+	my $insurance_list = $vars->db->sel1("
+		SELECT Insurance FROM AutoToken WHERE Token = ?", $token);
+	
 	$vars->db->query("
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);");
 		
@@ -2269,9 +2325,11 @@ sub get_add
 	
 	my $step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');
 	
+	$insurance_list .= ( $insurance_list ? ',' : '' ) . "$appdata_id=0";
+	
 	$vars->db->query("
-		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID =? WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $token);
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, Insurance = ? WHERE Token = ?", {}, 
+		$step, $appdata_id, $sch_id, $insurance_list, $token);
 	
 	return $step;
 }
@@ -2322,7 +2380,7 @@ sub get_html_page
 	}
 	
 	my $current_values = $self->get_all_values($step, $self->get_current_table_id($step, $token));
-	
+
 	for my $element (@$page_content) {
 		$content .= $self->get_html_line($element, $current_values);
 	}
@@ -2471,6 +2529,7 @@ sub get_html_for_element
 		'text'		=> '<td colspan="3" [u]>[value]</td>',
 		'info'		=> '<label id="[name]" [u]></label>',
 		'checklist'	=> '[options]',
+		'checklist_insurer' => '[options]',
 		'captcha'	=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
 		
 		'helper'	=> '[?] ', # value вписать в текст хелпа
@@ -2514,7 +2573,7 @@ sub get_html_for_element
 		my $list = '';
 
 		for my $opt (sort {$a cmp $b} keys %$param) {
-			
+		
 			my $checked = ( $value->{$opt} ? 'checked' : '' );
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
 			'<label for="' . $opt . '">' . $param->{$opt}->{label_for} . '</label><br>';
@@ -2522,6 +2581,27 @@ sub get_html_for_element
 		$content =~ s/\[options\]/$list/gi;
 	}
 
+	if ($type eq 'checklist_insurer') {
+		my $list = '';
+		my $value_list = {};
+		
+		my @value_list = split /,/, $value;
+		
+		for my $value (@value_list) {
+			my ($id, $val) = split /=/, $value;
+			$value_list->{ $id } = $val;
+		}
+
+		for my $opt (sort {$a cmp $b} keys %$param) {
+		
+			my $checked = ( $value_list->{$opt} ? 'checked' : '' );
+			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $name . '_' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
+			'<label for="' . $opt . '">' . $param->{$opt} . '</label><br>';
+		}
+		$content =~ s/\[options\]/$list/gi;
+		
+	}
+	
 	if ($type eq 'captcha') {
 		my $config = $vars->getConfig('captcha');
 		my $addr_captcha = $self->{'autoform'}->{'addr_captcha'};
@@ -2556,7 +2636,7 @@ sub save_data_from_form
 	
 	my $vars = $self->{'VCS::Vars'};
 
-	my $request_tables = $self->get_names_db_for_save_or_get($self->get_content_rules($step));
+	my $request_tables = $self->get_names_db_for_save_or_get($self->get_content_rules($step), 'save');
 	
 	for my $table (keys %$request_tables) {
 		
@@ -2606,6 +2686,23 @@ sub check_special_in_rules_for_save
 					$table_id->{AutoSchengenAppData});
 			}
 		}
+		elsif ($element->{special} eq 'insurer_many_id') {
+			my $all_insurer_list = $vars->db->sel1("
+				SELECT Insurance FROM AutoToken WHERE ID = ?", $table_id->{AutoToken} );
+
+			my @all_insurer = split /,/, $all_insurer_list;
+			my $new_list = '';
+
+			for my $insurer (@all_insurer) {
+				my ($id, $val) = split /=/, $insurer;
+				$val = ( $vars->getparam( 'insurance_' . $id ) ? 1 : 0 );
+				$new_list = ( $new_list ? ',' : '') . "$id=$val";
+			}	
+
+			$vars->db->query("
+				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, 
+				$new_list, $table_id->{AutoToken} ) if $new_list;
+		}
 	}
 }
 
@@ -2615,16 +2712,16 @@ sub get_all_values
 	my $self = shift;
 	my $step = shift;
 	my $table_id = shift;
-	
+
 	my $vars = $self->{'VCS::Vars'};
 	
 	my $all_values = {};
-	my $request_tables = $self->get_names_db_for_save_or_get($self->get_content_rules($step));
+	my $request_tables = $self->get_names_db_for_save_or_get($self->get_content_rules($step), 'get');
 
 	for my $table (keys %$request_tables) {
-		
+
 		next if !$table_id->{$table};
-	
+
 		my $request = join ',', keys %{$request_tables->{$table}};
 		
 		my $result = $vars->db->selallkeys("
@@ -2636,7 +2733,7 @@ sub get_all_values
 				$self->decode_data_from_db($step, $request_tables->{$table}->{$value}, $result->{$value});
 		}
 	}
-	
+
 	return $all_values;
 }
 
@@ -2713,20 +2810,25 @@ sub get_names_db_for_save_or_get
 {
 	my $self = shift;
 	my $page_content = shift;
+	my $save_or_get = shift;
+	
 	my $request_tables = {};
 
 	return if $page_content =~ /^\[/;
 	
 	for my $element (@$page_content) {
+		next if ($element->{special} eq 'insurer_many_id') and ($save_or_get eq 'save');
+
 		if ( $element->{db}->{name} eq 'complex' ) {
 			for my $sub_element (keys %{ $element->{param} }) {
-			$request_tables->{ 'Auto' . $element->{db}->{table} }->{ $element->{param}->{$sub_element}->{db} } = $sub_element;
+				$request_tables->{ 'Auto' . $element->{db}->{table} }->{ $element->{param}->{$sub_element}->{db} } = $sub_element;
 			}
 		}
 		else { 
 			$request_tables->{ 'Auto' . $element->{db}->{table} }->{ $element->{db}->{name} } = $element->{name};
 		}
 	}
+
 	return $request_tables;
 }
 
@@ -2762,6 +2864,9 @@ sub get_current_table_id
 	for my $id (0..$max_index) {
 		$tables_id->{ $tables_list->[$id] } = $ids[$id];
 	};
+	
+	$tables_id->{ AutoToken } = $vars->db->sel1("
+		SELECT ID FROM AutoToken WHERE Token = ?", $token);
 
 	return $tables_id;
 }
