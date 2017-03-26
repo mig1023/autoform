@@ -1570,6 +1570,20 @@ sub get_content_rules_hash
 					'name' => 'AppDate',
 				},
 				'special' => 'datepicker',
+				'uniq_code' => 'onchange="update_timeslots();"',
+			},
+			{
+				'type' => 'select',
+				'name' => 'timeslot',
+				'label' => 'Время',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'TimeslotID',
+				},
+				'param' => '[free]',
+				'special' => 'timeslots',
 			},
 		],
 		
@@ -1711,6 +1725,8 @@ sub autoform
 
 	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
 	
+	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots($token);
+
 	$vars->get_system->pheader($vars);
 	my $tvars = {
 		'langreq' => sub { return $vars->getLangSesVar(@_) },
@@ -1731,8 +1747,37 @@ sub autoform
 		'last_error_text' => $last_error_text,
 		'special' => $special,
 		'vcs_tools' => $self->{'autoform'}->{'addr_vcs'},
+		'appinfo' => $appinfo_for_timeslots,
 	};
 	$template->process($template_file, $tvars);
+}
+
+sub get_same_info_for_timeslots
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
+	my $vars = $self->{'VCS::Vars'};
+	
+	my $appinfo = {};
+	
+	# WTF?!
+	
+	my $appid = $vars->db->sel1("
+		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $token);
+		
+	$appinfo->{persons} = $vars->db->sel1("
+		SELECT COUNT(ID) FROM AutoAppData WHERE AppID = ?", $appid);
+	
+	$appinfo->{center} = $vars->db->sel1("
+		SELECT CenterID FROM AutoAppointments WHERE ID = ?", $appid);
+	
+	$appinfo->{fdate} = $vars->db->sel1("
+		SELECT SDate FROM AutoAppointments WHERE ID = ?", $appid);
+	
+	$appinfo->{fdate} =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	
+	return $appinfo;
 }
 
 sub init_add_param
@@ -1755,6 +1800,7 @@ sub init_add_param
 		'[schengen_provincies]' => [],
 		'[persons_in_app]' => [],
 		'[persons_in_app_for_insurance]' => [],
+		'[free]' => [],
 	};
 	
 	$info_from_db->{'[centers_from_db]'} = $vars->db->selall("
@@ -2436,12 +2482,14 @@ sub get_specials_of_element
 		'datepickers' => [],
 		'masks' => [],
 		'nearest_date' => [],
+		'timeslots' => [],
 	};
 	
 	for my $element (@$page_content) {
 		push( $special->{datepickers}, $element->{name} ) if $element->{special} eq 'datepicker';
 		push( $special->{masks}, $element->{name} ) if $element->{special} eq 'mask';
 		push( $special->{nearest_date}, $element->{name} ) if $element->{special} eq 'nearest_date';
+		push( $special->{timeslots}, $element->{name} ) if $element->{special} eq 'timeslots';
 	}
 	
 	return ($special);
