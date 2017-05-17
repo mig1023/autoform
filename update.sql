@@ -2,6 +2,7 @@ CREATE TABLE AutoToken (
 	ID INT NOT NULL AUTO_INCREMENT,
 	Token VARCHAR(64),
 	StartDate DATETIME,
+	LastChange DATETIME,
 	EndDate DATETIME,
 	AutoAppID INT(11),
 	AutoAppDataID INT(11),
@@ -11,6 +12,7 @@ CREATE TABLE AutoToken (
 	LastError VARCHAR(256),
 	Finished INT(2) DEFAULT 0,
 	Draft INT (2) DEFAULT 0,
+	CreatedApp INT(8),
 	PRIMARY KEY (ID),
 	INDEX Token (Token) 
 );

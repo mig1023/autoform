@@ -192,26 +192,20 @@ sub init_add_param
 	$info_from_db->{'[visas_from_db]'} = $vars->db->selall("
 		SELECT ID, VName FROM VisaTypes WHERE OnSite = 1");
 	
-	$info_from_db->{'[brh_countries]'} = [
-		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?,"SUN")', $country_code) },
-		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE not in(?,"SUN") ORDER BY EnglishName', $country_code) }
-	];
+	$info_from_db->{'[brh_countries]'} =
+		[ @{ $vars->db->selall('SELECT ID, EnglishName FROM Countries ORDER BY EnglishName') } ];
 	
-	$info_from_db->{'[citizenship_countries]'} = [
-		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?) AND Ex=0', $country_code) },	    
-		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE Ex=0 AND CODE NOT in(?) ORDER BY EnglishName', $country_code) },
-	];
+	$info_from_db->{'[citizenship_countries]'} =
+		[ @{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName') } ];
 	
-	$info_from_db->{'[prevcitizenship_countries]'} = [
-		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE in(?,"SUN")', $country_code) },
-		@{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE CODE not in(?,"SUN")', $country_code) },
-	];
+	$info_from_db->{'[prevcitizenship_countries]'} =
+		[ @{ $vars->db->selall('SELECT ID, EnglishName FROM Countries') } ];
 	
-	$info_from_db->{'[first_countries]'} = $vars->db->selall("
-		SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName");
+	$info_from_db->{'[first_countries]'} = [ @{ $vars->db->selall("
+		SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName") } ];
 	
-	$info_from_db->{'[schengen_provincies]'} = $vars->db->selall("
-		SELECT ID, Name FROM SchengenProvinces");
+	$info_from_db->{'[schengen_provincies]'} = [ @{ $vars->db->selall("
+		SELECT ID, Name FROM SchengenProvinces") } ];
 
 	if ($token) {
 		$info_from_db->{'[persons_in_app]'} = $vars->db->selall("
@@ -306,7 +300,7 @@ sub create_clear_form
 	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
 	
 	$vars->db->query("
-		UPDATE AutoToken SET AutoAppID = ? WHERE Token = ?", {}, 
+		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
 		$app_id, $token);
 
 }
@@ -414,19 +408,13 @@ sub get_autoform_content
 			$step = $self->set_step_by_content($token, '[app_finish]', 'next');
 		} else {
 			$step = $self->set_step_by_content($token, '[list_of_applicants]');
-			
-			if ( $app_status == 1 ) {	
-				$last_error = $self->text_error(4, undef, undef);
-			} else {
-				$last_error = $self->text_error(5, undef, undef);
-			}
+			$last_error = $self->text_error( ( $app_status == 1 ? 4 : 5 ), undef, undef);
 		}
 	}
 	
 	if ($action eq 'tolist') {
 		$step = $self->set_step_by_content($token, '[list_of_applicants]');
 	}
-	
 	
 	my $page = $self->get_content_rules($step, 'full');
 	my $back = ($action eq 'back' ? 'back' : '');
@@ -557,14 +545,18 @@ sub get_forward
 		$self->create_clear_form($token, $self->get_center_id());
 		$current_table_id = $self->get_current_table_id($step, $token);
 	}
+	
 	$self->save_data_from_form($step, $current_table_id);
+	$self->mod_last_change_date($token);
 	
 	my $last_error = $self->check_data_from_form($step);
 	
 	if ($last_error) {
+		my @last_error = split /\|/, $last_error;
+	
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, $last_error, $token);
+			$step, "$last_error[1] ($last_error[0])", $token);
 	} else {
 		$step++;
 		
@@ -576,6 +568,10 @@ sub get_forward
 	if ( !$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
 		$self->set_current_app_finished( $current_table_id->{AutoAppData} );
 	}
+
+	if ( $step >= $self->get_content_rules('length') ) {
+		$self->set_appointment_finished( $token );
+	}
 	
 	return ($step, $last_error);
 }
@@ -585,12 +581,30 @@ sub set_current_app_finished
 {
 	my $self = shift;
 	my $appdata_id = shift;
+	my $token = shift;
 	
 	my $vars = $self->{'VCS::Vars'};
 	
 	$vars->db->query("
 		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, 
 		$appdata_id);
+}
+
+sub set_appointment_finished
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
+	
+	my $vars = $self->{'VCS::Vars'};
+	
+	$vars->db->query("
+		UPDATE AutoToken SET EndDate = now(), Finished = 1 WHERE Token = ?", {}, 
+		$token);
+		
+	# AutoAppointments => Appointments
+	
+	# AutoToken.CreatedApp => Appointments.AppNum
 }
 
 sub get_step_by_content
@@ -628,8 +642,8 @@ sub set_step_by_content
 	my $step = $self->get_step_by_content($token, $content, $next);
 
 	$vars->db->query("
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-			$step, $token);
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
+		$step, $token);
 			
 	return $step;
 }
@@ -660,6 +674,7 @@ sub get_edit
 			$appdata_id);
 	}
 	
+	$self->mod_last_change_date($token);
 	return $step;
 }
 
@@ -684,6 +699,8 @@ sub get_delete
 		$vars->db->query("
 			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, 
 			$sch_id);
+			
+		$self->mod_last_change_date($token);
 	}
 }
 
@@ -765,6 +782,7 @@ sub get_add
 		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, Insurance = ? WHERE Token = ?", {}, 
 		$step, $appdata_id, $sch_id, $insurance_list, $token);
 	
+	$self->mod_last_change_date($token);
 	return $step;
 }
 
@@ -778,6 +796,7 @@ sub get_back
 	my $vars = $self->{'VCS::Vars'};
 	
 	$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
+	$self->mod_last_change_date($token);
 	$step--;
 	
 	if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
@@ -921,7 +940,8 @@ sub get_html_line
 		) .
 		$self->get_cell(
 			$self->get_html_for_element(
-				$element->{type}, $element->{name}, $current_value, $element->{param}, $element->{uniq_code}
+				$element->{type}, $element->{name}, $current_value, $element->{param}, 
+				$element->{uniq_code}, $element->{first_elements},
 			) . $label_for_need
 		);
 	
@@ -949,6 +969,7 @@ sub get_html_for_element
 	my $value = shift;
 	my $param = shift;
 	my $uniq_code = shift;
+	my $first_elements = shift;
 	
 	my $vars = $self->{'VCS::Vars'};
 	
@@ -985,7 +1006,8 @@ sub get_html_for_element
 	
 	if ($type eq 'select') {
 		my $list = '';
-		for my $opt (sort keys %$param) {
+
+		for my $opt ( $self->resort_with_first_elements( $param, $first_elements ) ) {
 			my $selected = ( $value == $opt ? 'selected' : '' );
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{$opt} . '</option>'; 
 		}
@@ -995,6 +1017,7 @@ sub get_html_for_element
 	if ($type eq 'radiolist') {
 		my $list = '';
 		my $uniq_id = 0;
+		
 		for my $opt (sort keys %$param) {
 			my $checked = ( $value == $opt ? 'checked' : '' );
 			$uniq_id++;
@@ -1035,7 +1058,6 @@ sub get_html_for_element
 			'<label for="' . $opt . '">' . $param->{$opt} . '</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
-		
 	}
 	
 	if ($type eq 'captcha') {
@@ -1050,6 +1072,36 @@ sub get_html_for_element
 	}
 	
 	return $content;
+}
+
+sub resort_with_first_elements
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $country_hash = shift;
+	my $first_elements = shift;
+	
+	if ( !$first_elements ) {
+		return sort keys %$country_hash;
+	}	
+	
+	my @first_elements = split /,/, $first_elements;
+
+	my @array_with_first_elements = ();
+	
+	for my $f (@first_elements) {
+		for my $e (keys %$country_hash) {
+			push @array_with_first_elements, $f if $e == $f;
+		}
+	}
+	
+	my %first_elements = map { $_ => 1 } @first_elements; 
+	
+	for my $e (sort { $country_hash->{ $a } cmp $country_hash->{ $b } } keys %$country_hash) {
+		push @array_with_first_elements, $e if !exists $first_elements{ $e };
+	}
+
+	return @array_with_first_elements;
 }
 
 sub get_center_id
@@ -1436,5 +1488,18 @@ sub text_error
 
 	return $text_error;	
 }
+
+sub mod_last_change_date
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
 	
+	my $vars = $self->{'VCS::Vars'};
+
+	$vars->db->query("
+		UPDATE AutoToken SET LastChange = now() WHERE Token = ?", {}, 
+		$token);
+}
+
 1;

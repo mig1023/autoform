@@ -355,6 +355,7 @@ sub get_content_rules_hash
 					'name' => 'BrhCountry',
 				},
 				'param' => '[brh_countries]',
+				'first_elements' => '70',
 			},
 			{
 				'type' => 'select',
@@ -367,6 +368,7 @@ sub get_content_rules_hash
 					'name' => 'Citizenship',
 				},
 				'param' => '[citizenship_countries]',
+				'first_elements' => '70',
 			},
 			{
 				'type' => 'select',
@@ -379,6 +381,7 @@ sub get_content_rules_hash
 					'name' => 'PrevCitizenship',
 				},
 				'param' => '[prevcitizenship_countries]',
+				'first_elements' => '70',
 			},
 			{
 				'type' => 'radiolist',
@@ -612,6 +615,7 @@ sub get_content_rules_hash
 					'name' => 'Nulla',
 				},
 				'param' => '[first_countries]',
+				'first_elements' => '133',
 			},
 			{
 				'type' => 'input',
