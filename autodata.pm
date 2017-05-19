@@ -50,6 +50,7 @@ sub get_content_rules_hash
 				'name' => 'email',
 				'label' => 'Email',
 				'comment' => '',
+				'example' => 'mail@mail.ru',
 				'check' => 'z',
 				'db' => {
 					'table' => 'Appointments',
@@ -131,6 +132,7 @@ sub get_content_rules_hash
 				'name' => 'rulname',
 				'label' => 'Фамилия',
 				'comment' => '',
+				'example' => 'Иванов',
 				'check' => 'zЁ',
 				'db' => {
 					'table' => 'AppData',
@@ -142,6 +144,7 @@ sub get_content_rules_hash
 				'name' => 'rufname',
 				'label' => 'Имя',
 				'comment' => '',
+				'example' => 'Иван',
 				'check' => 'zЁ',
 				'db' => {
 					'table' => 'AppData',
@@ -153,6 +156,7 @@ sub get_content_rules_hash
 				'name' => 'rumname',
 				'label' => 'Отчество',
 				'comment' => '',
+				'example' => 'Иванович',
 				'check' => 'zЁ',
 				'db' => {
 					'table' => 'AppData',

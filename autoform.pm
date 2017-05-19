@@ -172,40 +172,20 @@ sub init_add_param
 	
 	my $vars = $self->{'VCS::Vars'};
 	my $country_code='RUS';
-	
+
 	my $info_from_db = {
-		'[centers_from_db]' => [],
-		'[visas_from_db]' => [],
-		'[brh_countries]' => [],
-		'[citizenship_countries]' => [],
-		'[prevcitizenship_countries]' => [],
-		'[first_countries]' => [],
-		'[schengen_provincies]' => [],
-		'[persons_in_app]' => [],
-		'[persons_in_app_for_insurance]' => [],
-		'[free]' => [],
+		'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
+		'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
+		'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries ORDER BY EnglishName',
+		'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName',
+		'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
+		'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
+		'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
 	};
 	
-	$info_from_db->{'[centers_from_db]'} = $vars->db->selall("
-		SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0");
-	
-	$info_from_db->{'[visas_from_db]'} = $vars->db->selall("
-		SELECT ID, VName FROM VisaTypes WHERE OnSite = 1");
-	
-	$info_from_db->{'[brh_countries]'} =
-		[ @{ $vars->db->selall('SELECT ID, EnglishName FROM Countries ORDER BY EnglishName') } ];
-	
-	$info_from_db->{'[citizenship_countries]'} =
-		[ @{ $vars->db->selall('SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName') } ];
-	
-	$info_from_db->{'[prevcitizenship_countries]'} =
-		[ @{ $vars->db->selall('SELECT ID, EnglishName FROM Countries') } ];
-	
-	$info_from_db->{'[first_countries]'} = [ @{ $vars->db->selall("
-		SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName") } ];
-	
-	$info_from_db->{'[schengen_provincies]'} = [ @{ $vars->db->selall("
-		SELECT ID, Name FROM SchengenProvinces") } ];
+	for (keys %$info_from_db) {
+		$info_from_db->{ $_ } = $vars->db->selall( $info_from_db->{ $_ } );
+	}
 
 	if ($token) {
 		$info_from_db->{'[persons_in_app]'} = $vars->db->selall("
@@ -540,10 +520,11 @@ sub get_forward
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $current_table_id = $self->get_current_table_id($step, $token);
-	if (!$current_table_id->{AutoAppointments}) {
+	my $current_table_id = $self->get_current_table_id( $step, $token );
+	
+	if ( !$current_table_id->{AutoAppointments} ) {
 		$self->create_clear_form($token, $self->get_center_id());
-		$current_table_id = $self->get_current_table_id($step, $token);
+		$current_table_id = $self->get_current_table_id( $step, $token );
 	}
 	
 	$self->save_data_from_form($step, $current_table_id);
@@ -551,7 +532,7 @@ sub get_forward
 	
 	my $last_error = $self->check_data_from_form($step);
 	
-	if ($last_error) {
+	if ( $last_error ) {
 		my @last_error = split /\|/, $last_error;
 	
 		$vars->db->query("
@@ -886,17 +867,16 @@ sub get_specials_of_element
 	return if $page_content =~ /^\[/;
 	
 	my $special = {
-		'datepickers' => [],
-		'masks' => [],
+		'datepicker' => [],
+		'mask' => [],
 		'nearest_date' => [],
 		'timeslots' => [],
 	};
 	
-	for my $element (@$page_content) {
-		push( $special->{datepickers}, $element->{name} ) if $element->{special} eq 'datepicker';
-		push( $special->{masks}, $element->{name} ) if $element->{special} eq 'mask';
-		push( $special->{nearest_date}, $element->{name} ) if $element->{special} eq 'nearest_date';
-		push( $special->{timeslots}, $element->{name} ) if $element->{special} eq 'timeslots';
+	for my $element ( @$page_content ) {
+		for my $spec_type ( keys %$special ) {
+			push( $special->{ $spec_type }, $element->{name} ) if $element->{special} eq $spec_type;
+		}
 	}
 	
 	return ($special);
@@ -946,6 +926,10 @@ sub get_html_line
 		);
 	
 	$content .= $self->get_html_for_element('end_line');
+	
+	if ( $element->{example} ne '' ) {
+		$content .= $self->get_html_for_element('example', $element->{name}, $element->{example} );
+	}
 
 	return $content;
 }
@@ -974,24 +958,25 @@ sub get_html_for_element
 	my $vars = $self->{'VCS::Vars'};
 	
 	my $elements = {
-		'start_line'	=> '<tr [u]>',
-		'end_line'	=> '</tr>',
-		'start_cell'	=> '<td [u]>',
-		'end_cell'	=> '</td>',
+		'start_line'		=> '<tr [u]>',
+		'end_line'		=> '</tr>',
+		'start_cell'		=> '<td [u]>',
+		'end_cell'		=> '</td>',
 		
-		'input' 	=> '<input type="text" value="[value]" name="[name]" id="[name]" [u]>',
-		'checkbox' 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
-		'select'	=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
-		'radiolist'	=> '[options]',
-		'text'		=> '<td colspan="3" [u]>[value]</td>',
-		'info'		=> '<label id="[name]" [u]></label>',
-		'checklist'	=> '[options]',
-		'checklist_insurer' => '[options]',
-		'captcha'	=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
+		'input' 		=> '<input type="text" value="[value]" name="[name]" id="[name]" [u]>',
+		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
+		'select'		=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
+		'radiolist'		=> '[options]',
+		'text'			=> '<td colspan="3" [u]>[value]</td>',
+		'example'		=> '<tr [u]><td colspan="2">&nbsp;</td><td><i>[value]</i></td></td>',
+		'info'			=> '<label id="[name]" [u]></label>',
+		'checklist'		=> '[options]',
+		'checklist_insurer'	=> '[options]',
+		'captcha'		=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
 		
-		'helper'	=> '[?] ', # value вписать в текст хелпа
-		'label'		=> '<label id="[name]" [u]>[value]</label>',
-		'label_for'	=> '<label for="[name]" [u]>[value]</label>',
+		'helper'		=> '[?] ', # value вписать в текст хелпа
+		'label'			=> '<label id="[name]" [u]>[value]</label>',
+		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
 	};
 	
 	my $content = $elements->{$type};

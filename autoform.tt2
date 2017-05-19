@@ -1,10 +1,10 @@
 <head>
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
-[% IF special.datepickers %]
+[% IF special.datepicker %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
 [% END %]
-[% IF special.masks %]
+[% IF special.mask %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 [% END %]
 </head>
@@ -52,9 +52,10 @@ function prev_button() {
 	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
 [% END %]
 
-[% FOREACH picker IN special.datepickers %]
+[% FOREACH picker IN special.datepicker %]
 	$('#[% picker %]').datepicker({
 		dateFormat: 'dd.mm.yy',
+		firstDay: 1,
 		
 		showButtonPanel: true,
 		beforeShow: function( input ) {
@@ -77,7 +78,7 @@ function prev_button() {
 	});
 [% END %]
 
-[% FOREACH mask IN special.masks %]
+[% FOREACH mask IN special.mask %]
 	$("#[% mask %]").mask("99.99.9999");
 [% END %]
 
@@ -100,7 +101,7 @@ function prev_button() {
 		var restore_el = 0;
 		
 		$('#vtype').hide();
-		$('#vtype').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>")
+		$('#vtype').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>");
 		$('#vtype').find('option').remove();
 		
 		$.get("[% vcs_tools %]get_vtypes.htm", 
@@ -121,6 +122,51 @@ function prev_button() {
 			}, 
 		'xml');
 	}
+[% END %]
+
+[% FOREACH timeslot IN special.timeslots %]
+
+update_timeslots();
+
+function update_timeslots() {
+			
+	$('#timeslot').hide();
+	$('#timeslot').find('option').remove();
+	$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>");
+
+	$.get("[% vcs_tools %]get_times.htm", {
+		'center': '[% appinfo.center %]', 
+		'persons': '[% appinfo.persons %]', 
+		'appdate':$('#app_date').val(),
+		'fdate': '[% appinfo.fdate %]', 
+		'lang': 'ru',
+		
+		}, function(xml) {
+			$(xml).find('node').each( function() {
+				var apptimeValue = $(this).find('id').text();
+				var apptimeText = $(this).find('title').text();
+				if (apptimeValue == "") {
+					$('#timeslot').append('<option value="' + apptimeValue + '" selected >'+ apptimeText + '</option>');
+				} else {
+					$('#timeslot').append('<option value="' + apptimeValue + '">'+ apptimeText + '</option>');
+				}
+			
+		});
+		
+		$('#tmp_img').remove();
+		$('#timeslot').show();
+		
+		var al = $(xml).find('urgent_flag');
+		if (al.text() != '')
+		{
+			var alertText = al.text();
+			alert(alertText);
+		} else {
+			// alert not
+		}
+    }, 'xml');
+};
+
 [% END %]
 </script>
 
