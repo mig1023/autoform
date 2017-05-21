@@ -168,7 +168,7 @@ sub init_add_param
 	my $content_rules = shift;
 	my $token = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' ;
+	my $vars = $self->{ 'VCS::Vars' };
 	my $country_code = 'RUS';
 
 	my $info_from_db = {
