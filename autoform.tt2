@@ -1,5 +1,8 @@
 <head>
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
+<link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+
 [% IF special.datepicker %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
@@ -75,6 +78,18 @@ function prev_button() {
 		if(e.keyCode == 8 || e.keyCode == 46) {
 			$.datepicker._clearDate(this);
 		}
+	});
+[% END %]
+
+[% FOREACH comm IN special.comment %]
+	$('#[name]').poshytip({
+		className: 'tip-yellowsimple',
+		showOn: 'focus',
+		alignTo: 'target',
+		alignX: 'right',
+		alignY: 'center',
+		offsetX: 5,
+		showTimeout: 100
 	});
 [% END %]
 

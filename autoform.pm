@@ -871,12 +871,15 @@ sub get_specials_of_element
 		'mask' => [],
 		'nearest_date' => [],
 		'timeslots' => [],
+		'comment' => [],
 	};
 	
 	for my $element ( @$page_content ) {
 		for my $spec_type ( keys %$special ) {
 			push( $special->{ $spec_type }, $element->{name} ) if $element->{special} eq $spec_type;
 		}
+
+		push( $special->{ 'comment' }, $element->{name} ) if $element->{comment} ne '';
 	}
 	
 	return ($special);
@@ -915,13 +918,8 @@ sub get_html_line
 		) .
 		$self->get_cell(
 			$self->get_html_for_element(
-				'helper', 'helper',  $element->{label}
-			)
-		) .
-		$self->get_cell(
-			$self->get_html_for_element(
 				$element->{type}, $element->{name}, $current_value, $element->{param}, 
-				$element->{uniq_code}, $element->{first_elements},
+				$element->{uniq_code}, $element->{first_elements}, $element->{comment}
 			) . $label_for_need
 		);
 	
@@ -954,6 +952,7 @@ sub get_html_for_element
 	my $param = shift;
 	my $uniq_code = shift;
 	my $first_elements = shift;
+	my $comment = shift;
 	
 	my $vars = $self->{'VCS::Vars'};
 	
@@ -963,18 +962,18 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input type="text" value="[value]" name="[name]" id="[name]" [u]>',
+		'input' 		=> '<input type="text" value="[value]" name="[name]" id="[name]" title="[comment]"[u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '[options]',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
-		'example'		=> '<tr [u]><td colspan="2">&nbsp;</td><td><i>[value]</i></td></td>',
+		'example'		=> '<tr [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
+					'<span style="color:gray; font-size:0.7em;">[value]</span></td></td>',
 		'info'			=> '<label id="[name]" [u]></label>',
 		'checklist'		=> '[options]',
 		'checklist_insurer'	=> '[options]',
 		'captcha'		=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
 		
-		'helper'		=> '[?] ', # value вписать в текст хелпа
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
 	};
@@ -984,6 +983,7 @@ sub get_html_for_element
 	$content =~ s/\[name\]/$name/gi;
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[u\]/$uniq_code/gi;
+	$content =~ s/\[comment\]/$comment/gi;
 	
 	if ($type eq 'checkbox') {
 		$content =~ s/\[checked\]/checked/gi if $value;

@@ -131,7 +131,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rulname',
 				'label' => 'Фамилия',
-				'comment' => '',
+				'comment' => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
 				'example' => 'Иванов',
 				'check' => 'zЁ',
 				'db' => {
