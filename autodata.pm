@@ -143,7 +143,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rufname',
 				'label' => 'Имя',
-				'comment' => '',
+				'comment' => 'Введите имя на русском языке так, как она указана во внутреннем паспорте',
 				'example' => 'Иван',
 				'check' => 'zЁ',
 				'db' => {
@@ -155,7 +155,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rumname',
 				'label' => 'Отчество',
-				'comment' => '',
+				'comment' => 'Введите отчество на русском языке так, как она указана во внутреннем паспорте',
 				'example' => 'Иванович',
 				'check' => 'zЁ',
 				'db' => {
@@ -167,7 +167,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'birthdate',
 				'label' => 'Дата рождения',
-				'comment' => '',
+				'comment' => 'Введите дату рождения',
+				'example' => '01.01.1980',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -179,7 +180,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rupassnum',
 				'label' => '№ паспорта',
-				'comment' => '',
+				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				'example' => '754300001',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -190,7 +192,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'passdate',
 				'label' => 'Дата выдачи',
-				'comment' => '',
+				'comment' => 'Введите дату выдачи, указанную в паспорте',
+				'example' => '01.01.2010',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -202,7 +205,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rupasswhere',
 				'label' => 'Кем выдан',
-				'comment' => '',
+				'comment' => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
+				'example' => 'ОВД по району Беговой города Москвы',
 				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',
@@ -213,7 +217,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'phone',
 				'label' => 'Телефон',
-				'comment' => '',
+				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				'example' => '79161234567',
 				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',
@@ -224,7 +229,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'address',
 				'label' => 'Адрес',
-				'comment' => '',
+				'comment' => 'Полный адрес, включая индекс',
+				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
 				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',

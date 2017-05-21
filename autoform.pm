@@ -11,9 +11,9 @@ use Date::Calc qw/Add_Delta_Days/;
 sub new
 # //////////////////////////////////////////////////
 {
-	my ($class,$pclass,$vars) = @_;
+	my ( $class, $pclass, $vars ) = @_;
 	my $self = bless {}, $pclass;
-	$self->{'VCS::Vars'} = $vars;
+	$self->{ 'VCS::Vars' } = $vars;
 	return $self;
 }
 
@@ -25,15 +25,15 @@ sub get_content_rules
 	my $full = shift;
 	my $token = shift;
 	
-	my $content = VCS::Site::autodata::get_content_rules_hash($self);
+	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
 	
 	my $new_content = {};
-	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content) {
+	for my $page ( sort { $content->{$a}->[0]->{ page_ord } <=> $content->{$b}->[0]->{ page_ord } } keys %$content ) {
 		
-		my $page_ord = $content->{$page}->[0]->{page_ord};
+		my $page_ord = $content->{$page}->[0]->{ page_ord };
 		
-		$new_content->{ $page_ord } = $content->{$page};
-		if (!$full) {
+		$new_content->{ $page_ord } = $content->{ $page };
+		if ( !$full ) {
 			if ( $content->{ $page }->[0]->{replacer} ) {
 				$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
 			} else {
@@ -45,14 +45,14 @@ sub get_content_rules
 		}
 	}
 
-	$content = $self->init_add_param($new_content, $token);
+	$content = $self->init_add_param( $new_content, $token );
 	
-	if (!$page) {
+	if ( !$page ) {
 		return $content;
-	} elsif ($page =~ /length/i) {
-		return scalar(keys %$content);
+	} elsif ( $page =~ /length/i ) {
+		return scalar( keys %$content );
 	} else {
-		return $content->{$page};
+		return $content->{ $page };
 	};
 }
 
@@ -75,9 +75,9 @@ sub getContent
     	};
     	
     	my $disp_link = $dispathcher->{$id};
-    	$vars->get_system->redirect($vars->getform('fullhost').$self->{'autoform'}->{'addr'}.'index.htm')
+    	$vars->get_system->redirect( $vars->getform('fullhost').$self->{'autoform'}->{'addr'}.'index.htm' )
     		if !$disp_link;
-    	&{$disp_link}($self, $task, $id, $template);
+    	&{$disp_link}( $self, $task, $id, $template );
     	
     	return 1;	
 }
@@ -90,7 +90,7 @@ sub autoform
 	my $id = shift;
 	my $template = shift;
 
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	my $page_content;
 	my $step = 0;
 	my $last_error = '';
@@ -100,17 +100,17 @@ sub autoform
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
-	if ($token =~ /^\d\d$/) {
-		($title, $page_content, $template_file) = $self->get_token_error($token);
+	if ( $token =~ /^\d\d$/ ) {
+		( $title, $page_content, $template_file ) = $self->get_token_error( $token );
 	} else {
-		($step, $title, $page_content, $last_error, $template_file, $special) = $self->get_autoform_content($token);
+		( $step, $title, $page_content, $last_error, $template_file, $special ) = $self->get_autoform_content( $token );
 	}
 
-	my ($last_error_name, $last_error_text) = split /\|/, $last_error;
+	my ( $last_error_name, $last_error_text ) = split /\|/, $last_error;
 	
-	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots($token);
+	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots( $token );
 
-	$vars->get_system->pheader($vars);
+	$vars->get_system->pheader( $vars );
 	my $tvars = {
 		'langreq' => sub { return $vars->getLangSesVar(@_) },
 		'vars' => {
@@ -132,7 +132,7 @@ sub autoform
 		'vcs_tools' => $self->{'autoform'}->{'addr_vcs'},
 		'appinfo' => $appinfo_for_timeslots,
 	};
-	$template->process($template_file, $tvars);
+	$template->process( $template_file, $tvars );
 }
 
 sub get_same_info_for_timeslots
@@ -140,25 +140,23 @@ sub get_same_info_for_timeslots
 {
 	my $self = shift;
 	my $token = shift;
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $appinfo = {};
 	
-	# WTF?!
-	
 	my $appid = $vars->db->sel1("
-		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $token);
+		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $token );
 		
-	$appinfo->{persons} = $vars->db->sel1("
-		SELECT COUNT(ID) FROM AutoAppData WHERE AppID = ?", $appid);
+	$appinfo->{ persons } = $vars->db->sel1("
+		SELECT COUNT(ID) FROM AutoAppData WHERE AppID = ?", $appid );
 	
-	$appinfo->{center} = $vars->db->sel1("
-		SELECT CenterID FROM AutoAppointments WHERE ID = ?", $appid);
+	$appinfo->{ center } = $vars->db->sel1("
+		SELECT CenterID FROM AutoAppointments WHERE ID = ?", $appid );
 	
-	$appinfo->{fdate} = $vars->db->sel1("
-		SELECT SDate FROM AutoAppointments WHERE ID = ?", $appid);
+	$appinfo->{ fdate } = $vars->db->sel1("
+		SELECT SDate FROM AutoAppointments WHERE ID = ?", $appid );
 	
-	$appinfo->{fdate} =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	$appinfo->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 	
 	return $appinfo;
 }
@@ -170,8 +168,8 @@ sub init_add_param
 	my $content_rules = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
-	my $country_code='RUS';
+	my $vars = $self->{ 'VCS::Vars' ;
+	my $country_code = 'RUS';
 
 	my $info_from_db = {
 		'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
@@ -183,24 +181,24 @@ sub init_add_param
 		'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
 	};
 	
-	for (keys %$info_from_db) {
+	for ( keys %$info_from_db ) {
 		$info_from_db->{ $_ } = $vars->db->selall( $info_from_db->{ $_ } );
 	}
 
-	if ($token) {
-		$info_from_db->{'[persons_in_app]'} = $vars->db->selall("
+	if ( $token ) {
+		$info_from_db->{ '[persons_in_app]' } = $vars->db->selall("
 			SELECT AutoAppData.ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 			WHERE AutoToken.Token = ?", $token);
 		
-		for my $person (@{ $info_from_db->{'[persons_in_app]'} }) {
+		for my $person ( @{ $info_from_db->{'[persons_in_app]'} } ) {
 			$person->[1] =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 		}
 			
-		$info_from_db->{'[persons_in_app_for_insurance]'} = $self->simple_array_clone( $info_from_db->{'[persons_in_app]'} );
+		$info_from_db->{ '[persons_in_app_for_insurance]' } = $self->simple_array_clone( $info_from_db->{ '[persons_in_app]' } );
 			
-		push $info_from_db->{'[persons_in_app]'}, [ 0, 'на доверенное лицо' ];
+		push $info_from_db->{ '[persons_in_app]' }, [ 0, 'на доверенное лицо' ];
 	}
 		
 	for my $page ( keys %$content_rules ) {
@@ -210,10 +208,10 @@ sub init_add_param
 				my $param_array = $info_from_db->{ $element->{param} };
 				my $param_result = {};
 
-				for my $row (@$param_array) {
+				for my $row ( @$param_array ) {
 					$param_result->{ $row->[0] } = $row->[1];
 				};
-				$element->{param} = $param_result;
+				$element->{ param } = $param_result;
 			}
 		}
 	}
@@ -237,27 +235,27 @@ sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $token = $vars->getparam('t');
-	$token = lc($token);
+	$token = lc( $token );
 	$token =~ s/[^a-z0-9]//g;
 	
-	if ($token eq '') {
+	if ( $token eq '' ) {
 		$token = $self->token_generation();
-		$token = $self->save_new_token_in_db($token);
+		$token = $self->save_new_token_in_db( $token );
 	}
 	else {
-		my ($token_exist, $finished) = $vars->db->sel1("
-			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token);
+		my ( $token_exist, $finished ) = $vars->db->sel1("
+			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token );
 	
-		if (length($token) != 64) {
+		if ( length($token) != 64 ) {
 			$token = '01';
 		}
-		elsif (!$token_exist) {
+		elsif ( !$token_exist ) {
 			$token = '02';
 		}
-		elsif ($finished) {
+		elsif ( $finished ) {
 			$token = '03';
 		}
 	}
@@ -271,17 +269,17 @@ sub create_clear_form
 	my $self = shift;
 	my $token = shift;
 	my $centerid = shift;
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	$vars->db->query("
 		INSERT INTO AutoAppointments (RDate, Login, Draft) VALUES (now(), ?, 1)", {}, 
-		$vars->get_session->{'login'});
+		$vars->get_session->{'login'} );
 		
 	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
 	
 	$vars->db->query("
 		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
-		$app_id, $token);
+		$app_id, $token );
 
 }
 	
@@ -290,12 +288,12 @@ sub save_new_token_in_db
 {	
 	my $self = shift;
 	my $token = shift;
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 
 	$vars->db->query("
 		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
 		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, 
-		$token);
+		$token );
 	
 	return $token;
 }
@@ -304,7 +302,7 @@ sub token_generation
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 
 	my $token_existing = 1;
 	my $token = 'A';
@@ -312,11 +310,11 @@ sub token_generation
 	do {
 		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
 		for (1..63) {
-			$token .= @alph[int(rand(35))];
+			$token .= @alph[ int( rand( 35 ) ) ];
 		}
 		$token_existing = $vars->db->sel1("
-			SELECT ID FROM AutoToken WHERE Token = ?", $token) || 0;
-	} while ($token_existing);
+			SELECT ID FROM AutoToken WHERE Token = ?", $token ) || 0;
+	} while ( $token_existing );
 	
 	return $token;
 }
@@ -335,10 +333,10 @@ sub get_token_error
 		'app already finished',
 	];
 	
-	my $content = 'your token has error: ' . $error_type->[$error_num];
+	my $content = 'your token has error: ' . $error_type->[ $error_num ];
 	my $title = 'token error';
 	
-	return ($title, $content, $template);
+	return ( $title, $content, $template );
 }
 
 sub get_autoform_content
@@ -349,10 +347,10 @@ sub get_autoform_content
 	my $last_error = '';
 	my $title;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my ($step, $app_id) = $vars->db->sel1("
-		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token);
+		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token );
 
 	my $action = $vars->getparam('action');
 	$action = lc($action);
@@ -361,57 +359,57 @@ sub get_autoform_content
 	my $appdata_id = $vars->getparam('person');
 	$appdata_id =~ s/[^0-9]//g;
 	
-	if ( ($action eq 'back') and ($step > 1) ) {
-		$step = $self->get_back($step, $token);
+	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
+		$step = $self->get_back( $step, $token );
 	}
 
-	if ( ($action eq 'forward') and ($step < $self->get_content_rules('length')) ) {
-		($step, $last_error) = $self->get_forward($step, $token);
+	if ( ( $action eq 'forward' ) and ( $step < $self->get_content_rules('length') ) ) {
+		( $step, $last_error ) = $self->get_forward($step, $token);
 	}
 
-	if ( ($action eq 'edit') and $appdata_id ) {
+	if ( ( $action eq 'edit' ) and $appdata_id ) {
 		$step = $self->get_edit($step, $appdata_id, $token);
 	}
 	
-	if ( ($action eq 'delapp') and $appdata_id ) {
-		$self->get_delete($appdata_id, $token);
+	if ( ( $action eq 'delapp' ) and $appdata_id ) {
+		$self->get_delete( $appdata_id, $token );
 	}
 	
-	if ($action eq 'addapp') {
-		$step = $self->get_add($app_id, $token);
+	if ( $action eq 'addapp' ) {
+		$step = $self->get_add( $app_id, $token );
 	}
 	
-	if ($action eq 'tofinish') {
-		my $app_status = $self->check_all_app_finished_and_not_empty($token);
+	if ( $action eq 'tofinish' ) {
+		my $app_status = $self->check_all_app_finished_and_not_empty( $token );
 		
 		if ( $app_status == 0 ) {
-			$step = $self->set_step_by_content($token, '[app_finish]', 'next');
+			$step = $self->set_step_by_content( $token, '[app_finish]', 'next' );
 		} else {
-			$step = $self->set_step_by_content($token, '[list_of_applicants]');
+			$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
 			$last_error = $self->text_error( ( $app_status == 1 ? 4 : 5 ), undef, undef);
 		}
 	}
 	
-	if ($action eq 'tolist') {
-		$step = $self->set_step_by_content($token, '[list_of_applicants]');
+	if ( $action eq 'tolist' ) {
+		$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
 	}
 	
-	my $page = $self->get_content_rules($step, 'full');
-	my $back = ($action eq 'back' ? 'back' : '');
+	my $page = $self->get_content_rules( $step, 'full' );
+	my $back = ( $action eq 'back' ? 'back' : '' );
 	
-	if ( !$last_error and (exists $page->[0]->{relation}) ) {
-		($step, $page) = $self->check_relation($step, $page, $step, $token, $back);
+	if ( !$last_error and ( exists $page->[0]->{relation} ) ) {
+		( $step, $page ) = $self->check_relation( $step, $page, $step, $token, $back );
 	}
 	
-	if ($page !~ /\[/) { 
-		$title = $page->[0]->{page_name};
+	if ( $page !~ /\[/ ) { 
+		$title = $page->[0]->{ page_name };
 	}
 
-	my ($content, $template) = $self->get_html_page($step, $token);
+	my ($content, $template) = $self->get_html_page( $step, $token );
 	
-	my ($special) = $self->get_specials_of_element($step);
+	my ( $special ) = $self->get_specials_of_element( $step );
 	
-	return ($step, $title, $content, $last_error, $template, $special);
+	return ( $step, $title, $content, $last_error, $template, $special );
 }
 
 sub check_relation
@@ -424,49 +422,49 @@ sub check_relation
 	my $token = shift;
 	my $moonwalk = shift;
 
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 
 	my $skip_this_page;
 	my $at_least_one_page_skipped = 0;
 	
-	my $current_table_id = $self->get_current_table_id($step, $token); 
+	my $current_table_id = $self->get_current_table_id( $step, $token ); 
 	
 	do {
 	
 		$skip_this_page = 0;
 
-		for my $relation (keys %{ $page->[0]->{relation} }) {
-			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{relation}->{$relation}, $step, $token );
+		for my $relation ( keys %{ $page->[0]->{ relation } } ) {
+			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{ relation }->{ $relation }, $step, $token );
 		}
 		
-		if ($skip_this_page) {
+		if ( $skip_this_page ) {
 		
 			$at_least_one_page_skipped = 1;
 			
-			if ($moonwalk) {
+			if ( $moonwalk ) {
 				$step--;
 			} else {
 				$step++;
 			}
 			
-			$page = $self->get_content_rules($step, 'full');
+			$page = $self->get_content_rules( $step, 'full' );
 			
-			my $current_table_id = $self->get_current_table_id($step, $token); 
+			my $current_table_id = $self->get_current_table_id( $step, $token ); 
 			
 			if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
-				$self->set_current_app_finished( $current_table_id->{AutoAppData} );
+				$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
 			}
 		}
 	
-	} while ($skip_this_page);
+	} while ( $skip_this_page );
 
-	if ($at_least_one_page_skipped) {
+	if ( $at_least_one_page_skipped ) {
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-			$step, $token);
+			$step, $token );
 	}
 
-	return ($step, $page);
+	return ( $step, $page );
 }
 
 sub skip_page_by_relation
@@ -478,14 +476,14 @@ sub skip_page_by_relation
 	my $step = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $current_table_id = $self->get_current_table_id($step, $token); 
+	my $current_table_id = $self->get_current_table_id( $step, $token ); 
 	
 	my $value = $vars->db->sel1("
 		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?", $current_table_id->{ 'Auto'. $relation->{table} });
 	
-	return $self->skip_by_condition( $value, $relation->{value}, $condition ); 
+	return $self->skip_by_condition( $value, $relation->{ value }, $condition ); 
 }
 
 sub skip_by_condition
@@ -500,12 +498,12 @@ sub skip_by_condition
 	
 	my %relation = map { $_ => 1 } split /,/, $relation; 
 
-	if ($condition eq 'only_if') {
-		$skip_it = 1 unless exists $relation{$value};
+	if ( $condition eq 'only_if' ) {
+		$skip_it = 1 unless exists $relation{ $value };
 	}
 	
-	if ($condition eq 'only_if_not') {
-		$skip_it = 1 if exists $relation{$value};
+	if ( $condition eq 'only_if_not' ) {
+		$skip_it = 1 if exists $relation{ $value };
 	}
 	
 	return $skip_it;
@@ -518,43 +516,43 @@ sub get_forward
 	my $step = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $current_table_id = $self->get_current_table_id( $step, $token );
 	
 	if ( !$current_table_id->{AutoAppointments} ) {
-		$self->create_clear_form($token, $self->get_center_id());
+		$self->create_clear_form( $token, $self->get_center_id() );
 		$current_table_id = $self->get_current_table_id( $step, $token );
 	}
 	
-	$self->save_data_from_form($step, $current_table_id);
-	$self->mod_last_change_date($token);
+	$self->save_data_from_form( $step, $current_table_id );
+	$self->mod_last_change_date( $token );
 	
-	my $last_error = $self->check_data_from_form($step);
+	my $last_error = $self->check_data_from_form( $step );
 	
 	if ( $last_error ) {
 		my @last_error = split /\|/, $last_error;
 	
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, "$last_error[1] ($last_error[0])", $token);
+			$step, "$last_error[1] ($last_error[0])", $token );
 	} else {
 		$step++;
 		
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-			$step, $token);
+			$step, $token );
 	}
 
 	if ( !$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
-		$self->set_current_app_finished( $current_table_id->{AutoAppData} );
+		$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
 	}
 
-	if ( $step >= $self->get_content_rules('length') ) {
+	if ( $step >= $self->get_content_rules( 'length' ) ) {
 		$self->set_appointment_finished( $token );
 	}
 	
-	return ($step, $last_error);
+	return ( $step, $last_error );
 }
 
 sub set_current_app_finished
@@ -564,11 +562,11 @@ sub set_current_app_finished
 	my $appdata_id = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	$vars->db->query("
 		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, 
-		$appdata_id);
+		$appdata_id );
 }
 
 sub set_appointment_finished
@@ -577,11 +575,11 @@ sub set_appointment_finished
 	my $self = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	$vars->db->query("
 		UPDATE AutoToken SET EndDate = now(), Finished = 1 WHERE Token = ?", {}, 
-		$token);
+		$token );
 		
 	# AutoAppointments => Appointments
 	
@@ -596,13 +594,13 @@ sub get_step_by_content
 	my $content = shift;
 	my $next = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 
 	my $page_content = $self->get_content_rules();
 	my $step;
 
-	for my $page (keys %$page_content) {
-		$step = $page if ( $page_content->{$page} eq $content);
+	for my $page ( keys %$page_content ) {
+		$step = $page if ( $page_content->{ $page } eq $content );
 	}
 
 	$step++ if $next;
@@ -618,13 +616,13 @@ sub set_step_by_content
 	my $content = shift;
 	my $next = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 
-	my $step = $self->get_step_by_content($token, $content, $next);
+	my $step = $self->get_step_by_content( $token, $content, $next );
 
 	$vars->db->query("
 		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-		$step, $token);
+		$step, $token );
 			
 	return $step;
 }
@@ -637,25 +635,25 @@ sub get_edit
 	my $appdata_id = shift; 
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
-	if ( $self->check_existing_id_in_token($appdata_id, $token) ) {
+	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 		
 		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');;
 		
 		my $sch_id = $vars->db->sel1("
-			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id);
+			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id );
 		
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
-			$step, $appdata_id, $sch_id, $token);
+			$step, $appdata_id, $sch_id, $token );
 		
 		$vars->db->query("
 			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
-			$appdata_id);
+			$appdata_id );
 	}
 	
-	$self->mod_last_change_date($token);
+	$self->mod_last_change_date( $token );
 	return $step;
 }
 
@@ -666,22 +664,22 @@ sub get_delete
 	my $appdata_id = shift; 
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
-	if ( $self->check_existing_id_in_token($appdata_id, $token) ) {
+	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 	
 		my $sch_id = $vars->db->sel1("
-			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id);
+			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id );
 	
 		$vars->db->query("
 			DELETE FROM AutoAppData WHERE ID = ?", {}, 
-			$appdata_id);
+			$appdata_id );
 		
 		$vars->db->query("
 			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, 
-			$sch_id);
+			$sch_id );
 			
-		$self->mod_last_change_date($token);
+		$self->mod_last_change_date( $token );
 	}
 }
 
@@ -694,7 +692,7 @@ sub check_existing_id_in_token
 	
 	my $exist = 0;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $list_of_app_in_token = $vars->db->selallkeys("
 		SELECT AutoAppData.ID FROM AutoToken 
@@ -702,8 +700,8 @@ sub check_existing_id_in_token
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $token );
 		
-	for my $app (@$list_of_app_in_token) {
-		$exist = 1 if ($app->{ID} == $appdata_id);
+	for my $app ( @$list_of_app_in_token ) {
+		$exist = 1 if ( $app->{ID} == $appdata_id );
 	}
 	
 	return $exist;
@@ -717,7 +715,7 @@ sub check_all_app_finished_and_not_empty
 	
 	my $all_finished = 0;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my ( $app_count, $app_finished ) = $vars->db->sel1("
 		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
@@ -741,29 +739,29 @@ sub get_add
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $insurance_list = $vars->db->sel1("
-		SELECT Insurance FROM AutoToken WHERE Token = ?", $token);
+	my $insurance_list = $vars->db->sel1( "
+		SELECT Insurance FROM AutoToken WHERE Token = ?", $token );
 	
 	$vars->db->query("
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);");
 		
-	my $sch_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+	my $sch_id = $vars->db->sel1( 'SELECT last_insert_id()' ) || 0;
 	
 	$vars->db->query("
 		INSERT INTO AutoAppData (AnkDate, AppID, SchengenAppDataID) VALUES (now(), ?, ?)", {}, 
-		$app_id, $sch_id);
+		$app_id, $sch_id );
 	
-	my $appdata_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+	my $appdata_id = $vars->db->sel1( 'SELECT last_insert_id()' ) || 0;
 	
-	my $step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');
+	my $step = $self->get_step_by_content( $token, '[list_of_applicants]', 'next' );
 	
 	$insurance_list .= ( $insurance_list ? ',' : '' ) . "$appdata_id=0";
 	
 	$vars->db->query("
 		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, Insurance = ? WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $insurance_list, $token);
+		$step, $appdata_id, $sch_id, $insurance_list, $token );
 	
-	$self->mod_last_change_date($token);
+	$self->mod_last_change_date( $token );
 	return $step;
 }
 
@@ -776,12 +774,12 @@ sub get_back
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	$self->save_data_from_form($step, $self->get_current_table_id($step, $token));
-	$self->mod_last_change_date($token);
+	$self->save_data_from_form( $step, $self->get_current_table_id( $step, $token ) );
+	$self->mod_last_change_date( $token );
 	$step--;
 	
-	if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
-		$step = $self->set_step_by_content($token, '[list_of_applicants]');
+	if ( $step == $self->get_step_by_content( $token, '[app_finish]' ) ) {
+		$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
 	}
 	
 	$vars->db->query("
@@ -798,27 +796,27 @@ sub get_html_page
 	my $step = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $content = '';
 	my $template = 'autoform.tt2';
 	
-	my $page_content = $self->get_content_rules($step, '', $token);
+	my $page_content = $self->get_content_rules( $step, '', $token );
 
-	if ( $page_content eq '[list_of_applicants]') {
-		return $self->get_list_of_app($token);
+	if ( $page_content eq '[list_of_applicants]' ) {
+		return $self->get_list_of_app( $token );
 	}
 	
-	if ( $page_content eq '[app_finish]') {
+	if ( $page_content eq '[app_finish]' ) {
 		return $self->get_finish();
 	}
 	
-	my $current_values = $self->get_all_values($step, $self->get_current_table_id($step, $token));
+	my $current_values = $self->get_all_values( $step, $self->get_current_table_id( $step, $token ) );
 
-	for my $element (@$page_content) {
-		$content .= $self->get_html_line($element, $current_values);
+	for my $element ( @$page_content ) {
+		$content .= $self->get_html_line( $element, $current_values );
 	}
-	return ($content, $template);
+	return ( $content, $template );
 }
 
 sub get_list_of_app
@@ -826,7 +824,7 @@ sub get_list_of_app
 {
 	my $self = shift;
 	my $token = shift;
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $content = $vars->db->selallkeys("
 			SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
@@ -835,17 +833,17 @@ sub get_list_of_app
 			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 			WHERE Token = ?", $token );
 		
-	if (scalar(@$content) < 1) {
+	if ( scalar(@$content) < 1 ) {
 		$content->[0]->{ID} = 'X';
 	} else {
-		for my $app (@$content) {
+		for my $app ( @$content ) {
 			$app->{BirthDate} =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 		}
 	}
 	
 	my $template = 'autoform_list.tt2';
 	
-	return ($content, $template);
+	return ( $content, $template );
 }
 
 sub get_finish
@@ -855,7 +853,7 @@ sub get_finish
 	
 	my $template = 'autoform_finish.tt2';
 	
-	return (undef, $template);
+	return ( undef, $template );
 }
 
 sub get_specials_of_element
@@ -892,7 +890,7 @@ sub get_html_line
 	my $element = shift;
 	my $values = shift;
 	
-	my $content = $self->get_html_for_element('start_line');
+	my $content = $self->get_html_for_element( 'start_line' );
 	
 	if ( $element->{type} eq 'text' ) {
 		$content .= $self->get_html_for_element('text', $element->{name}, $element->{label});
@@ -905,28 +903,28 @@ sub get_html_line
 	
 	my $current_value = $values->{ $element->{name} };
 
-	if ( $element->{db}->{name} eq 'complex' ) {
-		for my $sub_value ( keys %{ $element->{param} } ) {
-			$current_value->{$sub_value} = $values->{ $sub_value };
+	if ( $element->{ db }->{ name } eq 'complex' ) {
+		for my $sub_value ( keys %{ $element->{ param } } ) {
+			$current_value->{ $sub_value } = $values->{ $sub_value };
 		}
 	}
 	
 	$content .= $self->get_cell(
 			$self->get_html_for_element(
-				'label', 'text', $element->{label}
+				'label', 'text', $element->{ label }
 			) 
 		) .
 		$self->get_cell(
 			$self->get_html_for_element(
-				$element->{type}, $element->{name}, $current_value, $element->{param}, 
-				$element->{uniq_code}, $element->{first_elements}, $element->{comment}
+				$element->{ type }, $element->{ name }, $current_value, $element->{ param }, 
+				$element->{ uniq_code }, $element->{ first_elements }, $element->{ comment }
 			) . $label_for_need
 		);
 	
-	$content .= $self->get_html_for_element('end_line');
+	$content .= $self->get_html_for_element( 'end_line' );
 	
-	if ( $element->{example} ne '' ) {
-		$content .= $self->get_html_for_element('example', $element->{name}, $element->{example} );
+	if ( $element->{ example } ne '' ) {
+		$content .= $self->get_html_for_element( 'example', $element->{name}, $element->{example} );
 	}
 
 	return $content;
@@ -938,7 +936,7 @@ sub get_cell
 	my $self = shift;
 	my $element = shift;
 	
-	return $self->get_html_for_element('start_cell') . $element . $self->get_html_for_element('end_cell');
+	return $self->get_html_for_element( 'start_cell' ) . $element . $self->get_html_for_element( 'end_cell' );
 }
 
 sub get_html_for_element
@@ -954,7 +952,7 @@ sub get_html_for_element
 	my $first_elements = shift;
 	my $comment = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $elements = {
 		'start_line'		=> '<tr [u]>',
@@ -962,7 +960,7 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input type="text" value="[value]" name="[name]" id="[name]" title="[comment]"[u]>',
+		'input' 		=> '<input type="text" value="[value]" name="[name]" id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '[options]',
@@ -978,32 +976,32 @@ sub get_html_for_element
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
 	};
 	
-	my $content = $elements->{$type};
+	my $content = $elements->{ $type };
 	
 	$content =~ s/\[name\]/$name/gi;
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[u\]/$uniq_code/gi;
 	$content =~ s/\[comment\]/$comment/gi;
 	
-	if ($type eq 'checkbox') {
+	if ( $type eq 'checkbox' ) {
 		$content =~ s/\[checked\]/checked/gi if $value;
 	}
 	
-	if ($type eq 'select') {
+	if ( $type eq 'select' ) {
 		my $list = '';
 
 		for my $opt ( $self->resort_with_first_elements( $param, $first_elements ) ) {
 			my $selected = ( $value == $opt ? 'selected' : '' );
-			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{$opt} . '</option>'; 
+			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{ $opt } . '</option>'; 
 		}
 		$content =~ s/\[options\]/$list/gi;
 	}
 	
-	if ($type eq 'radiolist') {
+	if ( $type eq 'radiolist' ) {
 		my $list = '';
 		my $uniq_id = 0;
 		
-		for my $opt (sort keys %$param) {
+		for my $opt ( sort keys %$param ) {
 			my $checked = ( $value == $opt ? 'checked' : '' );
 			$uniq_id++;
 			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' . $checked . ' id="'.$name.$uniq_id.'">'.
@@ -1016,7 +1014,7 @@ sub get_html_for_element
 	if ($type eq 'checklist') {
 		my $list = '';
 
-		for my $opt (sort {$a cmp $b} keys %$param) {
+		for my $opt ( sort {$a cmp $b} keys %$param ) {
 		
 			my $checked = ( $value->{$opt} ? 'checked' : '' );
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
@@ -1025,18 +1023,18 @@ sub get_html_for_element
 		$content =~ s/\[options\]/$list/gi;
 	}
 
-	if ($type eq 'checklist_insurer') {
+	if ( $type eq 'checklist_insurer' ) {
 		my $list = '';
 		my $value_list = {};
 		
 		my @value_list = split /,/, $value;
 		
-		for my $value (@value_list) {
-			my ($id, $val) = split /=/, $value;
+		for my $value ( @value_list ) {
+			my ( $id, $val ) = split /=/, $value;
 			$value_list->{ $id } = $val;
 		}
 
-		for my $opt (sort {$a cmp $b} keys %$param) {
+		for my $opt ( sort {$a cmp $b} keys %$param ) {
 		
 			my $checked = ( $value_list->{$opt} ? 'checked' : '' );
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $name . '_' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
@@ -1045,7 +1043,7 @@ sub get_html_for_element
 		$content =~ s/\[options\]/$list/gi;
 	}
 	
-	if ($type eq 'captcha') {
+	if ( $type eq 'captcha' ) {
 		my $config = $vars->getConfig('captcha');
 		my $addr_captcha = $self->{'autoform'}->{'addr_captcha'};
 		
@@ -1074,7 +1072,7 @@ sub resort_with_first_elements
 
 	my @array_with_first_elements = ();
 	
-	for my $f (@first_elements) {
+	for my $f ( @first_elements ) {
 		for my $e (keys %$country_hash) {
 			push @array_with_first_elements, $f if $e == $f;
 		}
@@ -1082,7 +1080,7 @@ sub resort_with_first_elements
 	
 	my %first_elements = map { $_ => 1 } @first_elements; 
 	
-	for my $e (sort { $country_hash->{ $a } cmp $country_hash->{ $b } } keys %$country_hash) {
+	for my $e ( sort { $country_hash->{ $a } cmp $country_hash->{ $b } } keys %$country_hash ) {
 		push @array_with_first_elements, $e if !exists $first_elements{ $e };
 	}
 
@@ -1109,30 +1107,30 @@ sub save_data_from_form
 	
 	my $vars = $self->{'VCS::Vars'};
 
-	my $request_tables = $self->get_names_db_for_save_or_get($self->get_content_rules($step), 'save');
+	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules($step), 'save' );
 
-	for my $table (keys %$request_tables) {
+	for my $table ( keys %$request_tables ) {
 		
 		next if !$table_id->{$table};
 	
 		my $request = '';
 		my @values = ();
 	
-		for my $row (keys %{$request_tables->{$table}}) { 
+		for my $row ( keys %{$request_tables->{$table}} ) { 
 
 			$request .=  "$row = ?, ";
-			my $value = $vars->getparam($request_tables->{$table}->{$row});
-			push (@values, $self->encode_data_for_db($step, $request_tables->{$table}->{$row}, $value));
+			my $value = $vars->getparam( $request_tables->{$table}->{$row} );
+			push ( @values, $self->encode_data_for_db( $step, $request_tables->{$table}->{$row}, $value) );
 		}
 		$request =~ s/,\s$//;			
 
 		$vars->db->query("
 			UPDATE $table SET $request WHERE ID = ?", {}, 
-			@values, $table_id->{$table});
+			@values, $table_id->{$table} );
 		
 	}
 	
-	$self->check_special_in_rules_for_save($step, $table_id);
+	$self->check_special_in_rules_for_save( $step, $table_id );
 }
 
 sub check_special_in_rules_for_save
@@ -1143,33 +1141,33 @@ sub check_special_in_rules_for_save
 	my $table_id = shift;
 	
 	my $vars = $self->{'VCS::Vars'};
-	my $elements = $self->get_content_rules($step);
+	my $elements = $self->get_content_rules( $step );
 	
 	return if $elements =~ /\[/;
 	
-	for my $element (@$elements) {
-		if ($element->{special} eq 'save_info_about_hastdatatype') {
+	for my $element ( @$elements ) {
+		if ( $element->{special} eq 'save_info_about_hastdatatype' ) {
 			
 			my $visa_type = $vars->db->sel1("
 				SELECT VisaPurpose1 FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData});
 
-				if ($visa_type != 1) {
+				if ( $visa_type != 1 ) {
 				$vars->db->query("
 					UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {}, 
 					$table_id->{AutoSchengenAppData});
 			}
 		}
-		elsif ($element->{special} eq 'insurer_many_id') {
+		elsif ( $element->{special} eq 'insurer_many_id' ) {
 			my $all_insurer_list = $vars->db->sel1("
 				SELECT Insurance FROM AutoToken WHERE ID = ?", $table_id->{AutoToken} );
 
 			my @all_insurer = split /,/, $all_insurer_list;
 			my $new_list = '';
 
-			for my $insurer (@all_insurer) {
-				my ($id, $val) = split /=/, $insurer;
+			for my $insurer ( @all_insurer ) {
+				my ( $id, $val ) = split /=/, $insurer;
 				$val = ( $vars->getparam( 'insurance_' . $id ) ? 1 : 0 );
-				$new_list = ( $new_list ? ',' : '') . "$id=$val";
+				$new_list = ( $new_list ? ',' : '' ) . "$id=$val";
 			}	
 
 			$vars->db->query("
@@ -1189,9 +1187,9 @@ sub get_all_values
 	my $vars = $self->{'VCS::Vars'};
 	
 	my $all_values = {};
-	my $request_tables = $self->get_names_db_for_save_or_get($self->get_content_rules($step), 'get');
+	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'get' );
 
-	for my $table (keys %$request_tables) {
+	for my $table ( keys %$request_tables ) {
 
 		next if !$table_id->{$table};
 
@@ -1201,9 +1199,9 @@ sub get_all_values
 			SELECT $request FROM $table WHERE ID = ?", $table_id->{$table} );
 		$result = $result->[0];
 		
-		for my $value (keys %$result) {
+		for my $value ( keys %$result ) {
 			$all_values->{$request_tables->{$table}->{$value} } = 
-				$self->decode_data_from_db($step, $request_tables->{$table}->{$value}, $result->{$value});
+				$self->decode_data_from_db( $step, $request_tables->{$table}->{$value}, $result->{$value} );
 		}
 	}
 
@@ -1218,11 +1216,11 @@ sub decode_data_from_db
 	my $element_name = shift;
 	my $value = shift;
 	
-	my $page_content = $self->get_content_rules($step);
+	my $page_content = $self->get_content_rules( $step );
 	
 	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
 	
-	$value = '' if ($value eq '00.00.0000');
+	$value = '' if ( $value eq '00.00.0000' );
 	
 	return $value;
 }
@@ -1239,8 +1237,8 @@ sub encode_data_for_db
 	
 	$value =~ s/^\s+|\s+$//g;
 
-	if ($element->{type} =~ /checkbox|checklist/) {
-		if ($value eq $element_name) {
+	if ( $element->{type} =~ /checkbox|checklist/ ) {
+		if ( $value eq $element_name ) {
 			$value = 1;
 		} else {
 			$value = 0;
@@ -1259,16 +1257,16 @@ sub get_element_by_name
 	my $step = shift;
 	my $element_name = shift;
 	
-	my $page_content = $self->get_content_rules($step);
+	my $page_content = $self->get_content_rules( $step );
 	my $element;
-	for my $element_search  (@$page_content) {
-		if ($element_search->{name} eq $element_name) {
+	for my $element_search ( @$page_content ) {
+		if ( $element_search->{name} eq $element_name ) {
 			$element = $element_search;
 		};
 		
 		if ( $element_search->{db}->{name} eq 'complex' ) {
-			for my $sub_element (keys %{ $element_search->{param} }) {
-				if ($sub_element eq $element_name) {
+			for my $sub_element ( keys %{ $element_search->{param} } ) {
+				if ( $sub_element eq $element_name ) {
 					$element = $element_search;
 				}
 			}
@@ -1339,7 +1337,7 @@ sub get_current_table_id
 	};
 	
 	$tables_id->{ AutoToken } = $vars->db->sel1("
-		SELECT ID FROM AutoToken WHERE Token = ?", $token);
+		SELECT ID FROM AutoToken WHERE Token = ?", $token );
 
 	return $tables_id;
 }
@@ -1381,11 +1379,11 @@ sub check_chkbox
 	my $self = shift;
 	my $element = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
-	my $value = $vars->getparam($element->{name});
+	my $vars = $self->{ 'VCS::Vars' };
+	my $value = $vars->getparam( $element->{name} );
 	my $rules = $element->{check};
 	
-	return $self->text_error(3, $element) if ( ($element->{check} =~ /true/) and ($value eq '') );
+	return $self->text_error( 3, $element ) if ( ( $element->{check} =~ /true/ ) and ( $value eq '' ) );
 }
 
 sub check_param
@@ -1394,19 +1392,19 @@ sub check_param
 	my $self = shift;
 	my $element = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
-	my $value = $vars->getparam($element->{name});
+	my $vars = $self->{ 'VCS::Vars' };
+	my $value = $vars->getparam( $element->{ name } );
 	my $error = '';
-	my $rules = $element->{check};
+	my $rules = $element->{ check };
 	
 	$value =~ s/^\s+|\s+$//g;
 
-	return $self->text_error(0, $element) if ($rules =~ /z/) and ($value eq '');
+	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( $value eq '' );
 	return if $rules eq 'z'; 
 
-	if ($rules =~ /D/) {
+	if ( $rules =~ /D/ ) {
 		$rules =~ s/(z|D)//g;
-		return $self->text_error(1, $element) if (!($value =~ /$rules/) and ($value ne ''));
+		return $self->text_error( 1, $element ) if ( !( $value =~ /$rules/ ) and ( $value ne '' ) );
 	}
 	else {
 		my $regexp = '';
@@ -1417,9 +1415,9 @@ sub check_param
 		my $revers_regexp = '[' . $regexp . $rules . ']';
 		$regexp = '[^' . $regexp . $rules . ']';
 
-		if (($value =~ /$regexp/) and ($value ne '')) {
+		if ( ( $value =~ /$regexp/ ) and ( $value ne '' ) ) {
 			$value =~ s/$revers_regexp//gi;
-			return $self->text_error(2, $element, $value);
+			return $self->text_error( 2, $element, $value );
 		}
 	}
 }
@@ -1430,7 +1428,8 @@ sub check_captcha
 	my $self = shift;
 	my $element = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
+	
 	my $config = $vars->getConfig('captcha');
 	my $captcha = $vars->getcaptcha();
 	
@@ -1438,7 +1437,7 @@ sub check_captcha
 	my $rcode = $vars->getparam('code') || '';
 	my $c_status = $captcha->check_code( $capverify, $rcode );
 	
-	return $vars->getCaptchaErr($c_status);
+	return $vars->getCaptchaErr( $c_status );
 }
 
 sub text_error
@@ -1458,14 +1457,14 @@ sub text_error
 		'Вы должны добавить по меньшей мере одного заявителя',
 	];
 	
-	if (!defined($element)) {
+	if ( !defined($element) ) {
 		return "|$text->[$error_code]";
 	}
 	
 	my $name_of_element = (	$element->{label} ? $element->{label} : ( 
 				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
 	
-	my $current_error = $text->[$error_code];
+	my $current_error = $text->[ $error_code ];
 	$current_error =~ s/\[name\]/$name_of_element/;
 	
 	my $text_error = "$element->{name}|$current_error";
@@ -1480,11 +1479,11 @@ sub mod_last_change_date
 	my $self = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 
 	$vars->db->query("
 		UPDATE AutoToken SET LastChange = now() WHERE Token = ?", {}, 
-		$token);
+		$token );
 }
 
 1;
