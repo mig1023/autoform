@@ -427,7 +427,7 @@ sub check_relation
 	my $skip_this_page;
 	my $at_least_one_page_skipped = 0;
 	
-	my $current_table_id = $self->get_current_table_id( $step, $token ); 
+	my $current_table_id = $self->get_current_table_id( $token ); 
 	
 	do {
 	
@@ -449,7 +449,7 @@ sub check_relation
 			
 			$page = $self->get_content_rules( $step, 'full' );
 			
-			my $current_table_id = $self->get_current_table_id( $step, $token ); 
+			my $current_table_id = $self->get_current_table_id( $token ); 
 			
 			if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
 				$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
@@ -478,7 +478,7 @@ sub skip_page_by_relation
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $current_table_id = $self->get_current_table_id( $step, $token ); 
+	my $current_table_id = $self->get_current_table_id( $token ); 
 	
 	my $value = $vars->db->sel1("
 		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?", $current_table_id->{ 'Auto'. $relation->{table} });
@@ -518,11 +518,11 @@ sub get_forward
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $current_table_id = $self->get_current_table_id( $step, $token );
+	my $current_table_id = $self->get_current_table_id( $token );
 	
 	if ( !$current_table_id->{AutoAppointments} ) {
 		$self->create_clear_form( $token, $self->get_center_id() );
-		$current_table_id = $self->get_current_table_id( $step, $token );
+		$current_table_id = $self->get_current_table_id( $token );
 	}
 	
 	$self->save_data_from_form( $step, $current_table_id );
@@ -535,7 +535,7 @@ sub get_forward
 	
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, "$last_error[1] ($last_error[0])", $token );
+			$step, "$last_error[1] (id $last_error[0], step $step)", $token );
 	} else {
 		$step++;
 		
@@ -577,13 +577,11 @@ sub set_appointment_finished
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	$vars->db->query("
-		UPDATE AutoToken SET EndDate = now(), Finished = 1 WHERE Token = ?", {}, 
-		$token );
-		
-	# AutoAppointments => Appointments
+	my $new_appid = $self->create_new_appointment( $token );
 	
-	# AutoToken.CreatedApp => Appointments.AppNum
+	$vars->db->query("
+		UPDATE AutoToken SET EndDate = now(), Finished = 1, CreatedApp = ? WHERE Token = ?", {}, 
+		$new_appid, $token );
 }
 
 sub get_step_by_content
@@ -774,7 +772,7 @@ sub get_back
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	$self->save_data_from_form( $step, $self->get_current_table_id( $step, $token ) );
+	$self->save_data_from_form( $step, $self->get_current_table_id( $token ) );
 	$self->mod_last_change_date( $token );
 	$step--;
 	
@@ -811,7 +809,7 @@ sub get_html_page
 		return $self->get_finish();
 	}
 	
-	my $current_values = $self->get_all_values( $step, $self->get_current_table_id( $step, $token ) );
+	my $current_values = $self->get_all_values( $step, $self->get_current_table_id( $token ) );
 
 	for my $element ( @$page_content ) {
 		$content .= $self->get_html_line( $element, $current_values );
@@ -1307,19 +1305,14 @@ sub get_current_table_id
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $step = shift;
 	my $token = shift;
 	
 	my $vars = $self->{'VCS::Vars'};
 	my $tables_id = {};
 	my $request_tables = '';
 	my $tables_list = [];
-	
-	my $tables_controled_by_AutoToken = {
-		'AutoAppointments' => 'AutoAppID',
-		'AutoAppData' => 'AutoAppDataID',
-		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
-	};
+
+	my $tables_controled_by_AutoToken = VCS::Site::autodata::get_tables_controled_by_AutoToken();
 	
 	for my $table_controlled (keys %$tables_controled_by_AutoToken) {
 		$request_tables .= $tables_controled_by_AutoToken->{$table_controlled} . ', ';
@@ -1484,6 +1477,129 @@ sub mod_last_change_date
 	$vars->db->query("
 		UPDATE AutoToken SET LastChange = now() WHERE Token = ?", {}, 
 		$token );
+}
+
+sub create_new_appointment
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $token = shift;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	my $new_appid;
+
+	my $tables_transfered = VCS::Site::autodata::get_tables_transfered();
+	my $tables_transfered_id = $self->get_current_table_id( $token );
+
+	my $db_rules = $self->get_content_db_rules();
+
+	for my $auto_table ( keys %$tables_transfered ) {
+		my $hash = $self->get_hash_table( $auto_table, $tables_transfered_id->{ $auto_table } );
+	
+		for my $column ( keys %$hash ) {
+			if ( $db_rules->{ $tables_transfered->{$auto_table} }->{ $column } eq 'nope') {
+				delete $hash->{ $column };
+			}
+		}
+		
+		if ( exists $hash->{ VisaPurpose } ) {
+			my $visa = '';
+			for (1..17) {
+				$visa .= ( $visa ? '|' : '' ) . ( $hash->{ VisaPurpose } == $_ ? '1' : '0' );
+			};
+			$hash->{ VisaPurpose } = $visa;
+		}
+		
+		if ( exists $hash->{ Mezzi1 } ) {
+			my $mezzi = '';
+			for (1..7) {
+				$mezzi .= ( $mezzi ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
+				delete $hash->{ 'Mezzi' . $_ };
+			};
+			$hash->{ Mezzi } = $mezzi;
+		}
+		
+		delete $hash->{ ID } if ( exists $hash->{ ID } );
+		delete $hash->{ Finished } if ( exists $hash->{ Finished } and $tables_transfered->{$auto_table} eq 'AppData' );
+
+		if ( $tables_transfered->{$auto_table} eq 'Appointments' ) {
+			my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments',$vars);
+			$hash->{ AppNum }  = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
+		}
+
+		my $inserted_id = $self->insert_hash_table( $tables_transfered->{ $auto_table }, $hash );
+		$new_appid = $inserted_id if ( $auto_table eq 'AutoAppointments' );
+	}
+
+	return $new_appid;
+}
+
+sub get_content_db_rules
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $content = $self->get_content_rules();
+	my $db_rules = {};
+
+	for my $page ( keys %$content ) {
+		
+		next if ( $content->{$page} =~ /\[/ );
+		
+		for my $element ( @{ $content->{$page} } ) {
+		
+			next if ( !defined $element->{db}->{table} or $element->{db}->{name} eq 'complex' );
+			
+			$db_rules->{ $element->{db}->{table} }->{ $element->{db}->{name} } = $element->{db}->{transfer};
+		}
+	}
+	return $db_rules;
+}
+
+sub get_hash_table
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $table_name = shift;
+	my $table_id = shift;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+
+	my $hash_table = $vars->db->selallkeys("
+		SELECT * FROM $table_name WHERE ID = ?", $table_id );
+	$hash_table = $hash_table->[0];
+
+	return $hash_table;
+}
+
+sub insert_hash_table
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $table_name = shift;
+	my $hash = shift;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my $request_columns = '';
+	my $request_values = '';
+	my @request_values = ();
+	
+	for (keys %$hash) {
+		$request_columns .= ( $request_columns ? ',' : '' ) . $_;
+		$request_values .= ( $request_values ? ',' : '' ) . '?';
+		push @request_values, $hash->{ $_ };
+	}
+	
+	$vars->db->query("
+		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, 
+		@request_values);
+warn "we try:";
+warn "INSERT INTO $table_name($request_columns) VALUES ($request_values)";
+warn Dumper(@request_values);
+	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+warn "last_insert_id = ".$app_id;
+	return $app_id;
 }
 
 1;

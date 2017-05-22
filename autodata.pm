@@ -1,6 +1,30 @@
 ﻿package VCS::Site::autodata;
 use strict;
 
+sub get_tables_controled_by_AutoToken
+# //////////////////////////////////////////////////
+{
+	my $tables_controled_by_AutoToken = {
+		'AutoAppointments' => 'AutoAppID',
+		'AutoAppData' => 'AutoAppDataID',
+		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
+	};
+	
+	return $tables_controled_by_AutoToken;
+}
+
+sub get_tables_transfered
+# //////////////////////////////////////////////////
+{
+	my $tables_transfered = {
+		'AutoAppointments' => 'Appointments',
+		'AutoAppData' => 'AppData',
+		'AutoSchengenAppData' => 'SchengenAppData',
+	};
+	
+	return $tables_transfered;
+}
+
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
 {
@@ -1362,6 +1386,7 @@ sub get_content_rules_hash
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'PersonForAgreements',
+					'transfer' => 'nope',
 					},
 				'param' => '[persons_in_app]',
 			},
