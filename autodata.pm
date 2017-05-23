@@ -13,18 +13,6 @@ sub get_tables_controled_by_AutoToken
 	return $tables_controled_by_AutoToken;
 }
 
-sub get_tables_transfered
-# //////////////////////////////////////////////////
-{
-	my $tables_transfered = {
-		'AutoAppointments' => 'Appointments',
-		'AutoAppData' => 'AppData',
-		'AutoSchengenAppData' => 'SchengenAppData',
-	};
-	
-	return $tables_transfered;
-}
-
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
 {
@@ -581,7 +569,7 @@ sub get_content_rules_hash
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'VisaPurpose1',
+					'name' => 'VisaPurpose',
 				},
 				'param' => { 
 					1 => 'Туризм', 
@@ -605,7 +593,7 @@ sub get_content_rules_hash
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
-						'name' => 'VisaPurpose1',
+						'name' => 'VisaPurpose',
 						'value' => '10',
 					}
 				},
@@ -872,7 +860,7 @@ sub get_content_rules_hash
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
-						'name' => 'VisaPurpose1',
+						'name' => 'VisaPurpose',
 						'value' => '1',
 					}
 				},
@@ -951,7 +939,7 @@ sub get_content_rules_hash
 					},
 					'only_if' => {
 						'table' => 'AppData',
-						'name' => 'VisaPurpose1',
+						'name' => 'VisaPurpose',
 						'value' => '1',
 					}
 				},
@@ -1054,7 +1042,7 @@ sub get_content_rules_hash
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'AppData',
-						'name' => 'VisaPurpose1',
+						'name' => 'VisaPurpose',
 						'value' => '1',
 					}
 				},

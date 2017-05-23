@@ -535,7 +535,7 @@ sub get_forward
 	
 		$vars->db->query("
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, "$last_error[1] (id $last_error[0], step $step)", $token );
+			$step, "$last_error[1] ($last_error[0], step $step)", $token );
 	} else {
 		$step++;
 		
@@ -577,11 +577,15 @@ sub set_appointment_finished
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $new_appid = $self->create_new_appointment( $token );
+	my ( $new_appid, $ncount ) = $self->create_new_appointment( $token );
 	
 	$vars->db->query("
 		UPDATE AutoToken SET EndDate = now(), Finished = 1, CreatedApp = ? WHERE Token = ?", {}, 
 		$new_appid, $token );
+		
+	$vars->db->query("
+		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? WHERE ID = ?", {}, 
+		$ncount, $new_appid );
 }
 
 sub get_step_by_content
@@ -1147,7 +1151,7 @@ sub check_special_in_rules_for_save
 		if ( $element->{special} eq 'save_info_about_hastdatatype' ) {
 			
 			my $visa_type = $vars->db->sel1("
-				SELECT VisaPurpose1 FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData});
+				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData});
 
 				if ( $visa_type != 1 ) {
 				$vars->db->query("
@@ -1487,51 +1491,122 @@ sub create_new_appointment
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	my $new_appid;
-
-	my $tables_transfered = VCS::Site::autodata::get_tables_transfered();
+	
 	my $tables_transfered_id = $self->get_current_table_id( $token );
-
 	my $db_rules = $self->get_content_db_rules();
 
-	for my $auto_table ( keys %$tables_transfered ) {
-		my $hash = $self->get_hash_table( $auto_table, $tables_transfered_id->{ $auto_table } );
+	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments', $tables_transfered_id, $db_rules );
+
+	my $allapp = $vars->db->selallkeys("
+		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
+		$tables_transfered_id->{ 'AutoAppointments' } );
 	
-		for my $column ( keys %$hash ) {
-			if ( $db_rules->{ $tables_transfered->{$auto_table} }->{ $column } eq 'nope') {
-				delete $hash->{ $column };
-			}
-		}
+	for my $app ( @$allapp ) {
 		
-		if ( exists $hash->{ VisaPurpose } ) {
-			my $visa = '';
-			for (1..17) {
-				$visa .= ( $visa ? '|' : '' ) . ( $hash->{ VisaPurpose } == $_ ? '1' : '0' );
-			};
-			$hash->{ VisaPurpose } = $visa;
-		}
+		my $sch_appid = $self->create_table( 'AutoSchengenAppData', 'SchengenAppData', $tables_transfered_id, $db_rules );
 		
-		if ( exists $hash->{ Mezzi1 } ) {
-			my $mezzi = '';
-			for (1..7) {
-				$mezzi .= ( $mezzi ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
-				delete $hash->{ 'Mezzi' . $_ };
-			};
-			$hash->{ Mezzi } = $mezzi;
-		}
-		
-		delete $hash->{ ID } if ( exists $hash->{ ID } );
-		delete $hash->{ Finished } if ( exists $hash->{ Finished } and $tables_transfered->{$auto_table} eq 'AppData' );
+		my $appid = $self->create_table( 'AutoAppData', 'AppData', $tables_transfered_id, $db_rules, $new_appid, $sch_appid );
+	}	
 
-		if ( $tables_transfered->{$auto_table} eq 'Appointments' ) {
-			my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments',$vars);
-			$hash->{ AppNum }  = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
-		}
+	return ( $new_appid, scalar @$allapp );
+}
 
-		my $inserted_id = $self->insert_hash_table( $tables_transfered->{ $auto_table }, $hash );
-		$new_appid = $inserted_id if ( $auto_table eq 'AutoAppointments' );
-	}
+sub create_table
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $autoname = shift;
+	my $name = shift;
+	my $tables_transfered_id = shift;
+	my $db_rules = shift;
 
+	my $new_appid = shift;
+	my $sch_appid = shift;
+	
+	my $hash = $self->get_hash_table( $autoname, $tables_transfered_id->{ $autoname } );
+	
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid );
+	
+	my $new_appid = $self->insert_hash_table( $name, $hash );
+	
 	return $new_appid;
+}
+
+sub mod_hash
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my $hash = shift;
+	my $table_name = shift;
+	my $db_rules = shift;
+	
+	my $appid = shift;
+	my $schappid = shift;
+	
+	for my $column ( keys %$hash ) {
+		if ( $db_rules->{ $table_name }->{ $column } eq 'nope') {
+			delete $hash->{ $column };
+		}
+	}
+	
+	$hash = $self->visapurpose_assembler( $hash ) if exists $hash->{ VisaPurpose };
+	$hash = $self->mezzi_assembler( $hash ) if exists $hash->{ Mezzi1 };
+	
+	if ( exists $hash->{ Mezzi1 } ) {
+		my $mezzi = '';
+		for (1..7) {
+			$mezzi .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
+			delete $hash->{ 'Mezzi' . $_ };
+		};
+		$hash->{ Mezzi } = $mezzi;
+	}
+	
+	delete $hash->{ ID } if ( exists $hash->{ ID } );
+	delete $hash->{ Finished } if ( exists $hash->{ Finished } and $table_name eq 'AppData' );
+
+	$hash->{AppID} = $appid if $appid;
+	$hash->{SchengenAppDataID} = $schappid if $schappid;
+	$hash->{Status} = 1 if exists $hash->{Status};
+	
+	if ( $table_name eq 'Appointments' ) {
+		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $vars);
+		$hash->{ AppNum }  = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
+	}
+		
+	return $hash;
+}
+
+sub visapurpose_assembler
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $hash = shift;
+
+	my $visa = '';
+	for (1..17) {
+		$visa .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ VisaPurpose } == $_ ? '1' : '0' );
+	};
+	$hash->{ VisaPurpose } = $visa;
+	
+	return $hash;
+}
+
+sub mezzi_assembler
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $hash = shift;
+
+	my $mezzi = '';
+	for (1..7) {
+		$mezzi .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
+		delete $hash->{ 'Mezzi' . $_ };
+	};
+	$hash->{ Mezzi } = $mezzi;
+	
+	return $hash;
 }
 
 sub get_content_db_rules
@@ -1594,12 +1669,10 @@ sub insert_hash_table
 	$vars->db->query("
 		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, 
 		@request_values);
-warn "we try:";
-warn "INSERT INTO $table_name($request_columns) VALUES ($request_values)";
-warn Dumper(@request_values);
-	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
-warn "last_insert_id = ".$app_id;
-	return $app_id;
+
+	my $current_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+
+	return $current_id;
 }
 
 1;
