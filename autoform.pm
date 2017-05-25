@@ -3,6 +3,7 @@ use strict;
 
 use VCS::Vars;
 use VCS::Site::autodata;
+use VCS::Site::autoselftest;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -15,45 +16,6 @@ sub new
 	my $self = bless {}, $pclass;
 	$self->{ 'VCS::Vars' } = $vars;
 	return $self;
-}
-
-sub get_content_rules
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-	my $page = shift;
-	my $full = shift;
-	my $token = shift;
-	
-	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
-	
-	my $new_content = {};
-	for my $page ( sort { $content->{$a}->[0]->{ page_ord } <=> $content->{$b}->[0]->{ page_ord } } keys %$content ) {
-		
-		my $page_ord = $content->{$page}->[0]->{ page_ord };
-		
-		$new_content->{ $page_ord } = $content->{ $page };
-		if ( !$full ) {
-			if ( $content->{ $page }->[0]->{replacer} ) {
-				$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
-			} else {
-				delete $new_content->{ $page_ord }->[0];
-				@{ $new_content->{ $page_ord } } = grep defined, @{ $new_content->{ $page_ord } };
-			}
-		} else {
-			$new_content->{ $page_ord }->[0]->{ page_name } = $page;
-		}
-	}
-
-	$content = $self->init_add_param( $new_content, $token );
-	
-	if ( !$page ) {
-		return $content;
-	} elsif ( $page =~ /length/i ) {
-		return scalar( keys %$content );
-	} else {
-		return $content->{ $page };
-	};
 }
 
 sub getContent 
@@ -69,17 +31,58 @@ sub getContent
 	$self->{'autoform'}->{'addr'} = '/autoform/';
 	$self->{'autoform'}->{'addr_captcha'} = '/vcs/static/files/';
 	$self->{'autoform'}->{'addr_vcs'} = '/vcs/';
-  
+
     	my $dispathcher = {
     		'index' => \&autoform,
+		'selftest' => \&autoselftest,
     	};
     	
     	my $disp_link = $dispathcher->{$id};
+
     	$vars->get_system->redirect( $vars->getform('fullhost').$self->{'autoform'}->{'addr'}.'index.htm' )
     		if !$disp_link;
     	&{$disp_link}( $self, $task, $id, $template );
     	
     	return 1;	
+}
+
+sub get_content_rules
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $page = shift;
+	my $full = shift;
+	my $token = shift;
+	
+	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
+	
+	my $new_content = {};
+	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content ) {
+		
+		my $page_ord = $content->{$page}->[0]->{page_ord};
+		
+		$new_content->{ $page_ord } = $content->{ $page };
+		if ( !$full ) {
+			if ( $content->{ $page }->[0]->{replacer} ) {
+				$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
+			} else {
+				delete $new_content->{ $page_ord }->[0];
+				@{ $new_content->{ $page_ord } } = grep defined, @{ $new_content->{ $page_ord } };
+			}
+		} else {
+			$new_content->{ $page_ord }->[0]->{page_name} = $page;
+		}
+	}
+
+	$content = $self->init_add_param( $new_content, $token );
+	
+	if ( !$page ) {
+		return $content;
+	} elsif ( $page =~ /length/i ) {
+		return scalar( keys %$content );
+	} else {
+		return $content->{ $page };
+	};
 }
 
 sub autoform
@@ -133,6 +136,23 @@ sub autoform
 		'appinfo' => $appinfo_for_timeslots,
 	};
 	$template->process( $template_file, $tvars );
+}
+
+sub autoselftest
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $task = shift;
+	my $id = shift;
+	my $template = shift;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
+	
+	$vars->get_system->pheader( $vars );
+	
+	print $self_test_result;
 }
 
 sub get_same_info_for_timeslots
@@ -242,8 +262,7 @@ sub get_token_and_create_new_form_if_need
 	$token =~ s/[^a-z0-9]//g;
 	
 	if ( $token eq '' ) {
-		$token = $self->token_generation();
-		$token = $self->save_new_token_in_db( $token );
+		$token = $self->save_new_token_in_db( $self->token_generation() );
 	}
 	else {
 		my ( $token_exist, $finished ) = $vars->db->sel1("
@@ -1169,7 +1188,7 @@ sub check_special_in_rules_for_save
 			for my $insurer ( @all_insurer ) {
 				my ( $id, $val ) = split /=/, $insurer;
 				$val = ( $vars->getparam( 'insurance_' . $id ) ? 1 : 0 );
-				$new_list = ( $new_list ? ',' : '' ) . "$id=$val";
+				$new_list .= ( $new_list ? ',' : '' ) . "$id=$val";
 			}	
 
 			$vars->db->query("
@@ -1497,6 +1516,8 @@ sub create_new_appointment
 
 	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments', $tables_transfered_id, $db_rules );
 
+# insurance!
+	
 	my $allapp = $vars->db->selallkeys("
 		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
 		$tables_transfered_id->{ 'AutoAppointments' } );
