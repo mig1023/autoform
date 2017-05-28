@@ -1705,26 +1705,28 @@ sub query
 	my $type = shift;
 	
 	my $db;
+	my $f = ( $self->{fake_db} ? $self->{fake_db} : 0 );
 	
-	if ( $self->{fake_db} ) {
-		$db = $self->{fake_db};
-	} else {
-		$db = $vars->db;
+	if ( $f and ( $type ne 'query' ) ) {
+	
+		my $query = shift;
+		if ( @_ ) {
+			@_ = ( $query, {}, @_ );
+		}
+		else {
+			@_ = ( $query );
+		}
 	}
+
+	return ( $f ? $f->do(@_) : $vars->db->query(@_) ) if $type eq 'query';
 	
-	return $db->query(@_) if $type eq 'query';
-	
-	if ( $type eq 'sel1' and wantarray ) {
-		my @result = $vars->db->sel1(@_);
-		return @result;
-	}
-	elsif ( $type eq 'sel1' ) {
-		my $result = $vars->db->sel1(@_);
-		return $result;
+	if ( $type eq 'sel1' ) {
+		my @result = ( $f ? $f->selectrow_array(@_) : $vars->db->sel1(@_) );
+		return ( wantarray ? @result : $result[0] );
 	}
 		
-	return $db->selall(@_) if $type eq 'selall';
-	return $db->selallkeys(@_) if $type eq 'selallkeys';
+	return ( $f ? $f->selectall_array(@_) : $vars->db->selall(@_) ) if $type eq 'selall';
+	return ( $f ? $f->selectall_array(@_) : $vars->db->selallkeys(@_) ) if $type eq 'selallkeys';
 }
 
 1;

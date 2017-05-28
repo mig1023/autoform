@@ -10,7 +10,6 @@ sub selftest
 	my $self = shift;
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $db_normal = $self->{'dbh'};
 	my $result = [];
 
 	# reconnect to fake db
@@ -25,12 +24,15 @@ sub selftest
 	}
 
 	# create test app
+	my $token = $self->get_token_and_create_new_form_if_need();
+	
 	
 	# test all subs
 	
 	# cleaning
 	
 	# reconnect to normal db
+	$db_fake->do("USE vcs");
 	$self->{fake_db} = 0;
 	
 	# show all result
@@ -54,11 +56,12 @@ sub reconnect_to_fake_db
 	);
 	
 	if ( !$fake_db ) {
-		return 0;
+		return undef;
 	}
 	else {
 		$fake_db->do("SET NAMES 'utf8'");
 		$fake_db->do("SET CHARACTER SET utf8");
+		$fake_db->do("USE fake_vcs");
 		
 		return $fake_db;
 	}
