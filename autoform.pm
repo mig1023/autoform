@@ -164,16 +164,16 @@ sub get_same_info_for_timeslots
 	
 	my $appinfo = {};
 	
-	my $appid = $vars->db->sel1("
+	my $appid = $self->query('sel1', "
 		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $token );
 		
-	$appinfo->{ persons } = $vars->db->sel1("
+	$appinfo->{ persons } = $self->query('sel1', "
 		SELECT COUNT(ID) FROM AutoAppData WHERE AppID = ?", $appid );
 	
-	$appinfo->{ center } = $vars->db->sel1("
+	$appinfo->{ center } = $self->query('sel1', "
 		SELECT CenterID FROM AutoAppointments WHERE ID = ?", $appid );
 	
-	$appinfo->{ fdate } = $vars->db->sel1("
+	$appinfo->{ fdate } = $self->query('sel1', "
 		SELECT SDate FROM AutoAppointments WHERE ID = ?", $appid );
 	
 	$appinfo->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
@@ -202,11 +202,11 @@ sub init_add_param
 	};
 	
 	for ( keys %$info_from_db ) {
-		$info_from_db->{ $_ } = $vars->db->selall( $info_from_db->{ $_ } );
+		$info_from_db->{ $_ } = $self->query('selall', $info_from_db->{ $_ } );
 	}
 
 	if ( $token ) {
-		$info_from_db->{ '[persons_in_app]' } = $vars->db->selall("
+		$info_from_db->{ '[persons_in_app]' } = $self->query('selall', "
 			SELECT AutoAppData.ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
@@ -265,7 +265,7 @@ sub get_token_and_create_new_form_if_need
 		$token = $self->save_new_token_in_db( $self->token_generation() );
 	}
 	else {
-		my ( $token_exist, $finished ) = $vars->db->sel1("
+		my ( $token_exist, $finished ) = $self->query('sel1', "
 			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token );
 	
 		if ( length($token) != 64 ) {
@@ -290,13 +290,13 @@ sub create_clear_form
 	my $centerid = shift;
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	$vars->db->query("
+	$self->query('query', "
 		INSERT INTO AutoAppointments (RDate, Login, Draft) VALUES (now(), ?, 1)", {}, 
 		$vars->get_session->{'login'} );
 		
-	my $app_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+	my $app_id = $self->query('sel1', "SELECT last_insert_id()") || 0;
 	
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
 		$app_id, $token );
 
@@ -309,7 +309,7 @@ sub save_new_token_in_db
 	my $token = shift;
 	my $vars = $self->{ 'VCS::Vars' };
 
-	$vars->db->query("
+	$self->query('query', "
 		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
 		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, 
 		$token );
@@ -331,7 +331,7 @@ sub token_generation
 		for (1..63) {
 			$token .= @alph[ int( rand( 35 ) ) ];
 		}
-		$token_existing = $vars->db->sel1("
+		$token_existing = $self->query('sel1', "
 			SELECT ID FROM AutoToken WHERE Token = ?", $token ) || 0;
 	} while ( $token_existing );
 	
@@ -368,7 +368,7 @@ sub get_autoform_content
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my ($step, $app_id) = $vars->db->sel1("
+	my ($step, $app_id) = $self->query('sel1', "
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token );
 
 	my $action = $vars->getparam('action');
@@ -414,6 +414,7 @@ sub get_autoform_content
 	}
 	
 	my $page = $self->get_content_rules( $step, 'full' );
+
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
 	if ( !$last_error and ( exists $page->[0]->{relation} ) ) {
@@ -478,7 +479,7 @@ sub check_relation
 	} while ( $skip_this_page );
 
 	if ( $at_least_one_page_skipped ) {
-		$vars->db->query("
+		$self->query('query', "
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 			$step, $token );
 	}
@@ -499,7 +500,7 @@ sub skip_page_by_relation
 	
 	my $current_table_id = $self->get_current_table_id( $token ); 
 	
-	my $value = $vars->db->sel1("
+	my $value = $self->query('sel1', "
 		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?", $current_table_id->{ 'Auto'. $relation->{table} });
 	
 	return $self->skip_by_condition( $value, $relation->{ value }, $condition ); 
@@ -552,13 +553,13 @@ sub get_forward
 	if ( $last_error ) {
 		my @last_error = split /\|/, $last_error;
 	
-		$vars->db->query("
+		$self->query('query', "
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
 			$step, "$last_error[1] ($last_error[0], step $step)", $token );
 	} else {
 		$step++;
 		
-		$vars->db->query("
+		$self->query('query', "
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 			$step, $token );
 	}
@@ -583,7 +584,7 @@ sub set_current_app_finished
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, 
 		$appdata_id );
 }
@@ -598,11 +599,11 @@ sub set_appointment_finished
 	
 	my ( $new_appid, $ncount ) = $self->create_new_appointment( $token );
 	
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE AutoToken SET EndDate = now(), Finished = 1, CreatedApp = ? WHERE Token = ?", {}, 
 		$new_appid, $token );
 		
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? WHERE ID = ?", {}, 
 		$ncount, $new_appid );
 }
@@ -641,7 +642,7 @@ sub set_step_by_content
 
 	my $step = $self->get_step_by_content( $token, $content, $next );
 
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 		$step, $token );
 			
@@ -662,14 +663,14 @@ sub get_edit
 		
 		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');;
 		
-		my $sch_id = $vars->db->sel1("
+		my $sch_id = $self->query('sel1', "
 			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id );
 		
-		$vars->db->query("
+		$self->query('query', "
 			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
 			$step, $appdata_id, $sch_id, $token );
 		
-		$vars->db->query("
+		$self->query('query', "
 			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
 			$appdata_id );
 	}
@@ -689,14 +690,14 @@ sub get_delete
 	
 	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 	
-		my $sch_id = $vars->db->sel1("
+		my $sch_id = $self->query('sel1', "
 			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id );
 	
-		$vars->db->query("
+		$self->query('query', "
 			DELETE FROM AutoAppData WHERE ID = ?", {}, 
 			$appdata_id );
 		
-		$vars->db->query("
+		$self->query('query', "
 			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, 
 			$sch_id );
 			
@@ -715,7 +716,7 @@ sub check_existing_id_in_token
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $list_of_app_in_token = $vars->db->selallkeys("
+	my $list_of_app_in_token = $self->query('selallkeys', "
 		SELECT AutoAppData.ID FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
@@ -738,7 +739,7 @@ sub check_all_app_finished_and_not_empty
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my ( $app_count, $app_finished ) = $vars->db->sel1("
+	my ( $app_count, $app_finished ) = $self->query('sel1', "
 		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
@@ -760,25 +761,25 @@ sub get_add
 	
 	my $vars = $self->{'VCS::Vars'};
 	
-	my $insurance_list = $vars->db->sel1( "
+	my $insurance_list = $self->query('sel1', "
 		SELECT Insurance FROM AutoToken WHERE Token = ?", $token );
 	
-	$vars->db->query("
+	$self->query('query', "
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);");
 		
-	my $sch_id = $vars->db->sel1( 'SELECT last_insert_id()' ) || 0;
+	my $sch_id = $self->query('sel1', "SELECT last_insert_id()" ) || 0;
 	
-	$vars->db->query("
+	$self->query('query', "
 		INSERT INTO AutoAppData (AnkDate, AppID, SchengenAppDataID) VALUES (now(), ?, ?)", {}, 
 		$app_id, $sch_id );
 	
-	my $appdata_id = $vars->db->sel1( 'SELECT last_insert_id()' ) || 0;
+	my $appdata_id = $self->query('sel1', "SELECT last_insert_id()" ) || 0;
 	
 	my $step = $self->get_step_by_content( $token, '[list_of_applicants]', 'next' );
 	
 	$insurance_list .= ( $insurance_list ? ',' : '' ) . "$appdata_id=0";
 	
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, Insurance = ? WHERE Token = ?", {}, 
 		$step, $appdata_id, $sch_id, $insurance_list, $token );
 	
@@ -803,7 +804,7 @@ sub get_back
 		$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
 	}
 	
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 		$step, $token);
 		
@@ -847,7 +848,7 @@ sub get_list_of_app
 	my $token = shift;
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $content = $vars->db->selallkeys("
+	my $content = $self->query('selallkeys', "
 			SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
 			FROM AutoToken 
 			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
@@ -1145,7 +1146,7 @@ sub save_data_from_form
 		}
 		$request =~ s/,\s$//;			
 
-		$vars->db->query("
+		$self->query('query', "
 			UPDATE $table SET $request WHERE ID = ?", {}, 
 			@values, $table_id->{$table} );
 		
@@ -1169,17 +1170,17 @@ sub check_special_in_rules_for_save
 	for my $element ( @$elements ) {
 		if ( $element->{special} eq 'save_info_about_hastdatatype' ) {
 			
-			my $visa_type = $vars->db->sel1("
+			my $visa_type = $self->query('sel1', "
 				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData});
 
 				if ( $visa_type != 1 ) {
-				$vars->db->query("
+				$self->query('query', "
 					UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {}, 
 					$table_id->{AutoSchengenAppData});
 			}
 		}
 		elsif ( $element->{special} eq 'insurer_many_id' ) {
-			my $all_insurer_list = $vars->db->sel1("
+			my $all_insurer_list = $self->query('sel1', "
 				SELECT Insurance FROM AutoToken WHERE ID = ?", $table_id->{AutoToken} );
 
 			my @all_insurer = split /,/, $all_insurer_list;
@@ -1191,7 +1192,7 @@ sub check_special_in_rules_for_save
 				$new_list .= ( $new_list ? ',' : '' ) . "$id=$val";
 			}	
 
-			$vars->db->query("
+			$self->query('query', "
 				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, 
 				$new_list, $table_id->{AutoToken} ) if $new_list;
 		}
@@ -1216,7 +1217,7 @@ sub get_all_values
 
 		my $request = join ',', keys %{$request_tables->{$table}};
 		
-		my $result = $vars->db->selallkeys("
+		my $result = $self->query('selallkeys', "
 			SELECT $request FROM $table WHERE ID = ?", $table_id->{$table} );
 		$result = $result->[0];
 		
@@ -1343,7 +1344,7 @@ sub get_current_table_id
 	}
 	$request_tables =~ s/,\s$//;
 
-	my @ids = $vars->db->sel1("
+	my @ids = $self->query('sel1', "
 		SELECT $request_tables FROM AutoToken WHERE Token = ?", $token);
 	
 	my $max_index = scalar( keys %$tables_controled_by_AutoToken ) - 1;
@@ -1352,7 +1353,7 @@ sub get_current_table_id
 		$tables_id->{ $tables_list->[$id] } = $ids[$id];
 	};
 	
-	$tables_id->{ AutoToken } = $vars->db->sel1("
+	$tables_id->{ AutoToken } = $self->query('sel1', "
 		SELECT ID FROM AutoToken WHERE Token = ?", $token );
 
 	return $tables_id;
@@ -1497,7 +1498,7 @@ sub mod_last_change_date
 	
 	my $vars = $self->{ 'VCS::Vars' };
 
-	$vars->db->query("
+	$self->query('query', "
 		UPDATE AutoToken SET LastChange = now() WHERE Token = ?", {}, 
 		$token );
 }
@@ -1518,7 +1519,7 @@ sub create_new_appointment
 
 # insurance!
 	
-	my $allapp = $vars->db->selallkeys("
+	my $allapp = $self->query('selallkeys', "
 		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
 		$tables_transfered_id->{ 'AutoAppointments' } );
 	
@@ -1661,7 +1662,7 @@ sub get_hash_table
 	
 	my $vars = $self->{ 'VCS::Vars' };
 
-	my $hash_table = $vars->db->selallkeys("
+	my $hash_table = $self->query('selallkeys', "
 		SELECT * FROM $table_name WHERE ID = ?", $table_id );
 	$hash_table = $hash_table->[0];
 
@@ -1687,13 +1688,43 @@ sub insert_hash_table
 		push @request_values, $hash->{ $_ };
 	}
 	
-	$vars->db->query("
+	$self->query('query', "
 		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, 
 		@request_values);
 
-	my $current_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
+	my $current_id = $self->query('sel1', "SELECT last_insert_id()") || 0;
 
 	return $current_id;
+}
+
+sub query
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $vars = $self->{ 'VCS::Vars' };
+	my $type = shift;
+	
+	my $db;
+	
+	if ( $self->{fake_db} ) {
+		$db = $self->{fake_db};
+	} else {
+		$db = $vars->db;
+	}
+	
+	return $db->query(@_) if $type eq 'query';
+	
+	if ( $type eq 'sel1' and wantarray ) {
+		my @result = $vars->db->sel1(@_);
+		return @result;
+	}
+	elsif ( $type eq 'sel1' ) {
+		my $result = $vars->db->sel1(@_);
+		return $result;
+	}
+		
+	return $db->selall(@_) if $type eq 'selall';
+	return $db->selallkeys(@_) if $type eq 'selallkeys';
 }
 
 1;
