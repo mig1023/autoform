@@ -1704,10 +1704,7 @@ sub query
 	my $vars = $self->{ 'VCS::Vars' };
 	my $type = shift;
 	
-	my $db;
-	my $f = ( $self->{fake_db} ? $self->{fake_db} : 0 );
-	
-	if ( $f and ( $type ne 'query' ) ) {
+	if ( $type =~ /^(selall|selallkeys)$/ ) {
 	
 		my $query = shift;
 		if ( @_ ) {
@@ -1717,16 +1714,15 @@ sub query
 			@_ = ( $query );
 		}
 	}
-
-	return ( $f ? $f->do(@_) : $vars->db->query(@_) ) if $type eq 'query';
+	return $vars->db->query(@_) if $type eq 'query';
 	
 	if ( $type eq 'sel1' ) {
-		my @result = ( $f ? $f->selectrow_array(@_) : $vars->db->sel1(@_) );
+		my @result = $vars->db->sel1(@_);
 		return ( wantarray ? @result : $result[0] );
 	}
 		
-	return ( $f ? $f->selectall_array(@_) : $vars->db->selall(@_) ) if $type eq 'selall';
-	return ( $f ? $f->selectall_array(@_) : $vars->db->selallkeys(@_) ) if $type eq 'selallkeys';
+	return $vars->db->selall(@_) if $type eq 'selall';
+	return $vars->db->selallkeys(@_) if $type eq 'selallkeys';
 }
 
 1;
