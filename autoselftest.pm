@@ -7,34 +7,83 @@ use Data::Dumper;
 my $tests = [
 	{ 	'func' 	=> \&{ VCS::Site::autoform::get_token_and_create_new_form_if_need },
 		'comment' => 'get_token_and_create_new_form_if_need',
-		'tester' => \&test_regexp,
-		'test' => { 	
-			1 => { 	'args' => [],
-				'param' => [ 
-					{ 'name' => '', 'value' => ''},
-				],
+		'test' => {	
+			1 => { 	'tester' => \&test_regexp,
+				'args' => [],
 				'expected' => '^A[a-z0-9]{63}$',
-				},
 			},
+			2 => {	'tester' => \&test_line,
+				'args' => [],
+				'param' => [ 
+					{ 'name' => 't', 'value' => '[token]' },
+				],
+				'expected' => '[token]',
+			},
+			3 => {	'tester' => \&test_line,
+				'args' => [],
+				'param' => [
+					{ 'name' => 't', 'value' => 'F[token]' },
+				],
+				'expected' => '01',
+			},
+			4 => {	'tester' => \&test_line,
+				'prepare' => \&pre_corrupt_token,
+				'args' => [],
+				'param' => [
+					{ 'name' => 't', 'value' => '[token]' },
+				],
+				'expected' => '02',
+			},
+			5 => {	'tester' => \&test_line,
+				'prepare' => \&pre_finished,
+				'args' => [],
+				'param' => [
+					{ 'name' => 't', 'value' => '[token]' },
+				],
+				'expected' => '03',
+			},
+		}
 	},
 	{ 	'func' 	=> \&{ VCS::Site::autoform::token_generation },
 		'comment' => 'token_generation',
-		'tester' => \&test_regexp,
 		'test' => { 	
-			1 => { 	'args' => [],
+			1 => { 	'tester' => \&test_regexp,
+				'args' => [],
 				'expected' => '^A[a-z0-9]{63}$',
-				},
 			},
+		},
 	},
 	{ 	'func' 	=> \&{ VCS::Site::autoform::save_new_token_in_db },
 		'comment' => 'save_new_token_in_db',
-		'tester' => \&test_db,
 		'test' => { 	
-			1 => { 	'args' => [ '[self]', '[token]' ],
+			1 => { 	'tester' => \&test_write_db,
+				'args' => [ '[token]' ],
 				'expected' => 'AutoToken:Token:[token]',
-				},
 			},
+		},
 	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_token_error },
+		'comment' => 'get_token_error',
+		'test' => { 	
+			1 => { 	'tester' => \&test_array,
+				'args' => [ '0' ],
+				'expected' => [ 'token error', 'your token has error: internal data error', 'autoform.tt2' ],
+			},
+			2 => { 	'tester' => \&test_array,
+				'args' => [ '1' ],
+				'expected' => [ 'token error', 'your token has error: token corrupted', 'autoform.tt2' ],
+			},
+			3 => { 	'tester' => \&test_array,
+				'args' => [ '2' ],
+				'expected' => [ 'token error', 'your token has error: token not existing', 'autoform.tt2' ],
+			},
+			4 => { 	'tester' => \&test_array,
+				'args' => [ '3' ],
+				'expected' => [ 'token error', 'your token has error: app already finished', 'autoform.tt2' ],
+			},
+		},
+	},
+	
 	
 ];
 
@@ -76,18 +125,28 @@ sub get_ordinary_tests
 	
 			$test_num++ if !$err_tmp;
 			
-			for ( @{ $test->{test}->{$_}->{args} }, $test->{test}->{$_}->{expected} ) {
+			my $t = $test->{test}->{$_};
+			
+			&{ $t->{prepare} }( 'PREPARE', \$test, $_, \$test_token, $vars ) if ref( $t->{prepare} ) eq 'CODE';
+			
+			for ( 	@{ $t->{args} }, @{ $t->{param} }, $t->{expected} ) {
 				s/\[token\]/$test_token/g;
-				$_ = $self if /\[self\]/;
+				
+				if ( ref($_) eq 'HASH' ) {
+					$_->{value} =~ s/\[token\]/$test_token/g;
+				}
 			}
 			
-			my $tmp_result = &{ $test->{func} }( $self, @{ $test->{test}->{$_}->{args} } );
+			for ( @{ $t->{param} } ) {
+				$vars->setparam( $_->{name} ,$_->{value} );
+			}
+
+			unless ( $err_tmp ) {
+				$err_tmp = &{ $t->{tester} }( $t->{expected}, $test->{comment}, $self, 
+					$test_token, &{ $test->{func} }( $self, @{ $t->{args} } ) );
+			}
 			
-#warn "$tmp_result <=> $test->{test}->{$_}->{expected}";			
-		
-			$err_tmp = &{ $test->{tester} }( $tmp_result, $test->{test}->{$_}->{expected}, 
-					$test->{comment}, $self, $test_token ) if !$err_tmp;
-					
+			&{ $t->{prepare} }( 'CLEAR', \$test, $_, \$test_token, $vars ) if ref( $t->{prepare} ) eq 'CODE';
 		} 
 		$test_num = 0 unless $err_tmp;
 		
@@ -103,8 +162,15 @@ sub show_result
 	my $result = shift;
 	my $result_line;
 	
+	my $test_num = 0;
 	my $fails = 0;
 
+	for my $test (@$tests) {
+		for( keys %{ $test->{test} } ) {
+			$test_num++;
+		}
+	}
+	
 	for ( @$result ) {
 		$fails++ if $_->{status};
 	}
@@ -116,8 +182,9 @@ sub show_result
 			( !$_->{status} ? 
 				self_test_htm( 'font', 'green', "-- ok" ) : 
 				self_test_htm( 'font', 'red', "-- fail ( test: $_->{status} )" )
-			) . '<br>';
+			) . self_test_htm( 'br' );
 	}
+	$result_line .= self_test_htm( 'br' ) . self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "$test_num тестов" );
 	
 	return $result_line;
 }
@@ -132,6 +199,7 @@ sub self_test_htm
 	my $html = {
 		'span' => '<span style="width:auto; color:white; background-color:[param]">&nbsp;[line]&nbsp;</span><br><br>',
 		'font' => '<font color="[param]">[line]</font>',
+		'br' => '<br>',
 	};
 	
 	my $html_line = $html->{$type};
@@ -145,37 +213,91 @@ sub self_test_htm
 sub test_line
 # //////////////////////////////////////////////////
 {
-	if (shift ne shift) { 
-		return shift;
+	my ( $expected, $comm, undef, undef, $result ) = @_;
+	
+	if ( lc( $expected ) ne lc( $result ) ) { 
+		return $comm;
+	};
+}
+
+sub test_array
+# //////////////////////////////////////////////////
+{
+	my $array_2 = shift;
+	my $comm = shift;
+	my $self = shift;
+	my $token = shift;
+	my @array_1 = @_;
+
+	my $eq = 1;
+	
+	for (1..$#array_1) {
+		$eq = 0 if $array_1[$_] ne $array_2->[$_];
+	}
+	
+	if ( !$eq ) { 
+		return $comm;
 	};
 }
 
 sub test_regexp
 # //////////////////////////////////////////////////
 {
-	my $line = shift;
-	my $regexp = shift;
+	my ( $regexp, $comm, undef, undef, $result ) = @_;
 	
-	if ( $line !~ /$regexp/ ) {
-		return shift;
+	if ( $result !~ /$regexp/ ) {
+		return $comm;
 	}
 }
 
-sub test_db
+sub test_write_db
 # //////////////////////////////////////////////////
 {
-	my $result = shift;
 	my ( $db_table, $db_name, $db_value ) = split /:/, shift;
 	my $comment = shift;
 	my $self = shift;
 	my $test_token = shift;
+	my $result = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $value = $vars->db->sel1( "SELECT $db_name FROM $db_table WHERE Token = '$test_token'" );
 
-	if ( $db_value ne $value ) {
+	if ( lc( $db_value ) ne lc( $value ) ) {
 		return $comment;
+	}
+}
+
+sub pre_corrupt_token
+# //////////////////////////////////////////////////
+{
+	my $type = shift;
+	my $test = shift;
+	my $num = shift;
+	my $token = shift;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$$token =~ s/^A/F/;
+	}
+	else {
+		$$token =~ s/^F/A/;
+	}	
+}
+
+sub pre_finished
+# //////////////////////////////////////////////////
+{
+	my $type = shift;
+	my $test = shift;
+	my $num = shift;
+	my $token = shift;
+	my $vars = shift;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query( "UPDATE AutoToken SET Finished = 1 WHERE Token = '$$token'" );
+	} 
+	else {
+		$vars->db->query( "UPDATE AutoToken SET Finished = 0 WHERE Token = '$$token'" );
 	}
 }
 

@@ -260,7 +260,7 @@ sub get_token_and_create_new_form_if_need
 	my $token = $vars->getparam('t');
 	$token = lc( $token );
 	$token =~ s/[^a-z0-9]//g;
-	
+
 	if ( $token eq '' ) {
 		$token = $self->save_new_token_in_db( $self->token_generation() );
 	}
@@ -287,7 +287,6 @@ sub create_clear_form
 {
 	my $self = shift;
 	my $token = shift;
-	my $centerid = shift;
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	$self->query('query', "
@@ -344,7 +343,7 @@ sub get_token_error
 	my $self = shift;
 	my $error_num = shift;
 	my $template = 'autoform.tt2';
-	
+
 	my $error_type = [
 		'internal data error',
 		'token corrupted',
