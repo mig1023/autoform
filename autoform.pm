@@ -548,16 +548,16 @@ sub get_forward
 	$self->mod_last_change_date( $token );
 	
 	my $last_error = $self->check_data_from_form( $step );
-	
+
 	if ( $last_error ) {
 		my @last_error = split /\|/, $last_error;
-	
+
 		$self->query('query', "
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
 			$step, "$last_error[1] ($last_error[0], step $step)", $token );
 	} else {
 		$step++;
-		
+			
 		$self->query('query', "
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 			$step, $token );
@@ -570,7 +570,7 @@ sub get_forward
 	if ( $step >= $self->get_content_rules( 'length' ) ) {
 		$self->set_appointment_finished( $token );
 	}
-	
+
 	return ( $step, $last_error );
 }
 
@@ -1385,7 +1385,6 @@ sub check_data_from_form
 			$first_error = $self->check_param( $element );
 			}
 	}
-	
 	return $first_error;
 }
 
@@ -1468,7 +1467,7 @@ sub text_error
 		'Поле "[name]" не заполнено',
 		'В поле "[name]" указана неверная дата',
 		'В поле "[name]" введены недопустимые символы',
-		'Вы должны дать указать поле "[name]"',
+		'Вы должны указать поле "[name]"',
 		'Вы должны полностью закончить все анкеты',
 		'Вы должны добавить по меньшей мере одного заявителя',
 	];
@@ -1574,15 +1573,6 @@ sub mod_hash
 	
 	$hash = $self->visapurpose_assembler( $hash ) if exists $hash->{ VisaPurpose };
 	$hash = $self->mezzi_assembler( $hash ) if exists $hash->{ Mezzi1 };
-	
-	if ( exists $hash->{ Mezzi1 } ) {
-		my $mezzi = '';
-		for (1..7) {
-			$mezzi .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
-			delete $hash->{ 'Mezzi' . $_ };
-		};
-		$hash->{ Mezzi } = $mezzi;
-	}
 	
 	delete $hash->{ ID } if ( exists $hash->{ ID } );
 	delete $hash->{ Finished } if ( exists $hash->{ Finished } and $table_name eq 'AppData' );
@@ -1702,19 +1692,7 @@ sub query
 	my $self = shift;
 	my $vars = $self->{ 'VCS::Vars' };
 	my $type = shift;
-	
-	if ( $type =~ /^(selall|selallkeys)$/ ) {
-	
-		my $query = shift;
-		if ( @_ ) {
-			@_ = ( $query, {}, @_ );
-		}
-		else {
-			@_ = ( $query );
-		}
-	}
-	return $vars->db->query(@_) if $type eq 'query';
-	
+
 	if ( $type eq 'sel1' ) {
 		my @result = $vars->db->sel1(@_);
 		return ( wantarray ? @result : $result[0] );
@@ -1722,6 +1700,7 @@ sub query
 		
 	return $vars->db->selall(@_) if $type eq 'selall';
 	return $vars->db->selallkeys(@_) if $type eq 'selallkeys';
+	return $vars->db->query(@_) if $type eq 'query';
 }
 
 1;
