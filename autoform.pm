@@ -910,7 +910,7 @@ sub get_html_line
 	my $self = shift;
 	my $element = shift;
 	my $values = shift;
-	
+
 	my $content = $self->get_html_for_element( 'start_line' );
 	
 	if ( $element->{type} eq 'text' ) {
@@ -929,7 +929,7 @@ sub get_html_line
 			$current_value->{ $sub_value } = $values->{ $sub_value };
 		}
 	}
-	
+
 	$content .= $self->get_cell(
 			$self->get_html_for_element(
 				'label', 'text', $element->{ label }
@@ -1001,11 +1001,18 @@ sub get_html_for_element
 	
 	$content =~ s/\[name\]/$name/gi;
 	$content =~ s/\[value\]/$value/gi;
-	$content =~ s/\[u\]/$uniq_code/gi;
 	$content =~ s/\[comment\]/$comment/gi;
+	
+	if ( $uniq_code ) {
+		$content =~ s/\[u\]/$uniq_code/gi;
+	}
+	else {
+		$content =~ s/\s\[u\]\>/>/gi;
+	}
 	
 	if ( $type eq 'checkbox' ) {
 		$content =~ s/\[checked\]/checked/gi if $value;
+		$content =~ s/\s\[checked\]//gi;
 	}
 	
 	if ( $type eq 'select' ) {
@@ -1034,7 +1041,7 @@ sub get_html_for_element
 	
 	if ($type eq 'checklist') {
 		my $list = '';
-
+warn Dumper($value);
 		for my $opt ( sort {$a cmp $b} keys %$param ) {
 		
 			my $checked = ( $value->{$opt} ? 'checked' : '' );
@@ -1094,6 +1101,8 @@ sub resort_with_first_elements
 	my @array_with_first_elements = ();
 	
 	for my $f ( @first_elements ) {
+	
+		$f =~ s/^\s+|\s+$//g;
 		for my $e (keys %$country_hash) {
 			push @array_with_first_elements, $f if $e == $f;
 		}

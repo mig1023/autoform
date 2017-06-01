@@ -296,12 +296,187 @@ my $tests = [
 			},
 		},
 	},
-	
+	{ 	'func' 	=> \&{ VCS::Site::autoform::resort_with_first_elements },
+		'comment' => 'resort_with_first_elements',
+		'test' => { 	
+			1 => { 	'tester' => \&test_array,
+				'args' => [ { 10 => 'first', 20 => 'second', 30 => 'third', 40 => 'fourth' }, '20, 40' ],
+				'expected' => [ 20, 40, 10, 30 ],
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_center_id },
+		'comment' => 'get_center_id',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [],
+				'param' => [
+					{ 'name' => 'center', 'value' => '999' },
+				],
+				'expected' => '999',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_html_for_element },
+		'comment' => 'get_html_for_element',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ 'start_line' ],
+				'expected' => '<tr>',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ 'end_line' ],
+				'expected' => '</tr>',
+			},
+			3 => { 	'tester' => \&test_line,
+				'args' => [ 'start_cell' ],
+				'expected' => '<td>',
+			},
+			4 => { 	'tester' => \&test_line,
+				'args' => [ 'end_cell' ],
+				'expected' => '</td>',
+			},
+			5 => { 	'tester' => \&test_line,
+				'args' => [ 'input', 'element', 'val', {}, 'uniq', undef, 'comm' ],
+				'expected' => '<input type="text" value="val" name="element" id="element" title="comm" uniq>',
+			},
+			6 => { 	'tester' => \&test_line,
+				'args' => [ 'checkbox', 'element', 'val', {} ],
+				'expected' => '<input type="checkbox" value="element" name="element" id="element" checked>',
+			},
+			7 => { 	'tester' => \&test_line,
+				'args' => [ 'checkbox', 'element' ],
+				'expected' => '<input type="checkbox" value="element" name="element" id="element">',
+			},
+			8 => { 	'tester' => \&test_line,
+				'args' => [ 'select', 'element', '3', { 1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth' }, undef, '2' ],
+				'expected' => 
+					'<select size = "1" name="element" id="element"><option  value="2">second</option>' .
+					'<option  value="1">first</option><option  value="4">fourth</option><option selected ' .
+					'value="3">third</option></select>',
+			},
+			9 => { 	'tester' => \&test_line,
+				'args' => [ 'radiolist', 'element', '2', { 1 => 'first', 2 => 'second', 3 => 'third' } ],
+				'expected' => 
+					'<input type="radio" name="element" value="1"  id="element1"><label for="element1">' .
+					'first</label><br><input type="radio" name="element" value="2" checked id="element2">' .
+					'<label for="element2">second</label><br><input type="radio" name="element" value="3"  '.
+					'id="element3"><label for="element3">third</label><br>',
+			},
+			10 => {	'tester' => \&test_line,
+				'args' => [ 'text', undef, 'text' ],
+				'expected' => '<td colspan="3">text</td>',
+			},
+			11 => {	'tester' => \&test_line,
+				'args' => [ 'example', undef, 'text' ],
+				'expected' => '<tr><td>&nbsp;</td><td style="vertical-align:top;">'.
+					'<span style="color:gray; font-size:0.7em;">text</span></td></td>',
+			},
+			12 => {	'tester' => \&test_line,
+				'args' => [ 'info', 'element' ],
+				'expected' => '<label id="element"></label>',
+			},
+			13 => {	'tester' => \&test_line,
+				'args' => [ 'label', 'element', 'text' ],
+				'expected' => '<label id="element">text</label>',
+			},
+			14 => {	'tester' => \&test_line,
+				'args' => [ 'label_for', 'element', 'text' ],
+				'expected' => '<label for="element">text</label>',
+			},
+			15 => {	'tester' => \&test_line,
+				'args' => [ 'checklist', 'element', { 'test1' => 1 }, { 
+					'test1' => { 'db' => 'test1', 'label_for' => 'Тест 1' },
+					'test2' => { 'db' => 'test2', 'label_for' => 'Тест 2' },
+				} ],
+				'expected' =>
+					'<input type="checkbox" value="test1" name="test1" id="test1" checked>'.
+					'<label for="test1">Тест 1</label><br><input type="checkbox" '.
+					'value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br>',
+			},
+			16 => {	'tester' => \&test_line,
+				'args' => [ 'checklist_insurer', 'element', 'test1=0,test2=1', { 
+					'test1' => 'Тест 1',
+					'test2' => 'Тест 2',
+				} ],
+				'expected' =>
+					'<input type="checkbox" value="test1" name="element_test1" id="test1" >'.
+					'<label for="test1">Тест 1</label><br><input type="checkbox" value="test2" '.
+					'name="element_test2" id="test2" checked><label for="test2">Тест 2</label><br>',
+			},
+			17 => {	'tester' => \&test_regexp,
+				'args' => [ 'captcha' ],
+				'expected' =>
+					'^\<img\ssrc="/vcs/static/files/[a-h0-9]+\.png"\>\<input\stype="hidden"\sname="code"\svalue="[a-h0-9]+">',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_cell },
+		'comment' => 'get_cell',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ 'test' ],
+				'expected' => '<td>test</td>',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_html_line },
+		'comment' => 'get_html_line',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [
+					{
+						'type' => 'input',
+						'name' => 'email',
+						'label' => 'Email',
+						'comment' => '',
+						'example' => 'mail@mail.ru',
+						'check' => 'z',
+					},
+					{
+						'email' => 'testvalue@mail.ru',
+					}
+				],
+				'expected' => 
+					'<tr><td><label id="text">Email</label></td><td><input type="text" ' .
+					'value="testvalue@mail.ru" name="email" id="email" title=""></td>' .
+					'</tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style='.
+					'"color:gray; font-size:0.7em;">mail@mail.ru</span></td></td>',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [
+					{
+						'type' => 'checklist',
+						'name' => 'test',
+						'label' => 'Средства',
+						'comment' => '',
+						'check' => 'at_least_one',
+						'db' => {
+							'name' => 'complex'
+						},
+						'param' => {
+							'test1' => { 'db' => 'Test1', 'label_for' => 'Тест 1' },
+							'test2' => { 'db' => 'Test2', 'label_for' => 'Тест 2' },
+						},
+					},
+					{
+						'test1' => '1',
+						'test2' => '0',
+					}
+				],
+				'expected' => 
+					'<tr><td><label id="text">Средства</label></td><td><input type="checkbox" ' .
+					'value="test1" name="test1" id="test1" checked><label for="test1">Тест 1' .
+					'</label><br><input type="checkbox" value="test2" name="test2" id="test2" ' .
+					'><label for="test2">Тест 2</label><br></td></tr>',
+			}
+		},
+	},
 ];
 
-my $first_page = '<tr ><td ><label id="text" >Визовый центр</label></td><td ><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr ><td ><label id="text" >Тип визы</label></td><td ><select size = "1" name="vtype" id="vtype" ></select></td></tr><tr ><td ><label id="text" >Ближайшее доступное время</label></td><td ><label id="free_date" ></label></td></tr><tr ><td ><label id="text" >Email</label></td><td ><input type="text" value="" name="email" id="email" title="" ></td></tr><tr ><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr ><td ><label id="text" ></label></td><td ><input type="checkbox" value="pers_info" name="pers_info" id="pers_info" [checked] ><label for="pers_info" >я согласен на обработку персональных данных</label></td></tr><tr ><td ><label id="text" ></label></td><td ><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info" [checked] ><label for="mobil_info" >я согласен на условия работы с мобильными</label></td></tr>';
+my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label id="free_date"></label></td></tr><tr><td><label id="text">Email</label></td><td><input type="text" value="" name="email" id="email" title=""></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными</label></td></tr>';
 
-my $second_page = '<tr ><td ><label id="text" >Дата начала поездки</label></td><td ><input type="text" value="" name="s_date" id="s_date" title="" ></td></tr><tr ><td ><label id="text" >Дата окончания поездки</label></td><td ><input type="text" value="" name="f_date" id="f_date" title="" ></td></tr>';
+my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input type="text" value="" name="s_date" id="s_date" title=""></td></tr><tr><td><label id="text">Дата окончания поездки</label></td><td><input type="text" value="" name="f_date" id="f_date" title=""></td></tr>';
 
 sub selftest 
 # //////////////////////////////////////////////////
@@ -382,7 +557,8 @@ sub show_result
 # //////////////////////////////////////////////////
 {
 	my $result = shift;
-	my $result_line;
+	
+	my $result_line = self_test_htm( 'body_start' );
 	
 	my $test_num = 0;
 	my $fails = 0;
@@ -397,7 +573,7 @@ sub show_result
 		$fails++ if $_->{status};
 	}
 	
-	$result_line = self_test_htm( 'span', ( $fails ? ( 'red', "Присутствуют ошибки" ) : ( 'green', "Всё нормально" ) ) );
+	$result_line .= self_test_htm( 'span', ( $fails ? ( 'red', "Присутствуют ошибки" ) : ( 'green', "Всё нормально" ) ) );
 	
 	for ( @$result ) {
 		$result_line .= $_->{text} . ' ' . 
@@ -408,7 +584,7 @@ sub show_result
 	}
 	$result_line .= self_test_htm( 'br' ) . self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "$test_num тест(ов)" );
 	
-	return $result_line;
+	return $result_line . self_test_htm( 'body_end' );
 }
 
 sub self_test_htm
@@ -419,6 +595,8 @@ sub self_test_htm
 	my $line = shift;
 	
 	my $html = {
+		'body_start' => '<body style = "padding: 40px">',
+		'body_end' => '</body>',
 		'span' => '<span style="width:auto; color:white; background-color:[param]">&nbsp;[line]&nbsp;</span><br><br>',
 		'font' => '<font color="[param]">[line]</font>',
 		'br' => '<br>',
@@ -436,7 +614,8 @@ sub test_line
 # //////////////////////////////////////////////////
 {
 	my ( $expected, $comm, undef, $result ) = @_;
-
+warn "exp : $expected";
+warn "rslt: $result";
 	if ( lc( $expected ) ne lc( $result ) ) { 
 		return $comm;
 	};
@@ -453,6 +632,22 @@ sub test_line_in_hash
 	};
 }
 
+sub test_hash
+# //////////////////////////////////////////////////
+{
+	my $first_hash = shift;
+	my $second_hash = shift;
+	
+	my $eq = 1;
+	
+	for ( keys %$first_hash, keys %$second_hash ) {
+		$eq = 0 if $first_hash->{ $_ } ne $second_hash->{ $_ };
+	}
+	
+	if ( !$eq ) { 
+		return shift;
+	};
+}
 sub test_array
 # //////////////////////////////////////////////////
 {
@@ -460,7 +655,8 @@ sub test_array
 	my $comm = shift;
 	my $self = shift;
 	my @array_1 = @_;
-
+#warn Dumper($array_2);
+#warn Dumper(\@array_1);
 	my $eq = 1;
 	
 	for ( 1..$#array_1 ) {
