@@ -94,19 +94,17 @@ sub autoform
 	my $template = shift;
 
 	my $vars = $self->{ 'VCS::Vars' };
-	my $page_content;
+	my ( $page_content, $special, $template_file, $title, $progress );
 	my $step = 0;
 	my $last_error = '';
-	my $special;
-	my $template_file;
-	my $title;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
 	if ( $token =~ /^\d\d$/ ) {
 		( $title, $page_content, $template_file ) = $self->get_token_error( $token );
 	} else {
-		( $step, $title, $page_content, $last_error, $template_file, $special ) = $self->get_autoform_content( $token );
+		( $step, $title, $page_content, $last_error, $template_file, $special, $progress ) = 
+			$self->get_autoform_content( $token );
 	}
 
 	my ( $last_error_name, $last_error_text ) = split /\|/, $last_error;
@@ -134,6 +132,7 @@ sub autoform
 		'special' => $special,
 		'vcs_tools' => $self->{'autoform'}->{'addr_vcs'},
 		'appinfo' => $appinfo_for_timeslots,
+		'progress' => $progress,
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -367,7 +366,7 @@ sub get_autoform_content
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my ($step, $app_id) = $self->query('sel1', "
+	my ( $step, $app_id ) = $self->query('sel1', "
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token );
 
 	my $action = $vars->getparam('action');
@@ -424,11 +423,13 @@ sub get_autoform_content
 		$title = $page->[0]->{ page_name };
 	}
 
-	my ($content, $template) = $self->get_html_page( $step, $token );
+	my ( $content, $template ) = $self->get_html_page( $step, $token );
+
+	my $progress = $self->get_progressbar( $page );
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
-	return ( $step, $title, $content, $last_error, $template, $special );
+	return ( $step, $title, $content, $last_error, $template, $special, $progress );
 }
 
 sub check_relation
@@ -960,6 +961,30 @@ sub get_cell
 	return $self->get_html_for_element( 'start_cell' ) . $element . $self->get_html_for_element( 'end_cell' );
 }
 
+sub get_progressbar
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $page = shift;
+	my $content;
+	
+	my $progress_line = VCS::Site::autodata::get_progressline();
+	my $current_progress = $page->[0]->{ progress };
+	
+	for ( 1..$#$progress_line ) {
+		
+		my $past_current_future = 'current';
+		$past_current_future = 'past' if $_ < $current_progress;
+		$past_current_future = 'future' if $_ > $current_progress;
+		
+		my $add_el = ( $_ == $#$progress_line ? '' : '&nbsp;-->' );
+	
+		$content .= $self->get_html_for_element( 'progress', undef, $progress_line->[ $_ ] . $add_el, $past_current_future );
+	}
+	
+	return $content;
+}
+
 sub get_html_for_element
 # //////////////////////////////////////////////////
 {
@@ -995,6 +1020,8 @@ sub get_html_for_element
 		
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
+		
+		'progress'		=> '<td>[progress_value]</td>',
 	};
 	
 	my $content = $elements->{ $type };
@@ -1041,7 +1068,7 @@ sub get_html_for_element
 	
 	if ($type eq 'checklist') {
 		my $list = '';
-warn Dumper($value);
+
 		for my $opt ( sort {$a cmp $b} keys %$param ) {
 		
 			my $checked = ( $value->{$opt} ? 'checked' : '' );
@@ -1080,6 +1107,13 @@ warn Dumper($value);
 	
 		$content =~ s!\[captcha_file\]!$addr_captcha$ccode.png!;
 		$content =~ s/\[captcha_code\]/$ccode/;
+	}
+	
+	
+	if ( $type eq 'progress' ) {
+		$value = "<i>$value</i>" if $param eq 'past';
+		$value = "<b>$value</b>" if $param eq 'current';
+		$content =~ s/\[progress_value\]/$value/;
 	}
 	
 	return $content;

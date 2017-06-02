@@ -13,6 +13,19 @@ sub get_tables_controled_by_AutoToken
 	return $tables_controled_by_AutoToken;
 }
 
+sub get_progressline
+# //////////////////////////////////////////////////
+{
+	my $progress_line = [ '',
+		'Начало заявки',
+		'Заявители',
+		'Доп. информация',
+		'Готово!',
+	];
+	
+	return $progress_line;
+}
+
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
 {
@@ -22,6 +35,7 @@ sub get_content_rules_hash
 		'Начало записи' => [
 			{
 				'page_ord' => 1,
+				'progress' => 1,
 			},
 			{
 				'type' => 'select',
@@ -61,7 +75,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'email',
 				'label' => 'Email',
-				'comment' => '',
+				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
 				'example' => 'mail@mail.ru',
 				'check' => 'z',
 				'db' => {
@@ -101,6 +115,7 @@ sub get_content_rules_hash
 		'Данные поездки' => [
 			{
 				'page_ord' => 2,
+				'progress' => 1,
 			},
 			{
 				'type' => 'input',
@@ -131,6 +146,7 @@ sub get_content_rules_hash
 		'Список заявителей' => [
 			{
 				'page_ord' => 3,
+				'progress' => 2,
 				'replacer' => '[list_of_applicants]',
 			},
 		],
@@ -138,6 +154,7 @@ sub get_content_rules_hash
 		'Данные внутреннего паспорта' => [
 			{
 				'page_ord' => 4,
+				'progress' => 2,
 			},
 			{
 				'type' => 'input',
@@ -254,6 +271,7 @@ sub get_content_rules_hash
 		'Данные загранпаспорта' => [
 			{
 				'page_ord' => 5,
+				'progress' => 2,
 			},	
 			{
 				'type' => 'input',
@@ -354,6 +372,7 @@ sub get_content_rules_hash
 		'Персональные данные' => [
 			{
 				'page_ord' => 6,
+				'progress' => 2,
 			},
 			{
 				'type' => 'input',
@@ -445,6 +464,7 @@ sub get_content_rules_hash
 		'Уточнение по семейному положению' => [
 			{
 				'page_ord' => 7,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -469,6 +489,7 @@ sub get_content_rules_hash
 		'Персональные данные по адресам' => [
 			{
 				'page_ord' => 8,
+				'progress' => 2,
 			},
 			{
 				'type' => 'input',
@@ -524,6 +545,7 @@ sub get_content_rules_hash
 		'Уточнение по стране пребывания' => [
 			{
 				'page_ord' => 9,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -560,6 +582,7 @@ sub get_content_rules_hash
 		'Информация о поездке' => [
 			{
 				'page_ord' => 10,
+				'progress' => 2,
 			},
 			{
 				'type' => 'radiolist',
@@ -590,6 +613,7 @@ sub get_content_rules_hash
 		'Иная цель посещения' => [
 			{
 				'page_ord' => 11,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -614,6 +638,7 @@ sub get_content_rules_hash
 		'Страна и город назначения' => [
 			{
 				'page_ord' => 12,
+				'progress' => 2,
 			},
 			{
 				'type' => 'input',
@@ -655,6 +680,7 @@ sub get_content_rules_hash
 		'Данные для визы' => [
 			{
 				'page_ord' => 13,
+				'progress' => 2,
 			},
 			{
 				'type' => 'select',
@@ -712,6 +738,7 @@ sub get_content_rules_hash
 		'Шенгенские визы' => [
 			{
 				'page_ord' => 14,
+				'progress' => 2,
 			},
 			{
 				'type' => 'radiolist',
@@ -733,6 +760,7 @@ sub get_content_rules_hash
 		'Сроки действия последней визы' => [
 			{
 				'page_ord' => 15,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -770,6 +798,7 @@ sub get_content_rules_hash
 		'Отпечатки пальцев' => [
 			{
 				'page_ord' => 16,
+				'progress' => 2,
 			},
 			{
 				'type' => 'radiolist',
@@ -791,6 +820,7 @@ sub get_content_rules_hash
 		'Дата сдачи отпечатков' => [
 			{
 				'page_ord' => 17,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -816,6 +846,7 @@ sub get_content_rules_hash
 		'Разрешение на въезд, если необходимо' => [
 			{
 				'page_ord' => 18,
+				'progress' => 2,
 			},
 			{
 				'type' => 'input',
@@ -857,6 +888,7 @@ sub get_content_rules_hash
 		'Проживание' => [
 			{
 				'page_ord' => 19,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -885,6 +917,7 @@ sub get_content_rules_hash
 		'Гостиница' => [
 			{
 				'page_ord' => 20,
+				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'SchengenAppData',
@@ -931,6 +964,7 @@ sub get_content_rules_hash
 		'Приглашение' => [
 			{
 				'page_ord' => 21,
+				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'SchengenAppData',
@@ -1039,6 +1073,7 @@ sub get_content_rules_hash
 		'Приглашение организации' => [
 			{
 				'page_ord' => 22,
+				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'AppData',
@@ -1130,6 +1165,7 @@ sub get_content_rules_hash
 		'Расходы заявителя' => [
 			{
 				'page_ord' => 23,
+				'progress' => 2,
 			},
 			{
 				'type' => 'radiolist',
@@ -1152,6 +1188,7 @@ sub get_content_rules_hash
 		'Уточните спонсора' => [
 			{
 				'page_ord' => 24,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -1176,6 +1213,7 @@ sub get_content_rules_hash
 		'Средства заявителя' => [
 			{
 				'page_ord' => 25,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -1208,6 +1246,7 @@ sub get_content_rules_hash
 		'Средства спонсора' => [
 			{
 				'page_ord' => 26,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -1239,6 +1278,7 @@ sub get_content_rules_hash
 		'Уточните иные средства' => [
 			{
 				'page_ord' => 27,
+				'progress' => 2,
 				'relation' => {
 					'only_if' => {
 						'table' => 'AppData',
@@ -1263,6 +1303,7 @@ sub get_content_rules_hash
 		'Родственники в ЕС' => [
 			{
 				'page_ord' => 28,
+				'progress' => 2,
 			},
 			{
 				'type' => 'radiolist',
@@ -1287,6 +1328,7 @@ sub get_content_rules_hash
 		'Данные родственника' => [
 			{
 				'page_ord' => 29,
+				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'AppData',
@@ -1356,6 +1398,7 @@ sub get_content_rules_hash
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
 				'page_ord' => 30,
+				'progress' => 3,
 				'replacer' => '[app_finish]',
 			},
 		],
@@ -1363,6 +1406,7 @@ sub get_content_rules_hash
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
 				'page_ord' => 31,
+				'progress' => 3,
 				
 			},
 			{
@@ -1383,6 +1427,7 @@ sub get_content_rules_hash
 		'Укажите данные данные доверенного лица' => [
 			{
 				'page_ord' => 32,
+				'progress' => 3,
 				'relation' => {
 					'only_if' => {
 						'table' => 'Appointments',
@@ -1485,6 +1530,7 @@ sub get_content_rules_hash
 		'Дополнительные услуги' => [
 			{
 				'page_ord' => 33,
+				'progress' => 3,
 			},
 			{
 				'type' => 'input',
@@ -1513,6 +1559,7 @@ sub get_content_rules_hash
 		'Предпочтительный офис выдачи документов' => [
 			{
 				'page_ord' => 34,
+				'progress' => 3,
 				'relation' => {
 					'only_if' => {
 						'table' => 'Appointments',
@@ -1543,7 +1590,7 @@ sub get_content_rules_hash
 		'Страховка' => [
 			{
 				'page_ord' => 35,
-				
+				'progress' => 3,
 			},
 			{
 				'type' => 'checklist_insurer',
@@ -1576,7 +1623,7 @@ sub get_content_rules_hash
 		'Дата и время записи' => [
 			{
 				'page_ord' => 36,
-				
+				'progress' => 3,
 			},
 			{
 				'type' => 'input',
@@ -1609,6 +1656,7 @@ sub get_content_rules_hash
 		'Подтверждение записи' => [
 			{
 				'page_ord' => 37,
+				'progress' => 3,
 			},
 			{
 				'type' => 'captcha',
@@ -1631,6 +1679,7 @@ sub get_content_rules_hash
 		'Поздравляем!' => [
 			{
 				'page_ord' => 38,
+				'progress' => 4,
 			},
 			{
 				'type' => 'text',

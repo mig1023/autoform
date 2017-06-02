@@ -12,6 +12,8 @@
 <table>
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
+<tr><td colspan="5"><table><tr>[% progress %]<tr></table><br><td><tr>
+
 [% IF last_error_text %]
 	<tr><td colspan="5">[% langreq(last_error_text) %]<br><br></td></tr>
 [% END %]
