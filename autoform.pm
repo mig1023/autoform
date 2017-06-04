@@ -966,6 +966,8 @@ sub get_progressbar
 {
 	my $self = shift;
 	my $page = shift;
+	
+	my $line;
 	my $content;
 	
 	my $progress_line = VCS::Site::autodata::get_progressline();
@@ -977,10 +979,13 @@ sub get_progressbar
 		$past_current_future = 'past' if $_ < $current_progress;
 		$past_current_future = 'future' if $_ > $current_progress;
 		
-		my $add_el = ( $_ == $#$progress_line ? '' : '&nbsp;-->' );
+		my $add_el = ( $_ == 1 ? 1 : ( $_ == $#$progress_line ? 2 : 0 ) ); # 1 - first, 2 - last
 	
-		$content .= $self->get_html_for_element( 'progress', undef, $progress_line->[ $_ ] . $add_el, $past_current_future );
+		$line .= $self->get_html_for_element( 'progress', $_, $progress_line->[ $_ ], $past_current_future, $add_el );
+		$content .= $self->get_html_for_element( 'stages', undef, $progress_line->[ $_ ], $past_current_future );
 	}
+	
+	$content = $line . $self->get_html_for_element( 'end_line' ) . $self->get_html_for_element( 'start_line' ) . $content;
 	
 	return $content;
 }
@@ -1021,7 +1026,11 @@ sub get_html_for_element
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
 		
-		'progress'		=> '<td>[progress_value]</td>',
+		'progress'		=> '<td align="center" style="background-image: url(' . "'/images/pbar-[back].png'" .
+					');background-size: 100% 100%;"><div [format]><div style="padding-top:7px;' . 
+					'color:white;font-size:30">[name]</div></div></td>',
+		'stages'		=> '<td [format]>[progress_stage]</td>',
+		
 	};
 	
 	my $content = $elements->{ $type };
@@ -1029,6 +1038,7 @@ sub get_html_for_element
 	$content =~ s/\[name\]/$name/gi;
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[comment\]/$comment/gi;
+	$content =~ s/\[progress_stage\]/$value/gi;
 	
 	if ( $uniq_code ) {
 		$content =~ s/\[u\]/$uniq_code/gi;
@@ -1111,9 +1121,42 @@ sub get_html_for_element
 	
 	
 	if ( $type eq 'progress' ) {
-		$value = "<i>$value</i>" if $param eq 'past';
-		$value = "<b>$value</b>" if $param eq 'current';
-		$content =~ s/\[progress_value\]/$value/;
+		my $form = 'style="width:50px;height:50px;border-radius:25px;background:';
+			
+		$form .= "#FF6666" if $param eq 'past';
+		$form .= "#CC0033" if $param eq 'current';
+		$form .= "#999999" if $param eq 'future';
+		
+		$form .= ';"';
+		
+		my $background_image = {
+			0 => {
+				'past' => 'red-red',
+				'current' => 'red-gray',
+				'future' => 'gray-gray',
+			},
+			1 => {
+				'past' => 'white-red',
+				'current' => 'white-gray',
+				'future' => 'white-gray',
+			},
+			2 => {
+				'past' => 'red-white',
+				'current' => 'red-white',
+				'future' => 'gray-white',
+			},
+		};
+		
+		my $back = $background_image->{ $uniq_code }->{ $param };
+				
+		$content =~ s/\[format\]/$form/;
+		$content =~ s/\[back\]/$back/;
+	}
+	
+	if ( $type eq 'stages' ) {
+		my $form = 'style="padding:5px;"';
+		
+		$content =~ s/\[format\]/$form/;
 	}
 	
 	return $content;
