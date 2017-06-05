@@ -11,7 +11,7 @@
 <table>
 <tr><td colspan="3"><h2>[% title %]</h2><br></td></tr>
 
-<tr><td colspan="3"><table  style="border-collapse: collapse;"><tr>[% progress %]<tr></table><br><td><tr>
+<tr><td colspan="3"><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><td><tr>
 
 <tr><td>
 	Заполнить ещё одну или оформить запись?

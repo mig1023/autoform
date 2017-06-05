@@ -21,7 +21,7 @@
 <table>
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
-<tr><td colspan="3"><table style="border-collapse: collapse;"><tr>[% progress %]<tr></table><br><td><tr>
+<tr><td colspan="3"><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><td><tr>
 
 [% IF last_error_text %]
 	<tr><td colspan="3">[% langreq(last_error_text) %]<br><br></td></tr>
