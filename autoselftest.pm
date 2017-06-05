@@ -105,6 +105,7 @@ my $tests = [
 					'',
 					'autoform.tt2',
 					{},
+					'[progress_bar]',
 				],
 			},
 			2 => { 	'tester' => \&test_array,
@@ -127,6 +128,7 @@ my $tests = [
 					'',
 					'autoform.tt2',
 					{},
+					'[progress_bar]',
 				],
 			},
 			3 => { 	'tester' => \&test_array,
@@ -142,6 +144,7 @@ my $tests = [
 					'',
 					'autoform.tt2',
 					{},
+					'[progress_bar]',
 				],
 			},
 			
@@ -474,7 +477,9 @@ my $tests = [
 	},
 ];
 
-my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label id="free_date"></label></td></tr><tr><td><label id="text">Email</label></td><td><input type="text" value="" name="email" id="email" title=""></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными</label></td></tr>';
+my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;">Начало</td><td style="padding:5px;">Заявители</td><td style="padding:5px;">Оформление</td><td style="padding:5px;">Готово!</td>';
+
+my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label id="free_date"></label></td></tr><tr><td><label id="text">Email</label></td><td><input type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными</label></td></tr>';
 
 my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input type="text" value="" name="s_date" id="s_date" title=""></td></tr><tr><td><label id="text">Дата окончания поездки</label></td><td><input type="text" value="" name="f_date" id="f_date" title=""></td></tr>';
 
@@ -485,9 +490,9 @@ sub selftest
 	my $vars = $self->{ 'VCS::Vars' };
 	my $config = $vars->getConfig('db');
 	
-	my $result = [];
-	
 	$vars->db->query("USE fake_vcs");
+	
+	my $result = [ { 'text' => "self_self_test", 'status' => self_self_test() } ];
 
 	my $test_token = $self->get_token_and_create_new_form_if_need();
 	
@@ -509,12 +514,12 @@ sub get_tests
 	
 	for my $test (@$tests) {
 	
-		my $err_tmp = 0;
+		my $err_line = '';
 		my $test_num = 0;
 		
 		for( sort { $a <=> $b } keys %{ $test->{test} } ) {
 	
-			$test_num++ if !$err_tmp;
+			$test_num++;
 			
 			my $t = $test->{test}->{$_};
 			
@@ -524,6 +529,7 @@ sub get_tests
 				( ref( $t->{expected} ) eq 'ARRAY' ? @{ $t->{expected} } : $t->{expected} )
 			) {
 				s/\[token\]/$test_token/g;
+				s/\[progress_bar\]/$progress_bar/g;
 				s/\[first_page\]/$first_page/g;
 				s/\[second_page\]/$second_page/g;
 				
@@ -536,18 +542,19 @@ sub get_tests
 				$vars->setparam( $_->{name} ,$_->{value} );
 			}
 
-			unless ( $err_tmp ) {
-				$err_tmp = &{ $t->{tester} }( 
-					$t->{expected}, $test->{comment}, $self, 
-					&{ $test->{func} }( $self, @{ $t->{args} } ) 
-				);
+			my $test_result =  &{ $t->{tester} }( 
+				$t->{expected}, $test->{comment}, $self, 
+				&{ $test->{func} }( $self, @{ $t->{args} } )
+			);
+			
+			if ( $test_result ) {
+				$err_line .= ( $err_line ? ', ' : '' ) . $test_num;
 			}
 			
 			&{ $t->{prepare} }( 'CLEAR', \$test, $_, \$test_token, $vars ) if ref( $t->{prepare} ) eq 'CODE';
 		} 
-		$test_num = 0 unless $err_tmp;
 		
-		push @result, { 'text' => "$test->{comment}", 'status' => $test_num };
+		push @result, { 'text' => "$test->{comment}", 'status' => $err_line };
 	}
 	
 	return @result;
@@ -579,7 +586,7 @@ sub show_result
 		$result_line .= $_->{text} . ' ' . 
 			( !$_->{status} ? 
 				self_test_htm( 'font', 'green', "-- ok" ) : 
-				self_test_htm( 'font', 'red', "-- fail ( test: $_->{status} )" )
+				self_test_htm( 'font', 'red', "-- fail: $_->{status}" )
 			) . self_test_htm( 'br' );
 	}
 	$result_line .= self_test_htm( 'br' ) . self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "$test_num тест(ов)" );
@@ -610,12 +617,35 @@ sub self_test_htm
 	return $html_line;
 }
 
+sub self_self_test
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $fail_in_myself = 0;
+	
+	$fail_in_myself += test_line( '12345ABCD', '1', undef, '12345ABCD' );
+	$fail_in_myself += test_line_in_hash( 'key2:value2', '1', undef, { 'key1' => 'value1', 'key2' => 'value2' } );
+	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, { 'key1' => 'value1', 'key2' => 'value2' }, '1' );
+	$fail_in_myself += test_array( [ '1', 'A', '2', 'B' ], '1', $self, ( '1', 'A', '2', 'B' ) );
+	$fail_in_myself += test_array_ref( [ '1', 'A', '2', 'B' ], '1', $self, [ '1', 'A', '2', 'B' ] );
+	$fail_in_myself += test_regexp( '^[A-D]+[0-5]+$', '1', undef, 'ABCD12345' );
+	
+	$fail_in_myself += ! test_line( '12345ABCD', '1', undef, '12345ABCD0' );
+	$fail_in_myself += ! test_line_in_hash( 'key2:value2', '1', undef, { 'key1' => 'value2', 'key2' => 'value1' } );
+	$fail_in_myself += ! test_hash( 
+		{ 'key1' => 'value1', 'key2' => 'value2' }, { 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' }, '1' );
+	$fail_in_myself += ! test_array( [ '1', 'A', '2', 'B', '3' ], '1', $self, ( '1', 'A', '2', 'B' ) );
+	$fail_in_myself += ! test_array_ref( [ '1', 'A', '2', 'B' ], '1', $self, [ '1', 'A', '2', 'B', '3' ] );
+	$fail_in_myself += ! test_regexp( '^[A-D]+[0-5]+$', '1', undef, 'ABC1234 5' );
+	
+	return $fail_in_myself;
+}
+
 sub test_line
 # //////////////////////////////////////////////////
 {
 	my ( $expected, $comm, undef, $result ) = @_;
-warn "exp : $expected";
-warn "rslt: $result";
+
 	if ( lc( $expected ) ne lc( $result ) ) { 
 		return $comm;
 	};
@@ -655,14 +685,15 @@ sub test_array
 	my $comm = shift;
 	my $self = shift;
 	my @array_1 = @_;
-#warn Dumper($array_2);
-#warn Dumper(\@array_1);
+
 	my $eq = 1;
 	
 	for ( 1..$#array_1 ) {
 		next if ref( $array_1[$_] ) and ref( $array_2->[$_] );
 		$eq = 0 if $array_1[$_] ne $array_2->[$_];
 	}
+	
+	$eq = 0 unless $#array_1 == $#$array_2;
 	
 	if ( !$eq ) { 
 		return $comm;
