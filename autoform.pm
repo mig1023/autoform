@@ -257,6 +257,7 @@ sub get_token_and_create_new_form_if_need
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $token = $vars->getparam('t');
+
 	$token = lc( $token );
 	$token =~ s/[^a-z0-9]//g;
 
@@ -1323,8 +1324,6 @@ sub decode_data_from_db
 	my $element_name = shift;
 	my $value = shift;
 	
-	my $page_content = $self->get_content_rules( $step );
-	
 	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
 	
 	$value = '' if ( $value eq '00.00.0000' );
@@ -1484,7 +1483,7 @@ sub check_chkbox
 	my $value = $vars->getparam( $element->{name} );
 	my $rules = $element->{check};
 	
-	return $self->text_error( 3, $element ) if ( ( $element->{check} =~ /true/ ) and ( $value eq '' ) );
+	return $self->text_error( 3, $element ) if ( ( $rules =~ /true/ ) and ( $value eq '' ) );
 }
 
 sub check_param
@@ -1495,9 +1494,8 @@ sub check_param
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	my $value = $vars->getparam( $element->{ name } );
-	my $error = '';
 	my $rules = $element->{ check };
-	
+
 	$value =~ s/^\s+|\s+$//g;
 
 	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( $value eq '' );

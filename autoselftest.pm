@@ -22,7 +22,7 @@ my $tests = [
 			3 => {	'tester' => \&test_line,
 				'args' => [],
 				'param' => [
-					{ 'name' => 't', 'value' => 'F[token]' },
+					{ 'name' => 't', 'value' => '7[token]' },
 				],
 				'expected' => '01',
 			},
@@ -57,8 +57,9 @@ my $tests = [
 		'comment' => 'save_new_token_in_db',
 		'test' => { 	
 			1 => { 	'tester' => \&test_write_db,
-				'args' => [ '[token]' ],
-				'expected' => '[token]:AutoToken:Token:[token]',
+				'args' => [ 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz17' ],
+				'expected' => 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz17'.
+					':AutoToken:Token:abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz17',
 			},
 		},
 	},
@@ -412,6 +413,30 @@ my $tests = [
 				'expected' =>
 					'^\<img\ssrc="/vcs/static/files/[a-h0-9]+\.png"\>\<input\stype="hidden"\sname="code"\svalue="[a-h0-9]+">',
 			},
+			18 => {	'tester' => \&test_line,
+				'args' => [ 'progress', 'test', undef, 'past', 0 ],
+				'expected' =>
+					'<td align="center" style="background-image: url(' . "'/images/pbar-red-red.png'" .
+					');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;'.
+					'background:#FF6666;"><div style="padding-top:7px;' . 
+					'color:white;font-size:30">test</div></div></td>',
+			},
+			19 => {	'tester' => \&test_line,
+				'args' => [ 'progress', 'test', undef, 'current', 1 ],
+				'expected' =>
+					'<td align="center" style="background-image: url(' . "'/images/pbar-white-gray.png'" .
+					');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;'.
+					'background:#CC0033;"><div style="padding-top:7px;' . 
+					'color:white;font-size:30">test</div></div></td>',
+			},
+			20 => {	'tester' => \&test_line,
+				'args' => [ 'progress', 'test', undef, 'future', 2 ],
+				'expected' =>
+					'<td align="center" style="background-image: url(' . "'/images/pbar-gray-white.png'" .
+					');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;'.
+					'background:#999999;"><div style="padding-top:7px;' . 
+					'color:white;font-size:30">test</div></div></td>',
+			},
 		},
 	},
 	{ 	'func' 	=> \&{ VCS::Site::autoform::get_cell },
@@ -475,9 +500,212 @@ my $tests = [
 			}
 		},
 	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_progressbar },
+		'comment' => 'get_progressbar',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ '[page1]' ],
+				'expected' => '[progress_bar]',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_finish },
+		'comment' => 'get_finish',
+		'test' => { 	
+			1 => { 	'tester' => \&test_array,
+				'expected' => [ undef, 'autoform_finish.tt2' ],
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_specials_of_element },
+		'comment' => 'get_specials_of_element',
+		'test' => { 	
+			1 => { 	'tester' => \&test_hash,
+				'args' => [ 1 ],
+				'expected' => {
+					'nearest_date' => [
+						'free_date'
+					],
+					'comment' => [
+						  'email'
+						],
+					'timeslots' => [],
+					'mask' => [],
+					'datepicker' => []
+				},
+
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::decode_data_from_db },
+		'comment' => 'decode_data_from_db',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'test', '2010-01-03' ],
+				'expected' => '03.01.2010',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'test', '03.01.2010' ],
+				'expected' => '03.01.2010',
+			},
+			3 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'test', '0000-00-00' ],
+				'expected' => '',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::encode_data_for_db },
+		'comment' => 'encode_data_for_db',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'pers_info', 'pers_info' ],
+				'expected' => 1,
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'pers_info', '' ],
+				'expected' => 0,
+			},
+			3 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'email', '   email   ' ],
+				'expected' => 'email',
+			},
+			4 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'email', '03.01.2010' ],
+				'expected' => '2010-01-03',
+			},
+			5 => { 	'tester' => \&test_line,
+				'args' => [ 1, 'email', '2010-01-03' ],
+				'expected' => '2010-01-03',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_element_by_name },
+		'comment' => 'get_element_by_name',
+		'test' => { 	
+			1 => { 	'tester' => \&test_hash,
+				'args' => [ 1, 'email' ],
+				'expected' => {
+					'db' => {
+							'name' => 'EMail',
+							'table' => 'Appointments'
+					},
+					'example' => 'mail@mail.ru',
+					'name' => 'email',
+					'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
+					'check' => 'z',
+					'type' => 'input',
+					'label' => 'Email',
+					'param' => {},
+				},
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_names_db_for_save_or_get },
+		'comment' => 'get_names_db_for_save_or_get',
+		'test' => { 	
+			1 => { 	'tester' => \&test_hash,
+				'args' => [ '[page1]' ],
+				'expected' => {
+					'Auto' => {
+						'' => 'free_date'
+					},
+					'AutoAppointments' => {
+						'PersonalDataPermission' => 'pers_info',
+						'CenterID' => 'center',
+						'EMail' => 'email',
+						'MobilPermission' => 'mobil_info',
+						'VType' => 'vtype'
+					}
+				}
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::check_chkbox },
+		'comment' => 'check_chkbox',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'true' } ],
+				'param' => [
+					{ 'name' => 'test', 'value' => '1' },
+				],
+				'expected' => '',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'true'} ],
+				'param' => [
+					{ 'name' => 'test', 'value' => '' },
+				],
+				'expected' => 'test|Вы должны указать поле "test"',
+			},
+			3 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => '' } ],
+				'param' => [
+					{ 'name' => 'test', 'value' => '' },
+				],
+				'expected' => '',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::check_param },
+		'comment' => 'check_param',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'z'} ],
+				'param' => [
+					{ 'name' => 'test', 'value' => 'text' },
+				],
+				'expected' => '',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'z' } ],
+				'param' => [
+					{ 'name' => 'test', 'value' => '' },
+				],
+				'expected' => 'test|Поле "test" не заполнено',
+			},
+			3 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
+				'param' => [
+					{ 'name' => 'test', 'value' => '2010-03-01' },
+				],
+				'expected' => 'test|В поле "test" указана неверная дата',
+			},
+			4 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'W' } ],
+				'param' => [
+					{ 'name' => 'test', 'value' => 'abcАБВ' },
+				],
+				'expected' => 'test|В поле "test" введены недопустимые символы: АБВ',
+			},
+			5 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'Ё' } ],
+				'param' => [
+					{ 'name' => 'test', 'value' => 'ABCабв' },
+				],
+				'expected' => 'test|В поле "test" введены недопустимые символы: ABC',
+			},
+			6 => { 	'tester' => \&test_line,
+				'args' => [ { 'name' => 'test', 'check' => 'N' } ],
+				'param' => [
+					{ 'name' => 'test', 'value' => '123XYZ456' },
+				],
+				'expected' => 'test|В поле "test" введены недопустимые символы: XYZ',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::check_existing_id_in_token },
+		'comment' => 'check_existing_id_in_token',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ '[appdata_id]', '[token]' ],
+				'expected' => '1',
+			},
+		},
+	},
+	
 ];
 
-my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;">Начало</td><td style="padding:5px;">Заявители</td><td style="padding:5px;">Оформление</td><td style="padding:5px;">Готово!</td>';
+my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;">Готово!</td>';
 
 my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label id="free_date"></label></td></tr><tr><td><label id="text">Email</label></td><td><input type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными</label></td></tr>';
 
@@ -493,14 +721,37 @@ sub selftest
 	$vars->db->query("USE fake_vcs");
 	
 	my $result = [ { 'text' => "self_self_test", 'status' => self_self_test() } ];
-
-	my $test_token = $self->get_token_and_create_new_form_if_need();
 	
-	push @$result, get_tests( $self, $vars, $test_token );
+	my ( $test_token, $appid, $appdataid ) = get_test_appointments( $self, $vars );
+	
+	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $test_token =~ /^A[a-z0-9]{63}$/ ) and ( $appid =~ /^\d+$/ ) ? 0 : 1 ) };
+	push @$result, { 'text' => 'get_add', 'status' => ( ( $appid =~ /^\d+$/ ) ? 0 : 1 ) };
+	
+	push @$result, get_tests( $self, $vars, $test_token, $appid, $appdataid );
 	
 	$vars->db->query( "USE " . $config->{"dbname"} );	
 
 	return show_result($result);
+}
+
+sub get_test_appointments
+{
+	my $self = shift;
+	my $vars = shift;
+	
+	my $test_token = $self->get_token_and_create_new_form_if_need();
+	
+	$self->create_clear_form( $test_token );
+	
+	my $appid = $vars->db->sel1("
+		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $test_token);
+	
+	$self->get_add( $appid, $test_token );
+	
+	my $appdataid = $vars->db->sel1("
+		SELECT AutoAppDataID FROM AutoToken WHERE Token = ?", $test_token);
+	
+	return ( $test_token, $appid, $appdataid );
 }
 
 sub get_tests
@@ -509,6 +760,8 @@ sub get_tests
 	my $self = shift;
 	my $vars = shift;
 	my $test_token = shift;
+	my $test_appid = shift;
+	my $test_appdataid = shift;
 	
 	my @result = ();
 	
@@ -529,9 +782,13 @@ sub get_tests
 				( ref( $t->{expected} ) eq 'ARRAY' ? @{ $t->{expected} } : $t->{expected} )
 			) {
 				s/\[token\]/$test_token/g;
+				s/\[app_id\]/$test_appid/g;
+				s/\[appdata_id\]/$test_appdataid/g;
 				s/\[progress_bar\]/$progress_bar/g;
 				s/\[first_page\]/$first_page/g;
 				s/\[second_page\]/$second_page/g;
+				
+				$_ = $self->get_content_rules( 1, 'full' ) if /\[page1\]/;
 				
 				if ( ref($_) eq 'HASH' ) {
 					$_->{value} =~ s/\[token\]/$test_token/g if exists $_->{value};
@@ -567,7 +824,7 @@ sub show_result
 	
 	my $result_line = self_test_htm( 'body_start' );
 	
-	my $test_num = 0;
+	my $test_num = 3; 	# self_self + create_clear_form + get_add
 	my $fails = 0;
 
 	for my $test (@$tests) {
@@ -589,7 +846,7 @@ sub show_result
 				self_test_htm( 'font', 'red', "-- fail: $_->{status}" )
 			) . self_test_htm( 'br' );
 	}
-	$result_line .= self_test_htm( 'br' ) . self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "$test_num тест(ов)" );
+	$result_line .= self_test_htm( 'br' ) . self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "Всего тестов: $test_num" );
 	
 	return $result_line . self_test_htm( 'body_end' );
 }
@@ -625,15 +882,18 @@ sub self_self_test
 	
 	$fail_in_myself += test_line( '12345ABCD', '1', undef, '12345ABCD' );
 	$fail_in_myself += test_line_in_hash( 'key2:value2', '1', undef, { 'key1' => 'value1', 'key2' => 'value2' } );
-	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, { 'key1' => 'value1', 'key2' => 'value2' }, '1' );
+	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, '1', undef, 
+		{ 'key1' => 'value1', 'key2' => 'value2' }, '1' );
 	$fail_in_myself += test_array( [ '1', 'A', '2', 'B' ], '1', $self, ( '1', 'A', '2', 'B' ) );
 	$fail_in_myself += test_array_ref( [ '1', 'A', '2', 'B' ], '1', $self, [ '1', 'A', '2', 'B' ] );
 	$fail_in_myself += test_regexp( '^[A-D]+[0-5]+$', '1', undef, 'ABCD12345' );
 	
 	$fail_in_myself += ! test_line( '12345ABCD', '1', undef, '12345ABCD0' );
 	$fail_in_myself += ! test_line_in_hash( 'key2:value2', '1', undef, { 'key1' => 'value2', 'key2' => 'value1' } );
-	$fail_in_myself += ! test_hash( 
-		{ 'key1' => 'value1', 'key2' => 'value2' }, { 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' }, '1' );
+	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => [ 1, 2, 3 ] }, '1', undef, 
+		{ 'key1' => 'value1', 'key2' => ( 1, 3, 2 ) }, '1' );
+	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, '1', undef, 
+		{ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3'  }, '1' );
 	$fail_in_myself += ! test_array( [ '1', 'A', '2', 'B', '3' ], '1', $self, ( '1', 'A', '2', 'B' ) );
 	$fail_in_myself += ! test_array_ref( [ '1', 'A', '2', 'B' ], '1', $self, [ '1', 'A', '2', 'B', '3' ] );
 	$fail_in_myself += ! test_regexp( '^[A-D]+[0-5]+$', '1', undef, 'ABC1234 5' );
@@ -646,7 +906,7 @@ sub test_line
 {
 	my ( $expected, $comm, undef, $result ) = @_;
 
-	if ( lc( $expected ) ne lc( $result ) ) { 
+	if ( lc( $expected ) ne lc( $result ) ) {
 		return $comm;
 	};
 }
@@ -665,35 +925,42 @@ sub test_line_in_hash
 sub test_hash
 # //////////////////////////////////////////////////
 {
-	my $first_hash = shift;
-	my $second_hash = shift;
-	
+	my ( $expected, $comm, undef, $result ) = @_;
 	my $eq = 1;
 	
-	for ( keys %$first_hash, keys %$second_hash ) {
-		$eq = 0 if $first_hash->{ $_ } ne $second_hash->{ $_ };
+	for ( keys %$expected, keys %$result ) {
+		if ( ( ref( $result->{ $_ } ) eq 'ARRAY' ) and ( ref( $expected->{ $_ } ) eq 'ARRAY' ) ) {
+			next if ( $result->{ $_ } = [] ) and ( $expected->{ $_ } = [] );
+			$eq = ( test_array( $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 0 : 1 );
+		}
+		elsif ( ( ref( $result->{ $_ } ) eq 'HASH' ) and ( ref( $expected->{ $_ } ) eq 'HASH' ) ) {
+			$eq = ( test_hash( $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 0 : 1 );
+		}
+		else {
+			$eq = 0 if $expected->{ $_ } ne $result->{ $_ };
+		}
 	}
-	
+
 	if ( !$eq ) { 
-		return shift;
+		return $comm;
 	};
 }
 sub test_array
 # //////////////////////////////////////////////////
 {
-	my $array_2 = shift;
+	my $expected = shift;
 	my $comm = shift;
 	my $self = shift;
-	my @array_1 = @_;
+	my @result = @_;
 
 	my $eq = 1;
 	
-	for ( 1..$#array_1 ) {
-		next if ref( $array_1[$_] ) and ref( $array_2->[$_] );
-		$eq = 0 if $array_1[$_] ne $array_2->[$_];
+	for ( 1..$#result ) {
+		next if ref( $result[$_] ) and ref( $expected->[$_] );
+		$eq = 0 if $result[$_] ne $expected->[$_];
 	}
 	
-	$eq = 0 unless $#array_1 == $#$array_2;
+	$eq = 0 unless $#result == $#$expected;
 	
 	if ( !$eq ) { 
 		return $comm;
@@ -703,15 +970,15 @@ sub test_array
 sub test_array_ref
 # //////////////////////////////////////////////////
 {
-	my $array_2 = shift;
+	my $expected = shift;
 	my $comm = shift;
 	my $self = shift;
-	my $array_1 = shift;
+	my $result = shift;
 
 	my $eq = 1;
 	
-	for ( 1..$#{$array_1} ) {
-		$eq = 0 if $array_1->[$_] ne $array_2->[$_];
+	for ( 1..$#{$result} ) {
+		$eq = 0 if $result->[$_] ne $expected->[$_];
 	}
 	
 	if ( !$eq ) { 
