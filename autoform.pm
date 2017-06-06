@@ -1154,7 +1154,7 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'stages' ) {
-		my $form = 'style="padding:5px;"';
+		my $form = 'style="padding:5px;text-align:center;"';
 		
 		$content =~ s/\[format\]/$form/;
 	}
