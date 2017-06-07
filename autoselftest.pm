@@ -702,7 +702,55 @@ my $tests = [
 			},
 		},
 	},
-	
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_current_table_id },
+		'comment' => 'get_current_table_id',
+		'test' => { 	
+			1 => { 	'tester' => \&test_hash,
+				'args' => [ '[token]' ],
+				'expected' =>  {
+					'AutoAppData' => '[appdata_id]',
+					'AutoSchengenAppData' => '[schdata_id]',
+					'AutoToken' => '[token_id]',
+					'AutoAppointments' => '[app_id]'
+				},
+
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::skip_by_condition },
+		'comment' => 'skip_by_condition',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ 9, '8,9,10', 'only_if' ],
+				'expected' => '0',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ 9, '7,8,10', 'only_if' ],
+				'expected' => '1',
+			},
+			3 => { 	'tester' => \&test_line,
+				'args' => [ 9, '6,8,10', 'only_if_not' ],
+				'expected' => '0',
+			},
+			4 => { 	'tester' => \&test_line,
+				'args' => [ 9, '10,9,8', 'only_if_not' ],
+				'expected' => '1',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::skip_page_by_relation },
+		'comment' => 'skip_page_by_relation',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ 'only_if', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+				'expected' => '0',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ 'only_if_not', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+				'expected' => '1',
+			},
+		},
+	},
 ];
 
 my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;">Готово!</td>';
@@ -722,12 +770,12 @@ sub selftest
 	
 	my $result = [ { 'text' => "self_self_test", 'status' => self_self_test() } ];
 	
-	my ( $test_token, $appid, $appdataid ) = get_test_appointments( $self, $vars );
+	my ( $test_token, $appid, $appdataid, $appdata_schid, $token_id ) = get_test_appointments( $self, $vars );
 	
 	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $test_token =~ /^A[a-z0-9]{63}$/ ) and ( $appid =~ /^\d+$/ ) ? 0 : 1 ) };
 	push @$result, { 'text' => 'get_add', 'status' => ( ( $appid =~ /^\d+$/ ) ? 0 : 1 ) };
 	
-	push @$result, get_tests( $self, $vars, $test_token, $appid, $appdataid );
+	push @$result, get_tests( $self, $vars, $test_token, $appid, $appdataid, $appdata_schid, $token_id );
 	
 	$vars->db->query( "USE " . $config->{"dbname"} );	
 
@@ -747,11 +795,11 @@ sub get_test_appointments
 		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $test_token);
 	
 	$self->get_add( $appid, $test_token );
-	
-	my $appdataid = $vars->db->sel1("
-		SELECT AutoAppDataID FROM AutoToken WHERE Token = ?", $test_token);
-	
-	return ( $test_token, $appid, $appdataid );
+
+	my ( $token_id, $appdataid, $appdata_schid ) = $vars->db->sel1("
+		SELECT ID, AutoAppDataID, AutoSchengenAppDataID FROM AutoToken WHERE Token = ?", $test_token);
+
+	return ( $test_token, $appid, $appdataid, $appdata_schid, $token_id );
 }
 
 sub get_tests
@@ -762,7 +810,9 @@ sub get_tests
 	my $test_token = shift;
 	my $test_appid = shift;
 	my $test_appdataid = shift;
-	
+	my $test_appdata_schid = shift;
+	my $token_id = shift;
+
 	my @result = ();
 	
 	for my $test (@$tests) {
@@ -778,12 +828,17 @@ sub get_tests
 			
 			&{ $t->{prepare} }( 'PREPARE', \$test, $_, \$test_token, $vars ) if ref( $t->{prepare} ) eq 'CODE';
 			
-			for (	@{ $t->{args} }, @{ $t->{param} },
-				( ref( $t->{expected} ) eq 'ARRAY' ? @{ $t->{expected} } : $t->{expected} )
+			for (	@{ $t->{args} }, 
+				@{ $t->{param} },
+				( ref( $t->{expected} ) eq 'ARRAY' ? @{ $t->{expected} } : 
+				( ref( $t->{expected} ) eq 'HASH' ? values %{ $t->{expected} } : $t->{expected} ) 
+				)
 			) {
 				s/\[token\]/$test_token/g;
+				s/\[token_id\]/$token_id/g;
 				s/\[app_id\]/$test_appid/g;
 				s/\[appdata_id\]/$test_appdataid/g;
+				s/\[schdata_id\]/$test_appdata_schid/g;
 				s/\[progress_bar\]/$progress_bar/g;
 				s/\[first_page\]/$first_page/g;
 				s/\[second_page\]/$second_page/g;

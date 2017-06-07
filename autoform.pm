@@ -417,7 +417,7 @@ sub get_autoform_content
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
 	if ( !$last_error and ( exists $page->[0]->{relation} ) ) {
-		( $step, $page ) = $self->check_relation( $step, $page, $step, $token, $back );
+		( $step, $page ) = $self->check_relation( $step, $page, $token, $back );
 	}
 	
 	if ( $page !~ /\[/ ) { 
@@ -439,7 +439,6 @@ sub check_relation
 	my $self = shift;
 	my $step = shift;
 	my $page = shift;
-	my $step = shift; 
 	my $token = shift;
 	my $moonwalk = shift;
 
@@ -455,7 +454,7 @@ sub check_relation
 		$skip_this_page = 0;
 
 		for my $relation ( keys %{ $page->[0]->{ relation } } ) {
-			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{ relation }->{ $relation }, $step, $token );
+			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{ relation }->{ $relation }, $token );
 		}
 		
 		if ( $skip_this_page ) {
@@ -494,9 +493,8 @@ sub skip_page_by_relation
 	my $self = shift;
 	my $condition = shift;
 	my $relation = shift;
-	my $step = shift;
 	my $token = shift;
-	
+
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $current_table_id = $self->get_current_table_id( $token ); 
@@ -514,7 +512,7 @@ sub skip_by_condition
 	my $value = shift;
 	my $relation = shift;
 	my $condition = shift;
-	
+
 	my $skip_it = 0;
 	
 	my %relation = map { $_ => 1 } split /,/, $relation; 
