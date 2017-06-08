@@ -105,7 +105,13 @@ my $tests = [
 					'[first_page]', 
 					'',
 					'autoform.tt2',
-					{},
+					{
+						'nearest_date' => [ 'free_date' ],
+						'comment' => [ 'email' ],
+						'timeslots' => [],
+						'mask' => [],
+						'datepicker' => []
+					},
 					'[progress_bar]',
 				],
 			},
@@ -128,7 +134,13 @@ my $tests = [
 					'[second_page]', 
 					'',
 					'autoform.tt2',
-					{},
+					{
+						'nearest_date' => [ 'free_date' ],
+						'comment' => [ 'email' ],
+						'timeslots' => [],
+						'mask' => [],
+						'datepicker' => []
+					},
 					'[progress_bar]',
 				],
 			},
@@ -144,7 +156,13 @@ my $tests = [
 					'[first_page]', 
 					'',
 					'autoform.tt2',
-					{},
+					{
+						'nearest_date' => [ 'free_date' ],
+						'comment' => [ 'email' ],
+						'timeslots' => [],
+						'mask' => [],
+						'datepicker' => []
+					},
 					'[progress_bar]',
 				],
 			},
@@ -524,7 +542,7 @@ my $tests = [
 				'args' => [ 1 ],
 				'expected' => {
 					'nearest_date' => [
-						'free_date'
+						'free_date',
 					],
 					'comment' => [
 						  'email'
@@ -713,7 +731,6 @@ my $tests = [
 					'AutoToken' => '[token_id]',
 					'AutoAppointments' => '[app_id]'
 				},
-
 			},
 		},
 	},
@@ -751,6 +768,66 @@ my $tests = [
 			},
 		},
 	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_same_info_for_timeslots },
+		'comment' => 'get_same_info_for_timeslots',
+		'test' => { 	
+			1 => { 	'tester' => \&test_hash,
+				'prepare' => \&pre_getinfo,
+				'args' => [ '[token]' ],
+				'expected' =>  {
+					'persons' => '1',
+					'center' => '5',
+					'fdate' => '01.05.2011',
+				},
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::init_add_param },
+		'comment' => 'init_add_param',
+		'test' => { 	
+			1 => { 	'tester' => \&test_hash,
+				'prepare' => \&pre_init_param,
+				'args' => [ 
+					{ 
+						1 => [
+							{
+								'type' => 'select',
+								'name' => 'center',
+								'label' => 'Визовый центр',
+								'comment' => '',
+								'check' => 'zN',
+								'db' => {
+									'table' => 'Appointments',
+									'name' => 'CenterID',
+								},
+								'param' => '[centers_from_db]',
+							},
+						] 
+					}, 
+					'[token]' 
+				],
+				'expected' => { 
+					1 => [
+						{
+							'type' => 'select',
+							'name' => 'center',
+							'label' => 'Визовый центр',
+							'comment' => '',
+							'check' => 'zN',
+							'db' => {
+								'table' => 'Appointments',
+								'name' => 'CenterID',
+							},
+							'param' => {
+								'1' => 'Moscow',
+								'12' => 'Mosc2ow',
+							}
+						},
+					]
+				},
+			},
+		},
+	},
 ];
 
 my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;">Готово!</td>';
@@ -770,14 +847,13 @@ sub selftest
 	
 	my $result = [ { 'text' => "self_self_test", 'status' => self_self_test() } ];
 	
-	my ( $test_token, $appid, $appdataid, $appdata_schid, $token_id ) = get_test_appointments( $self, $vars );
+	my @param = get_test_appointments( $self, $vars );
 	
-	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $test_token =~ /^A[a-z0-9]{63}$/ ) and ( $appid =~ /^\d+$/ ) ? 0 : 1 ) };
-	push @$result, { 'text' => 'get_add', 'status' => ( ( $appid =~ /^\d+$/ ) ? 0 : 1 ) };
+	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $param[0] =~ /^A[a-z0-9]{63}$/ ) and ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
+	push @$result, { 'text' => 'get_add', 'status' => ( ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
+	push @$result, get_tests( $self, $vars, @param );
 	
-	push @$result, get_tests( $self, $vars, $test_token, $appid, $appdataid, $appdata_schid, $token_id );
-	
-	$vars->db->query( "USE " . $config->{"dbname"} );	
+	$vars->db->query( "USE $config->{'dbname'}" );	
 
 	return show_result($result);
 }
@@ -796,10 +872,10 @@ sub get_test_appointments
 	
 	$self->get_add( $appid, $test_token );
 
-	my ( $token_id, $appdataid, $appdata_schid ) = $vars->db->sel1("
-		SELECT ID, AutoAppDataID, AutoSchengenAppDataID FROM AutoToken WHERE Token = ?", $test_token);
+	my @param = $vars->db->sel1("
+		SELECT AutoAppDataID, AutoSchengenAppDataID, ID FROM AutoToken WHERE Token = ?", $test_token);
 
-	return ( $test_token, $appid, $appdataid, $appdata_schid, $token_id );
+	return ( $test_token, $appid, @param );
 }
 
 sub get_tests
@@ -826,7 +902,8 @@ sub get_tests
 			
 			my $t = $test->{test}->{$_};
 			
-			&{ $t->{prepare} }( 'PREPARE', \$test, $_, \$test_token, $vars ) if ref( $t->{prepare} ) eq 'CODE';
+			&{ $t->{prepare} }( 'PREPARE', \$test, $_, \$test_token, $test_appid, $vars ) 
+				if ref( $t->{prepare} ) eq 'CODE';
 			
 			for (	@{ $t->{args} }, 
 				@{ $t->{param} },
@@ -863,7 +940,8 @@ sub get_tests
 				$err_line .= ( $err_line ? ', ' : '' ) . $test_num;
 			}
 			
-			&{ $t->{prepare} }( 'CLEAR', \$test, $_, \$test_token, $vars ) if ref( $t->{prepare} ) eq 'CODE';
+			&{ $t->{prepare} }( 'CLEAR', \$test, $_, \$test_token, $test_appid, $vars ) 
+				if ref( $t->{prepare} ) eq 'CODE';
 		} 
 		
 		push @result, { 'text' => "$test->{comment}", 'status' => $err_line };
@@ -879,7 +957,7 @@ sub show_result
 	
 	my $result_line = self_test_htm( 'body_start' );
 	
-	my $test_num = 3; 	# self_self + create_clear_form + get_add
+	my $test_num = 18; 	# 15 self_self + create_clear_form + get_add
 	my $fails = 0;
 
 	for my $test (@$tests) {
@@ -934,26 +1012,55 @@ sub self_self_test
 {
 	my $self = shift;
 	my $fail_in_myself = 0;
+
+	$fail_in_myself += test_line( '12345ABCD', 'self1', undef, '12345ABCD' );
+	$fail_in_myself += test_line_in_hash( 'key2:value2', 'self2', undef, { 'key1' => 'value1', 'key2' => 'value2' } );
+	$fail_in_myself += test_array( [ '1', 'A', '2', 'B' ], 'self3', $self, ( '1', 'A', '2', 'B' ) );
+	$fail_in_myself += test_array_ref( [ '1', 'A', '2', 'B' ], 'self4', $self, [ '1', 'A', '2', 'B' ] );
+	$fail_in_myself += test_regexp( '^[A-D]+[0-5]+$', 'self5', undef, 'ABCD12345' );
 	
-	$fail_in_myself += test_line( '12345ABCD', '1', undef, '12345ABCD' );
-	$fail_in_myself += test_line_in_hash( 'key2:value2', '1', undef, { 'key1' => 'value1', 'key2' => 'value2' } );
-	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, '1', undef, 
-		{ 'key1' => 'value1', 'key2' => 'value2' }, '1' );
-	$fail_in_myself += test_array( [ '1', 'A', '2', 'B' ], '1', $self, ( '1', 'A', '2', 'B' ) );
-	$fail_in_myself += test_array_ref( [ '1', 'A', '2', 'B' ], '1', $self, [ '1', 'A', '2', 'B' ] );
-	$fail_in_myself += test_regexp( '^[A-D]+[0-5]+$', '1', undef, 'ABCD12345' );
+	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, 'self6', undef, 
+		{ 'key1' => 'value1', 'key2' => 'value2' } );
+	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self7', undef, 
+		{ 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] } );	
 	
-	$fail_in_myself += ! test_line( '12345ABCD', '1', undef, '12345ABCD0' );
-	$fail_in_myself += ! test_line_in_hash( 'key2:value2', '1', undef, { 'key1' => 'value2', 'key2' => 'value1' } );
-	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => [ 1, 2, 3 ] }, '1', undef, 
-		{ 'key1' => 'value1', 'key2' => ( 1, 3, 2 ) }, '1' );
-	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, '1', undef, 
-		{ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3'  }, '1' );
-	$fail_in_myself += ! test_array( [ '1', 'A', '2', 'B', '3' ], '1', $self, ( '1', 'A', '2', 'B' ) );
-	$fail_in_myself += ! test_array_ref( [ '1', 'A', '2', 'B' ], '1', $self, [ '1', 'A', '2', 'B', '3' ] );
-	$fail_in_myself += ! test_regexp( '^[A-D]+[0-5]+$', '1', undef, 'ABC1234 5' );
+	$fail_in_myself += ! test_line( '12345ABCD', 'self8', undef, '12345ABCD0' );
+	$fail_in_myself += ! test_line_in_hash( 'key2:value2', 'self9', undef, { 'key1' => 'value2', 'key2' => 'value1' } );
+	$fail_in_myself += ! test_array( [ '1', 'A', '2', 'B', '3' ], 'self10', $self, ( '1', 'A', '2', 'B' ) );
+	$fail_in_myself += ! test_array_ref( [ '1', 'A', '2', 'B' ], 'self11', $self, [ '1', 'A', '2', 'B', '3' ] );
+	$fail_in_myself += ! test_regexp( '^[A-D]+[0-5]+$', 'self12', undef, 'ABC1234 5' );
+	
+	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => [ 1, 2, 3 ] }, 'self3', undef, 
+		{ 'key1' => 'value1', 'key2' => ( 1, 3, 2 ) } );
+	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, 'self14', undef, 
+		{ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' } );
+	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self15', undef, 
+		{ 'key1' => 'value1', 'key2' => [ { 'key3' => [ 2, 1, 3 ] } ] } );
 	
 	return $fail_in_myself;
+}
+
+sub recursive_check
+# //////////////////////////////////////////////////
+{
+	my ( $expect, $comm, undef, $result ) = @_;
+
+	my $not_eq = 0;
+	
+	if ( ( ref( $result ) eq 'ARRAY' ) and ( ref( $expect ) eq 'ARRAY' ) ) {
+		return 0 if ( !@$result ) and ( !@$expect );
+		$not_eq += ( test_array( $expect, $comm, undef, $result ) ? 1 : 0 );
+	}
+	elsif ( ( ref( $result ) eq 'HASH' ) and ( ref( $expect ) eq 'HASH' ) ) {
+		return 0 if ( !%$result ) and ( !%$expect );
+		$not_eq += ( test_hash( $expect, $comm, undef, $result ) ? 1 : 0 );
+	}
+	else {
+		$not_eq += 1 if $expect ne $result;
+	}
+	
+	return $not_eq;
+	
 }
 
 sub test_line
@@ -981,25 +1088,17 @@ sub test_hash
 # //////////////////////////////////////////////////
 {
 	my ( $expected, $comm, undef, $result ) = @_;
-	my $eq = 1;
+	my $not_eq = 0;
 	
 	for ( keys %$expected, keys %$result ) {
-		if ( ( ref( $result->{ $_ } ) eq 'ARRAY' ) and ( ref( $expected->{ $_ } ) eq 'ARRAY' ) ) {
-			next if ( $result->{ $_ } = [] ) and ( $expected->{ $_ } = [] );
-			$eq = ( test_array( $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 0 : 1 );
-		}
-		elsif ( ( ref( $result->{ $_ } ) eq 'HASH' ) and ( ref( $expected->{ $_ } ) eq 'HASH' ) ) {
-			$eq = ( test_hash( $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 0 : 1 );
-		}
-		else {
-			$eq = 0 if $expected->{ $_ } ne $result->{ $_ };
-		}
+		$not_eq += ( recursive_check( $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 1 : 0 );
 	}
 
-	if ( !$eq ) { 
-		return $comm;
+	if ( $not_eq ) {
+		return 1;
 	};
 }
+
 sub test_array
 # //////////////////////////////////////////////////
 {
@@ -1008,17 +1107,14 @@ sub test_array
 	my $self = shift;
 	my @result = @_;
 
-	my $eq = 1;
-	
-	for ( 1..$#result ) {
-		next if ref( $result[$_] ) and ref( $expected->[$_] );
-		$eq = 0 if $result[$_] ne $expected->[$_];
+	my $not_eq = 0;
+
+	for ( 1..$#result, 1..$#$expected ) {
+		$not_eq += ( recursive_check( $expected->[$_], $comm, undef, $result[$_] ) ? 1 : 0 );
 	}
-	
-	$eq = 0 unless $#result == $#$expected;
-	
-	if ( !$eq ) { 
-		return $comm;
+
+	if ( $not_eq ) { 
+		return 1;
 	};
 }
 
@@ -1030,14 +1126,14 @@ sub test_array_ref
 	my $self = shift;
 	my $result = shift;
 
-	my $eq = 1;
+	my $not_eq = 0;
 	
-	for ( 1..$#{$result} ) {
-		$eq = 0 if $result->[$_] ne $expected->[$_];
+	for ( 1..$#$result, 1..$#$expected ) {
+		$not_eq += ( recursive_check( $expected->[$_], $comm, undef, $result->[$_] ) ? 1 : 0 );
 	}
 	
-	if ( !$eq ) { 
-		return $comm;
+	if ( $not_eq ) { 
+		return 1;
 	};
 }
 
@@ -1061,7 +1157,8 @@ sub test_write_db
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $value = $vars->db->sel1( "SELECT $db_name FROM $db_table WHERE Token = '$test_token'" );
+	my $value = $vars->db->sel1("
+		SELECT $db_name FROM $db_table WHERE Token = '$test_token'" );
 
 	if ( lc( $db_value ) ne lc( $value ) ) {
 		return $comment;
@@ -1071,10 +1168,7 @@ sub test_write_db
 sub pre_corrupt_token
 # //////////////////////////////////////////////////
 {
-	my $type = shift;
-	my $test = shift;
-	my $num = shift;
-	my $token = shift;
+	my ( $type, $test, $num, $token ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
 		$$token =~ s/^A/F/;
@@ -1087,48 +1181,80 @@ sub pre_corrupt_token
 sub pre_finished
 # //////////////////////////////////////////////////
 {
-	my $type = shift;
-	my $test = shift;
-	my $num = shift;
-	my $token = shift;
-	my $vars = shift;
+	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
-		$vars->db->query( "UPDATE AutoToken SET Finished = 1 WHERE Token = '$$token'" );
+		$vars->db->query("
+			UPDATE AutoToken SET Finished = 1 WHERE Token = '$$token'" );
 	} 
 	else {
-		$vars->db->query( "UPDATE AutoToken SET Finished = 0 WHERE Token = '$$token'" );
+		$vars->db->query("
+			UPDATE AutoToken SET Finished = 0 WHERE Token = '$$token'" );
 	}
 }
 
 sub pre_content_1
 # //////////////////////////////////////////////////
 {
-	my $type = shift;
-	my $test = shift;
-	my $num = shift;
-	my $token = shift;
-	my $vars = shift;
+	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
 	
-	$vars->db->query( "UPDATE AutoToken SET Step = 1 WHERE Token = '$$token'" );
+	$vars->db->query("
+		UPDATE AutoToken SET Step = 1 WHERE Token = '$$token'" );
 }
 
 sub pre_content_2
 # //////////////////////////////////////////////////
 {
-	my $type = shift;
-	my $test = shift;
-	my $num = shift;
-	my $token = shift;
-	my $vars = shift;
+	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
 	
-	my $appid = $vars->db->sel1( "SELECT AutoAppID FROM AutoToken WHERE Token = '$$token'" );
+	$vars->db->query("
+		UPDATE AutoAppointments SET PersonalDataPermission = 0, MobilPermission = 0, EMail = '' 
+		WHERE ID = '$appid'" );
 		
-	$vars->db->query( 
-		"UPDATE AutoAppointments SET PersonalDataPermission = 0,
-		MobilPermission = 0, EMail = '' WHERE ID = '$appid'" );
+	$vars->db->query("
+		UPDATE AutoToken SET Step = 2 WHERE Token = '$$token'" );
+}
+
+sub pre_getinfo
+# //////////////////////////////////////////////////
+{
+	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
+	
+	$vars->db->query("
+		UPDATE AutoAppointments SET SDate = '2011-05-01', CenterID = '5'
+		WHERE ID = '$appid'" );
+}
+
+sub pre_init_param
+# //////////////////////////////////////////////////
+{
+	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
+			Insurance, BAddr, JAddr, AddrEqualled, SenderID, SenderCity, CTemplate, isConcil, 
+			isSMS, isUrgent, posShipping, isDover, calcInsurance, cdSimpl, cdUrgent, cdCatD, 
+			CollectDate, siteLink, calcConcil, ConsNDS, genbank, isTranslate, shengen, isAnketa, 
+			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
+			DefaultPaymentMethod, DisableAppSameDay) 
+			VALUES (1, 'Moscow', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 26, 'rtf', 
+			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)");
 		
-	$vars->db->query( "UPDATE AutoToken SET Step = 2 WHERE Token = '$$token'" );
+		$vars->db->query("
+			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
+			Insurance, BAddr, JAddr, AddrEqualled, SenderID, SenderCity, CTemplate, isConcil, 
+			isSMS, isUrgent, posShipping, isDover, calcInsurance, cdSimpl, cdUrgent, cdCatD, 
+			CollectDate, siteLink, calcConcil, ConsNDS, genbank, isTranslate, shengen, isAnketa, 
+			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
+			DefaultPaymentMethod, DisableAppSameDay) 
+			VALUES (2, 'MoscowЫЗИ', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 26, 'rtf', 
+			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)");
+	} 
+	else {
+		$vars->db->query("
+			DELETE FROM Branches");
+	}
 }
 
 1;

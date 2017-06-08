@@ -1167,7 +1167,7 @@ sub resort_with_first_elements
 	my $self = shift;
 	my $country_hash = shift;
 	my $first_elements = shift;
-	
+
 	if ( !$first_elements ) {
 		return sort keys %$country_hash;
 	}	
