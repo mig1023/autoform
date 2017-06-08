@@ -57,9 +57,9 @@ my $tests = [
 		'comment' => 'save_new_token_in_db',
 		'test' => { 	
 			1 => { 	'tester' => \&test_write_db,
-				'args' => [ 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz17' ],
-				'expected' => 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz17'.
-					':AutoToken:Token:abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz17',
+				'args' => [ 'Abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171' ],
+				'expected' => 'Abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171'.
+					':AutoToken:Token:Abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171',
 			},
 		},
 	},
@@ -261,60 +261,6 @@ my $tests = [
 			4 => { 	'tester' => \&test_line,
 				'args' => [ 4 ],
 				'expected' => '|Вы должны полностью закончить все анкеты',
-			},
-		},
-	},
-	{ 	'func' 	=> \&{ VCS::Site::autoform::check_param },
-		'comment' => 'check_param',
-		'test' => { 	
-			1 => { 	'tester' => \&test_line,
-				'args' => [ { 'name' => 'test', 'check' => 'z' } ],
-				'param' => [
-					{ 'name' => 'test', 'value' => '' },
-				],
-				'expected' => 'test|Поле "test" не заполнено',
-			},
-			2 => { 	'tester' => \&test_line,
-				'args' => [ { 'name' => 'test', 'check' => 'zW' } ],
-				'param' => [
-					{ 'name' => 'test', 'value' => 'ABC5АБВ9' },
-				],
-				'expected' => 'test|В поле "test" введены недопустимые символы: 5АБВ9',
-			},
-			3 => { 	'tester' => \&test_line,
-				'args' => [ { 'name' => 'test', 'check' => 'zЁ' } ],
-				'param' => [
-					{ 'name' => 'test', 'value' => 'ABC5АБВ9' },
-				],
-				'expected' => 'test|В поле "test" введены недопустимые символы: ABC59',
-			},
-			4 => { 	'tester' => \&test_line,
-				'args' => [ { 'name' => 'test', 'check' => 'zN' } ],
-				'param' => [
-					{ 'name' => 'test', 'value' => 'ABC5АБВ9' },
-				],
-				'expected' => 'test|В поле "test" введены недопустимые символы: ABCАБВ',
-			},
-			
-			# .......
-		},
-	},
-	{ 	'func' 	=> \&{ VCS::Site::autoform::check_chkbox },
-		'comment' => 'check_chkbox',
-		'test' => { 	
-			1 => { 	'tester' => \&test_line,
-				'args' => [ { 'name' => 'test', 'check' => 'true' } ],
-				'param' => [
-					{ 'name' => 'test', 'value' => '' },
-				],
-				'expected' => 'test|Вы должны указать поле "test"',
-			},
-			2 => { 	'tester' => \&test_line,
-				'args' => [ { 'name' => 'test', 'check' => '' } ],
-				'param' => [
-					{ 'name' => 'test', 'value' => '' },
-				],
-				'expected' => '',
 			},
 		},
 	},
@@ -828,6 +774,99 @@ my $tests = [
 			},
 		},
 	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::get_content_rules },
+		'comment' => 'get_content_rules',
+		'test' => { 	
+			1 => { 	'tester' => \&test_array,
+				'args' => [ '2', 'full', '[token]' ],
+				'expected' =>  
+				[
+					[
+						{
+							'page_name' => 'Данные поездки',
+							'page_ord' => 2,
+							'progress' => 1,
+							'param' => {},
+						},
+						{
+							'type' => 'input',
+							'name' => 's_date',
+							'label' => 'Дата начала поездки',
+							'comment' => '',
+							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'db' => {
+								'table' => 'Appointments',
+								'name' => 'SDate',
+							},
+							'special' => 'datepicker',
+							'param' => {},
+						},
+						{
+							'type' => 'input',
+							'name' => 'f_date',
+							'label' => 'Дата окончания поездки',
+							'comment' => '',
+							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'db' => {
+								'table' => 'Appointments',
+								'name' => 'FDate',
+							},
+							'special' => 'datepicker',
+							'param' => {},
+						},
+					],
+				],
+			},
+			2 => { 	'tester' => \&test_array,
+				'args' => [ '2', undef, '[token]' ],
+				'expected' =>  
+				[
+					[
+						{
+							'type' => 'input',
+							'name' => 's_date',
+							'label' => 'Дата начала поездки',
+							'comment' => '',
+							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'db' => {
+								'table' => 'Appointments',
+								'name' => 'SDate',
+							},
+							'special' => 'datepicker',
+							'param' => {},
+						},
+						{
+							'type' => 'input',
+							'name' => 'f_date',
+							'label' => 'Дата окончания поездки',
+							'comment' => '',
+							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'db' => {
+								'table' => 'Appointments',
+								'name' => 'FDate',
+							},
+							'special' => 'datepicker',
+							'param' => {},
+						},
+					],
+				],
+			},
+			3 => { 	'tester' => \&test_regexp,
+				'args' => [ 'length', undef, '[token]' ],
+				'expected' => '^\d+$',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::set_current_app_finished },
+		'comment' => 'set_current_app_finished',
+		'test' => { 	
+			1 => { 	'tester' => \&test_write_db,
+				'prepare' => \&pre_app_finish,
+				'args' => [ '[appdata_id]' ],
+				'expected' => '[appdata_id]:AutoAppData:Finished:1',
+			},
+		},
+	},
 ];
 
 my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;">Готово!</td>';
@@ -902,7 +941,7 @@ sub get_tests
 			
 			my $t = $test->{test}->{$_};
 			
-			&{ $t->{prepare} }( 'PREPARE', \$test, $_, \$test_token, $test_appid, $vars ) 
+			&{ $t->{prepare} }( 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
 			
 			for (	@{ $t->{args} }, 
@@ -940,7 +979,7 @@ sub get_tests
 				$err_line .= ( $err_line ? ', ' : '' ) . $test_num;
 			}
 			
-			&{ $t->{prepare} }( 'CLEAR', \$test, $_, \$test_token, $test_appid, $vars ) 
+			&{ $t->{prepare} }( 'CLEAR', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
 		} 
 		
@@ -1150,15 +1189,17 @@ sub test_regexp
 sub test_write_db
 # //////////////////////////////////////////////////
 {
-	my ( $test_token, $db_table, $db_name, $db_value ) = split /:/, shift;
+	my ( $token_or_appid, $db_table, $db_name, $db_value ) = split /:/, shift;
 	my $comment = shift;
 	my $self = shift;
 	my $result = shift;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
+	my $field = ( $token_or_appid =~ /^(A[a-z0-9]{63}|Token)$/ ? "Token" : "ID" );
+	
 	my $value = $vars->db->sel1("
-		SELECT $db_name FROM $db_table WHERE Token = '$test_token'" );
+			SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
 
 	if ( lc( $db_value ) ne lc( $value ) ) {
 		return $comment;
@@ -1181,7 +1222,7 @@ sub pre_corrupt_token
 sub pre_finished
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
+	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
 		$vars->db->query("
@@ -1196,7 +1237,7 @@ sub pre_finished
 sub pre_content_1
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
+	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoToken SET Step = 1 WHERE Token = '$$token'" );
@@ -1205,7 +1246,7 @@ sub pre_content_1
 sub pre_content_2
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
+	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoAppointments SET PersonalDataPermission = 0, MobilPermission = 0, EMail = '' 
@@ -1218,7 +1259,7 @@ sub pre_content_2
 sub pre_getinfo
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
+	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoAppointments SET SDate = '2011-05-01', CenterID = '5'
@@ -1228,7 +1269,7 @@ sub pre_getinfo
 sub pre_init_param
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $vars ) = @_;
+	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
 		$vars->db->query("
@@ -1255,6 +1296,16 @@ sub pre_init_param
 		$vars->db->query("
 			DELETE FROM Branches");
 	}
+}
+
+sub pre_app_finish
+# //////////////////////////////////////////////////
+{
+	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	$vars->db->query("
+		UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
+		$appdataid );
 }
 
 1;
