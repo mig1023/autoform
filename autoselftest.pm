@@ -135,11 +135,14 @@ my $tests = [
 					'',
 					'autoform.tt2',
 					{
-						'nearest_date' => [ 'free_date' ],
-						'comment' => [ 'email' ],
+						'nearest_date' => [],
+						'comment' => [],
 						'timeslots' => [],
 						'mask' => [],
-						'datepicker' => []
+						'datepicker' => [
+							's_date',
+							'f_date',
+						],
 					},
 					'[progress_bar]',
 				],
@@ -766,7 +769,6 @@ my $tests = [
 							},
 							'param' => {
 								'1' => 'Moscow',
-								'12' => 'Mosc2ow',
 							}
 						},
 					]
@@ -864,6 +866,30 @@ my $tests = [
 				'prepare' => \&pre_app_finish,
 				'args' => [ '[appdata_id]' ],
 				'expected' => '[appdata_id]:AutoAppData:Finished:1',
+			},
+		},
+	},
+	{ 	'func' 	=> \&{ VCS::Site::autoform::query },
+		'comment' => 'query',
+		'test' => { 	
+			1 => { 	'tester' => \&test_write_db,
+				'args' => [ 'query', 'UPDATE AutoAppData SET Finished = 5 WHERE ID = ?', {}, '[appdata_id]' ],
+				'expected' => '[appdata_id]:AutoAppData:Finished:5',
+			},
+			2 => { 	'tester' => \&test_line,
+				'prepare' => \&pre_query,
+				'args' => [ 'sel1', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+				'expected' => '15',
+			},
+			3 => { 	'tester' => \&test_array,
+				'prepare' => \&pre_query,
+				'args' => [ 'selall', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+				'expected' => [ [ [ '15' ] ] ],
+			},
+			4 => { 	'tester' => \&test_array,
+				'prepare' => \&pre_query,
+				'args' => [ 'selallkeys', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+				'expected' => [ [ { 'Finished' => '15' } ] ],
 			},
 		},
 	},
@@ -971,7 +997,7 @@ sub get_tests
 			}
 
 			my $test_result =  &{ $t->{tester} }( 
-				$t->{expected}, $test->{comment}, $self, 
+				$t->{debug}, $t->{expected}, "$test->{comment}-$test_num", $self, 
 				&{ $test->{func} }( $self, @{ $t->{args} } )
 			);
 			
@@ -1051,48 +1077,48 @@ sub self_self_test
 {
 	my $self = shift;
 	my $fail_in_myself = 0;
+	my $self_debug = 0;
 
-	$fail_in_myself += test_line( '12345ABCD', 'self1', undef, '12345ABCD' );
-	$fail_in_myself += test_line_in_hash( 'key2:value2', 'self2', undef, { 'key1' => 'value1', 'key2' => 'value2' } );
-	$fail_in_myself += test_array( [ '1', 'A', '2', 'B' ], 'self3', $self, ( '1', 'A', '2', 'B' ) );
-	$fail_in_myself += test_array_ref( [ '1', 'A', '2', 'B' ], 'self4', $self, [ '1', 'A', '2', 'B' ] );
-	$fail_in_myself += test_regexp( '^[A-D]+[0-5]+$', 'self5', undef, 'ABCD12345' );
-	
-	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, 'self6', undef, 
+	$fail_in_myself += test_line( $self_debug, '12345ABCD', 'self1', undef, '12345ABCD' );
+	$fail_in_myself += test_line_in_hash( $self_debug, 'key2:value2', 'self2', undef, { 'key1' => 'value1', 'key2' => 'value2' } );
+	$fail_in_myself += test_array( $self_debug, [ '1', 'A', '2', 'B' ], 'self3', $self, ( '1', 'A', '2', 'B' ) );
+	$fail_in_myself += test_array_ref( $self_debug, [ '1', 'A', '2', 'B' ], 'self4', $self, [ '1', 'A', '2', 'B' ] );
+	$fail_in_myself += test_regexp( $self_debug, '^[A-D]+[0-5]+$', 'self5', undef, 'ABCD12345' );
+
+	$fail_in_myself += test_hash( $self_debug, { 'key1' => 'value1', 'key2' => 'value2' }, 'self6', undef, 
 		{ 'key1' => 'value1', 'key2' => 'value2' } );
-	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self7', undef, 
+	$fail_in_myself += test_hash( $self_debug, { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self7', undef, 
 		{ 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] } );	
-	
-	$fail_in_myself += ! test_line( '12345ABCD', 'self8', undef, '12345ABCD0' );
-	$fail_in_myself += ! test_line_in_hash( 'key2:value2', 'self9', undef, { 'key1' => 'value2', 'key2' => 'value1' } );
-	$fail_in_myself += ! test_array( [ '1', 'A', '2', 'B', '3' ], 'self10', $self, ( '1', 'A', '2', 'B' ) );
-	$fail_in_myself += ! test_array_ref( [ '1', 'A', '2', 'B' ], 'self11', $self, [ '1', 'A', '2', 'B', '3' ] );
-	$fail_in_myself += ! test_regexp( '^[A-D]+[0-5]+$', 'self12', undef, 'ABC1234 5' );
-	
-	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => [ 1, 2, 3 ] }, 'self3', undef, 
+
+	$fail_in_myself += ! test_line( $self_debug, '12345ABCD', 'self8', undef, '12345ABCD0' );
+	$fail_in_myself += ! test_line_in_hash( $self_debug, 'key2:value2', 'self9', undef, { 'key1' => 'value2', 'key2' => 'value1' } );
+	$fail_in_myself += ! test_array( $self_debug, [ '1', 'A', '2', 'B', '3' ], 'self10', $self, ( '1', 'A', '2', 'B' ) );
+	$fail_in_myself += ! test_array_ref( $self_debug, [ '1', 'A', '2', 'B' ], 'self11', $self, [ '1', 'A', '2', 'B', '3' ] );
+	$fail_in_myself += ! test_regexp( $self_debug, '^[A-D]+[0-5]+$', 'self12', undef, 'ABC1234 5' );
+
+	$fail_in_myself += ! test_hash( $self_debug, { 'key1' => 'value1', 'key2' => [ 1, 2, 3 ] }, 'self3', undef, 
 		{ 'key1' => 'value1', 'key2' => ( 1, 3, 2 ) } );
-	$fail_in_myself += ! test_hash( { 'key1' => 'value1', 'key2' => 'value2' }, 'self14', undef, 
+	$fail_in_myself += ! test_hash( $self_debug, { 'key1' => 'value1', 'key2' => 'value2' }, 'self14', undef, 
 		{ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' } );
-	$fail_in_myself += test_hash( { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self15', undef, 
+	$fail_in_myself += ! test_hash( 1, { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self15', undef, 
 		{ 'key1' => 'value1', 'key2' => [ { 'key3' => [ 2, 1, 3 ] } ] } );
-	
+		
 	return $fail_in_myself;
 }
 
 sub recursive_check
 # //////////////////////////////////////////////////
 {
-	my ( $expect, $comm, undef, $result ) = @_;
-
+	my ( $debug, $expect, $comm, undef, $result ) = @_;
 	my $not_eq = 0;
 	
 	if ( ( ref( $result ) eq 'ARRAY' ) and ( ref( $expect ) eq 'ARRAY' ) ) {
-		return 0 if ( !@$result ) and ( !@$expect );
-		$not_eq += ( test_array( $expect, $comm, undef, $result ) ? 1 : 0 );
+		return 0 if ( $#$result < 0 ) and ( $#$expect < 0 );
+		$not_eq += ( test_array_ref( $debug, $expect, $comm, undef, $result ) ? 1 : 0 );
 	}
 	elsif ( ( ref( $result ) eq 'HASH' ) and ( ref( $expect ) eq 'HASH' ) ) {
 		return 0 if ( !%$result ) and ( !%$expect );
-		$not_eq += ( test_hash( $expect, $comm, undef, $result ) ? 1 : 0 );
+		$not_eq += ( test_hash( $debug, $expect, $comm, undef, $result ) ? 1 : 0 );
 	}
 	else {
 		$not_eq += 1 if $expect ne $result;
@@ -1105,7 +1131,7 @@ sub recursive_check
 sub test_line
 # //////////////////////////////////////////////////
 {
-	my ( $expected, $comm, undef, $result ) = @_;
+	my ( $debug, $expected, $comm, undef, $result ) = @_;
 
 	if ( lc( $expected ) ne lc( $result ) ) {
 		return $comm;
@@ -1115,7 +1141,7 @@ sub test_line
 sub test_line_in_hash
 # //////////////////////////////////////////////////
 {
-	my ( $expected, $comm, undef, $result ) = @_;
+	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my ( $key, $value ) = split /:/, $expected;
 
 	if ( lc( $result->{ $key } ) ne lc( $value ) ) { 
@@ -1126,11 +1152,11 @@ sub test_line_in_hash
 sub test_hash
 # //////////////////////////////////////////////////
 {
-	my ( $expected, $comm, undef, $result ) = @_;
+	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my $not_eq = 0;
-	
+
 	for ( keys %$expected, keys %$result ) {
-		$not_eq += ( recursive_check( $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 1 : 0 );
+		$not_eq += ( recursive_check( $debug, $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 1 : 0 );
 	}
 
 	if ( $not_eq ) {
@@ -1141,15 +1167,20 @@ sub test_hash
 sub test_array
 # //////////////////////////////////////////////////
 {
+	my $debug = shift;
 	my $expected = shift;
 	my $comm = shift;
 	my $self = shift;
 	my @result = @_;
-
+	
 	my $not_eq = 0;
 
-	for ( 1..$#result, 1..$#$expected ) {
-		$not_eq += ( recursive_check( $expected->[$_], $comm, undef, $result[$_] ) ? 1 : 0 );
+	return 0 if ( $#result < 0 ) and ( $#$expected < 0 );
+	return 1 if ( $#result < 0 ) or ( $#$expected < 0 );
+	return 1 if ( $#result != $#$expected );
+
+	for ( 0..$#result ) {
+		$not_eq += ( recursive_check( $debug, $expected->[$_], $comm, undef, $result[$_] ) ? 1 : 0 );
 	}
 
 	if ( $not_eq ) { 
@@ -1160,6 +1191,7 @@ sub test_array
 sub test_array_ref
 # //////////////////////////////////////////////////
 {
+	my $debug = shift;
 	my $expected = shift;
 	my $comm = shift;
 	my $self = shift;
@@ -1167,8 +1199,13 @@ sub test_array_ref
 
 	my $not_eq = 0;
 	
-	for ( 1..$#$result, 1..$#$expected ) {
-		$not_eq += ( recursive_check( $expected->[$_], $comm, undef, $result->[$_] ) ? 1 : 0 );
+	return 0 if ( $#$result < 0 ) and ( $#$expected < 0 );
+	return 1 if ( $#$result < 0 ) or ( $#$expected < 0 );
+	return 1 if ( $#$result != $#$expected );
+
+
+	for ( 0..$#$result ) {
+		$not_eq += ( recursive_check( $debug, $expected->[$_], $comm, undef, $result->[$_] ) ? 1 : 0 );
 	}
 	
 	if ( $not_eq ) { 
@@ -1179,7 +1216,7 @@ sub test_array_ref
 sub test_regexp
 # //////////////////////////////////////////////////
 {
-	my ( $regexp, $comm, undef, $result ) = @_;
+	my ( $debug, $regexp, $comm, undef, $result ) = @_;
 	
 	if ( $result !~ /$regexp/ ) {
 		return $comm;
@@ -1189,6 +1226,7 @@ sub test_regexp
 sub test_write_db
 # //////////////////////////////////////////////////
 {
+	my $debug = shift;
 	my ( $token_or_appid, $db_table, $db_name, $db_value ) = split /:/, shift;
 	my $comment = shift;
 	my $self = shift;
@@ -1281,16 +1319,6 @@ sub pre_init_param
 			DefaultPaymentMethod, DisableAppSameDay) 
 			VALUES (1, 'Moscow', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 26, 'rtf', 
 			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)");
-		
-		$vars->db->query("
-			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
-			Insurance, BAddr, JAddr, AddrEqualled, SenderID, SenderCity, CTemplate, isConcil, 
-			isSMS, isUrgent, posShipping, isDover, calcInsurance, cdSimpl, cdUrgent, cdCatD, 
-			CollectDate, siteLink, calcConcil, ConsNDS, genbank, isTranslate, shengen, isAnketa, 
-			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
-			DefaultPaymentMethod, DisableAppSameDay) 
-			VALUES (2, 'MoscowЫЗИ', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 26, 'rtf', 
-			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)");
 	} 
 	else {
 		$vars->db->query("
@@ -1306,6 +1334,23 @@ sub pre_app_finish
 	$vars->db->query("
 		UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
 		$appdataid );
+}
+
+sub pre_query
+# //////////////////////////////////////////////////
+{
+	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			UPDATE AutoAppData SET Finished = 15 WHERE ID = ?", {}, 
+			$appdataid );
+	}
+	else {
+		$vars->db->query("
+			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
+			$appdataid );
+	}
 }
 
 1;
