@@ -893,6 +893,77 @@ my $tests = [
 			},
 		},
 	},
+	{	'func' 	=> \&{ VCS::Site::autoform::get_hash_table },
+		'comment' => 'get_hash_table',
+		'test' => { 	
+			1 => { 	'tester' => \&test_hash,
+				'prepare' => \&pre_init_param,
+				'args' => [ 'Branches', '1' ],
+				'expected' => {
+					'ID' => '1',	
+					'BName' => 'Moscow',
+					'Ord' => '1',
+					'Timezone' => '3',
+					'isDeleted' => '0',
+					'isDefault' => '1',
+					'Display' => '1',
+					'Insurance' => '1',
+					'BAddr' => 'г.Москва',
+					'JAddr' => 'г.Москва',
+					'AddrEqualled' => '0',
+					'SenderID' => '1',
+					'SenderCity' => '26',
+					'CTemplate' => 'rtf',
+					'isConcil' => '0',
+					'isSMS' => '1',
+					'isUrgent' => '1',
+					'posShipping' => '1',
+					'isDover' => '1',
+					'calcInsurance' => '0',
+					'cdSimpl' => '3',
+					'cdUrgent' => '2',
+					'cdCatD' => '14',
+					'CollectDate' => '1',
+					'siteLink' => 'http',
+					'calcConcil' => '0',
+					'ConsNDS' => '0',
+					'genbank' => '0',
+					'isTranslate' => '0',
+					'shengen' => '1',
+					'isAnketa' => '1',
+					'isPrinting' => '0',
+					'isPhoto' => '0',
+					'isVIP' => '1',
+					'Weekend' => '67',
+					'isShippingFree' => '0',
+					'isPrepayedAppointment' => '1',
+					'DefaultPaymentMethod' => '1',
+					'DisableAppSameDay' => '0',
+				},
+			},
+		},
+	},
+	{	'func' 	=> \&{ VCS::Site::autoform::create_table },
+		'comment' => 'create_table',
+		'test' => { 	
+			1 => { 	'tester' => \&test_regexp,
+				'args' => [ 
+					'AutoAppointments', 'Appointments', { 'AutoAppointments' => '[app_id]' }, 
+					{
+						'Appointments' => { 
+							'PersonalDataPermission' => 'nope',
+							'MobilPermission' => 'nope',
+							'PersonForAgreements' => 'nope',
+						}
+					}
+				],
+				'expected' => '^[1-9]\d*$',
+			},
+			
+			# .......
+		},
+	},
+	
 ];
 
 my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;">Готово!</td>';
@@ -988,7 +1059,10 @@ sub get_tests
 				$_ = $self->get_content_rules( 1, 'full' ) if /\[page1\]/;
 				
 				if ( ref($_) eq 'HASH' ) {
-					$_->{value} =~ s/\[token\]/$test_token/g if exists $_->{value};
+					for my $field ( keys %$_ ) {
+						$_->{ $field } =~ s/\[token\]/$test_token/g;
+						$_->{ $field } =~ s/\[app_id\]/$test_appid/g;
+					}
 				}
 			}
 			
