@@ -162,21 +162,16 @@ sub get_same_info_for_timeslots
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $appinfo = {};
-	
-	my $appid = $self->query('sel1', "
-		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $token );
+
+	( $appinfo->{ persons }, $appinfo->{ center }, $appinfo->{ fdate } ) = $self->query('sel1', "
+		SELECT count(AutoAppData.ID), CenterID, SDate
+		FROM AutoToken 
+		JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $token );
 		
-	$appinfo->{ persons } = $self->query('sel1', "
-		SELECT COUNT(ID) FROM AutoAppData WHERE AppID = ?", $appid );
-	
-	$appinfo->{ center } = $self->query('sel1', "
-		SELECT CenterID FROM AutoAppointments WHERE ID = ?", $appid );
-	
-	$appinfo->{ fdate } = $self->query('sel1', "
-		SELECT SDate FROM AutoAppointments WHERE ID = ?", $appid );
-	
 	$appinfo->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
-	
+
 	return $appinfo;
 }
 
@@ -190,21 +185,28 @@ sub init_add_param
 	my $vars = $self->{ 'VCS::Vars' };
 	my $country_code = 'RUS';
 
-	my $info_from_db = {
-		'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
-		'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
-		'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries ORDER BY EnglishName',
-		'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName',
-		'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
-		'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
-		'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
-	};
+	my $info_from_db = $vars->get_memd->get('autoform_addparam');
 	
-	for ( keys %$info_from_db ) {
-		$info_from_db->{ $_ } = $self->query('selall', $info_from_db->{ $_ } );
+	if ( !$info_from_db ) {
+		my $info_from_sql = {
+			'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
+			'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
+			'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries ORDER BY EnglishName',
+			'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName',
+			'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
+			'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
+			'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
+		};
+		
+		for ( keys %$info_from_sql ) {
+			$info_from_db->{ $_ } = $self->query('selall', $info_from_sql->{ $_ } );
+		}
+		
+		$vars->get_memd->set('autoform_addparam', $info_from_db, 12*3600 );
 	}
 
 	if ( $token ) {
+
 		$info_from_db->{ '[persons_in_app]' } = $self->query('selall', "
 			SELECT AutoAppData.ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person
 			FROM AutoToken 
@@ -579,7 +581,6 @@ sub set_current_app_finished
 {
 	my $self = shift;
 	my $appdata_id = shift;
-	my $token = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
