@@ -980,7 +980,7 @@ sub selftest
 	my $config = $vars->getConfig('db');
 	
 	$vars->db->query("USE fake_vcs");
-	
+
 	my $result = [ { 'text' => "self_self_test", 'status' => self_self_test() } ];
 	
 	my @param = get_test_appointments( $self, $vars );
@@ -1382,6 +1382,8 @@ sub pre_init_param
 # //////////////////////////////////////////////////
 {
 	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	my $info_from_db = $vars->get_memd->delete('autoform_addparam');
 	
 	if ( $type eq 'PREPARE' ) { 
 		$vars->db->query("
