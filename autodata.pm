@@ -1,6 +1,18 @@
 ﻿package VCS::Site::autodata;
 use strict;
 
+sub get_settings
+# //////////////////////////////////////////////////
+{
+	my $settings = {
+		'addr' => '/autoform/',
+		'addr_captcha' => '/vcs/static/files/',
+		'addr_vcs' => '/vcs/',
+	};
+	
+	return $settings;
+}
+
 sub get_tables_controled_by_AutoToken
 # //////////////////////////////////////////////////
 {
@@ -127,7 +139,7 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'SDate',
 				},
-				'special' => 'datepicker',
+				'special' => 'datepicker, mask',
 			},
 			{
 				'type' => 'input',
@@ -139,7 +151,7 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'FDate',
 				},
-				'special' => 'datepicker',
+				'special' => 'datepicker, mask',
 			},
 		],
 		
@@ -708,7 +720,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'AppSDate',
 				},
-				'special' => 'datepicker',
+				'special' => 'datepicker, mask',
 			},
 			{
 				'type' => 'input',
@@ -720,7 +732,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'AppFDate',
 				},
-				'special' => 'datepicker',
+				'special' => 'datepicker, mask',
 			},
 			{
 				'type' => 'input',
@@ -1635,7 +1647,7 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'AppDate',
 				},
-				'special' => 'datepicker',
+				'special' => 'datepicker, mask',
 				'uniq_code' => 'onchange="update_timeslots();"',
 			},
 			{
@@ -1689,6 +1701,39 @@ sub get_content_rules_hash
 				'check' => '',
 				'db' => {},
 			},
+			{
+				'type' => 'info',
+				'name' => 'new_app_num',
+				'label' => 'Ваш номер записи',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
+			},
+			{
+				'type' => 'info',
+				'name' => 'new_app_branch',
+				'label' => 'Ваш визовый центр',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'CenterID',
+					'transfer' => 'nope',
+				},
+			},
+			{
+				'type' => 'info',
+				'name' => 'new_app_timeslot',
+				'label' => 'Время',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'TimeslotID',
+					'transfer' => 'nope',
+				},
+			},
+			
 		],
 	};
 	

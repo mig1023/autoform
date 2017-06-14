@@ -6,6 +6,7 @@
 [% IF special.datepicker %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
+	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 [% END %]
 [% IF special.mask %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
@@ -30,11 +31,11 @@
 [% content_text %]
 
 <tr><td colspan="3">
-[% IF step > 1 %]
+[% IF ( step > 1 ) && ( step != max_step ) %]
 	<input type="button" value="◁ [% langreq('Назад') %]" onclick="prev_button();">
 	&nbsp;
 [% END %]
-[% IF (step < max_step) && (step > 0) %]
+[% IF ( step < max_step ) && ( step > 0 ) %]
 	<input type="button" value="[% langreq('Далее') %] ▷" onclick="next_button();">
 [% END %]
 </td></tr></table>

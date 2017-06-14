@@ -28,9 +28,7 @@ sub getContent
 
 	my $vars = $self->{'VCS::Vars'};
 	
-	$self->{'autoform'}->{'addr'} = '/autoform/';
-	$self->{'autoform'}->{'addr_captcha'} = '/vcs/static/files/';
-	$self->{'autoform'}->{'addr_vcs'} = '/vcs/';
+	$self->{'autoform'} = VCS::Site::autodata::get_settings();
 
     	my $dispathcher = {
     		'index' => \&autoform,
@@ -41,6 +39,7 @@ sub getContent
 
     	$vars->get_system->redirect( $vars->getform('fullhost').$self->{'autoform'}->{'addr'}.'index.htm' )
     		if !$disp_link;
+	
     	&{$disp_link}( $self, $task, $id, $template );
     	
     	return 1;	
@@ -300,7 +299,6 @@ sub create_clear_form
 	$self->query('query', "
 		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
 		$app_id, $token );
-
 }
 	
 sub save_new_token_in_db
@@ -325,7 +323,7 @@ sub token_generation
 	my $vars = $self->{ 'VCS::Vars' };
 
 	my $token_existing = 1;
-	my $token = 'A';
+	my $token = 'a';
 	
 	do {
 		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
@@ -379,16 +377,18 @@ sub get_autoform_content
 	my $appdata_id = $vars->getparam('person');
 	$appdata_id =~ s/[^0-9]//g;
 	
+	my $appnum = undef;
+	
 	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
 		$step = $self->get_back( $step, $token );
 	}
 
 	if ( ( $action eq 'forward' ) and ( $step < $self->get_content_rules('length') ) ) {
-		( $step, $last_error ) = $self->get_forward($step, $token);
+		( $step, $last_error, $appnum ) = $self->get_forward( $step, $token );
 	}
 
 	if ( ( $action eq 'edit' ) and $appdata_id ) {
-		$step = $self->get_edit($step, $appdata_id, $token);
+		$step = $self->get_edit( $step, $appdata_id, $token );
 	}
 	
 	if ( ( $action eq 'delapp' ) and $appdata_id ) {
@@ -426,7 +426,7 @@ sub get_autoform_content
 		$title = $page->[0]->{ page_name };
 	}
 
-	my ( $content, $template ) = $self->get_html_page( $step, $token );
+	my ( $content, $template ) = $self->get_html_page( $step, $token, $appnum );
 
 	my $progress = $self->get_progressbar( $page );
 	
@@ -565,15 +565,17 @@ sub get_forward
 			$step, $token );
 	}
 
+	my $appnum = undef;
+	
 	if ( !$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
 		$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
 	}
 
 	if ( $step >= $self->get_content_rules( 'length' ) ) {
-		$self->set_appointment_finished( $token );
+		( undef, $appnum ) = $self->set_appointment_finished( $token );
 	}
 
-	return ( $step, $last_error );
+	return ( $step, $last_error, $appnum );
 }
 
 sub set_current_app_finished
@@ -597,7 +599,9 @@ sub set_appointment_finished
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my ( $new_appid, $ncount ) = $self->create_new_appointment( $token );
+	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment( $token );
+	
+	$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
 	
 	$self->query('query', "
 		UPDATE AutoToken SET EndDate = now(), Finished = 1, CreatedApp = ? WHERE Token = ?", {}, 
@@ -606,6 +610,8 @@ sub set_appointment_finished
 	$self->query('query', "
 		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? WHERE ID = ?", {}, 
 		$ncount, $new_appid );
+		
+	return ( $new_appid, $appnum );
 }
 
 sub get_step_by_content
@@ -645,7 +651,7 @@ sub set_step_by_content
 	$self->query('query', "
 		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
 		$step, $token );
-			
+
 	return $step;
 }
 
@@ -700,7 +706,7 @@ sub get_delete
 		$self->query('query', "
 			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, 
 			$sch_id );
-			
+
 		$self->mod_last_change_date( $token );
 	}
 }
@@ -817,6 +823,7 @@ sub get_html_page
 	my $self = shift;
 	my $step = shift;
 	my $token = shift;
+	my $appnum = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -834,7 +841,8 @@ sub get_html_page
 	}
 	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id( $token ) );
-
+	$current_values->{ 'new_app_num' } = $appnum if $appnum;
+	
 	for my $element ( @$page_content ) {
 		$content .= $self->get_html_line( $element, $current_values );
 	}
@@ -896,7 +904,7 @@ sub get_specials_of_element
 	
 	for my $element ( @$page_content ) {
 		for my $spec_type ( keys %$special ) {
-			push( $special->{ $spec_type }, $element->{name} ) if $element->{special} eq $spec_type;
+			push( $special->{ $spec_type }, $element->{name} ) if $element->{special} =~ /$spec_type/;
 		}
 
 		push( $special->{ 'comment' }, $element->{name} ) if $element->{comment} ne '';
@@ -1018,7 +1026,7 @@ sub get_html_for_element
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
 		'example'		=> '<tr [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
 					'<span style="color:gray; font-size:0.7em;">[value]</span></td></td>',
-		'info'			=> '<label id="[name]" [u]></label>',
+		'info'			=> '<label id="[name]" [u]><b>[text]</b></label>',
 		'checklist'		=> '[options]',
 		'checklist_insurer'	=> '[options]',
 		'captcha'		=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
@@ -1159,6 +1167,10 @@ sub get_html_for_element
 		$content =~ s/\[format\]/$form/;
 	}
 	
+	if ( $type eq 'info' and $value ) {
+		$content =~ s/\[text\]/$value/;
+	}
+	
 	return $content;
 }
 
@@ -1294,21 +1306,21 @@ sub get_all_values
 	my $vars = $self->{'VCS::Vars'};
 	
 	my $all_values = {};
-	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'get' );
+	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'full' );
 
 	for my $table ( keys %$request_tables ) {
 
-		next if !$table_id->{$table};
+		next if !$table_id->{ $table };
 
-		my $request = join ',', keys %{$request_tables->{$table}};
+		my $request = join ',', keys %{ $request_tables->{ $table } };
 		
 		my $result = $self->query('selallkeys', "
-			SELECT $request FROM $table WHERE ID = ?", $table_id->{$table} );
+			SELECT $request FROM $table WHERE ID = ?", $table_id->{ $table } );
 		$result = $result->[0];
 		
 		for my $value ( keys %$result ) {
-			$all_values->{$request_tables->{$table}->{$value} } = 
-				$self->decode_data_from_db( $step, $request_tables->{$table}->{$value}, $result->{$value} );
+			$all_values->{$request_tables->{ $table }->{ $value } } = 
+				$self->decode_data_from_db( $step, $request_tables->{ $table }->{ $value }, $result->{ $value } );
 		}
 	}
 
@@ -1609,9 +1621,12 @@ sub create_new_appointment
 		my $sch_appid = $self->create_table( 'AutoSchengenAppData', 'SchengenAppData', $tables_transfered_id, $db_rules );
 		
 		my $appid = $self->create_table( 'AutoAppData', 'AppData', $tables_transfered_id, $db_rules, $new_appid, $sch_appid );
-	}	
+	}
+	
+	my $appnum = $self->query('sel1', "
+		SELECT AppNum FROM Appointments WHERE ID = ?", $new_appid );
 
-	return ( $new_appid, scalar @$allapp );
+	return ( $new_appid, scalar @$allapp, $appnum );
 }
 
 sub create_table
