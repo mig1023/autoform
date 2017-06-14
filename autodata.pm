@@ -1733,7 +1733,10 @@ sub get_content_rules_hash
 					'transfer' => 'nope',
 				},
 			},
-			
+			{
+				'type' => 'free_line',
+				'db' => {},
+			},
 		],
 	};
 	

@@ -599,6 +599,12 @@ sub set_appointment_finished
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
+	my $this_is_draft = $self->query('sel1', "
+		SELECT Draft FROM AutoToken WHERE Token = ?", 
+		$token );
+
+	return ( 0, 'draft' ) if $this_is_draft; 
+	
 	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment( $token );
 	
 	$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
@@ -920,6 +926,8 @@ sub get_html_line
 	my $element = shift;
 	my $values = shift;
 
+	return $self->get_html_for_element( 'free_line' ) if $element->{type} eq 'free_line';
+	
 	my $content = $self->get_html_for_element( 'start_line' );
 	
 	if ( $element->{type} eq 'text' ) {
@@ -1038,7 +1046,7 @@ sub get_html_for_element
 					');background-size: 100% 100%;"><div [format]><div style="padding-top:7px;' . 
 					'color:white;font-size:30">[name]</div></div></td>',
 		'stages'		=> '<td [format]>[progress_stage]</td>',
-		
+		'free_line'		=> '<tr><td colspan="3">&nbsp;</td></tr>',
 	};
 	
 	my $content = $elements->{ $type };

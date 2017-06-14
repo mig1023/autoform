@@ -30,13 +30,16 @@
 
 [% content_text %]
 
-<tr><td colspan="3">
+<tr><td colspan="3"><br>
 [% IF ( step > 1 ) && ( step != max_step ) %]
-	<input type="button" value="◁ [% langreq('Назад') %]" onclick="prev_button();">
+	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 [% END %]
 [% IF ( step < max_step ) && ( step > 0 ) %]
-	<input type="button" value="[% langreq('Далее') %] ▷" onclick="next_button();">
+	<input type="button" value="[% langreq('Далее') %] ▷" onclick="go_button('forward');">
+[% END %]
+[% IF ( step == max_step ) %]
+	<input type="button" value="[% langreq('Перейти на страницу записи') %] ▷" onclick="go_button('app');">
 [% END %]
 </td></tr></table>
 
@@ -44,13 +47,8 @@
 
 <script>
 
-function next_button() {
-	$('#action').val('forward');
-	document.dataform.submit();
-};
-
-function prev_button() {
-	$('#action').val('back');
+function go_button(where) {
+	$('#action').val(where);
 	document.dataform.submit();
 };
 
