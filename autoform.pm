@@ -549,7 +549,7 @@ sub get_forward
 	$self->save_data_from_form( $step, $current_table_id );
 	$self->mod_last_change_date( $token );
 	
-	my $last_error = $self->check_data_from_form( $step );
+	my $last_error = $self->check_data_from_form( $token, $step );
 
 	if ( $last_error ) {
 		my @last_error = split /\|/, $last_error;
@@ -1466,10 +1466,12 @@ sub check_data_from_form
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	my $token = shift;
 	my $step = shift;
 	
 	my $vars = $self->{'VCS::Vars'};
-	my $page_content = $self->get_content_rules($step);
+	my $page_content = $self->get_content_rules( $step );
+	my $tables_id = $self->get_current_table_id( $token );
 
 	return if $page_content =~ /^\[/;
 	
@@ -1477,17 +1479,22 @@ sub check_data_from_form
 	
 	for my $element (@$page_content) {
 		last if $first_error;
-		next if !$element->{check};
-		if ( $element->{type} =~ /checkbox/ ) {
-			$first_error = $self->check_chkbox( $element );
+		
+		if ( $element->{check} ) {
+			if ( $element->{type} =~ /checkbox/ ) {
+				$first_error = $self->check_chkbox( $element );
+			}
+			elsif ( ( $element->{type} =~ /input/ ) and ( $element->{check} =~ /captcha_input/ ) ) {
+				$first_error = $self->check_captcha( $element );
+			}
+			else {
+				$first_error = $self->check_param( $element );
+			}
 		}
-		elsif ( ( $element->{type} =~ /input/ ) and ( $element->{check} =~ /captcha_input/ ) ) {
-			$first_error = $self->check_captcha( $element );
-			$first_error = "$element->{name}|$first_error" if $first_error;
-			}
-		else {
-			$first_error = $self->check_param( $element );
-			}
+		
+		if ( !$first_error and $element->{check_logic} ) {
+			$first_error = $self->check_logic( $element, $tables_id );
+		}
 	}
 	return $first_error;
 }
@@ -1547,15 +1554,52 @@ sub check_captcha
 	my $element = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
-	
-	my $config = $vars->getConfig('captcha');
 	my $captcha = $vars->getcaptcha();
 	
 	my $capverify = $vars->getparam( $element->{name} ) || '';
 	my $rcode = $vars->getparam('code') || '';
 	my $c_status = $captcha->check_code( $capverify, $rcode );
 	
-	return $vars->getCaptchaErr( $c_status );
+	my $captcha_error = $vars->getCaptchaErr( $c_status );
+	$captcha_error = "$element->{name}|$captcha_error" if $captcha_error;
+	
+	return $captcha_error;
+}
+
+sub check_logic
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $element = shift;
+	my $tables_id = shift;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	my $value = $vars->getparam( $element->{name} );
+	my $first_error = '';
+	my $error = 0;
+
+	for my $rule ( @{ $element->{ check_logic } } ) {
+	
+		if ( $rule->{ condition } =~ /^equal_or_(later|earlier)$/ ) {
+			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
+
+			my $datediff = $self->query('sel1', "
+				SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
+				$value, $tables_id->{ 'Auto'.$rule->{table} } );
+
+			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
+				
+			$error = 6 if ( ( $datediff < ( $offset * -1 ) ) and ( $rule->{ condition } =~ /later$/ ) );
+			$error = 8 if ( ( $datediff > $offset ) and ( $rule->{ condition } =~ /earlier$/ ) );
+
+			$first_error = $self->text_error( ( $offset ? $error+1 : $error ), $element, undef, 
+				$rule->{ error }, $offset ) if $error;
+		}
+		
+		last if $first_error;
+	}
+	
+	return $first_error;	
 }
 
 sub text_error
@@ -1565,6 +1609,8 @@ sub text_error
 	my $error_code = shift;
 	my $element = shift;
 	my $incorrect_symbols = shift;
+	my $relation = shift;
+	my $offset = shift;
 	
 	my $text = [
 		'Поле "[name]" не заполнено',
@@ -1573,6 +1619,10 @@ sub text_error
 		'Вы должны указать поле "[name]"',
 		'Вы должны полностью закончить все анкеты',
 		'Вы должны добавить по меньшей мере одного заявителя',
+		'"[name]" не может быть раньше, чем "[relation]"',
+		'"[name]" не может быть раньше, чем "[relation]", больше чем на [offset] дня',
+		'"[name]" не может быть позднее, чем "[relation]"',
+		'"[name]" не может быть позднее, чем "[relation]", больше чем на [offset] дня',
 	];
 	
 	if ( !defined($element) ) {
@@ -1584,6 +1634,8 @@ sub text_error
 	
 	my $current_error = $text->[ $error_code ];
 	$current_error =~ s/\[name\]/$name_of_element/;
+	$current_error =~ s/\[relation\]/$relation/;
+	$current_error =~ s/\[offset\]/$offset/;
 	
 	my $text_error = "$element->{name}|$current_error";
 	$text_error .= ': ' . $incorrect_symbols if $error_code == 2;

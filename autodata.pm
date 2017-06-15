@@ -147,6 +147,22 @@ sub get_content_rules_hash
 				'label' => 'Дата окончания поездки',
 				'comment' => '',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'equal_or_later',
+						'table' => 'Appointments',
+						'name' => 'SDate',
+						'error' => 'Дата начала поездки',
+					#	'offset' => 3,
+					},
+					{
+						'condition' => 'equal_or_earlier',
+						'table' => 'Appointments',
+						'name' => 'SDate',
+						'error' => 'Дата начала поездки',
+					#	'offset' => 3,
+					},
+				],
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'FDate',
