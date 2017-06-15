@@ -240,6 +240,14 @@ sub get_content_rules_hash
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				'example' => '754300001',
 				'check' => 'zN',
+				'check_logic' => [
+					{
+						'condition' => 'unique_in_pending',
+						'table' => 'Appointments',
+						'name' => 'PassNum',
+						'error' => 'Дата начала поездки',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RPassNum',

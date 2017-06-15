@@ -1596,6 +1596,17 @@ sub check_logic
 				$rule->{ error }, $offset ) if $error;
 		}
 		
+		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
+
+			my $id_in_db = $self->query('sel1', "
+				SELECT COUNT(ID) FROM $rule->{table} WHERE Status = 1 AND $rule->{name} = ?",
+				$value );
+
+			$error = 10 if $id_in_db;
+
+			$first_error = $self->text_error( 10, $element ) if $id_in_db;
+		}
+		
 		last if $first_error;
 	}
 	
@@ -1623,6 +1634,7 @@ sub text_error
 		'"[name]" не может быть раньше, чем "[relation]", больше чем на [offset] дня',
 		'"[name]" не может быть позднее, чем "[relation]"',
 		'"[name]" не может быть позднее, чем "[relation]", больше чем на [offset] дня',
+		'Поле "[name]" уже встречается в актуальных записях.',
 	];
 	
 	if ( !defined($element) ) {
