@@ -1,5 +1,7 @@
 <head>
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
+<link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 </head>
 
 <center>
@@ -14,19 +16,16 @@
 
 <tr><td colspan="5"><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><td><tr>
 
-[% IF last_error_text %]
-	<tr><td colspan="5">[% langreq(last_error_text) %]<br><br></td></tr>
-[% END %]
-
 [% IF content_text.0.ID == "X" %]
-	<tr><td colspan="5">
+	<tr><td colspan="5" id = "applist">
 	[% langreq('Ни один заявитель ещё не добавлен') %]
 	</td></tr>
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
 	<tr>
 	<td>[% i %].</td>
-	<td>[% IF !person.Finished %][draft][% END %] [% person.FName %] [% person.LName %]</td>
+	<td [% IF i == 1 %]id = "applist"[% END %]>
+	[% IF !person.Finished %][draft][% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% person.BirthDate %]</td>
 	<td><input type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
 	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
@@ -35,16 +34,16 @@
 [% END %]
 
 <tr><td colspan="5">
-	<input type="button" value="[% langreq('Добавить заявителя') %]" onclick="add_button();">
+	<input type="button" value="[% langreq('Добавить заявителя') %]" onclick="go_button('addapp');">
 </td></tr>
 
 <tr><td colspan="5">&nbsp;
 </td></tr>
 
 <tr><td colspan="5">
-	<input type="button" value="◁ [% langreq('Назад') %]" onclick="prev_button();">
+	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
-	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="finish_button();">
+	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="go_button('tofinish');">
 </td></tr>
 </table>
 
@@ -52,14 +51,23 @@
 
 <script>
 
+[% IF last_error_name %]
+	$('#[% last_error_name %]').poshytip({
+		className: 'tip-redsimple',
+		content: '[% langreq(last_error_text) %]',
+		showOn: 'none',
+		alignTo: 'target',
+		alignX: 'inner-left',
+		offsetX: 0,
+		offsetY: 5
+	});
+
+	$('#[% last_error_name %]').poshytip('show');
+[% END %]
+
 function edit_button(id) {
 	$('#action').val('edit');
 	$('#person').val(id);
-	document.dataform.submit();
-};
-
-function add_button(id) {
-	$('#action').val('addapp');
 	document.dataform.submit();
 };
 
@@ -69,13 +77,8 @@ function delapp_button(id) {
 	document.dataform.submit();
 };
 
-function prev_button() {
-	$('#action').val('back');
-	document.dataform.submit();
-};
-
-function finish_button(id) {
-	$('#action').val('tofinish');
+function go_button(where) {
+	$('#action').val(where);
 	document.dataform.submit();
 };
 

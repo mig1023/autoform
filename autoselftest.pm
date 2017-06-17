@@ -10,7 +10,7 @@ my $tests = [
 		'test' => {	
 			1 => { 	'tester' => \&test_regexp,
 				'args' => [],
-				'expected' => '^A[a-z0-9]{63}$',
+				'expected' => '^a[a-z0-9]{63}$',
 			},
 			2 => {	'tester' => \&test_line,
 				'args' => [],
@@ -49,7 +49,7 @@ my $tests = [
 		'test' => { 	
 			1 => { 	'tester' => \&test_regexp,
 				'args' => [],
-				'expected' => '^A[a-z0-9]{63}$',
+				'expected' => '^a[a-z0-9]{63}$',
 			},
 		},
 	},
@@ -57,9 +57,9 @@ my $tests = [
 		'comment' => 'save_new_token_in_db',
 		'test' => { 	
 			1 => { 	'tester' => \&test_write_db,
-				'args' => [ 'Abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171' ],
-				'expected' => 'Abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171'.
-					':AutoToken:Token:Abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171',
+				'args' => [ 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171' ],
+				'expected' => 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171'.
+					':AutoToken:Token:abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171',
 			},
 		},
 	},
@@ -344,8 +344,8 @@ my $tests = [
 					'<span style="color:gray; font-size:0.7em;">text</span></td></td>',
 			},
 			12 => {	'tester' => \&test_line,
-				'args' => [ 'info', 'element' ],
-				'expected' => '<label id="element"></label>',
+				'args' => [ 'info', 'element', 'text' ],
+				'expected' => '<label id="element"><b>text</b></label>',
 			},
 			13 => {	'tester' => \&test_line,
 				'args' => [ 'label', 'element', 'text' ],
@@ -1308,7 +1308,7 @@ sub test_write_db
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $field = ( $token_or_appid =~ /^(A[a-z0-9]{63}|Token)$/ ? "Token" : "ID" );
+	my $field = ( $token_or_appid =~ /^(a[a-z0-9]{63}|Token)$/ ? "Token" : "ID" );
 	
 	my $value = $vars->db->sel1("
 			SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
@@ -1324,10 +1324,10 @@ sub pre_corrupt_token
 	my ( $type, $test, $num, $token ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
-		$$token =~ s/^A/F/;
+		$$token =~ s/^a/F/;
 	}
 	else {
-		$$token =~ s/^F/A/;
+		$$token =~ s/^F/a/;
 	}	
 }
 

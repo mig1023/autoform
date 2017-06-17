@@ -406,7 +406,7 @@ sub get_autoform_content
 			$step = $self->set_step_by_content( $token, '[app_finish]', 'next' );
 		} else {
 			$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
-			$last_error = $self->text_error( ( $app_status == 1 ? 4 : 5 ), undef, undef);
+			$last_error = $self->text_error( ( $app_status == 1 ? 4 : 5 ), { 'name' => 'applist' }, undef);
 		}
 	}
 	
@@ -1034,6 +1034,7 @@ sub get_html_for_element
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
 		'example'		=> '<tr [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
 					'<span style="color:gray; font-size:0.7em;">[value]</span></td></td>',
+
 		'info'			=> '<label id="[name]" [u]><b>[text]</b></label>',
 		'checklist'		=> '[options]',
 		'checklist_insurer'	=> '[options]',
@@ -1045,6 +1046,7 @@ sub get_html_for_element
 		'progress'		=> '<td align="center" style="background-image: url(' . "'/images/pbar-[back].png'" .
 					');background-size: 100% 100%;"><div [format]><div style="padding-top:7px;' . 
 					'color:white;font-size:30">[name]</div></div></td>',
+					
 		'stages'		=> '<td [format]>[progress_stage]</td>',
 		'free_line'		=> '<tr><td colspan="3">&nbsp;</td></tr>',
 	};
@@ -1651,7 +1653,7 @@ sub text_error
 	
 	my $text_error = "$element->{name}|$current_error";
 	$text_error .= ': ' . $incorrect_symbols if $error_code == 2;
-
+	
 	return $text_error;	
 }
 

@@ -2,6 +2,7 @@
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+<link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 
 [% IF special.datepicker %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
@@ -23,10 +24,6 @@
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 <tr><td colspan="3"><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><td><tr>
-
-[% IF last_error_text %]
-	<tr><td colspan="3">[% langreq(last_error_text) %]<br><br></td></tr>
-[% END %]
 
 [% content_text %]
 
@@ -54,6 +51,18 @@ function go_button(where) {
 
 [% IF last_error_name %]
 	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
+	
+	$('#[% last_error_name %]').poshytip({
+		className: 'tip-redsimple',
+		content: '[% langreq(last_error_text) %]',
+		showOn: 'none',
+		alignTo: 'target',
+		alignX: 'inner-left',
+		offsetX: 0,
+		offsetY: 5
+	});
+
+	$('#[% last_error_name %]').poshytip('show');
 [% END %]
 
 [% FOREACH picker IN special.datepicker %]
@@ -173,12 +182,9 @@ function update_timeslots() {
 		$('#timeslot').show();
 		
 		var al = $(xml).find('urgent_flag');
-		if (al.text() != '')
-		{
+		if (al.text() != '') {
 			var alertText = al.text();
 			alert(alertText);
-		} else {
-			// alert not
 		}
     }, 'xml');
 };
