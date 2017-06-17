@@ -133,7 +133,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 's_date',
 				'label' => 'Дата начала поездки',
-				'comment' => '',
+				'comment' => 'Введите предполагаемую дату начала поездки',
+				'example' => '01.01.2025',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'Appointments',
@@ -145,7 +146,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'f_date',
 				'label' => 'Дата окончания поездки',
-				'comment' => '',
+				'comment' => 'Введите предполагаемую дату окончания поездки',
+				'example' => '31.12.2025',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -200,7 +202,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rufname',
 				'label' => 'Имя',
-				'comment' => 'Введите имя на русском языке так, как она указана во внутреннем паспорте',
+				'comment' => 'Введите имя на русском языке так, как оно указана во внутреннем паспорте',
 				'example' => 'Иван',
 				'check' => 'zЁ',
 				'db' => {
@@ -212,7 +214,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rumname',
 				'label' => 'Отчество',
-				'comment' => 'Введите отчество на русском языке так, как она указана во внутреннем паспорте',
+				'comment' => 'Введите отчество на русском языке так, как оно указана во внутреннем паспорте',
 				'example' => 'Иванович',
 				'check' => 'zЁ',
 				'db' => {
@@ -245,7 +247,6 @@ sub get_content_rules_hash
 						'condition' => 'unique_in_pending',
 						'table' => 'Appointments',
 						'name' => 'PassNum',
-						'error' => 'Дата начала поездки',
 					},
 				],
 				'db' => {
@@ -313,7 +314,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'lname',
 				'label' => 'Фамилия',
-				'comment' => '',
+				'comment' => 'Введите фамилию на английском языке так, как она указана в загранпаспорте',
+				'example' => 'Ivanov',
 				'check' => 'zW',
 				'db' => {
 					'table' => 'AppData',
@@ -324,7 +326,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'fname',
 				'label' => 'Имя',
-				'comment' => '',
+				'comment' => 'Введите имя на английском языке так, как оно указана в загранпаспорте',
+				'example' => 'Ivan',
 				'check' => 'zW',
 				'db' => {
 					'table' => 'AppData',
@@ -335,7 +338,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rupassnum',
 				'label' => '№ загранпаспорта',
-				'comment' => '',
+				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				'example' => '753500001',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -346,7 +350,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'passdate',
 				'label' => 'Дата выдачи',
-				'comment' => '',
+				'comment' => 'Введите дату выдачи, указанную в паспорте',
+				'example' => '01.01.2010',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -358,7 +363,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'passtill',
 				'label' => 'Действителен до',
-				'comment' => '',
+				'comment' => 'Введите дату окончания действия загранпаспорта, указанную в паспорте',
+				'example' => '01.01.2010',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -370,7 +376,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'passwhere',
 				'label' => 'Выдан',
-				'comment' => '',
+				'comment' => 'UFMS/FMS и номер подразделения',
+				'example' => 'FMS 12345',
 				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',
@@ -1742,7 +1749,6 @@ sub get_content_rules_hash
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'CenterID',
-					'transfer' => 'nope',
 				},
 			},
 			{
@@ -1754,7 +1760,6 @@ sub get_content_rules_hash
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'TimeslotID',
-					'transfer' => 'nope',
 				},
 			},
 			{

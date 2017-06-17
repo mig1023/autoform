@@ -345,16 +345,15 @@ sub get_token_error
 	my $template = 'autoform.tt2';
 
 	my $error_type = [
-		'internal data error',
-		'token corrupted',
-		'token not existing',
-		'app already finished',
+		'внутренняя ошибка',
+		'неправильный токен',
+		'такого токена не существует',
+		'запись уже завершена',
 	];
 	
-	my $content = 'your token has error: ' . $error_type->[ $error_num ];
-	my $title = 'token error';
+	my $title = 'ошибка: ' . $error_type->[ $error_num ];
 	
-	return ( $title, $content, $template );
+	return ( $title, '', $template );
 }
 
 sub get_autoform_content
@@ -1733,7 +1732,6 @@ sub mod_hash
 	my $hash = shift;
 	my $table_name = shift;
 	my $db_rules = shift;
-	
 	my $appid = shift;
 	my $schappid = shift;
 	

@@ -57,9 +57,10 @@ function go_button(where) {
 		content: '[% langreq(last_error_text) %]',
 		showOn: 'none',
 		alignTo: 'target',
-		alignX: 'inner-left',
-		offsetX: 0,
-		offsetY: 5
+		alignX: 'left',
+		alignY: 'center',
+		offsetX: 5,
+		offsetY: 0
 	});
 
 	$('#[% last_error_name %]').poshytip('show');
