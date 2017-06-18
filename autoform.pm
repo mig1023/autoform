@@ -1029,13 +1029,13 @@ sub get_html_for_element
 		'input' 		=> '<input type="text" value="[value]" name="[name]" id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
-		'radiolist'		=> '[options]',
+		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
 		'example'		=> '<tr [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
 					'<span style="color:gray; font-size:0.7em;">[value]</span></td></td>',
 
 		'info'			=> '<label id="[name]" [u]><b>[text]</b></label>',
-		'checklist'		=> '[options]',
+		'checklist'		=> '<div id="[name]">[options]</div>',
 		'checklist_insurer'	=> '[options]',
 		'captcha'		=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
 		
@@ -1488,6 +1488,9 @@ sub check_data_from_form
 			elsif ( ( $element->{type} =~ /input/ ) and ( $element->{check} =~ /captcha_input/ ) ) {
 				$first_error = $self->check_captcha( $element );
 			}
+			elsif ( $element->{type} =~ /checklist/ ) {
+				$first_error = $self->check_checklist( $element );
+			}
 			else {
 				$first_error = $self->check_param( $element );
 			}
@@ -1500,6 +1503,23 @@ sub check_data_from_form
 	return $first_error;
 }
 
+sub check_checklist
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $element = shift;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my $at_least_one = 0;
+	
+	for my $field ( keys %{ $element->{ param } } ) {
+		$at_least_one += ( $vars->getparam( $field ) ? 1 : 0 );
+	}
+	
+	return $self->text_error( 11, $element ) if ( ( $element->{ check } =~ /at_least_one/ ) and ( $at_least_one == 0 ) );
+}
+
 sub check_chkbox
 # //////////////////////////////////////////////////
 {
@@ -1507,10 +1527,9 @@ sub check_chkbox
 	my $element = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
-	my $value = $vars->getparam( $element->{name} );
-	my $rules = $element->{check};
+	my $value = $vars->getparam( $element->{ name } );
 	
-	return $self->text_error( 3, $element ) if ( ( $rules =~ /true/ ) and ( $value eq '' ) );
+	return $self->text_error( 3, $element ) if ( ( $element->{ check } =~ /true/ ) and ( $value eq '' ) );
 }
 
 sub check_param
@@ -1557,7 +1576,7 @@ sub check_captcha
 	my $vars = $self->{ 'VCS::Vars' };
 	my $captcha = $vars->getcaptcha();
 	
-	my $capverify = $vars->getparam( $element->{name} ) || '';
+	my $capverify = $vars->getparam( $element->{ name } ) || '';
 	my $rcode = $vars->getparam('code') || '';
 	my $c_status = $captcha->check_code( $capverify, $rcode );
 	
@@ -1575,7 +1594,7 @@ sub check_logic
 	my $tables_id = shift;
 
 	my $vars = $self->{ 'VCS::Vars' };
-	my $value = $vars->getparam( $element->{name} );
+	my $value = $vars->getparam( $element->{ name } );
 	my $first_error = '';
 	my $error = 0;
 
@@ -1636,6 +1655,7 @@ sub text_error
 		'"[name]" не может быть позднее, чем "[relation]"',
 		'"[name]" не может быть позднее, чем "[relation]", больше чем на [offset] дня',
 		'Поле "[name]" уже встречается в актуальных записях.',
+		'В поле "[name]" нужно выбрать хотя бы одно значение',
 	];
 	
 	if ( !defined($element) ) {

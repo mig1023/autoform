@@ -1441,7 +1441,7 @@ sub get_content_rules_hash
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
 				'page_ord' => 30,
-				'progress' => 3,
+				'progress' => 2,
 				'replacer' => '[app_finish]',
 			},
 		],
