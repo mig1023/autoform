@@ -349,6 +349,7 @@ sub get_token_error
 	];
 	
 	my $title = 'ошибка: ' . $error_type->[ $error_num ];
+	$title = "<center>$title</center>";
 	
 	return ( $title, '', $template );
 }
@@ -995,7 +996,7 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input type="text" value="[value]" name="[name]" id="[name]" title="[comment]" [u]>',
+		'input' 		=> '<input style="width:20em" type="text" value="[value]" name="[name]" id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',

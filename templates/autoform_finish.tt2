@@ -8,10 +8,15 @@
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 
-<table>
-<tr><td colspan="3"><h2>[% title %]</h2><br></td></tr>
 
-<tr><td colspan="3"><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><td><tr>
+<table width="100%">
+
+<tr><td><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+
+<tr><td align="center">
+<table width="450px">
+
+<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 <tr><td>
 	Заполнить ещё одну или оформить запись?

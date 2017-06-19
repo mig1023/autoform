@@ -80,7 +80,6 @@ sub get_content_rules_hash
 				'label' => 'Ближайшее доступное время',
 				'comment' => '',
 				'check' => '',
-				'db' => {},
 				'special' => 'nearest_date',
 			},
 			{
@@ -187,6 +186,17 @@ sub get_content_rules_hash
 				'progress' => 2,
 			},
 			{
+				'type' => 'text',
+				'name' => 'rupass_text',
+				'label' => 'Данные внутреннего паспорта',
+				'font' => 'bold',
+				'comment' => '',
+				'check' => '',
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'input',
 				'name' => 'rulname',
 				'label' => 'Фамилия',
@@ -234,7 +244,21 @@ sub get_content_rules_hash
 					'name' => 'BirthDate',
 				},
 				'special' => 'mask',
-			},	
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'text',
+				'name' => 'rupass_text',
+				'label' => 'Данные загранпаспорта',
+				'font' => 'bold',
+				'comment' => '',
+				'check' => '',
+			},
+			{
+				'type' => 'free_line',
+			},
 			{
 				'type' => 'input',
 				'name' => 'lname',
@@ -335,22 +359,28 @@ sub get_content_rules_hash
 				},
 				'relation' => {},
 			},
+		],
+		
+		'Дополнительные данные' => [
 			{
-				'type' => 'input',
-				'name' => 'brhplace',
-				'label' => 'Место рождения',
-				'comment' => '',
-				'check' => 'z',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'BrhPlace',
-				},
+				'page_ord' => 5,
+				'progress' => 2,
+			},
+			{
+				'type' => 'text',
+				'name' => 'otherpass_text',
+				'label' => 'Иные данные',
+				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'select',
 				'name' => 'brhcountry',
 				'label' => 'Страна рождения',
 				'comment' => '',
+				'example' => 'The Soviet Union',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -360,10 +390,23 @@ sub get_content_rules_hash
 				'first_elements' => '70',
 			},
 			{
+				'type' => 'input',
+				'name' => 'brhplace',
+				'label' => 'Место рождения',
+				'comment' => 'Укажите место рождения так, как оно указано в загранпаспорте, без знака /',
+				'example' => 'Moscow',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'BrhPlace',
+				},
+			},
+			{
 				'type' => 'select',
 				'name' => 'сitizenshipype',
 				'label' => 'Гражданство в настоящее время',
-				'comment' => '',
+				'comment' => 'Если у вас два гражданства, то укажите гражданство по паспорту той страны, который подаёте на визу',
+				'example' => 'The Russian Federation',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -376,7 +419,8 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'prev_сitizenshipype',
 				'label' => 'Гражданство при рождении',
-				'comment' => '',
+				'comment' => 'Для тех, кто родился до 1992 необходимо указывать The Soviet Union, позднее - The Russian Federation',
+				'example' => 'The Russian Federation',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -411,20 +455,24 @@ sub get_content_rules_hash
 					'name' => 'Family',
 				},
 				'param' => {
-					0 => 'Не указано',
-					1 => 'Холост/не замужем',
-					2 => 'Женат/замужем',
-					3 => 'Не проживает с супругом',
-					4 => 'Разведен/-а',
-					5 => 'Вдовец/вдова',
-					6 => 'Иное'
+					0 => 'не указано',
+					1 => 'холост/не замужем',
+					2 => 'женат/замужем',
+					3 => 'не проживает с супругом',
+					4 => 'разведен/-а',
+					5 => 'вдовец/вдова',
+					6 => 'иное'
 				},
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'input',
 				'name' => 'kinderdata',
 				'label' => 'Для несовершеннолетних',
-				'comment' => '',
+				'comment' => 'Фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей или законного представителя',
+				'example' => 'Ivanov Ivan, The Soviet Union',
 				'check' => '',
 				'db' => {
 					'table' => 'AppData',
@@ -435,7 +483,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'workdata',
 				'label' => 'Профессиональная деятельность',
-				'comment' => '',
+				'comment' => 'Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
+				'example' => 'Doctor',
 				'check' => '',
 				'db' => {
 					'table' => 'AppData',
@@ -446,12 +495,16 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'workaddr',
 				'label' => 'Работодатель: адрес, телефон',
-				'comment' => '',
+				'comment' => 'Данные заполняются в соответствии со справкой с места работы',
+				'example' => 'MedCenter, Moscow, ul.Lenina 1, (095) 123-4567',
 				'check' => '',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'WorkOrg',
 				},
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'radiolist',
@@ -469,6 +522,9 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'radiolist',
 				'name' => 'purpose',
 				'label' => 'Основная цель поездки',
@@ -479,16 +535,16 @@ sub get_content_rules_hash
 					'name' => 'VisaPurpose',
 				},
 				'param' => { 
-					1 => 'Туризм', 
-					2 => 'Деловая',
-					3 => 'Учёба',
-					4 => 'Официальная',
-					5 => 'Культура',
-					6 => 'Спорт',
-					7 => 'Транзит',
-					8 => 'Лечение',
-					9 => 'Посещение родственников',
-					10 => 'Иная',
+					1 => 'туризм', 
+					2 => 'деловая',
+					3 => 'учёба',
+					4 => 'официальная',
+					5 => 'культура',
+					6 => 'спорт',
+					7 => 'транзит',
+					8 => 'лечение',
+					9 => 'посещение родственников',
+					10 => 'иная',
 				},
 				'special' => 'save_info_about_hastdatatype',
 			},
@@ -496,7 +552,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по семейному положению' => [
 			{
-				'page_ord' => 5,
+				'page_ord' => 6,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -521,7 +577,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по стране пребывания' => [
 			{
-				'page_ord' => 6,
+				'page_ord' => 7,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -558,7 +614,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по цели посещения' => [
 			{
-				'page_ord' => 7,
+				'page_ord' => 8,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -581,16 +637,26 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Страна и город назначения' => [
+		'Данные о поездке' => [
 			{
-				'page_ord' => 8,
+				'page_ord' => 9,
 				'progress' => 2,
+			},
+			{
+				'type' => 'text',
+				'name' => 'otherpass_text',
+				'label' => 'Данные визы',
+				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'input',
 				'name' => 'city',
 				'label' => 'Город назначения',
-				'comment' => '',
+				'comment' => 'Город назначения',
+				'example' => 'Milan',
 				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',
@@ -614,7 +680,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'nullacity',
 				'label' => 'Город первого въезда',
-				'comment' => '',
+				'comment' => 'Город первого въезда',
+				'example' => 'Roma',
 				'check' => 'z',
 				'db' => {
 					'table' => 'AppData',
@@ -623,29 +690,29 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'free_line',
-				'db' => {},
 			},
 			{
 				'type' => 'select',
 				'name' => 'visanum',
 				'label' => 'Виза запрашивается для',
-				'comment' => '',
+				'comment' => 'Виза с однократным въездом даёт возможность пересечь границу Шенгена только один раз. После того как Вы покинете зону Шенгена по данной визе, она будет закрыта и перестанет действовать. Виза с двукратным въездом позволяет въехать и покинуть зону Шенгена два раза в период действия визы. Виза с многократным въездом даёт возможность пересекать границу зоны Шенгенского соглашения в период действия визы',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'VisaNum',
 				},
 				'param' => {
-					0 => 'Однократного въезда',
-					1 => 'Двукратного въезда',
-					2 => 'Многократного въезда',
+					0 => 'однократного въезда',
+					1 => 'двукратного въезда',
+					2 => 'многократного въезда',
 				},
 			},
 			{
 				'type' => 'input',
 				'name' => 'apps_date',
 				'label' => 'Дата начала поездки',
-				'comment' => '',
+				'comment' => 'Укажите дату начала действия запрашивамой визы',
+				'example' => '01.01.2025',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -657,7 +724,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'appf_date',
 				'label' => 'Дата окончания поездки',
-				'comment' => '',
+				'comment' => 'Укажите дату окончания действия запрашивамой визы',
+				'example' => '31.12.2025',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -669,7 +737,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'calcdur',
 				'label' => 'Продолжительность пребывания',
-				'comment' => '',
+				'comment' => 'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
+				'example' => '14',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -678,16 +747,12 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'free_line',
-				'db' => {},
 			},
 			{
 				'type' => 'text',
 				'name' => 'permi_text',
 				'label' => 'Предыдущие шенгенские визы',
 				'font' => 'bold',
-				'comment' => '',
-				'check' => '',
-				'db' => {},
 			},
 			{
 				'type' => 'radiolist',
@@ -721,22 +786,19 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'free_line',
-				'db' => {},
 			},
 			{
 				'type' => 'text',
 				'name' => 'permi_text',
 				'label' => 'Разрешение на въезд, если необходимо',
 				'font' => 'bold',
-				'comment' => '',
-				'check' => '',
-				'db' => {},
 			},
 			{
 				'type' => 'input',
 				'name' => 'premesso',
 				'label' => 'Кем выдано',
-				'comment' => '',
+				'comment' => 'Укажите, есть ли разрешение на въезд в страну конечного следования, если такое разрешение необходимо',
+				'example' => 'EMBASSY OF THE REPUBLIC OF BULGARIA Consular Section Moscow 552',
 				'check' => '',
 				'db' => {
 					'table' => 'AppData',
@@ -747,7 +809,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'premessofd',
 				'label' => 'Действительно с',
-				'comment' => '',
+				'comment' => 'Начало действия разрешения',
+				'example' => '01.01.2025',
 				'check' => '',
 				'db' => {
 					'table' => 'AppData',
@@ -759,7 +822,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'premessoed',
 				'label' => 'Действительно по',
-				'comment' => '',
+				'comment' => 'окончание действия разрешения',
+				'example' => '31.12.2025',
 				'check' => '',
 				'db' => {
 					'table' => 'AppData',
@@ -769,7 +833,6 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'free_line',
-				'db' => {},
 			},
 			{
 				'type' => 'text',
@@ -778,7 +841,6 @@ sub get_content_rules_hash
 				'font' => 'bold',
 				'comment' => '',
 				'check' => '',
-				'db' => {},
 			},
 			{
 				'type' => 'radiolist',
@@ -802,7 +864,7 @@ sub get_content_rules_hash
 		
 		'Сроки действия последней визы' => [
 			{
-				'page_ord' => 9,
+				'page_ord' => 10,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -840,7 +902,7 @@ sub get_content_rules_hash
 		
 		'Дата сдачи отпечатков' => [
 			{
-				'page_ord' => 10,
+				'page_ord' => 11,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -866,7 +928,7 @@ sub get_content_rules_hash
 		
 		'Проживание' => [
 			{
-				'page_ord' => 11,
+				'page_ord' => 12,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -895,7 +957,7 @@ sub get_content_rules_hash
 		
 		'Гостиница' => [
 			{
-				'page_ord' => 12,
+				'page_ord' => 13,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -942,7 +1004,7 @@ sub get_content_rules_hash
 		
 		'Приглашение' => [
 			{
-				'page_ord' => 13,
+				'page_ord' => 14,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -1051,7 +1113,7 @@ sub get_content_rules_hash
 	
 		'Приглашение организации' => [
 			{
-				'page_ord' => 14,
+				'page_ord' => 15,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -1143,7 +1205,7 @@ sub get_content_rules_hash
 		
 		'Расходы заявителя' => [
 			{
-				'page_ord' => 15,
+				'page_ord' => 16,
 				'progress' => 2,
 			},
 			{
@@ -1166,7 +1228,7 @@ sub get_content_rules_hash
 		
 		'Уточните спонсора' => [
 			{
-				'page_ord' => 16,
+				'page_ord' => 17,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1191,7 +1253,7 @@ sub get_content_rules_hash
 		
 		'Средства заявителя' => [
 			{
-				'page_ord' => 17,
+				'page_ord' => 18,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1224,7 +1286,7 @@ sub get_content_rules_hash
 		
 		'Средства спонсора' => [
 			{
-				'page_ord' => 18,
+				'page_ord' => 19,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1256,7 +1318,7 @@ sub get_content_rules_hash
 		
 		'Уточните иные средства' => [
 			{
-				'page_ord' => 19,
+				'page_ord' => 20,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1281,7 +1343,7 @@ sub get_content_rules_hash
 				
 		'Данные родственника в ЕС' => [
 			{
-				'page_ord' => 20,
+				'page_ord' => 21,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -1351,7 +1413,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				'page_ord' => 21,
+				'page_ord' => 22,
 				'progress' => 2,
 				'replacer' => '[app_finish]',
 			},
@@ -1359,7 +1421,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				'page_ord' => 22,
+				'page_ord' => 23,
 				'progress' => 3,
 				
 			},
@@ -1380,7 +1442,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные для договора' => [
 			{
-				'page_ord' => 23,
+				'page_ord' => 24,
 				'progress' => 3,
 				'relation' => {
 					'only_if_not' => {
@@ -1421,7 +1483,6 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'free_line',
-				'db' => {},
 			},
 			{
 				'type' => 'input',
@@ -1495,7 +1556,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные доверенного лица' => [
 			{
-				'page_ord' => 24,
+				'page_ord' => 25,
 				'progress' => 3,
 				'relation' => {
 					'only_if' => {
@@ -1601,16 +1662,26 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Дополнительные услуги' => [
+		'Оформление записи' => [
 			{
-				'page_ord' => 25,
+				'page_ord' => 26,
 				'progress' => 3,
+			},
+			{
+				'type' => 'text',
+				'name' => 'services_text',
+				'label' => 'Дополнительные слуги',
+				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'input',
 				'name' => 'sms',
 				'label' => 'SMS уведомление',
-				'comment' => '',
+				'comment' => 'Введите номер сотового телефона для получения СМС о готовности документов; услуга платная',
+				'example' => '79051234578',
 				'check' => 'N',
 				'db' => {
 					'table' => 'Appointments',
@@ -1621,12 +1692,25 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'shipping',
 				'label' => 'Адрес доставки',
-				'comment' => '',
+				'comment' => 'Введите для доставки документов документов; услуга платная',
+				'example' => 'Москва, ул.Ленина, 1',
 				'check' => 'Ё',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'ShAddress',
 				},
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'text',
+				'name' => 'insurance_text',
+				'label' => 'Страховка',
+				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'checklist_insurer',
@@ -1654,9 +1738,21 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'text',
+				'name' => 'appdate_text',
+				'label' => 'Дата записи',
+				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'input',
 				'name' => 'app_date',
-				'label' => 'Дата записи',
+				'label' => 'Дата записи в Визовый центр',
 				'comment' => '',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
@@ -1683,7 +1779,7 @@ sub get_content_rules_hash
 		
 		'Предпочтительный офис выдачи документов' => [
 			{
-				'page_ord' => 26,
+				'page_ord' => 27,
 				'progress' => 3,
 				'relation' => {
 					'only_if' => {
@@ -1713,7 +1809,7 @@ sub get_content_rules_hash
 		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 27,
+				'page_ord' => 28,
 				'progress' => 3,
 			},
 			{
@@ -1722,7 +1818,6 @@ sub get_content_rules_hash
 				'label' => '',
 				'comment' => '',
 				'check' => '',
-				'db' => {},
 			},
 			{
 				'type' => 'input',
@@ -1730,13 +1825,12 @@ sub get_content_rules_hash
 				'label' => 'Введите текст с картинки',
 				'comment' => '',
 				'check' => 'captcha_input',
-				'db' => {},
 			},
 		],
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 28,
+				'page_ord' => 29,
 				'progress' => 4,
 			},
 			{
@@ -1745,7 +1839,6 @@ sub get_content_rules_hash
 				'label' => 'Всё, запись создана!',
 				'comment' => '',
 				'check' => '',
-				'db' => {},
 			},
 			{
 				'type' => 'info',
@@ -1753,7 +1846,6 @@ sub get_content_rules_hash
 				'label' => 'Ваш номер записи',
 				'comment' => '',
 				'check' => '',
-				'db' => {},
 			},
 			{
 				'type' => 'info',

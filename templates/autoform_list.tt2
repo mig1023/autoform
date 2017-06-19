@@ -11,10 +11,14 @@
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "" name = "person" id = "person">
 
-<table>
-<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
+<table width="100%">
 
-<tr><td colspan="5"><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><td><tr>
+<tr><td><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+
+<tr><tdalign="center">
+<table width="450px">
+
+<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% IF content_text.0.ID == "X" %]
 	<tr><td colspan="5" id = "applist">
@@ -24,7 +28,7 @@
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
 	<tr>
 	<td>[% i %].</td>
-	<td [% IF i == 1 %]id = "applist"[% END %]>
+	<td [% IF i == 1 %]id = "applist"[% END %] width="90%">
 	[% IF !person.Finished %][draft][% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% person.BirthDate %]</td>
 	<td><input type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
@@ -44,8 +48,10 @@
 	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="go_button('tofinish');">
-</td></tr>
-</table>
+	
+</td></tr></table>
+
+</td></tr></table>
 
 </form>
 

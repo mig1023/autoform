@@ -20,10 +20,14 @@
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 
-<table>
-<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
+<table width="100%">
 
-<tr><td colspan="3"><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><td><tr>
+<tr><td><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+
+<tr><td align="center">
+<table width="650px">
+
+<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% content_text %]
 
@@ -40,6 +44,8 @@
 [% END %]
 </td></tr></table>
 
+</td></tr></table>
+
 </form>
 
 <script>
@@ -48,23 +54,6 @@ function go_button(where) {
 	$('#action').val(where);
 	document.dataform.submit();
 };
-
-[% IF last_error_name %]
-	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
-	
-	$('#[% last_error_name %]').poshytip({
-		className: 'tip-redsimple',
-		content: '[% langreq(last_error_text) %]',
-		showOn: 'none',
-		alignTo: 'target',
-		alignX: 'left',
-		alignY: 'center',
-		offsetX: 5,
-		offsetY: 0
-	});
-
-	$('#[% last_error_name %]').poshytip('show');
-[% END %]
 
 [% FOREACH picker IN special.datepicker %]
 	$('#[% picker %]').datepicker({
@@ -190,6 +179,33 @@ function update_timeslots() {
     }, 'xml');
 };
 
+[% END %]
+
+[% IF last_error_name %]
+
+	function findPos(obj) {
+		var curtop = 0;
+		if (obj.offsetParent) {
+			do {
+				curtop += obj.offsetTop;
+			} while (obj = obj.offsetParent);
+			return [curtop];
+		}
+	}
+
+	window.scroll(0,findPos(document.getElementById("[% last_error_name %]")));
+	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
+	$('#[% last_error_name %]').poshytip({
+		className: 'tip-redsimple',
+		content: '[% langreq(last_error_text) %]',
+		showOn: 'none',
+		alignTo: 'target',
+		alignX: 'left',
+		alignY: 'center',
+		offsetX: 5,
+		offsetY: 0
+	});
+	$('#[% last_error_name %]').poshytip('show');
 [% END %]
 </script>
 
