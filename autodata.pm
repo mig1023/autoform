@@ -181,7 +181,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Данные внутреннего паспорта' => [
+		'Данные паспортов' => [
 			{
 				'page_ord' => 4,
 				'progress' => 2,
@@ -234,81 +234,6 @@ sub get_content_rules_hash
 					'name' => 'BirthDate',
 				},
 				'special' => 'mask',
-			},
-			{
-				'type' => 'input',
-				'name' => 'rupassnum',
-				'label' => '№ паспорта',
-				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '754300001',
-				'check' => 'zN',
-				'check_logic' => [
-					{
-						'condition' => 'unique_in_pending',
-						'table' => 'Appointments',
-						'name' => 'PassNum',
-					},
-				],
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'RPassNum',
-				},
-			},
-			{
-				'type' => 'input',
-				'name' => 'passdate',
-				'label' => 'Дата выдачи',
-				'comment' => 'Введите дату выдачи, указанную в паспорте',
-				'example' => '01.01.2010',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'RPWhen',
-				},
-				'special' => 'mask',
-			},
-			{
-				'type' => 'input',
-				'name' => 'rupasswhere',
-				'label' => 'Кем выдан',
-				'comment' => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
-				'example' => 'ОВД по району Беговой города Москвы',
-				'check' => 'z',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'RPWhere',
-				},
-			},
-			{
-				'type' => 'input',
-				'name' => 'phone',
-				'label' => 'Телефон',
-				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
-				'example' => '79161234567',
-				'check' => 'z',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'AppPhone',
-				},
-			},
-			{
-				'type' => 'input',
-				'name' => 'address',
-				'label' => 'Адрес',
-				'comment' => 'Полный адрес, включая индекс',
-				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
-				'check' => 'z',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'FullAddress',
-				},
-			},
-		],
-		
-		'Данные загранпаспорта' => [
-			{
-				'page_ord' => 5,
-				'progress' => 2,
 			},	
 			{
 				'type' => 'input',
@@ -410,13 +335,6 @@ sub get_content_rules_hash
 				},
 				'relation' => {},
 			},
-		],
-		
-		'Персональные данные' => [
-			{
-				'page_ord' => 6,
-				'progress' => 2,
-			},
 			{
 				'type' => 'input',
 				'name' => 'brhplace',
@@ -502,38 +420,6 @@ sub get_content_rules_hash
 					6 => 'Иное'
 				},
 			},
-		],
-		
-		'Уточнение по семейному положению' => [
-			{
-				'page_ord' => 7,
-				'progress' => 2,
-				'relation' => {
-					'only_if' => {
-						'table' => 'AppData',
-						'name' => 'Family',
-						'value' => '6',
-					}
-				},
-			},
-			{
-				'type' => 'input',
-				'name' => 'familyother',
-				'label' => 'Семейное положение',
-				'comment' => '',
-				'check' => 'z',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'FamilyOther',
-				},
-			},
-		],
-		
-		'Персональные данные по адресам' => [
-			{
-				'page_ord' => 8,
-				'progress' => 2,
-			},
 			{
 				'type' => 'input',
 				'name' => 'kinderdata',
@@ -582,12 +468,60 @@ sub get_content_rules_hash
 					2 => 'не является страной гражданства', 
 				},
 			},
-			
+			{
+				'type' => 'radiolist',
+				'name' => 'purpose',
+				'label' => 'Основная цель поездки',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'VisaPurpose',
+				},
+				'param' => { 
+					1 => 'Туризм', 
+					2 => 'Деловая',
+					3 => 'Учёба',
+					4 => 'Официальная',
+					5 => 'Культура',
+					6 => 'Спорт',
+					7 => 'Транзит',
+					8 => 'Лечение',
+					9 => 'Посещение родственников',
+					10 => 'Иная',
+				},
+				'special' => 'save_info_about_hastdatatype',
+			},
+		],
+		
+		'Уточнение по семейному положению' => [
+			{
+				'page_ord' => 5,
+				'progress' => 2,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'Family',
+						'value' => '6',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'familyother',
+				'label' => 'Семейное положение',
+				'comment' => '',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FamilyOther',
+				},
+			},
 		],
 		
 		'Уточнение по стране пребывания' => [
 			{
-				'page_ord' => 9,
+				'page_ord' => 6,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -622,40 +556,9 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Информация о поездке' => [
+		'Уточнение по цели посещения' => [
 			{
-				'page_ord' => 10,
-				'progress' => 2,
-			},
-			{
-				'type' => 'radiolist',
-				'name' => 'purpose',
-				'label' => 'Основная цель поездки',
-				'comment' => '',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'VisaPurpose',
-				},
-				'param' => { 
-					1 => 'Туризм', 
-					2 => 'Деловая',
-					3 => 'Учёба',
-					4 => 'Официальная',
-					5 => 'Культура',
-					6 => 'Спорт',
-					7 => 'Транзит',
-					8 => 'Лечение',
-					9 => 'Посещение родственников',
-					10 => 'Иная',
-				},
-				'special' => 'save_info_about_hastdatatype',
-			},
-		],
-		
-		'Иная цель посещения' => [
-			{
-				'page_ord' => 11,
+				'page_ord' => 7,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -680,7 +583,7 @@ sub get_content_rules_hash
 		
 		'Страна и город назначения' => [
 			{
-				'page_ord' => 12,
+				'page_ord' => 8,
 				'progress' => 2,
 			},
 			{
@@ -718,12 +621,9 @@ sub get_content_rules_hash
 					'name' => 'NullaCity',
 				},
 			},
-		],
-		
-		'Данные для визы' => [
 			{
-				'page_ord' => 13,
-				'progress' => 2,
+				'type' => 'free_line',
+				'db' => {},
 			},
 			{
 				'type' => 'select',
@@ -776,17 +676,23 @@ sub get_content_rules_hash
 					'name' => 'CalcDuration',
 				},
 			},
-		],
-		
-		'Шенгенские визы' => [
 			{
-				'page_ord' => 14,
-				'progress' => 2,
+				'type' => 'free_line',
+				'db' => {},
+			},
+			{
+				'type' => 'text',
+				'name' => 'permi_text',
+				'label' => 'Предыдущие шенгенские визы',
+				'font' => 'bold',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
 			},
 			{
 				'type' => 'radiolist',
 				'name' => 'prevvisa',
-				'label' => 'Шенгенские визы, выданные за последние три года',
+				'label' => 'Были ли визы за последние три года',
 				'comment' => '',
 				'check' => 'zN',
 				'db' => {
@@ -794,59 +700,14 @@ sub get_content_rules_hash
 					'name' => 'PrevVisa',
 				},
 				'param' => { 
-					1 => 'Нет', 
-					2 => 'Да',
+					1 => 'нет', 
+					2 => 'да',
 				},
-			},
-		],
-		
-		'Сроки действия последней визы' => [
-			{
-				'page_ord' => 15,
-				'progress' => 2,
-				'relation' => {
-					'only_if' => {
-						'table' => 'AppData',
-						'name' => 'PrevVisa',
-						'value' => '2',
-					}
-				},
-			},
-			{
-				'type' => 'input',
-				'name' => 'prevvisafd',
-				'label' => 'Дата начала',
-				'comment' => '',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'PrevVisaFD',
-				},
-				'special' => 'mask',
-			},
-			{
-				'type' => 'input',
-				'name' => 'prevvised',
-				'label' => 'Дата окончания',
-				'comment' => '',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'PrevVisaED',
-				},
-				'special' => 'mask',
-			},
-		],
-		
-		'Отпечатки пальцев' => [
-			{
-				'page_ord' => 16,
-				'progress' => 2,
 			},
 			{
 				'type' => 'radiolist',
 				'name' => 'fingers',
-				'label' => 'Предоставлены при прошлой визе',
+				'label' => 'Отпечатки предоставлены за последние 5 лет',
 				'comment' => '',
 				'check' => '',
 				'db' => {
@@ -854,42 +715,22 @@ sub get_content_rules_hash
 					'name' => 'Fingers',
 				},
 				'param' => { 
-					0 => 'Нет', 
-					1 => 'Да',
-				},
-			},
-		],
-		
-		'Дата сдачи отпечатков' => [
-			{
-				'page_ord' => 17,
-				'progress' => 2,
-				'relation' => {
-					'only_if' => {
-						'table' => 'AppData',
-						'name' => 'Fingers',
-						'value' => '1',
-					}
+					0 => 'нет', 
+					1 => 'да',
 				},
 			},
 			{
-				'type' => 'input',
-				'name' => 'prevvisafd',
-				'label' => 'Дата сдачи отпечатков, если известна',
+				'type' => 'free_line',
+				'db' => {},
+			},
+			{
+				'type' => 'text',
+				'name' => 'permi_text',
+				'label' => 'Разрешение на въезд, если необходимо',
+				'font' => 'bold',
 				'comment' => '',
 				'check' => '',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'FingersDate',
-				},
-				'special' => 'mask',
-			},
-		],
-		
-		'Разрешение на въезд, если необходимо' => [
-			{
-				'page_ord' => 18,
-				'progress' => 2,
+				'db' => {},
 			},
 			{
 				'type' => 'input',
@@ -926,11 +767,106 @@ sub get_content_rules_hash
 				},
 				'special' => 'mask',
 			},
+			{
+				'type' => 'free_line',
+				'db' => {},
+			},
+			{
+				'type' => 'text',
+				'name' => 'permi_text',
+				'label' => 'Родственник в ЕС',
+				'font' => 'bold',
+				'comment' => '',
+				'check' => '',
+				'db' => {},
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'femrel',
+				'label' => 'Степень родства',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FamRel',
+				},
+				'param' => { 
+					0 => 'нет', 
+					1 => 'супруг',
+					2 => 'ребёнок',
+					3 => 'иные близкие родственники',
+					4 => 'иждивенец',
+				},
+			},
+		],
+		
+		'Сроки действия последней визы' => [
+			{
+				'page_ord' => 9,
+				'progress' => 2,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'PrevVisa',
+						'value' => '2',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'prevvisafd',
+				'label' => 'Дата начала',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PrevVisaFD',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'prevvised',
+				'label' => 'Дата окончания',
+				'comment' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'PrevVisaED',
+				},
+				'special' => 'mask',
+			},
+		],
+		
+		'Дата сдачи отпечатков' => [
+			{
+				'page_ord' => 10,
+				'progress' => 2,
+				'relation' => {
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'Fingers',
+						'value' => '1',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'prevvisafd',
+				'label' => 'Дата сдачи отпечатков, если известна',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FingersDate',
+				},
+				'special' => 'mask',
+			},
 		],
 		
 		'Проживание' => [
 			{
-				'page_ord' => 19,
+				'page_ord' => 11,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -951,15 +887,15 @@ sub get_content_rules_hash
 					'name' => 'HostDataType',
 				},
 				'param' => { 
-					'H' => 'Гостиница/аренда/собственность', 
-					'P' => 'Приглашение',
+					'H' => 'гостиница/аренда/собственность', 
+					'P' => 'приглашение',
 				},
 			},
 		],
 		
 		'Гостиница' => [
 			{
-				'page_ord' => 20,
+				'page_ord' => 12,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -1006,7 +942,7 @@ sub get_content_rules_hash
 		
 		'Приглашение' => [
 			{
-				'page_ord' => 21,
+				'page_ord' => 13,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -1115,7 +1051,7 @@ sub get_content_rules_hash
 	
 		'Приглашение организации' => [
 			{
-				'page_ord' => 22,
+				'page_ord' => 14,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -1207,7 +1143,7 @@ sub get_content_rules_hash
 		
 		'Расходы заявителя' => [
 			{
-				'page_ord' => 23,
+				'page_ord' => 15,
 				'progress' => 2,
 			},
 			{
@@ -1230,7 +1166,7 @@ sub get_content_rules_hash
 		
 		'Уточните спонсора' => [
 			{
-				'page_ord' => 24,
+				'page_ord' => 16,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1255,7 +1191,7 @@ sub get_content_rules_hash
 		
 		'Средства заявителя' => [
 			{
-				'page_ord' => 25,
+				'page_ord' => 17,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1288,7 +1224,7 @@ sub get_content_rules_hash
 		
 		'Средства спонсора' => [
 			{
-				'page_ord' => 26,
+				'page_ord' => 18,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1320,7 +1256,7 @@ sub get_content_rules_hash
 		
 		'Уточните иные средства' => [
 			{
-				'page_ord' => 27,
+				'page_ord' => 19,
 				'progress' => 2,
 				'relation' => {
 					'only_if' => {
@@ -1343,34 +1279,9 @@ sub get_content_rules_hash
 			},
 		],
 				
-		'Родственники в ЕС' => [
+		'Данные родственника в ЕС' => [
 			{
-				'page_ord' => 28,
-				'progress' => 2,
-			},
-			{
-				'type' => 'radiolist',
-				'name' => 'femrel',
-				'label' => 'Степень родства',
-				'comment' => '',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'FamRel',
-				},
-				'param' => { 
-					0 => 'Нет', 
-					1 => 'Супруг',
-					2 => 'Ребёнок',
-					3 => 'Иные близкие родственники',
-					4 => 'Иждивенец',
-				},
-			},
-		],
-		
-		'Данные родственника' => [
-			{
-				'page_ord' => 29,
+				'page_ord' => 20,
 				'progress' => 2,
 				'relation' => {
 					'only_if_not' => {
@@ -1440,7 +1351,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				'page_ord' => 30,
+				'page_ord' => 21,
 				'progress' => 2,
 				'replacer' => '[app_finish]',
 			},
@@ -1448,7 +1359,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				'page_ord' => 31,
+				'page_ord' => 22,
 				'progress' => 3,
 				
 			},
@@ -1462,14 +1373,129 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'PersonForAgreements',
 					'transfer' => 'nope',
-					},
+				},
 				'param' => '[persons_in_app]',
 			},
 		],
 		
-		'Укажите данные данные доверенного лица' => [
+		'Укажите данные для договора' => [
 			{
-				'page_ord' => 32,
+				'page_ord' => 23,
+				'progress' => 3,
+				'relation' => {
+					'only_if_not' => {
+						'table' => 'Appointments',
+						'name' => 'PersonForAgreements',
+						'value' => '0',
+					}
+				},
+			},
+			{
+				'type' => 'info',
+				'name' => 'info_rulname',
+				'label' => 'Фамилия',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RLName',
+				},
+			},
+			{
+				'type' => 'info',
+				'name' => 'info_rufname',
+				'label' => 'Имя',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RFName',
+				},
+			},
+			{
+				'type' => 'info',
+				'name' => 'info_rumname',
+				'label' => 'Отчество',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RMName',
+				},
+			},
+			{
+				'type' => 'free_line',
+				'db' => {},
+			},
+			{
+				'type' => 'input',
+				'name' => 'rupassnum',
+				'label' => '№ паспорта',
+				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				'example' => '754300001',
+				'check' => 'zN',
+				'check_logic' => [
+					{
+						'condition' => 'unique_in_pending',
+						'table' => 'Appointments',
+						'name' => 'PassNum',
+					},
+				],
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RPassNum',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'passdate',
+				'label' => 'Дата выдачи',
+				'comment' => 'Введите дату выдачи, указанную в паспорте',
+				'example' => '01.01.2010',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RPWhen',
+				},
+				'special' => 'mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'rupasswhere',
+				'label' => 'Кем выдан',
+				'comment' => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
+				'example' => 'ОВД по району Беговой города Москвы',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RPWhere',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'phone',
+				'label' => 'Телефон',
+				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				'example' => '79161234567',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppPhone',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'address',
+				'label' => 'Адрес',
+				'comment' => 'Полный адрес, включая индекс',
+				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
+				'check' => 'z',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FullAddress',
+				},
+			},
+		],
+		
+		'Укажите данные доверенного лица' => [
+			{
+				'page_ord' => 24,
 				'progress' => 3,
 				'relation' => {
 					'only_if' => {
@@ -1483,7 +1509,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovlname',
 				'label' => 'Фамилия',
-				'comment' => '',
+				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				'example' => '754300001',
 				'check' => 'zЁ',
 				'db' => {
 					'table' => 'Appointments',
@@ -1527,7 +1554,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovpassdate',
 				'label' => 'Дата выдачи',
-				'comment' => '',
+				'comment' => 'Введите дату выдачи, указанную в паспорте',
+				'example' => '01.01.2010',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'Appointments',
@@ -1539,7 +1567,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovpasswhere',
 				'label' => 'Кем выдан',
-				'comment' => '',
+				'comment' => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
+				'example' => 'ОВД по району Беговой города Москвы',
 				'check' => 'z',
 				'db' => {
 					'table' => 'Appointments',
@@ -1550,7 +1579,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovphone',
 				'label' => 'Телефон',
-				'comment' => '',
+				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				'example' => '79161234567',
 				'check' => 'z',
 				'db' => {
 					'table' => 'Appointments',
@@ -1561,7 +1591,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovaddress',
 				'label' => 'Адрес',
-				'comment' => '',
+				'comment' => 'Полный адрес, включая индекс',
+				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
 				'check' => 'z',
 				'db' => {
 					'table' => 'Appointments',
@@ -1572,7 +1603,7 @@ sub get_content_rules_hash
 		
 		'Дополнительные услуги' => [
 			{
-				'page_ord' => 33,
+				'page_ord' => 25,
 				'progress' => 3,
 			},
 			{
@@ -1596,44 +1627,6 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'ShAddress',
 				},
-			},
-		],
-				
-		'Предпочтительный офис выдачи документов' => [
-			{
-				'page_ord' => 34,
-				'progress' => 3,
-				'relation' => {
-					'only_if' => {
-						'table' => 'Appointments',
-						'name' => 'CenterID',
-						'value' => '1',
-					}
-				},
-				
-			},
-			{
-				'type' => 'radiolist',
-				'name' => 'mezziwhom',
-				'label' => 'Выберите офис выдачи документов',
-				'comment' => '',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'OfficeToReceive',
-				},
-				'param' => { 
-					0 => 'Малый Толмачёвский, д.6 стр.1',
-					1 => 'ул. Киевская, вл. 2, 3 этаж',
-				},
-			},
-		],
-		
-		
-		'Страховка' => [
-			{
-				'page_ord' => 35,
-				'progress' => 3,
 			},
 			{
 				'type' => 'checklist_insurer',
@@ -1659,14 +1652,6 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'Duration',
 				},
-			},
-			
-		],
-		
-		'Дата и время записи' => [
-			{
-				'page_ord' => 36,
-				'progress' => 3,
 			},
 			{
 				'type' => 'input',
@@ -1696,9 +1681,39 @@ sub get_content_rules_hash
 			},
 		],
 		
+		'Предпочтительный офис выдачи документов' => [
+			{
+				'page_ord' => 26,
+				'progress' => 3,
+				'relation' => {
+					'only_if' => {
+						'table' => 'Appointments',
+						'name' => 'CenterID',
+						'value' => '1',
+					}
+				},
+				
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'mezziwhom',
+				'label' => 'Выберите офис выдачи документов',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'OfficeToReceive',
+				},
+				'param' => { 
+					0 => 'Малый Толмачёвский, д.6 стр.1',
+					1 => 'ул. Киевская, вл. 2, 3 этаж',
+				},
+			},
+		],
+		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 37,
+				'page_ord' => 27,
 				'progress' => 3,
 			},
 			{
@@ -1721,7 +1736,7 @@ sub get_content_rules_hash
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 38,
+				'page_ord' => 28,
 				'progress' => 4,
 			},
 			{
@@ -1761,10 +1776,6 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'TimeslotID',
 				},
-			},
-			{
-				'type' => 'free_line',
-				'db' => {},
 			},
 		],
 	};

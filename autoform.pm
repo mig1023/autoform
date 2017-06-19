@@ -158,7 +158,6 @@ sub get_same_info_for_timeslots
 {
 	my $self = shift;
 	my $token = shift;
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $appinfo = {};
 
@@ -306,7 +305,6 @@ sub save_new_token_in_db
 {	
 	my $self = shift;
 	my $token = shift;
-	my $vars = $self->{ 'VCS::Vars' };
 
 	$self->query('query', "
 		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
@@ -320,7 +318,6 @@ sub token_generation
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $vars = $self->{ 'VCS::Vars' };
 
 	my $token_existing = 1;
 	my $token = 'a';
@@ -443,8 +440,6 @@ sub check_relation
 	my $token = shift;
 	my $moonwalk = shift;
 
-	my $vars = $self->{ 'VCS::Vars' };
-
 	my $skip_this_page;
 	my $at_least_one_page_skipped = 0;
 	
@@ -496,8 +491,6 @@ sub skip_page_by_relation
 	my $relation = shift;
 	my $token = shift;
 
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my $current_table_id = $self->get_current_table_id( $token ); 
 	
 	my $value = $self->query('sel1', "
@@ -535,8 +528,6 @@ sub get_forward
 	my $self = shift;
 	my $step = shift;
 	my $token = shift;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $current_table_id = $self->get_current_table_id( $token );
 	
@@ -583,8 +574,6 @@ sub set_current_app_finished
 	my $self = shift;
 	my $appdata_id = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	$self->query('query', "
 		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, 
 		$appdata_id );
@@ -595,8 +584,6 @@ sub set_appointment_finished
 {
 	my $self = shift;
 	my $token = shift;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $this_is_draft = $self->query('sel1', "
 		SELECT Draft FROM AutoToken WHERE Token = ?", 
@@ -627,8 +614,6 @@ sub get_step_by_content
 	my $content = shift;
 	my $next = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-
 	my $page_content = $self->get_content_rules();
 	my $step;
 
@@ -648,8 +633,6 @@ sub set_step_by_content
 	my $token = shift;
 	my $content = shift;
 	my $next = shift;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 
 	my $step = $self->get_step_by_content( $token, $content, $next );
 
@@ -667,8 +650,6 @@ sub get_edit
 	my $step = shift;
 	my $appdata_id = shift; 
 	my $token = shift;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 		
@@ -697,8 +678,6 @@ sub get_delete
 	my $appdata_id = shift; 
 	my $token = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 	
 		my $sch_id = $self->query('sel1', "
@@ -725,8 +704,6 @@ sub check_existing_id_in_token
 	
 	my $exist = 0;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my $list_of_app_in_token = $self->query('selallkeys', "
 		SELECT AutoAppData.ID FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
@@ -748,8 +725,6 @@ sub check_all_app_finished_and_not_empty
 	
 	my $all_finished = 0;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my ( $app_count, $app_finished ) = $self->query('sel1', "
 		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
@@ -769,8 +744,6 @@ sub get_add
 	my $self = shift;
 	my $app_id = shift;
 	my $token = shift;
-	
-	my $vars = $self->{'VCS::Vars'};
 	
 	my $insurance_list = $self->query('sel1', "
 		SELECT Insurance FROM AutoToken WHERE Token = ?", $token );
@@ -805,8 +778,6 @@ sub get_back
 	my $step = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
-	
 	$self->save_data_from_form( $step, $self->get_current_table_id( $token ) );
 	$self->mod_last_change_date( $token );
 	$step--;
@@ -829,8 +800,6 @@ sub get_html_page
 	my $step = shift;
 	my $token = shift;
 	my $appnum = shift;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $content = '';
 	my $template = 'autoform.tt2';
@@ -859,7 +828,6 @@ sub get_list_of_app
 {
 	my $self = shift;
 	my $token = shift;
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $content = $self->query('selallkeys', "
 			SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
@@ -930,7 +898,8 @@ sub get_html_line
 	my $content = $self->get_html_for_element( 'start_line' );
 	
 	if ( $element->{type} eq 'text' ) {
-		$content .= $self->get_html_for_element('text', $element->{name}, $element->{label});
+		$content .= $self->get_html_for_element('text', $element->{ name }, $element->{ label }, 
+				undef, $element->{ font } );
 		$content .= $self->get_html_for_element('end_line');
 	
 		return $content;
@@ -1058,6 +1027,7 @@ sub get_html_for_element
 	$content =~ s/\[progress_stage\]/$value/gi;
 	
 	if ( $uniq_code ) {
+		$uniq_code = 'style="font-weight:bold;"' if $uniq_code eq 'bold';
 		$content =~ s/\[u\]/$uniq_code/gi;
 	}
 	else {
@@ -1245,10 +1215,11 @@ sub save_data_from_form
 		my @values = ();
 	
 		for my $row ( keys %{$request_tables->{$table}} ) { 
-
 			$request .=  "$row = ?, ";
 			my $value = $vars->getparam( $request_tables->{$table}->{$row} );
 			push ( @values, $self->encode_data_for_db( $step, $request_tables->{$table}->{$row}, $value) );
+			
+			$self->change_current_appdata( $value, $table_id ) if $row eq 'PersonForAgreements';
 		}
 		$request =~ s/,\s$//;			
 
@@ -1259,6 +1230,18 @@ sub save_data_from_form
 	}
 	
 	$self->check_special_in_rules_for_save( $step, $table_id );
+}
+
+sub change_current_appdata
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $current_app_id = shift;
+	my $table_id = shift;
+	
+	$self->query('query', "
+		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, 
+		$current_app_id, $table_id->{ AutoToken} );
 }
 
 sub check_special_in_rules_for_save
@@ -1312,8 +1295,6 @@ sub get_all_values
 	my $step = shift;
 	my $table_id = shift;
 
-	my $vars = $self->{'VCS::Vars'};
-	
 	my $all_values = {};
 	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'full' );
 
@@ -1415,6 +1396,7 @@ sub get_names_db_for_save_or_get
 	
 	for my $element (@$page_content) {
 		next if ($element->{special} eq 'insurer_many_id') and ($save_or_get eq 'save');
+		next if ($element->{type} eq 'info') and ($save_or_get eq 'save');
 
 		if ( $element->{db}->{name} eq 'complex' ) {
 			for my $sub_element (keys %{ $element->{param} }) {
@@ -1435,7 +1417,6 @@ sub get_current_table_id
 	my $self = shift;
 	my $token = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
 	my $tables_id = {};
 	my $request_tables = '';
 	my $tables_list = [];
@@ -1470,7 +1451,6 @@ sub check_data_from_form
 	my $token = shift;
 	my $step = shift;
 	
-	my $vars = $self->{'VCS::Vars'};
 	my $page_content = $self->get_content_rules( $step );
 	my $tables_id = $self->get_current_table_id( $token );
 
@@ -1682,8 +1662,6 @@ sub mod_last_change_date
 	my $self = shift;
 	my $token = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-
 	$self->query('query', "
 		UPDATE AutoToken SET LastChange = now() WHERE Token = ?", {}, 
 		$token );
@@ -1695,7 +1673,6 @@ sub create_new_appointment
 	my $self = shift;
 	my $token = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
 	my $new_appid;
 	
 	my $tables_transfered_id = $self->get_current_table_id( $token );
@@ -1839,8 +1816,6 @@ sub get_hash_table
 	my $table_name = shift;
 	my $table_id = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-
 	my $hash_table = $self->query('selallkeys', "
 		SELECT * FROM $table_name WHERE ID = ?", $table_id );
 	$hash_table = $hash_table->[0];
@@ -1854,8 +1829,6 @@ sub insert_hash_table
 	my $self = shift;
 	my $table_name = shift;
 	my $hash = shift;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $request_columns = '';
 	my $request_values = '';
