@@ -957,6 +957,7 @@ sub get_progressbar
 	
 	my $progress_line = VCS::Site::autodata::get_progressline();
 	my $current_progress = $page->[0]->{ progress };
+	my $big_element = 0;
 	
 	for ( 1..$#$progress_line ) {
 		
@@ -965,9 +966,13 @@ sub get_progressbar
 		$past_current_future = 'future' if $_ > $current_progress;
 		
 		my $add_el = ( $_ == 1 ? 1 : ( $_ == $#$progress_line ? 2 : 0 ) ); # 1 - first, 2 - last
+		
+		$big_element++ if $progress_line->[ $_ ]->{ big };
 	
-		$line .= $self->get_html_for_element( 'progress', $_, $progress_line->[ $_ ], $past_current_future, $add_el );
-		$content .= $self->get_html_for_element( 'stages', undef, $progress_line->[ $_ ], $past_current_future );
+		$line .= $self->get_html_for_element( 'progress', $big_element, $progress_line->[ $_ ]->{ name }, 
+				$past_current_future, $add_el, $progress_line->[ $_ ]->{ big } );
+		$content .= $self->get_html_for_element( 'stages', undef, $progress_line->[ $_ ]->{ name }, 
+				$past_current_future, undef, $progress_line->[ $_ ]->{ big } );
 	}
 	
 	$content = $line . $self->get_html_for_element( 'end_line' ) . $self->get_html_for_element( 'start_line' ) . $content;
@@ -1022,10 +1027,22 @@ sub get_html_for_element
 	
 	my $content = $elements->{ $type };
 	
-	$content =~ s/\[name\]/$name/gi;
+	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {
+		$content =~ s/\[name\]//gi;
+	}
+	else {
+		$content =~ s/\[name\]/$name/gi;
+	}
+	
+	if ( ( $type eq 'stages' ) and ( !$first_elements ) ) {
+		$content =~ s/\[progress_stage\]//gi;
+	}
+	else {
+		$content =~ s/\[progress_stage\]/$value/gi;
+	}
+	
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[comment\]/$comment/gi;
-	$content =~ s/\[progress_stage\]/$value/gi;
 	
 	if ( $uniq_code ) {
 		$uniq_code = 'style="font-weight:bold;"' if $uniq_code eq 'bold';
@@ -1109,7 +1126,8 @@ sub get_html_for_element
 	
 	
 	if ( $type eq 'progress' ) {
-		my $form = 'style="width:50px;height:50px;border-radius:25px;background:';
+		my $form = 'style="width:24px;height:24px;border-radius:12px;background:';
+		$form = 'style="width:50px;height:50px;border-radius:25px;background:' if $first_elements == 1;
 			
 		$form .= "#FF6666" if $param eq 'past';
 		$form .= "#CC0033" if $param eq 'current';
