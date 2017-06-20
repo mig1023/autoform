@@ -82,7 +82,7 @@ function go_button(where) {
 [% END %]
 
 [% FOREACH comm IN special.comment %]
-	$('#[name]').poshytip({
+	$('#[% comm %]').poshytip({
 		className: 'tip-yellowsimple',
 		showOn: 'focus',
 		alignTo: 'target',

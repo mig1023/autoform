@@ -1018,7 +1018,7 @@ sub get_html_for_element
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
 		
 		'progress'		=> '<td align="center" style="background-image: url(' . "'/images/pbar-[back].png'" .
-					');background-size: 100% 100%;"><div [format]><div style="padding-top:7px;' . 
+					');background-size: 100% 100%;"><div [format] title="[title]"><div style="padding-top:7px;' . 
 					'color:white;font-size:30">[name]</div></div></td>',
 					
 		'stages'		=> '<td [format]>[progress_stage]</td>',
@@ -1029,9 +1029,11 @@ sub get_html_for_element
 	
 	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {
 		$content =~ s/\[name\]//gi;
+		$content =~ s/\[title\]/$value/gi;
 	}
 	else {
 		$content =~ s/\[name\]/$name/gi;
+		$content =~ s/\[title\]//gi;
 	}
 	
 	if ( ( $type eq 'stages' ) and ( !$first_elements ) ) {
@@ -1072,7 +1074,8 @@ sub get_html_for_element
 		my $uniq_id = 0;
 		
 		for my $opt ( sort keys %$param ) {
-			my $checked = ( $value == $opt ? 'checked' : '' );
+			my $checked = ( $value eq $opt ? 'checked' : '' );
+			
 			$uniq_id++;
 			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' . $checked . ' id="'.$name.$uniq_id.'">'.
 				'<label for="'.$name.$uniq_id.'">'.$param->{$opt}.'</label><br>';
@@ -1087,6 +1090,7 @@ sub get_html_for_element
 		for my $opt ( sort {$a cmp $b} keys %$param ) {
 		
 			my $checked = ( $value->{$opt} ? 'checked' : '' );
+			
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
 			'<label for="' . $opt . '">' . $param->{$opt}->{label_for} . '</label><br>';
 		}
