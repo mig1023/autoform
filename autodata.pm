@@ -146,6 +146,12 @@ sub get_content_rules_hash
 				'comment' => 'Введите предполагаемую дату начала поездки',
 				'example' => '01.01.2025',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'now_or_later',
+					#	'offset' => 3, 	# -----------------> нужно брать из БД
+					},
+				],
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'SDate',
@@ -345,9 +351,12 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'checkbox',
 				'name' => 'ischild',
-				'label' => '',
+				'label' => 'Если ребёнок вписан в паспорт родителей',
 				'label_for' => 'вписан в паспорт',
 				'comment' => '',
 				'check' => '',
@@ -358,9 +367,12 @@ sub get_content_rules_hash
 				'relation' => {},
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'checkbox',
 				'name' => 'nres',
-				'label' => '',
+				'label' => 'Если заявитель не является гражданином или резидентом страны пребывания',
 				'label_for' => 'не резидент',
 				'comment' => '',
 				'check' => '',

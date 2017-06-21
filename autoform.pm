@@ -1619,6 +1619,18 @@ sub check_logic
 				$rule->{ error }, $offset ) if $error;
 		}
 		
+		if ( $rule->{ condition } =~ /^now_or_later$/ ) {
+			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
+
+			my $datediff = $self->query('sel1', "
+				SELECT DATEDIFF( ?, now() )", $value );
+
+			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
+
+			$first_error = $self->text_error( 12, $element, undef, $rule->{ error } )
+				if ( ( $datediff < $offset ) and ( $rule->{ condition } =~ /later$/ ) );
+		}
+		
 		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
 
 			my $id_in_db = $self->query('sel1', "
@@ -1659,6 +1671,7 @@ sub text_error
 		'"[name]" не может быть позднее, чем "[relation]", больше чем на [offset] дня',
 		'Поле "[name]" уже встречается в актуальных записях.',
 		'В поле "[name]" нужно выбрать хотя бы одно значение',
+		'Недопустимая дата в поле "[name]"',
 	];
 	
 	if ( !defined($element) ) {
