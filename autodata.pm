@@ -122,7 +122,7 @@ sub get_content_rules_hash
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
 				'label' => '',
-				'label_for' => 'я согласен на условия работы с мобильными',
+				'label_for' => 'я согласен на условия работы с мобильными телефона на территории визового центра',
 				'comment' => '',
 				'check' => 'true',
 				'db' => {

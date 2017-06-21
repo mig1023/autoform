@@ -746,9 +746,6 @@ sub get_add
 	my $app_id = shift;
 	my $token = shift;
 	
-	my $insurance_list = $self->query('sel1', "
-		SELECT Insurance FROM AutoToken WHERE Token = ?", $token );
-	
 	$self->query('query', "
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);");
 		
@@ -762,11 +759,9 @@ sub get_add
 	
 	my $step = $self->get_step_by_content( $token, '[list_of_applicants]', 'next' );
 	
-	$insurance_list .= ( $insurance_list ? ',' : '' ) . "$appdata_id=0";
-	
 	$self->query('query', "
-		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, Insurance = ? WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $insurance_list, $token );
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
+		$step, $appdata_id, $sch_id, $token );
 	
 	$self->mod_last_change_date( $token );
 	return $step;
@@ -1060,6 +1055,7 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'select' ) {
+	
 		my $list = '';
 
 		for my $opt ( $self->resort_with_first_elements( $param, $first_elements ) ) {
@@ -1070,6 +1066,7 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'radiolist' ) {
+	
 		my $list = '';
 		my $uniq_id = 0;
 		
@@ -1085,6 +1082,7 @@ sub get_html_for_element
 	}
 	
 	if ($type eq 'checklist') {
+
 		my $list = '';
 
 		for my $opt ( sort {$a cmp $b} keys %$param ) {
@@ -1098,19 +1096,13 @@ sub get_html_for_element
 	}
 
 	if ( $type eq 'checklist_insurer' ) {
+		
 		my $list = '';
-		my $value_list = {};
-		
-		my @value_list = split /,/, $value;
-		
-		for my $value ( @value_list ) {
-			my ( $id, $val ) = split /=/, $value;
-			$value_list->{ $id } = $val;
-		}
+		my %value_list = map { $_ => 1 } split /,/, $value;
 
 		for my $opt ( sort {$a cmp $b} keys %$param ) {
 		
-			my $checked = ( $value_list->{$opt} ? 'checked' : '' );
+			my $checked = ( $value_list{$opt} ? 'checked' : '' );
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $name . '_' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
 			'<label for="' . $opt . '">' . $param->{$opt} . '</label><br>';
 		}
@@ -1285,24 +1277,22 @@ sub check_special_in_rules_for_save
 			my $visa_type = $self->query('sel1', "
 				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData});
 
-				if ( $visa_type != 1 ) {
+			if ( $visa_type != 1 ) {
 				$self->query('query', "
 					UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {}, 
 					$table_id->{AutoSchengenAppData});
 			}
 		}
 		elsif ( $element->{special} eq 'insurer_many_id' ) {
-			my $all_insurer_list = $self->query('sel1', "
-				SELECT Insurance FROM AutoToken WHERE ID = ?", $table_id->{AutoToken} );
+			my $all_insurer = $self->query('selallkeys', "
+				SELECT ID FROM AutoAppData WHERE AppID = ?", $table_id->{AutoAppointments} );
 
-			my @all_insurer = split /,/, $all_insurer_list;
 			my $new_list = '';
-
-			for my $insurer ( @all_insurer ) {
-				my ( $id, $val ) = split /=/, $insurer;
-				$val = ( $vars->getparam( 'insurance_' . $id ) ? 1 : 0 );
-				$new_list .= ( $new_list ? ',' : '' ) . "$id=$val";
-			}	
+				
+			for my $insurer ( @$all_insurer ) {
+				next unless $vars->getparam( 'insurance_' . $insurer->{ ID } );
+				$new_list .= ( $new_list ? ',' : '' ) . $insurer->{ ID };
+			}
 
 			$self->query('query', "
 				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, 
@@ -1351,7 +1341,7 @@ sub decode_data_from_db
 	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
 	
 	$value = '' if ( $value eq '00.00.0000' );
-	
+
 	return $value;
 }
 
@@ -1698,9 +1688,11 @@ sub mod_last_change_date
 	my $self = shift;
 	my $token = shift;
 	
+	my $lastip = $ENV{'HTTP_X_REAL_IP'};
+	
 	$self->query('query', "
-		UPDATE AutoToken SET LastChange = now() WHERE Token = ?", {}, 
-		$token );
+		UPDATE AutoToken SET LastChange = now(), LastIP = ? WHERE Token = ?", {}, 
+		$lastip, $token );
 }
 
 sub create_new_appointment

@@ -14,6 +14,8 @@
 [% END %]
 </head>
 
+<font face="arial">
+
 <center>
 <div style = "margin: 50px ">
 
@@ -25,7 +27,7 @@
 <tr><td><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
 <tr><td align="center">
-<table width="650px">
+<table width="590px">
 
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
