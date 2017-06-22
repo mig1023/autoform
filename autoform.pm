@@ -181,7 +181,9 @@ sub init_add_param
 	my $token = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
+	
 	my $country_code = 'RUS';
+	my $age_for_agreements = 18;
 
 	my $info_from_db = $vars->get_memd->get('autoform_addparam');
 	
@@ -205,17 +207,23 @@ sub init_add_param
 
 	if ( $token ) {
 
-		$info_from_db->{ '[persons_in_app]' } = $self->query('selall', "
-			SELECT AutoAppData.ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person
+		my $app_person_in_app = $self->query('selallkeys', "
+			SELECT AutoAppData.ID as ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person,
+			birthdate, CURRENT_DATE() as currentdate
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 			WHERE AutoToken.Token = ?", $token);
-		
-		for my $person ( @{ $info_from_db->{'[persons_in_app]'} } ) {
-			$person->[1] =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
-		}
+
+		for my $person ( @$app_person_in_app ) {
+			$person->{ person } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 			
-		$info_from_db->{ '[persons_in_app_for_insurance]' } = $self->simple_array_clone( $info_from_db->{ '[persons_in_app]' } );
+			push ( @{ $info_from_db->{ '[persons_in_app_for_insurance]' } },
+				[ $person->{ ID }, $person->{ person } ] );
+
+			next if $self->age( $person->{ birthdate }, $person->{ currentdate } ) < $age_for_agreements;
+
+			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
+		}
 			
 		push $info_from_db->{ '[persons_in_app]' }, [ 0, 'на доверенное лицо' ];
 	}
@@ -237,18 +245,6 @@ sub init_add_param
 
 	return $content_rules;
 }	
-
-sub simple_array_clone
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-	my $old_array = shift;
-	my $new_array = [];
-	
-	push $new_array, $_ for @$old_array;
-	
-	return $new_array;
-}
 
 sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
@@ -1875,6 +1871,26 @@ sub insert_hash_table
 	my $current_id = $self->query('sel1', "SELECT last_insert_id()") || 0;
 
 	return $current_id;
+}
+
+sub age
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	my $gconfig = $vars->getConfig('general');
+	my $age_free_days = $gconfig->{'age_free_days'} + 0;
+
+	my ( $birth_year, $birth_month, $birth_day ) = split /\-/, shift; 
+	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
+
+	my $age = $year - $birth_year;
+	$age-- unless sprintf("%02d%02d", $month, $day)
+		>= sprintf("%02d%02d", $birth_month, $birth_day);
+	$age = 0 if $age < 0;
+
+	return $age;
 }
 
 sub query
