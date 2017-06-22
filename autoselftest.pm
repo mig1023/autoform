@@ -68,28 +68,19 @@ my $tests = [
 		'test' => { 	
 			1 => { 	'tester' => \&test_array,
 				'args' => [ '0' ],
-				'expected' => [ 'token error', 'your token has error: internal data error', 'autoform.tt2' ],
+				'expected' => [ '<center>ошибка: внутренняя ошибка</center>', '', 'autoform.tt2' ],
 			},
 			2 => { 	'tester' => \&test_array,
 				'args' => [ '1' ],
-				'expected' => [ 'token error', 'your token has error: token corrupted', 'autoform.tt2' ],
+				'expected' => [ '<center>ошибка: неправильный токен</center>', '', 'autoform.tt2' ],
 			},
 			3 => { 	'tester' => \&test_array,
 				'args' => [ '2' ],
-				'expected' => [ 'token error', 'your token has error: token not existing', 'autoform.tt2' ],
+				'expected' => [ '<center>ошибка: такого токена не существует</center>', '', 'autoform.tt2' ],
 			},
 			4 => { 	'tester' => \&test_array,
 				'args' => [ '3' ],
-				'expected' => [ 'token error', 'your token has error: app already finished', 'autoform.tt2' ],
-			},
-		},
-	},
-	{ 	'func' 	=> \&{ VCS::Site::autoform::simple_array_clone },
-		'comment' => 'simple_array_clone',
-		'test' => { 	
-			1 => { 	'tester' => \&test_array_ref,
-				'args' => [ [ '1', 'A', '2', 'B' ] ],
-				'expected' => [ '1', 'A', '2', 'B' ],
+				'expected' => [ '<center>ошибка: запись уже завершена</center>', '', 'autoform.tt2' ],
 			},
 		},
 	},
@@ -136,15 +127,21 @@ my $tests = [
 					'autoform.tt2',
 					{
 						'nearest_date' => [],
-						'comment' => [],
+						'comment' => [
+							's_date',
+							'f_date',
+						],
 						'timeslots' => [],
-						'mask' => [],
+						'mask' => [
+							's_date',
+							'f_date',
+						],
 						'datepicker' => [
 							's_date',
 							'f_date',
 						],
 					},
-					'[progress_bar]',
+					'[progress_bar_2]',
 				],
 			},
 			3 => { 	'tester' => \&test_array,
@@ -309,7 +306,7 @@ my $tests = [
 			},
 			5 => { 	'tester' => \&test_line,
 				'args' => [ 'input', 'element', 'val', {}, 'uniq', undef, 'comm' ],
-				'expected' => '<input type="text" value="val" name="element" id="element" title="comm" uniq>',
+				'expected' => '<input style="width:20em" type="text" value="val" name="element" id="element" title="comm" uniq>',
 			},
 			6 => { 	'tester' => \&test_line,
 				'args' => [ 'checkbox', 'element', 'val', {} ],
@@ -329,10 +326,10 @@ my $tests = [
 			9 => { 	'tester' => \&test_line,
 				'args' => [ 'radiolist', 'element', '2', { 1 => 'first', 2 => 'second', 3 => 'third' } ],
 				'expected' => 
-					'<input type="radio" name="element" value="1"  id="element1"><label for="element1">' .
+					'<div id="element"><input type="radio" name="element" value="1"  id="element1"><label for="element1">' .
 					'first</label><br><input type="radio" name="element" value="2" checked id="element2">' .
 					'<label for="element2">second</label><br><input type="radio" name="element" value="3"  '.
-					'id="element3"><label for="element3">third</label><br>',
+					'id="element3"><label for="element3">third</label><br></div>',
 			},
 			10 => {	'tester' => \&test_line,
 				'args' => [ 'text', undef, 'text' ],
@@ -361,9 +358,10 @@ my $tests = [
 					'test2' => { 'db' => 'test2', 'label_for' => 'Тест 2' },
 				} ],
 				'expected' =>
-					'<input type="checkbox" value="test1" name="test1" id="test1" checked>'.
-					'<label for="test1">Тест 1</label><br><input type="checkbox" '.
-					'value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br>',
+					'<div id="element"><input type="checkbox" value="test1" name="test1" ' .
+					'id="test1" checked><label for="test1">Тест 1</label><br><input type=' .
+					'"checkbox" value="test2" name="test2" id="test2" ><label for="test2">' .
+					'Тест 2</label><br></div>',
 			},
 			16 => {	'tester' => \&test_line,
 				'args' => [ 'checklist_insurer', 'element', 'test1=0,test2=1', { 
@@ -371,9 +369,9 @@ my $tests = [
 					'test2' => 'Тест 2',
 				} ],
 				'expected' =>
-					'<input type="checkbox" value="test1" name="element_test1" id="test1" >'.
-					'<label for="test1">Тест 1</label><br><input type="checkbox" value="test2" '.
-					'name="element_test2" id="test2" checked><label for="test2">Тест 2</label><br>',
+					'<input type="checkbox" value="test1" name="element_test1" id="test1" >' .
+					'<label for="test1">Тест 1</label><br><input type="checkbox" value="test2" ' .
+					'name="element_test2" id="test2" ><label for="test2">Тест 2</label><br>',
 			},
 			17 => {	'tester' => \&test_regexp,
 				'args' => [ 'captcha' ],
@@ -384,25 +382,25 @@ my $tests = [
 				'args' => [ 'progress', 'test', undef, 'past', 0 ],
 				'expected' =>
 					'<td align="center" style="background-image: url(' . "'/images/pbar-red-red.png'" .
-					');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;'.
-					'background:#FF6666;"><div style="padding-top:7px;' . 
-					'color:white;font-size:30">test</div></div></td>',
+					');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius' .
+					':12px;background:#FF6666;" title=""><div style="padding-top:7px;color:white;' .
+					'font-size:30"></div></div></td>',
 			},
 			19 => {	'tester' => \&test_line,
 				'args' => [ 'progress', 'test', undef, 'current', 1 ],
 				'expected' =>
 					'<td align="center" style="background-image: url(' . "'/images/pbar-white-gray.png'" .
-					');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;'.
-					'background:#CC0033;"><div style="padding-top:7px;' . 
-					'color:white;font-size:30">test</div></div></td>',
+					');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:' .
+					'12px;background:#CC0033;" title=""><div style="padding-top:7px;color:white;' .
+					'font-size:30"></div></div></td>',
 			},
 			20 => {	'tester' => \&test_line,
 				'args' => [ 'progress', 'test', undef, 'future', 2 ],
 				'expected' =>
 					'<td align="center" style="background-image: url(' . "'/images/pbar-gray-white.png'" .
-					');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;'.
-					'background:#999999;"><div style="padding-top:7px;' . 
-					'color:white;font-size:30">test</div></div></td>',
+					');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:' .
+					'12px;background:#999999;" title=""><div style="padding-top:7px;color:white;' .
+					'font-size:30"></div></div></td>',
 			},
 		},
 	},
@@ -433,9 +431,9 @@ my $tests = [
 					}
 				],
 				'expected' => 
-					'<tr><td><label id="text">Email</label></td><td><input type="text" ' .
-					'value="testvalue@mail.ru" name="email" id="email" title=""></td>' .
-					'</tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style='.
+					'<tr><td><label id="text">Email</label></td><td><input style="width:20em"' .
+					' type="text" value="testvalue@mail.ru" name="email" id="email" title="">' .
+					'</td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style=' .
 					'"color:gray; font-size:0.7em;">mail@mail.ru</span></td></td>',
 			},
 			2 => { 	'tester' => \&test_line,
@@ -460,10 +458,11 @@ my $tests = [
 					}
 				],
 				'expected' => 
-					'<tr><td><label id="text">Средства</label></td><td><input type="checkbox" ' .
-					'value="test1" name="test1" id="test1" checked><label for="test1">Тест 1' .
-					'</label><br><input type="checkbox" value="test2" name="test2" id="test2" ' .
-					'><label for="test2">Тест 2</label><br></td></tr>',
+					'<tr><td><label id="text">Средства</label></td><td><div id="test">' .
+					'<input type="checkbox" value="test1" name="test1" id="test1" checked>' .
+					'<label for="test1">Тест 1</label><br><input type="checkbox" value=' .
+					'"test2" name="test2" id="test2" ><label for="test2">Тест 2</label>' .
+					'<br></div></td></tr>',
 			}
 		},
 	},
@@ -787,33 +786,54 @@ my $tests = [
 						{
 							'page_name' => 'Данные поездки',
 							'page_ord' => 2,
-							'progress' => 1,
+							'progress' => 2,
 							'param' => {},
 						},
 						{
 							'type' => 'input',
 							'name' => 's_date',
 							'label' => 'Дата начала поездки',
-							'comment' => '',
+							'comment' => 'Введите предполагаемую дату начала поездки',
+							'example' => '01.01.2025',
 							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'check_logic' => [
+								{
+									'condition' => 'now_or_later',
+								},
+							],
 							'db' => {
 								'table' => 'Appointments',
 								'name' => 'SDate',
 							},
-							'special' => 'datepicker',
+							'special' => 'datepicker, mask',
 							'param' => {},
 						},
 						{
 							'type' => 'input',
 							'name' => 'f_date',
 							'label' => 'Дата окончания поездки',
-							'comment' => '',
+							'comment' => 'Введите предполагаемую дату окончания поездки',
+							'example' => '31.12.2025',
 							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'check_logic' => [
+								{
+									'condition' => 'equal_or_later',
+									'table' => 'Appointments',
+									'name' => 'SDate',
+									'error' => 'Дата начала поездки',
+								},
+								{
+									'condition' => 'equal_or_earlier',
+									'table' => 'Appointments',
+									'name' => 'SDate',
+									'error' => 'Дата начала поездки',
+								},
+							],
 							'db' => {
 								'table' => 'Appointments',
 								'name' => 'FDate',
 							},
-							'special' => 'datepicker',
+							'special' => 'datepicker, mask',
 							'param' => {},
 						},
 					],
@@ -828,26 +848,47 @@ my $tests = [
 							'type' => 'input',
 							'name' => 's_date',
 							'label' => 'Дата начала поездки',
-							'comment' => '',
+							'comment' => 'Введите предполагаемую дату начала поездки',
+							'example' => '01.01.2025',
 							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'check_logic' => [
+								{
+									'condition' => 'now_or_later',
+								},
+							],
 							'db' => {
 								'table' => 'Appointments',
 								'name' => 'SDate',
 							},
-							'special' => 'datepicker',
+							'special' => 'datepicker, mask',
 							'param' => {},
 						},
 						{
 							'type' => 'input',
 							'name' => 'f_date',
 							'label' => 'Дата окончания поездки',
-							'comment' => '',
+							'comment' => 'Введите предполагаемую дату окончания поездки',
+							'example' => '31.12.2025',
 							'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+							'check_logic' => [
+								{
+									'condition' => 'equal_or_later',
+									'table' => 'Appointments',
+									'name' => 'SDate',
+									'error' => 'Дата начала поездки',
+								},
+								{
+									'condition' => 'equal_or_earlier',
+									'table' => 'Appointments',
+									'name' => 'SDate',
+									'error' => 'Дата начала поездки',
+								},
+							],
 							'db' => {
 								'table' => 'Appointments',
 								'name' => 'FDate',
 							},
-							'special' => 'datepicker',
+							'special' => 'datepicker, mask',
 							'param' => {},
 						},
 					],
@@ -963,14 +1004,29 @@ my $tests = [
 			# .......
 		},
 	},
+	{	'func' 	=> \&{ VCS::Site::autoform::age },
+		'comment' => 'age',
+		'test' => { 	
+			1 => { 	'tester' => \&test_line,
+				'args' => [ '1999-06-23', '2017-06-15' ],
+				'expected' => '17',
+			},
+			2 => { 	'tester' => \&test_line,
+				'args' => [ '1999-06-22', '2017-06-15' ],
+				'expected' => '18',
+			},
+		},
+	},
 	
 ];
 
-my $progress_bar = '<td align="center" style="background-image: url(\'/images/pbar-white-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;"><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;"><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;">Готово!</td>';
+my $progress_bar = '<td align="center" style="background-image: url('."'".'/images/pbar-white-gray.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;" title=""><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Паспорта"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Допданные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Поездка"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Проживание"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Расходы"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Ещё?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="На кого?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Офис"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Подтверждение"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-white.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Готово!</td>';
 
-my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label id="free_date"></label></td></tr><tr><td><label id="text">Email</label></td><td><input type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными</label></td></tr>';
+my $progress_bar_2 = '<td align="center" style="background-image: url(\'/images/pbar-white-red.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#FF6666;" title=""><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-red-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#CC0033;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Паспорта"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Допданные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Поездка"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Проживание"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Расходы"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Ещё?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="На кого?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Офис"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Подтверждение"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Готово!</td>';
 
-my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input type="text" value="" name="s_date" id="s_date" title=""></td></tr><tr><td><label id="text">Дата окончания поездки</label></td><td><input type="text" value="" name="f_date" id="f_date" title=""></td></tr>';
+my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label id="free_date"><b>[text]</b></label></td></tr><tr><td><label id="text">Email</label></td><td><input style="width:20em" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+
+my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input style="width:20em" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">01.01.2025</span></td></td><tr><td><label id="text">Дата окончания поездки</label></td><td><input style="width:20em" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">31.12.2025</span></td></td>';
 
 sub selftest 
 # //////////////////////////////////////////////////
@@ -1053,6 +1109,7 @@ sub get_tests
 				s/\[appdata_id\]/$test_appdataid/g;
 				s/\[schdata_id\]/$test_appdata_schid/g;
 				s/\[progress_bar\]/$progress_bar/g;
+				s/\[progress_bar_2\]/$progress_bar_2/g;
 				s/\[first_page\]/$first_page/g;
 				s/\[second_page\]/$second_page/g;
 				
@@ -1174,7 +1231,7 @@ sub self_self_test
 		{ 'key1' => 'value1', 'key2' => ( 1, 3, 2 ) } );
 	$fail_in_myself += ! test_hash( $self_debug, { 'key1' => 'value1', 'key2' => 'value2' }, 'self14', undef, 
 		{ 'key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3' } );
-	$fail_in_myself += ! test_hash( 1, { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self15', undef, 
+	$fail_in_myself += ! test_hash( $self_debug, { 'key1' => 'value1', 'key2' => [ { 'key3' => [ 1, 2, 3 ] } ] }, 'self15', undef, 
 		{ 'key1' => 'value1', 'key2' => [ { 'key3' => [ 2, 1, 3 ] } ] } );
 		
 	return $fail_in_myself;
@@ -1207,6 +1264,8 @@ sub test_line
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 
+	warn "$expected\n$result" if $debug;
+	
 	if ( lc( $expected ) ne lc( $result ) ) {
 		return $comm;
 	};
@@ -1217,6 +1276,8 @@ sub test_line_in_hash
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my ( $key, $value ) = split /:/, $expected;
+	
+	warn Dumper( $expected, $result ) if $debug;
 
 	if ( lc( $result->{ $key } ) ne lc( $value ) ) { 
 		return $comm;
@@ -1229,6 +1290,8 @@ sub test_hash
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my $not_eq = 0;
 
+	warn Dumper( $expected, $result ) if $debug;
+	
 	for ( keys %$expected, keys %$result ) {
 		$not_eq += ( recursive_check( $debug, $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 1 : 0 );
 	}
@@ -1248,7 +1311,9 @@ sub test_array
 	my @result = @_;
 	
 	my $not_eq = 0;
-
+	
+	warn Dumper( $expected, \@result ) if $debug;
+	
 	return 0 if ( $#result < 0 ) and ( $#$expected < 0 );
 	return 1 if ( $#result < 0 ) or ( $#$expected < 0 );
 	return 1 if ( $#result != $#$expected );
@@ -1265,12 +1330,10 @@ sub test_array
 sub test_array_ref
 # //////////////////////////////////////////////////
 {
-	my $debug = shift;
-	my $expected = shift;
-	my $comm = shift;
-	my $self = shift;
-	my $result = shift;
+	my ( $debug, $expected, $comm, $self, $result ) = @_;
 
+	warn Dumper( $expected, $result ) if $debug;
+	
 	my $not_eq = 0;
 	
 	return 0 if ( $#$result < 0 ) and ( $#$expected < 0 );
@@ -1292,6 +1355,8 @@ sub test_regexp
 {
 	my ( $debug, $regexp, $comm, undef, $result ) = @_;
 	
+	warn "$regexp\n$result" if $debug;
+	
 	if ( $result !~ /$regexp/ ) {
 		return $comm;
 	}
@@ -1302,9 +1367,7 @@ sub test_write_db
 {
 	my $debug = shift;
 	my ( $token_or_appid, $db_table, $db_name, $db_value ) = split /:/, shift;
-	my $comment = shift;
-	my $self = shift;
-	my $result = shift;
+	my ( $comment, $self, $result ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
