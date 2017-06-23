@@ -1446,7 +1446,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 23,
 				'progress' => 10,
-				
+				'persons_in_page' => 1,
 			},
 			{
 				'type' => 'select',
@@ -1689,6 +1689,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 26,
 				'progress' => 12,
+				'persons_in_page' => 1,
 			},
 			{
 				'type' => 'text',

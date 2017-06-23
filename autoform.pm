@@ -49,11 +49,12 @@ sub get_content_rules
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $page = shift;
+	my $current_page = shift;
 	my $full = shift;
 	my $token = shift;
 	
 	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
+	my $persons_in_current_page = 0;
 	
 	my $new_content = {};
 	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content ) {
@@ -61,6 +62,8 @@ sub get_content_rules
 		my $page_ord = $content->{$page}->[0]->{page_ord};
 		
 		$new_content->{ $page_ord } = $content->{ $page };
+		$persons_in_current_page = ( $new_content->{ $page_ord }->[0]->{ persons_in_page } ? 1 : 0 ) if $current_page == $page_ord;
+		
 		if ( !$full ) {
 			if ( $content->{ $page }->[0]->{replacer} ) {
 				$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
@@ -73,14 +76,15 @@ sub get_content_rules
 		}
 	}
 
+	$token = undef unless $persons_in_current_page;
 	$content = $self->init_add_param( $new_content, $token );
 	
-	if ( !$page ) {
+	if ( !$current_page ) {
 		return $content;
-	} elsif ( $page =~ /length/i ) {
+	} elsif ( $current_page =~ /length/i ) {
 		return scalar( keys %$content );
 	} else {
-		return $content->{ $page };
+		return $content->{ $current_page };
 	};
 }
 
@@ -225,7 +229,7 @@ sub init_add_param
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		}
 			
-		push $info_from_db->{ '[persons_in_app]' }, [ 0, 'на доверенное лицо' ];
+		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, 'на доверенное лицо' ];
 	}
 		
 	for my $page ( keys %$content_rules ) {
@@ -1884,7 +1888,7 @@ sub age
 
 	my ( $birth_year, $birth_month, $birth_day ) = split /\-/, shift; 
 	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
-
+	
 	my $age = $year - $birth_year;
 	$age-- unless sprintf("%02d%02d", $month, $day)
 		>= sprintf("%02d%02d", $birth_month, $birth_day);
