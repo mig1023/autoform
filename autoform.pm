@@ -813,10 +813,57 @@ sub get_html_page
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id( $token ) );
 	$current_values->{ 'new_app_num' } = $appnum if $appnum;
 	
+	$self->correct_values( \$current_values, $appnum, $token );
+	
 	for my $element ( @$page_content ) {
 		$content .= $self->get_html_line( $element, $current_values );
 	}
 	return ( $content, $template );
+}
+
+sub correct_values
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $current_values = shift;
+	my $appnum = shift;
+	my $token = shift;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+
+	$$current_values->{ 'new_app_num' } = $appnum if $appnum;
+
+	if ( $$current_values->{ 'new_app_branch' } ) {
+	
+		my $current_barnch = $$current_values->{ 'new_app_branch' };
+		$$current_values->{ 'new_app_branch' } = $self->query('sel1', "
+			SELECT BName FROM Branches WHERE ID = ?", $$current_values->{ 'new_app_branch' } );
+	
+		my $branch_geo = VCS::Site::autodata::get_geo_branches();
+		
+		$$current_values->{ 'new_app_branch' } .= $self->get_html_for_element( 'geo_link', 
+			"$branch_geo->{ $current_barnch }->[1]|$branch_geo->{ $current_barnch }->[0]" );
+	};
+	
+	if ( $$current_values->{ 'new_app_timedate' } ) {
+
+		$$current_values->{ 'new_app_timedate' } = $self->query('sel1', "
+			SELECT AppDate FROM AutoAppointments 
+			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
+			WHERE AutoToken.Token = ?", $token );
+
+		$$current_values->{ 'new_app_timedate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	}
+	
+	if ( $$current_values->{ 'new_app_timeslot' } ) {
+	
+		my ( $start, $end ) = $self->query('sel1', "
+			SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $$current_values->{ 'new_app_timeslot' } );
+		
+		$_ = $vars->get_system->time_to_str( $_ ) for ( $start, $end );
+		
+		$$current_values->{ 'new_app_timeslot' } = "$start - $end";	
+	}
 }
 
 sub get_list_of_app
@@ -1018,6 +1065,10 @@ sub get_html_for_element
 					
 		'stages'		=> '<td [format]>[progress_stage]</td>',
 		'free_line'		=> '<tr><td colspan="3">&nbsp;</td></tr>',
+		
+		'geo_link'		=> ' <a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
+					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]' .
+					'">[ найти визовый центр на карте ]</a>',
 	};
 	
 	my $content = $elements->{ $type };
@@ -1163,6 +1214,12 @@ sub get_html_for_element
 	
 	if ( $type eq 'info' and $value ) {
 		$content =~ s/\[text\]/$value/;
+	}
+	
+	if ( $type eq 'geo_link' ) {
+		my ( $x, $y ) = split /\|/, $name;
+		$content =~ s/\[x\]/$x/;
+		$content =~ s/\[y\]/$y/;
 	}
 	
 	return $content;
