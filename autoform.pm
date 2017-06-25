@@ -1867,6 +1867,7 @@ sub mezzi_assembler
 		$mezzi .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
 		delete $hash->{ 'Mezzi' . $_ };
 	};
+
 	$hash->{ Mezzi } = $mezzi;
 	
 	return $hash;
