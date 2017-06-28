@@ -27,7 +27,7 @@
 <tr><td><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
 <tr><td align="center">
-<table width="590px">
+<table width="590px" id="app_table">
 
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
@@ -51,6 +51,28 @@
 </form>
 
 <script>
+
+$(window).resize(mobileScreenCheck);
+$(document).ready(mobileScreenCheck);
+
+function mobileScreenCheck() {
+	var mob_td_block = '';
+
+	if ( document.body.clientWidth < 700 ) {
+		$('#app_table').attr("cellspacing", 50);
+		mob_td_block = 'block';
+	}
+	else {
+		$('#app_table').attr("cellspacing", 0);
+	};
+	
+	$("#app_table").each(function(){
+		$("td",this).each(function(){
+			$(this).css( "display", mob_td_block );
+		});
+	});
+}
+
 
 function go_button(where) {
 	$('#action').val(where);
