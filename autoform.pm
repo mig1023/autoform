@@ -811,7 +811,6 @@ sub get_html_page
 	}
 	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id( $token ) );
-	$current_values->{ 'new_app_num' } = $appnum if $appnum;
 	
 	$self->correct_values( \$current_values, $appnum, $token );
 	
@@ -1043,13 +1042,14 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input style="width:20em" type="text" value="[value]" name="[name]" id="[name]" title="[comment]" [u]>',
+		'input' 		=> '<input class="inp_comm" style="width:20em" type="text" value="[value]" name="[name]"'.
+					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
-		'example'		=> '<tr [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
-					'<span style="color:gray; font-size:0.7em;">[value]</span></td></td>',
+		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
+					'<span style="color:gray; font-size:0.7em;">[value]</span></td>',
 
 		'info'			=> '<label id="[name]" [u]><b>[text]</b></label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',
