@@ -17,14 +17,14 @@
 <font face="arial">
 
 <center>
-<div style = "margin: 50px ">
+<div id="app_form" style = "margin: 50px ">
 
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 
 <table width="100%">
 
-<tr><td><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+<tr><td><table id="progressbar" style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
 <tr><td align="center">
 <table width="590px" id="app_table">
@@ -55,21 +55,53 @@
 $(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
 
-function mobileScreenCheck() {
-	var mob_td_block = '';
+function isMobile() {
+	return ( document.body.clientWidth < 700 ? 1 : 0);
+}
 
-	if ( document.body.clientWidth < 700 ) {
-		$('#app_table').attr("cellspacing", 50);
-		mob_td_block = 'block';
+function mobileScreenCheck() {
+
+	var mobilScreen = 0;		
+	if ( isMobile() ) {
+		mobilScreen = 1;
+		init_comm( 'center', 'bottom' );
 	}
 	else {
-		$('#app_table').attr("cellspacing", 0);
+		init_comm( 'right', 'center' );
 	};
+	
+	$('#app_table').attr("cellspacing", ( mobilScreen ? '50' : '' ) );
+	$('#app_table').attr("width", ( mobilScreen ? '100%' : '590px' ) );
+	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
+	$('#progressbar').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	
 	$("#app_table").each(function(){
 		$("td",this).each(function(){
-			$(this).css( "display", mob_td_block );
+			$(this).css( "display", ( mobilScreen ? 'block' : '' ) );
+			$(this).css( "float", ( mobilScreen ? 'left' : '' ) );
+			$(this).css( "width", ( mobilScreen ? '100%' : '' ) );
 		});
+	});
+	
+	if ( mobilScreen ) {
+		[% FOREACH picker IN special.datepicker %]
+			$('#[% picker %]').css( "width", '93%');
+		[% END %]
+		[% FOREACH mask IN special.mask %]
+			$("#[% mask %]").css( "width", '93%');
+		[% END %]
+	} else {
+		[% FOREACH picker IN special.datepicker %]
+			$('#[% picker %]').css( "width", '');
+		[% END %]
+		[% FOREACH mask IN special.mask %]
+			$("#[% mask %]").css( "width", '');
+		[% END %]
+	};
+	
+	$(".mobil_hide").each(function(){
+		$(this).css( "display", ( mobilScreen ? 'none' : '' ) );
 	});
 }
 
@@ -78,6 +110,20 @@ function go_button(where) {
 	$('#action').val(where);
 	document.dataform.submit();
 };
+
+function init_comm(pos_x, pos_y) {
+	$('.inp_comm').poshytip('destroy');
+
+	$('.inp_comm').poshytip({
+		className: 'tip-yellowsimple',
+		showOn: 'focus',
+		alignTo: 'target',
+		alignX: pos_x,
+		alignY: pos_y,
+		offsetX: 5,
+		showTimeout: 100
+	});
+}
 
 [% FOREACH picker IN special.datepicker %]
 	$('#[% picker %]').datepicker({
@@ -102,18 +148,6 @@ function go_button(where) {
 		if(e.keyCode == 8 || e.keyCode == 46) {
 			$.datepicker._clearDate(this);
 		}
-	});
-[% END %]
-
-[% FOREACH comm IN special.comment %]
-	$('#[% comm %]').poshytip({
-		className: 'tip-yellowsimple',
-		showOn: 'focus',
-		alignTo: 'target',
-		alignX: 'right',
-		alignY: 'center',
-		offsetX: 5,
-		showTimeout: 100
 	});
 [% END %]
 
@@ -216,7 +250,15 @@ function update_timeslots() {
 			return [curtop];
 		}
 	}
+$(document).ready(function() {
 
+	var mobScreen = isMobile();
+	var error_x = ( mobScreen ? 'inner-left' : 'left' );
+	var error_y = ( mobScreen ? 'top' : 'center' );
+	var offset_x = ( mobScreen ? 0 : 5 );
+	var offset_y = ( mobScreen ? 5 : 0 );
+	
+	
 	window.scroll(0,findPos(document.getElementById("[% last_error_name %]")));
 	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
 	$('#[% last_error_name %]').poshytip({
@@ -224,12 +266,13 @@ function update_timeslots() {
 		content: '[% langreq(last_error_text) %]',
 		showOn: 'none',
 		alignTo: 'target',
-		alignX: 'left',
-		alignY: 'center',
-		offsetX: 5,
-		offsetY: 0
+		alignX: error_x,
+		alignY: error_y,
+		offsetX: offset_x,
+		offsetY: offset_y,
 	});
 	$('#[% last_error_name %]').poshytip('show');
+});
 [% END %]
 </script>
 

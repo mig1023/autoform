@@ -1042,10 +1042,10 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input class="inp_comm" style="width:20em" type="text" value="[value]" name="[name]"'.
+		'input' 		=> '<input class="input_width inp_comm" style="width:20em" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
-		'select'		=> '<select size = "1" name="[name]" id="[name]" [u]>[options]</select>',
+		'select'		=> '<select class="input_width" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
 		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td style="vertical-align:top;">'.

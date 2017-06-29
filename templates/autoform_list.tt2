@@ -15,10 +15,10 @@
 
 <table width="100%">
 
-<tr><td><table style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+<tr><td><table id="progressbar" style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
 <tr><tdalign="center">
-<table width="450px">
+<table width="450px" id="app_table">
 
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
@@ -89,6 +89,21 @@ function go_button(where) {
 	$('#action').val(where);
 	document.dataform.submit();
 };
+
+$(window).resize(mobileScreenCheck);
+$(document).ready(mobileScreenCheck);
+
+function mobileScreenCheck() {
+
+	if ( document.body.clientWidth < 700 ) {
+		$('#progressbar').css( "display", 'none' );
+		$('#app_table').attr("width", '100%' );
+	}
+	else {
+		$('#progressbar').css( "display", '' );
+		$('#app_table').attr("width", '450px' );
+	};
+}
 
 </script>
 
