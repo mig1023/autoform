@@ -19,7 +19,7 @@
 <center>
 <div id="app_form" style = "margin: 50px ">
 
-<form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
+<form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 
 <table width="100%">

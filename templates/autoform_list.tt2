@@ -9,7 +9,7 @@
 <center>
 <div style = "margin: 50px ">
 
-<form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
+<form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "" name = "person" id = "person">
 

@@ -29,7 +29,7 @@ sub getContent
 	my $vars = $self->{'VCS::Vars'};
 	
 	$self->{'autoform'} = VCS::Site::autodata::get_settings();
-
+	
     	my $dispathcher = {
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
@@ -103,6 +103,8 @@ sub autoform
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
+	$self->{'lang'} = 'en' if $vars->getparam( 'lang' ) =~ /^en$/i ;
+
 	if ( $token =~ /^\d\d$/ ) {
 		( $title, $page_content, $template_file ) = $self->get_token_error( $token );
 	} else {
@@ -136,6 +138,7 @@ sub autoform
 		'vcs_tools' => $self->{'autoform'}->{'addr_vcs'},
 		'appinfo' => $appinfo_for_timeslots,
 		'progress' => $progress,
+		'lang_in_link' => $self->{'lang'},
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -229,7 +232,7 @@ sub init_add_param
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		}
 			
-		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, 'на доверенное лицо' ];
+		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
 		
 	for my $page ( keys %$content_rules ) {
@@ -348,7 +351,7 @@ sub get_token_error
 		'запись уже завершена',
 	];
 	
-	my $title = 'ошибка: ' . $error_type->[ $error_num ];
+	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
 	$title = "<center>$title</center>";
 	
 	return ( $title, '', $template );
@@ -420,7 +423,7 @@ sub get_autoform_content
 	}
 	
 	if ( $page !~ /\[/ ) { 
-		$title = $page->[0]->{ page_name };
+		$title = $self->lang( $page->[0]->{ page_name } );
 	}
 
 	my ( $content, $template ) = $self->get_html_page( $step, $token, $appnum );
@@ -1026,13 +1029,11 @@ sub get_html_for_element
 {
 	my $self = shift;
 	
-	my $type = shift;
-	my $name = shift;
-	my $value = shift;
-	my $param = shift;
-	my $uniq_code = shift;
-	my $first_elements = shift;
-	my $comment = shift;
+	my ( $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment ) = @_;
+	
+	my $value = $self->lang( $value_original );
+	my $param = $self->lang( $param );
+	my $comment = $self->lang( $comment );
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -1101,7 +1102,7 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'checkbox' ) {
-		$content =~ s/\[checked\]/checked/gi if $value;
+		$content =~ s/\[checked\]/checked/gi if $value_original;
 		$content =~ s/\s\[checked\]//gi;
 	}
 	
@@ -1110,7 +1111,7 @@ sub get_html_for_element
 		my $list = '';
 
 		for my $opt ( $self->resort_with_first_elements( $param, $first_elements ) ) {
-			my $selected = ( $value == $opt ? 'selected' : '' );
+			my $selected = ( $value_original == $opt ? 'selected' : '' );
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{ $opt } . '</option>'; 
 		}
 		$content =~ s/\[options\]/$list/gi;
@@ -1122,7 +1123,7 @@ sub get_html_for_element
 		my $uniq_id = 0;
 		
 		for my $opt ( sort keys %$param ) {
-			my $checked = ( $value eq $opt ? 'checked' : '' );
+			my $checked = ( $value_original eq $opt ? 'checked' : '' );
 			
 			$uniq_id++;
 			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' . $checked . ' id="'.$name.$uniq_id.'">'.
@@ -1161,11 +1162,11 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'captcha' ) {
-		my $config = $vars->getConfig('captcha');
-		my $addr_captcha = $self->{'autoform'}->{'addr_captcha'};
+		my $config = $vars->getConfig( 'captcha' );
+		my $addr_captcha = $self->{ 'autoform' }->{ 'addr_captcha' };
 		
 		my $captcha = $vars->getcaptcha();
-		my $ccode = $captcha->generate_code($config->{'code_nums'});
+		my $ccode = $captcha->generate_code( $config->{ 'code_nums' } );
 	
 		$content =~ s!\[captcha_file\]!$addr_captcha$ccode.png!;
 		$content =~ s/\[captcha_code\]/$ccode/;
@@ -1722,13 +1723,13 @@ sub text_error
 	];
 	
 	if ( !defined($element) ) {
-		return "|$text->[$error_code]";
+		return "|" . $self->lang( $text->[$error_code] );
 	}
 	
 	my $name_of_element = (	$element->{label} ? $element->{label} : ( 
 				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
 	
-	my $current_error = $text->[ $error_code ];
+	my $current_error = $self->lang( $text->[ $error_code ] );
 	$current_error =~ s/\[name\]/$name_of_element/;
 	$current_error =~ s/\[relation\]/$relation/;
 	$current_error =~ s/\[offset\]/$offset/;
@@ -1953,6 +1954,26 @@ sub age
 	$age = 0 if $age < 0;
 
 	return $age;
+}
+
+sub lang
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $text = shift;
+	my $vocabulary = $self->{ 'VCS::Vars' }->{ 'VCS::Resources' }->{ 'list' };
+
+	return if !$text;
+	
+	if ( ref( $text ) ne 'HASH' ) {
+		return $vocabulary->{ $text }->{ $self->{ 'lang' } } || $text;
+	}
+	else {
+		for ( keys %$text ) {
+			$text->{ $_ } = $vocabulary->{ $text->{ $_ } }->{ $self->{ 'lang' } } || $text->{ $_ };
+		}
+		return $text;
+	}
 }
 
 sub query
