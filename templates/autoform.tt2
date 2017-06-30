@@ -65,6 +65,8 @@ function mobileScreenCheck() {
 	if ( isMobile() ) {
 		mobilScreen = 1;
 		init_comm( 'center', 'bottom' );
+		
+		
 	}
 	else {
 		init_comm( 'right', 'center' );
@@ -82,6 +84,11 @@ function mobileScreenCheck() {
 			$(this).css( "float", ( mobilScreen ? 'left' : '' ) );
 			$(this).css( "width", ( mobilScreen ? '100%' : '' ) );
 		});
+	});
+	
+	$('.input_width').each(function(){
+		$(this).css( "height", mobilScreen ? '40px' : '20px' );
+		$(this).css( "font-size", mobilScreen ? '1.5em' : '' );
 	});
 	
 	if ( mobilScreen ) {
