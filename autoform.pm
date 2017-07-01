@@ -1055,7 +1055,7 @@ sub get_html_for_element
 		'info'			=> '<label class="info" id="[name]" [u]><b>[text]</b></label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',
 		'checklist_insurer'	=> '[options]',
-		'captcha'		=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
+		'captcha'		=> '<img src="[captcha_file]" width="100%"><input type="hidden" name="code" value="[captcha_code]" [u]>',
 		
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
@@ -1225,6 +1225,24 @@ sub get_html_for_element
 	}
 	
 	return $content;
+}
+
+sub add_css_class
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	my $html = shift;
+	my $new_class = shift;
+	
+	if ( $html =~ /\sclass="([^"]*)"/i ) {
+		my $classes = "$1 $new_class";
+		$html =~ s/\sclass="[^"]*"/ class="$classes"/i;
+	}
+	else {
+		$html =~ s/^\s*(\<[^\s]+\s)/$1class="$new_class"/;
+	}
+	
+	return $html;
 }
 
 sub resort_with_first_elements

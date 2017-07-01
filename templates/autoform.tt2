@@ -24,7 +24,7 @@
 
 <table width="100%">
 
-<tr><td><table id="progressbar" style="border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+<tr><td><table id="progressbar" style="display:none;border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
 <tr><td align="center">
 <table width="590px" id="app_table">
