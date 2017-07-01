@@ -51,16 +51,19 @@ function back_button() {
 $(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
 
+function isMobile() {
+	return ( document.body.clientWidth < 700 ? 1 : 0);
+}
+
 function mobileScreenCheck() {
 
-	if ( document.body.clientWidth < 700 ) {
-		$('#progressbar').css( "display", 'none' );
-		$('#app_table').attr("width", '100%' );
-	}
-	else {
-		$('#progressbar').css( "display", '' );
-		$('#app_table').attr("width", '450px' );
-	};
+	var mobilScreen = 0;		
+	if ( isMobile() ) {
+		mobilScreen = 1;
+	
+	$('#progressbar').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
+	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
 }
 
 </script>

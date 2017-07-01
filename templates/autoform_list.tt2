@@ -20,7 +20,7 @@
 <tr><tdalign="center">
 <table width="450px" id="app_table">
 
-<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
+<tr><td colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% IF content_text.0.ID == "X" %]
 	<tr><td colspan="5" id = "applist">
@@ -33,7 +33,7 @@
 	<td [% IF i == 1 %]id = "applist"[% END %] width="90%">
 	[% IF !person.Finished %][draft][% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% person.BirthDate %]</td>
-	<td><input type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
+	<td><input class="edit_input" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
 	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
 	</tr>
 	[% END %]
@@ -93,16 +93,21 @@ function go_button(where) {
 $(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
 
+function isMobile() {
+	return ( document.body.clientWidth < 700 ? 1 : 0);
+}
+
 function mobileScreenCheck() {
 
-	if ( document.body.clientWidth < 700 ) {
-		$('#progressbar').css( "display", 'none' );
-		$('#app_table').attr("width", '100%' );
+	var mobilScreen = 0;	
+	if ( isMobile() ) {
+		mobilScreen = 1;
 	}
-	else {
-		$('#progressbar').css( "display", '' );
-		$('#app_table').attr("width", '450px' );
-	};
+	
+	$('#progressbar').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
+	$('.edit_input').attr("value", ( mobilScreen ? '✎' : '[% langreq('Редактировать') %]' ) );
+	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
 }
 
 </script>

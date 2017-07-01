@@ -65,8 +65,6 @@ function mobileScreenCheck() {
 	if ( isMobile() ) {
 		mobilScreen = 1;
 		init_comm( 'center', 'bottom' );
-		
-		
 	}
 	else {
 		init_comm( 'right', 'center' );
@@ -77,6 +75,8 @@ function mobileScreenCheck() {
 	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : '' ) );
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
+	$('.info').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
+	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
 	
 	$("#app_table").each(function(){
 		$("td",this).each(function(){

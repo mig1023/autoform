@@ -1043,7 +1043,7 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input class="input_width inp_comm" style="width:20em;" type="text" value="[value]" name="[name]"'.
+		'input' 		=> '<input class="input_width inp_comm" style="width:20em" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select class="input_width" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
@@ -1052,7 +1052,7 @@ sub get_html_for_element
 		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
 					'<span style="color:gray; font-size:0.7em;">[value]</span></td>',
 
-		'info'			=> '<label id="[name]" [u]><b>[text]</b></label>',
+		'info'			=> '<label class="info" id="[name]" [u]><b>[text]</b></label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',
 		'checklist_insurer'	=> '[options]',
 		'captcha'		=> '<img src="[captcha_file]"><input type="hidden" name="code" value="[captcha_code]" [u]>',
@@ -1065,11 +1065,10 @@ sub get_html_for_element
 					'color:white;font-size:30">[name]</div></div></td>',
 					
 		'stages'		=> '<td [format]>[progress_stage]</td>',
-		'free_line'		=> '<tr><td colspan="3">&nbsp;</td></tr>',
+		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 		
 		'geo_link'		=> ' <a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
-					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]' .
-					'">[ найти визовый центр на карте ]</a>',
+					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]">',
 	};
 	
 	my $content = $elements->{ $type };
@@ -1221,6 +1220,8 @@ sub get_html_for_element
 		my ( $x, $y ) = split /\|/, $name;
 		$content =~ s/\[x\]/$x/;
 		$content =~ s/\[y\]/$y/;
+		
+		$content .= '[ ' . $self->lang( "найти визовый центр на карте" ) . ' ]</a>';
 	}
 	
 	return $content;
