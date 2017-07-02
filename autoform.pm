@@ -1043,14 +1043,14 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input class="input_width inp_comm" style="width:20em" type="text" value="[value]" name="[name]"'.
+		'input' 		=> '<input class="input_width input_gen"type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select class="input_width" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
-		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td style="vertical-align:top;">'.
-					'<span style="color:gray; font-size:0.7em;">[value]</span></td>',
+		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">'.
+					'<span class="exam_span_gen">[value]</span></td>',
 
 		'info'			=> '<label class="info" id="[name]" [u]><b>[text]</b></label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',
@@ -1060,11 +1060,10 @@ sub get_html_for_element
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
 		
-		'progress'		=> '<td align="center" style="background-image: url(' . "'/images/pbar-[back].png'" .
-					');background-size: 100% 100%;"><div [format] title="[title]"><div style="padding-top:7px;' . 
-					'color:white;font-size:30">[name]</div></div></td>',
+		'progress'		=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
+					'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
 					
-		'stages'		=> '<td [format]>[progress_stage]</td>',
+		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
 		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 		
 		'geo_link'		=> ' <a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
@@ -1173,43 +1172,31 @@ sub get_html_for_element
 	
 	
 	if ( $type eq 'progress' ) {
-		my $form = 'style="width:24px;height:24px;border-radius:12px;background:';
-		$form = 'style="width:50px;height:50px;border-radius:25px;background:' if $first_elements == 1;
+		
+		my $form = ( $first_elements ? 'big_progr pr_' : 'ltl_progr pr_' ) . $param;
 			
-		$form .= "#FF6666" if $param eq 'past';
-		$form .= "#CC0033" if $param eq 'current';
-		$form .= "#999999" if $param eq 'future';
-		
-		$form .= ';"';
-		
 		my $background_image = {
 			0 => {
-				'past' => 'red-red',
-				'current' => 'red-gray',
-				'future' => 'gray-gray',
+				'past' => 'red_red',
+				'current' => 'red_gray',
+				'future' => 'gray_gray',
 			},
 			1 => {
-				'past' => 'white-red',
-				'current' => 'white-gray',
-				'future' => 'white-gray',
+				'past' => 'white_red',
+				'current' => 'white_gray',
+				'future' => 'white_gray',
 			},
 			2 => {
-				'past' => 'red-white',
-				'current' => 'red-white',
-				'future' => 'gray-white',
+				'past' => 'red_white',
+				'current' => 'red_white',
+				'future' => 'gray_white',
 			},
 		};
 		
 		my $back = $background_image->{ $uniq_code }->{ $param };
 				
 		$content =~ s/\[format\]/$form/;
-		$content =~ s/\[back\]/$back/;
-	}
-	
-	if ( $type eq 'stages' ) {
-		my $form = 'style="padding:5px;text-align:center;"';
-		
-		$content =~ s/\[format\]/$form/;
+		$content =~ s/\[file\]/$back/;
 	}
 	
 	if ( $type eq 'info' and $value ) {

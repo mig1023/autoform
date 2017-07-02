@@ -3,6 +3,7 @@
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
 <link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+<link href="/css/autoform.css" rel="stylesheet" type="text/css">
 
 [% IF special.datepicker %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
@@ -24,7 +25,7 @@
 
 <table width="100%">
 
-<tr><td><table id="progressbar" style="display:none;border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+<tr><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
 <tr><td align="center">
 <table width="590px" id="app_table">
@@ -73,7 +74,7 @@ function mobileScreenCheck() {
 	$('#app_table').attr("cellspacing", ( mobilScreen ? '50' : '' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '590px' ) );
 	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
-	$('#progressbar').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	$('.info').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
@@ -119,9 +120,9 @@ function go_button(where) {
 };
 
 function init_comm(pos_x, pos_y) {
-	$('.inp_comm').poshytip('destroy');
+	$('.input_gen').poshytip('destroy');
 
-	$('.inp_comm').poshytip({
+	$('.input_gen').poshytip({
 		className: 'tip-yellowsimple',
 		showOn: 'focus',
 		alignTo: 'target',

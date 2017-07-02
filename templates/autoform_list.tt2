@@ -2,6 +2,7 @@
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+<link href="/css/autoform.css" rel="stylesheet" type="text/css">
 </head>
 
 <font face="arial">
@@ -15,9 +16,9 @@
 
 <table width="100%">
 
-<tr><td><table id="progressbar" style="display:none;border-collapse: collapse;" width="100%"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+<tr><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
-<tr><tdalign="center">
+<tr><td align="center">
 <table width="450px" id="app_table">
 
 <tr><td colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
@@ -104,7 +105,7 @@ function mobileScreenCheck() {
 		mobilScreen = 1;
 	}
 	
-	$('#progressbar').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
 	$('.edit_input').attr("value", ( mobilScreen ? '✎' : '[% langreq('Редактировать') %]' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );

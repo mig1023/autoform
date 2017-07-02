@@ -1,0 +1,66 @@
+
+.progressbar_gen{
+	display:none;
+	border-collapse:collapse;
+	width:100%;
+}
+
+.pr_size_gen{
+	background-size: 100% 100%;
+}
+
+.pr_red_red_gen{ background-image: url('/images/pbar-red-red.png'); }
+.pr_red_gray_gen{ background-image: url('/images/pbar-red-gray.png'); }
+.pr_red_white_gen{ background-image: url('/images/pbar-red-white.png'); }
+.pr_gray_gray_gen{ background-image: url('/images/pbar-gray-gray.png'); }
+.pr_gray_white_gen{ background-image: url('/images/pbar-gray-white.png'); }
+.pr_white_red_gen{ background-image: url('/images/pbar-white-red.png'); }
+.pr_white_gray_gen{ background-image: url('/images/pbar-white-gray.png'); }
+
+.pr_in_gen{
+	padding-top:7px;
+	color:white;
+	font-size:30;
+}
+
+.big_progr{
+	width:50px;
+	height:50px;
+	border-radius:25px;
+}
+
+.ltl_progr{
+	width:24px;
+	height:24px;
+	border-radius:12px;
+}
+
+.pr_past{
+	background:#FF6666;
+}
+
+.pr_current{
+	background:#CC0033;
+}
+
+.pr_future{
+	background:#999999;
+}
+
+.input_gen{
+	width:20em;
+}
+
+.exam_td_gen{
+	vertical-align:top;
+}
+
+.exam_span_gen{
+	color:gray;
+	font-size:0.7em;
+}
+
+.stage_gen{
+	padding:5px;
+	text-align:center;
+}
