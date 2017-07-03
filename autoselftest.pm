@@ -309,7 +309,8 @@ sub get_test_list {
 				},
 				5 => { 	'tester' => \&test_line,
 					'args' => [ 'input', 'element', 'val', {}, 'uniq', undef, 'comm' ],
-					'expected' => '<input style="width:20em" type="text" value="val" name="element" id="element" title="comm" uniq>',
+					'expected' => '<input class="input_width input_gen" type="text" value="val" ' .
+						'name="element" id="element" title="comm" uniq>',
 				},
 				6 => { 	'tester' => \&test_line,
 					'args' => [ 'checkbox', 'element', 'val', {} ],
@@ -322,9 +323,9 @@ sub get_test_list {
 				8 => { 	'tester' => \&test_line,
 					'args' => [ 'select', 'element', '3', { 1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth' }, undef, '2' ],
 					'expected' => 
-						'<select size = "1" name="element" id="element"><option  value="2">second</option>' .
-						'<option  value="1">first</option><option  value="4">fourth</option><option selected ' .
-						'value="3">third</option></select>',
+						'<select class="input_width" size = "1" name="element" id="element">' .
+						'<option  value="2">second</option><option  value="1">first</option>' .
+						'<option  value="4">fourth</option><option selected value="3">third</option></select>',
 				},
 				9 => { 	'tester' => \&test_line,
 					'args' => [ 'radiolist', 'element', '2', { 1 => 'first', 2 => 'second', 3 => 'third' } ],
@@ -340,12 +341,12 @@ sub get_test_list {
 				},
 				11 => {	'tester' => \&test_line,
 					'args' => [ 'example', undef, 'text' ],
-					'expected' => '<tr><td>&nbsp;</td><td style="vertical-align:top;">'.
-						'<span style="color:gray; font-size:0.7em;">text</span></td></td>',
+					'expected' => '<tr class="mobil_hide"><td>&nbsp;</td>' .
+						'<td class="exam_td_gen"><span class="exam_span_gen">text</span></td>',
 				},
 				12 => {	'tester' => \&test_line,
 					'args' => [ 'info', 'element', 'text' ],
-					'expected' => '<label id="element"><b>text</b></label>',
+					'expected' => '<label class="info" id="element"><b>text</b></label>',
 				},
 				13 => {	'tester' => \&test_line,
 					'args' => [ 'label', 'element', 'text' ],
@@ -379,31 +380,26 @@ sub get_test_list {
 				17 => {	'tester' => \&test_regexp,
 					'args' => [ 'captcha' ],
 					'expected' =>
-						'^\<img\ssrc="/vcs/static/files/[a-h0-9]+\.png"\>\<input\stype="hidden"\sname="code"\svalue="[a-h0-9]+">',
+						'^\<img\ssrc="/vcs/static/files/[a-h0-9]+\.png" ' .
+						'width="100%"\>\<input\stype="hidden"\sname="code"\svalue="[a-h0-9]+">',
 				},
 				18 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'past', 0 ],
 					'expected' =>
-						'<td align="center" style="background-image: url(' . "'/images/pbar-red-red.png'" .
-						');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius' .
-						':12px;background:#FF6666;" title=""><div style="padding-top:7px;color:white;' .
-						'font-size:30"></div></div></td>',
+						'<td align="center" class="pr_size_gen pr_red_red_gen">' .
+						'<div class="ltl_progr pr_past" title=""><div class="pr_in_gen"></div></div></td>',
 				},
 				19 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'current', 1 ],
 					'expected' =>
-						'<td align="center" style="background-image: url(' . "'/images/pbar-white-gray.png'" .
-						');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:' .
-						'12px;background:#CC0033;" title=""><div style="padding-top:7px;color:white;' .
-						'font-size:30"></div></div></td>',
+						'<td align="center" class="pr_size_gen pr_white_gray_gen">' .
+						'<div class="ltl_progr pr_current" title=""><div class="pr_in_gen"></div></div></td>',
 				},
 				20 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'future', 2 ],
 					'expected' =>
-						'<td align="center" style="background-image: url(' . "'/images/pbar-gray-white.png'" .
-						');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:' .
-						'12px;background:#999999;" title=""><div style="padding-top:7px;color:white;' .
-						'font-size:30"></div></div></td>',
+						'<td align="center" class="pr_size_gen pr_gray_white_gen">' .
+						'<div class="ltl_progr pr_future" title=""><div class="pr_in_gen"></div></div></td>',
 				},
 			},
 		},
@@ -434,10 +430,10 @@ sub get_test_list {
 						}
 					],
 					'expected' => 
-						'<tr><td><label id="text">Email</label></td><td><input style="width:20em"' .
-						' type="text" value="testvalue@mail.ru" name="email" id="email" title="">' .
-						'</td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style=' .
-						'"color:gray; font-size:0.7em;">mail@mail.ru</span></td></td>',
+						'<tr><td><label id="text">Email</label></td><td><input class="input_width ' .
+						'input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" ' .
+						'title=""></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_' .
+						'td_gen"><span class="exam_span_gen">mail@mail.ru</span></td>',
 				},
 				2 => { 	'tester' => \&test_line,
 					'args' => [
@@ -1020,6 +1016,16 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::lang },
+			'comment' => 'lang',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_lang,
+					'args' => [ 'Дата вылета' ],
+					'expected' => 'Departure date',
+				},
+			},
+		},
 		
 	];
 	
@@ -1027,13 +1033,13 @@ sub get_test_list {
 	return $test_obj;
 }
 
-my $progress_bar = '<td align="center" style="background-image: url('."'".'/images/pbar-white-gray.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#CC0033;" title=""><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Паспорта"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Допданные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Поездка"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Проживание"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Расходы"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Ещё?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="На кого?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Офис"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-gray.png'."'".');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Подтверждение"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url('."'".'/images/pbar-gray-white.png'."'".');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Готово!</td>';
+my $progress_bar = '<td align="center" class="pr_size_gen pr_white_gray_gen"><div class="big_progr pr_current" title=""><div class="pr_in_gen">1</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">2</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Паспорта"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Допданные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Поездка"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Проживание"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Расходы"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Ещё?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="На кого?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">3</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Офис"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_white_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
-my $progress_bar_2 = '<td align="center" style="background-image: url(\'/images/pbar-white-red.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#FF6666;" title=""><div style="padding-top:7px;color:white;font-size:30">1</div></div></td><td align="center" style="background-image: url(\'/images/pbar-red-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#CC0033;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">2</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Паспорта"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Допданные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Поездка"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Проживание"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Расходы"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Ещё?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="На кого?"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Данные"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">3</div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Офис"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-gray.png\');background-size: 100% 100%;"><div style="width:24px;height:24px;border-radius:12px;background:#999999;" title="Подтверждение"><div style="padding-top:7px;color:white;font-size:30"></div></div></td><td align="center" style="background-image: url(\'/images/pbar-gray-white.png\');background-size: 100% 100%;"><div style="width:50px;height:50px;border-radius:25px;background:#999999;" title=""><div style="padding-top:7px;color:white;font-size:30">4</div></div></td></tr><tr><td style="padding:5px;text-align:center;">Начало</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Заявители</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Оформление</td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;"></td><td style="padding:5px;text-align:center;">Готово!</td>';
+my $progress_bar_2 = '<td align="center" class="pr_size_gen pr_white_red_gen"><div class="big_progr pr_past" title=""><div class="pr_in_gen">1</div></div></td><td align="center" class="pr_size_gen pr_red_gray_gen"><div class="ltl_progr pr_current" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">2</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Паспорта"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Допданные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Поездка"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Проживание"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Расходы"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Ещё?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="На кого?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">3</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Офис"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_white_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
-my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label id="free_date"><b>[text]</b></label></td></tr><tr><td><label id="text">Email</label></td><td><input style="width:20em" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">mail@mail.ru</span></td></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width" size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width" size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" id="free_date"><b>[text]</b></label></td></tr><tr><td><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 
-my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input style="width:20em" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">01.01.2025</span></td></td><tr><td><label id="text">Дата окончания поездки</label></td><td><input style="width:20em" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки"></td></tr><tr><td>&nbsp;</td><td style="vertical-align:top;"><span style="color:gray; font-size:0.7em;">31.12.2025</span></td></td>';
+my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">01.01.2025</span></td><tr><td><label id="text">Дата окончания поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">31.12.2025</span></td>';
 
 sub selftest 
 # //////////////////////////////////////////////////
