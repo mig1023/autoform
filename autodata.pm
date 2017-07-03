@@ -97,6 +97,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 1,
 				'progress' => 1,
+				'param' => 1,
 			},
 			{
 				'type' => 'select',
@@ -176,6 +177,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 2,
 				'progress' => 2,
+				'collect_date' => 1,
 			},
 			{
 				'type' => 'input',
@@ -187,7 +189,7 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'now_or_later',
-					#	'offset' => 3, 	# -----------------> нужно брать из БД
+					#	'offset' => 3, 	# -----------------> collect_date в init_add_param
 					},
 				],
 				'db' => {
@@ -426,6 +428,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 5,
 				'progress' => 5,
+				'param' => 1,
 			},
 			{
 				'type' => 'text',
@@ -702,6 +705,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 9,
 				'progress' => 6,
+				'param' => 1,
 			},
 			{
 				'type' => 'text',
@@ -1067,6 +1071,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 14,
 				'progress' => 7,
+				'param' => 1,
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'SchengenAppData',
@@ -1176,6 +1181,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 15,
 				'progress' => 7,
+				'param' => 1,
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'AppData',

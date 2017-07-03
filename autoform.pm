@@ -54,7 +54,7 @@ sub get_content_rules
 	my $token = shift;
 	
 	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
-	my $persons_in_current_page = 0;
+	my $keys_in_current_page = {};
 	
 	my $new_content = {};
 	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content ) {
@@ -62,7 +62,12 @@ sub get_content_rules
 		my $page_ord = $content->{$page}->[0]->{page_ord};
 		
 		$new_content->{ $page_ord } = $content->{ $page };
-		$persons_in_current_page = ( $new_content->{ $page_ord }->[0]->{ persons_in_page } ? 1 : 0 ) if $current_page == $page_ord;
+		
+		if ( $current_page == $page_ord ) {
+			$keys_in_current_page->{ persons } = ( $new_content->{ $page_ord }->[0]->{ persons_in_page } ? 1 : 0 );
+			$keys_in_current_page->{ collectdate } = ( $new_content->{ $page_ord }->[0]->{ collect_date } ? 1 : 0 );
+			$keys_in_current_page->{ param } = ( $new_content->{ $page_ord }->[0]->{ param } ? 1 : 0 );
+		}
 		
 		if ( !$full ) {
 			if ( $content->{ $page }->[0]->{replacer} ) {
@@ -76,8 +81,7 @@ sub get_content_rules
 		}
 	}
 
-	$token = undef unless $persons_in_current_page;
-	$content = $self->init_add_param( $new_content, $token );
+	$content = $self->init_add_param( $new_content, $token, $keys_in_current_page );
 	
 	if ( !$current_page ) {
 		return $content;
@@ -186,33 +190,55 @@ sub init_add_param
 	my $self = shift;
 	my $content_rules = shift;
 	my $token = shift;
+	my $keys_in_current_page = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $country_code = 'RUS';
 	my $age_for_agreements = 18;
 
-	my $info_from_db = $vars->get_memd->get('autoform_addparam');
+	my ( $info_from_db, $collect_dates ) = undef;
 	
-	if ( !$info_from_db ) {
-		my $info_from_sql = {
-			'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
-			'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
-			'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries ORDER BY EnglishName',
-			'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName',
-			'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
-			'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
-			'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
-		};
+	if ( $keys_in_current_page->{ param } ) {
+	
+		$info_from_db = $vars->get_memd->get('autoform_addparam');
 		
-		for ( keys %$info_from_sql ) {
-			$info_from_db->{ $_ } = $self->query('selall', $info_from_sql->{ $_ } );
+		if ( !$info_from_db ) {
+			my $info_from_sql = {
+				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
+				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
+				'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries ORDER BY EnglishName',
+				'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName',
+				'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
+				'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
+				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
+			};
+			
+			for ( keys %$info_from_sql ) {
+				$info_from_db->{ $_ } = $self->query('selall', $info_from_sql->{ $_ } );
+			}
+		
+			$vars->get_memd->set('autoform_addparam', $info_from_db, 12*3600 );
 		}
+	}
+	
+	if ( $keys_in_current_page->{ collectdate } ) {
+	
+		my $collect_dates = $vars->get_memd->get('autoform_collectdates');
 		
-		$vars->get_memd->set('autoform_addparam', $info_from_db, 12*3600 );
+		if ( !$collect_dates ) {
+			my $collect_dates_array = $self->query('selallkeys', "
+				SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1");
+			
+			for ( @$collect_dates_array ) {
+				$collect_dates->{ $_->{ ID } } = [ $_->{ CollectDate }, $_->{ cdSimpl }, $_->{ cdUrgent }, $_->{ cdCatD } ];
+			}
+			
+			$vars->get_memd->set('autoform_collectdates', $collect_dates, 12*3600 );
+		}
 	}
 
-	if ( $token ) {
+	if ( $token and $keys_in_current_page->{ persons } ) {
 
 		my $app_person_in_app = $self->query('selallkeys', "
 			SELECT AutoAppData.ID as ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person,
@@ -234,18 +260,16 @@ sub init_add_param
 			
 		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
-		
-	for my $page ( keys %$content_rules ) {
-		next if $content_rules->{$page} =~ /^\[/;
-		for my $element ( @{ $content_rules->{$page} } ) {
-			if ( ref($element->{param}) ne 'HASH' ) {
-				my $param_array = $info_from_db->{ $element->{param} };
-				my $param_result = {};
-
-				for my $row ( @$param_array ) {
-					$param_result->{ $row->[0] } = $row->[1];
-				};
-				$element->{ param } = $param_result;
+	
+	if ( $keys_in_current_page->{ param } or $keys_in_current_page->{ collectdate } or $keys_in_current_page->{ persons } ) {
+		for my $page ( keys %$content_rules ) {
+			next if $content_rules->{$page} =~ /^\[/;
+			for my $element ( @{ $content_rules->{$page} } ) {
+				if ( ref($element->{param}) ne 'HASH' ) {
+					my $param_array = $info_from_db->{ $element->{param} };
+					$element->{ param } = {};
+					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
+				}
 			}
 		}
 	}
@@ -1043,7 +1067,7 @@ sub get_html_for_element
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
-		'input' 		=> '<input class="input_width input_gen"type="text" value="[value]" name="[name]"'.
+		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		'select'		=> '<select class="input_width" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
@@ -1066,7 +1090,7 @@ sub get_html_for_element
 		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
 		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 		
-		'geo_link'		=> ' <a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
+		'geo_link'		=> '<a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
 					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]">',
 	};
 	
@@ -1208,7 +1232,7 @@ sub get_html_for_element
 		$content =~ s/\[x\]/$x/;
 		$content =~ s/\[y\]/$y/;
 		
-		$content .= '[ ' . $self->lang( "найти визовый центр на карте" ) . ' ]</a>';
+		$content .= ' [ ' . $self->lang( "найти визовый центр на карте" ) . ' ]</a>';
 	}
 	
 	return $content;
