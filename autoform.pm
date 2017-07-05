@@ -65,9 +65,9 @@ sub get_content_rules
 		$new_content->{ $page_ord } = $content->{ $page };
 		
 		if ( $current_page == $page_ord ) {
-			$keys_in_current_page->{ persons } = ( $new_content->{ $page_ord }->[0]->{ persons_in_page } ? 1 : 0 );
-			$keys_in_current_page->{ collectdate } = ( $new_content->{ $page_ord }->[0]->{ collect_date } ? 1 : 0 );
-			$keys_in_current_page->{ param } = ( $new_content->{ $page_ord }->[0]->{ param } ? 1 : 0 );
+			for ( 'persons_in_page', 'collect_date', 'param' ) {
+				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[0]->{ $_ } ? 1 : 0 );
+			}
 		}
 		
 		if ( !$full ) {
@@ -223,7 +223,7 @@ sub init_add_param
 		}
 	}
 	
-	if ( $keys_in_current_page->{ collectdate } ) {
+	if ( $keys_in_current_page->{ collect_date } ) {
 	
 		$collect_dates = $vars->get_memd->get('autoform_collectdates');
 		
@@ -244,7 +244,7 @@ sub init_add_param
 		}
 	}
 
-	if ( $token and $keys_in_current_page->{ persons } ) {
+	if ( $token and $keys_in_current_page->{ persons_in_page } ) {
 
 		my $app_person_in_app = $self->query('selallkeys', "
 			SELECT AutoAppData.ID as ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person,
@@ -267,8 +267,10 @@ sub init_add_param
 		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
 	
-	if ( $keys_in_current_page->{ param } or $keys_in_current_page->{ collectdate } or $keys_in_current_page->{ persons } ) {
+	if ( $keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date } or $keys_in_current_page->{ persons_in_page } ) {
+
 		for my $page ( keys %$content_rules ) {
+		
 			next if $content_rules->{$page} =~ /^\[/;
 			for my $element ( @{ $content_rules->{$page} } ) {
 				if ( ref($element->{ param } ) ne 'HASH' ) {
@@ -1098,38 +1100,7 @@ sub get_html_for_element
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $elements = {
-		'start_line'		=> '<tr [u]>',
-		'end_line'		=> '</tr>',
-		'start_cell'		=> '<td [u]>',
-		'end_cell'		=> '</td>',
-		
-		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
-					' id="[name]" title="[comment]" [u]>',
-		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
-		'select'		=> '<select class="input_width" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
-		'radiolist'		=> '<div id="[name]">[options]</div>',
-		'text'			=> '<td colspan="3" [u]>[value]</td>',
-		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">'.
-					'<span class="exam_span_gen">[value]</span></td>',
-
-		'info'			=> '<label class="info" id="[name]" [u]><b>[text]</b></label>',
-		'checklist'		=> '<div id="[name]">[options]</div>',
-		'checklist_insurer'	=> '[options]',
-		'captcha'		=> '<img src="[captcha_file]" width="100%"><input type="hidden" name="code" value="[captcha_code]" [u]>',
-		
-		'label'			=> '<label id="[name]" [u]>[value]</label>',
-		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
-		
-		'progress'		=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
-					'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
-					
-		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
-		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
-		
-		'geo_link'		=> '<a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
-					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]">',
-	};
+	my $elements = VCS::Site::autodata::get_html_elements();
 	
 	my $content = $elements->{ $type };
 	
@@ -1589,7 +1560,7 @@ sub check_data_from_form
 	my $token = shift;
 	my $step = shift;
 	
-	my $page_content = $self->get_content_rules( $step, undef, undef, 'init' );
+	my $page_content = $self->get_content_rules( $step, undef, $token, 'init' );
 	my $tables_id = $self->get_current_table_id( $token );
 
 	return if $page_content =~ /^\[/;
@@ -1740,7 +1711,7 @@ sub check_logic
 			my $datediff = $self->query('sel1', "
 				SELECT DATEDIFF( ?, now() )", $value );
 
-			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
+				my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
 
 			$first_error = $self->text_error( 12, $element, undef, $rule->{ error } )
 				if ( ( $datediff < $offset ) and ( $rule->{ condition } =~ /later$/ ) );

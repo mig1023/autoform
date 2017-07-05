@@ -560,7 +560,6 @@ sub get_test_list {
 						'check' => 'z',
 						'type' => 'input',
 						'label' => 'Email',
-						'param' => {},
 					},
 				},
 			},
@@ -751,7 +750,8 @@ sub get_test_list {
 								},
 							] 
 						}, 
-						'[token]' 
+						'[token]',
+						{ 'param' => 1 },
 					],
 					'expected' => { 
 						1 => [
@@ -778,7 +778,7 @@ sub get_test_list {
 			'comment' => 'get_content_rules',
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
-					'args' => [ '2', 'full', '[token]' ],
+					'args' => [ '2', 'full', '[token]', 'init' ],
 					'expected' =>  
 					[
 						[
@@ -786,7 +786,8 @@ sub get_test_list {
 								'page_name' => 'Данные поездки',
 								'page_ord' => 2,
 								'progress' => 2,
-								'param' => {},
+								'collect_date' => 1,
+								'param' => {}
 							},
 							{
 								'type' => 'input',
@@ -798,6 +799,7 @@ sub get_test_list {
 								'check_logic' => [
 									{
 										'condition' => 'now_or_later',
+										'offset' => 0,
 									},
 								],
 								'db' => {
@@ -805,7 +807,7 @@ sub get_test_list {
 									'name' => 'SDate',
 								},
 								'special' => 'datepicker, mask',
-								'param' => {},
+								'param' => {}
 							},
 							{
 								'type' => 'input',
@@ -821,25 +823,19 @@ sub get_test_list {
 										'name' => 'SDate',
 										'error' => 'Дата начала поездки',
 									},
-									{
-										'condition' => 'equal_or_earlier',
-										'table' => 'Appointments',
-										'name' => 'SDate',
-										'error' => 'Дата начала поездки',
-									},
 								],
 								'db' => {
 									'table' => 'Appointments',
 									'name' => 'FDate',
 								},
 								'special' => 'datepicker, mask',
-								'param' => {},
+								'param' => {}
 							},
 						],
 					],
 				},
 				2 => { 	'tester' => \&test_array,
-					'args' => [ '2', undef, '[token]' ],
+					'args' => [ '2', undef, '[token]', 'init' ],
 					'expected' =>  
 					[
 						[
@@ -853,6 +849,7 @@ sub get_test_list {
 								'check_logic' => [
 									{
 										'condition' => 'now_or_later',
+										'offset' => 0,
 									},
 								],
 								'db' => {
@@ -860,7 +857,7 @@ sub get_test_list {
 									'name' => 'SDate',
 								},
 								'special' => 'datepicker, mask',
-								'param' => {},
+								'param' => {}
 							},
 							{
 								'type' => 'input',
@@ -876,19 +873,13 @@ sub get_test_list {
 										'name' => 'SDate',
 										'error' => 'Дата начала поездки',
 									},
-									{
-										'condition' => 'equal_or_earlier',
-										'table' => 'Appointments',
-										'name' => 'SDate',
-										'error' => 'Дата начала поездки',
-									},
 								],
 								'db' => {
 									'table' => 'Appointments',
 									'name' => 'FDate',
 								},
 								'special' => 'datepicker, mask',
-								'param' => {},
+								'param' => {}
 							},
 						],
 					],
@@ -1020,7 +1011,7 @@ sub get_test_list {
 			'comment' => 'lang',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_lang,
+					'prepare' => \&pre_lang_1,
 					'args' => [ 'Дата вылета' ],
 					'expected' => 'Departure date',
 				},
@@ -1109,7 +1100,7 @@ sub get_tests
 	
 			my $t = $test->{test}->{$_};
 			
-			&{ $t->{prepare} }( 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
+			&{ $t->{prepare} }( $self, 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
 			
 			for (	@{ $t->{args} }, 
@@ -1151,7 +1142,7 @@ sub get_tests
 				$err_line .= ( $err_line ? ', ' : '' ) . $test_num;
 			}
 			
-			&{ $t->{prepare} }( 'CLEAR', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
+			&{ $t->{prepare} }( $self, 'CLEAR', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
 		}
 		
@@ -1400,7 +1391,7 @@ sub test_write_db
 sub pre_corrupt_token
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token ) = @_;
+	my ( $self, $type, $test, $num, $token ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
 		$$token =~ s/^a/F/;
@@ -1413,7 +1404,7 @@ sub pre_corrupt_token
 sub pre_finished
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
 		$vars->db->query("
@@ -1428,7 +1419,7 @@ sub pre_finished
 sub pre_content_1
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoToken SET Step = 1 WHERE Token = '$$token'" );
@@ -1437,7 +1428,7 @@ sub pre_content_1
 sub pre_content_2
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoAppointments SET PersonalDataPermission = 0, MobilPermission = 0, EMail = '' 
@@ -1450,7 +1441,7 @@ sub pre_content_2
 sub pre_getinfo
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoAppointments SET SDate = '2011-05-01', CenterID = '5'
@@ -1460,7 +1451,7 @@ sub pre_getinfo
 sub pre_init_param
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	my $info_from_db = $vars->get_memd->delete('autoform_addparam');
 	
@@ -1484,7 +1475,7 @@ sub pre_init_param
 sub pre_app_finish
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
@@ -1494,7 +1485,7 @@ sub pre_app_finish
 sub pre_query
 # //////////////////////////////////////////////////
 {
-	my ( $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
 		$vars->db->query("
@@ -1505,6 +1496,19 @@ sub pre_query
 		$vars->db->query("
 			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
 			$appdataid );
+	}
+}
+
+sub pre_lang_1
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$self->{ lang } = 'en';
+	}
+	else {
+		$self->{ lang } = 'ru';
 	}
 }
 

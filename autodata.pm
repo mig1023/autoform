@@ -1,30 +1,6 @@
 ﻿package VCS::Site::autodata;
 use strict;
 
-sub get_settings
-# //////////////////////////////////////////////////
-{
-	my $settings = {
-		'addr' => '/autoform/',
-		'addr_captcha' => '/vcs/static/files/',
-		'addr_vcs' => '/vcs/',
-	};
-	
-	return $settings;
-}
-
-sub get_tables_controled_by_AutoToken
-# //////////////////////////////////////////////////
-{
-	my $tables_controled_by_AutoToken = {
-		'AutoAppointments' => 'AutoAppID',
-		'AutoAppData' => 'AutoAppDataID',
-		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
-	};
-	
-	return $tables_controled_by_AutoToken;
-}
-
 sub get_progressline
 # //////////////////////////////////////////////////
 {
@@ -48,44 +24,6 @@ sub get_progressline
 	
 	return $progress_line;
 }
-
-sub get_geo_branches
-# //////////////////////////////////////////////////
-{
-	my $branch_geo = {
-		1 => [ '55.7420115', '37.6184734', ],
-		2 => [ '53.191534', '50.095994', ],
-		3 => [ '45.01503599999999', '38.97375699999998', ],
-		4 => [ '56.8318046', '60.615513700000065', ],
-		5 => [ '55.782051', '49.129489000000035', ],
-		6 => [ '54.7178522', '20.497306900000012', ],
-		7 => [ '52.5968568', '39.56752210000002', ],
-		8 => [ '56.323534', '44.02221499999996', ],
-		9 => [ '55.0243972', '82.92012199999999', ],
-		11 => [ '59.9340869', '30.3207489,17', ],
-		12 => [ '54.7286619', '55.94788270000004', ],
-		13 => [ '54.9717809', '73.40270800000008', ],
-		14 => [ '44.2243358', '43.08334519999994', ],
-		15 => [ '55.1661983', '61.40640499999995', ],
-		16 => [ '45.0043149', '41.92712489999997', ],
-		17 => [ '51.67589', '39.21556199999998', ],
-		18 => [ '54.3209128', '48.400032099999976', ],
-		19 => [ '47.219554', '39.71273700000006', ],
-		20 => [ '48.7000669', '44.5056527', ],
-		21 => [ '52.2869115', '104.28770970000005', ],
-		22 => [ '56.4797551', '84.9485994', ],
-		23 => [ '43.1129553', '131.9111166', ],
-		24 => [ '56.01107099999999', '92.85671100000002', ],
-		25 => [ '58.0135019', '56.23937339999998', ],
-		26 => [ '50.594371', '36.59324800000002', ],
-		27 => [ '64.5346717', '40.5237803', ],
-		33 => [ '61.7903448', '34.3707563', ],
-		38 => [ '57.816866', '28.3087423', ],
-		42 => [ '43.315049', '45.697579', ],
-	};
-		
-	return $branch_geo;
-};
 		
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
@@ -1943,5 +1881,106 @@ sub get_content_rules_hash
 	
 	return $content_rules;
 }
+
+sub get_settings
+# //////////////////////////////////////////////////
+{
+	my $settings = {
+		'addr' => '/autoform/',
+		'addr_captcha' => '/vcs/static/files/',
+		'addr_vcs' => '/vcs/',
+	};
+	
+	return $settings;
+}
+
+sub get_html_elements
+# //////////////////////////////////////////////////
+{
+	my $elements = { 
+		'start_line'		=> '<tr [u]>',
+		'end_line'		=> '</tr>',
+		'start_cell'		=> '<td [u]>',
+		'end_cell'		=> '</td>',
+		
+		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
+					' id="[name]" title="[comment]" [u]>',
+		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
+		'select'		=> '<select class="input_width" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
+		'radiolist'		=> '<div id="[name]">[options]</div>',
+		'text'			=> '<td colspan="3" [u]>[value]</td>',
+		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">'.
+					'<span class="exam_span_gen">[value]</span></td>',
+
+		'info'			=> '<label class="info" id="[name]" [u]><b>[text]</b></label>',
+		'checklist'		=> '<div id="[name]">[options]</div>',
+		'checklist_insurer'	=> '[options]',
+		'captcha'		=> '<img src="[captcha_file]" width="100%"><input type="hidden" name="code" value="[captcha_code]" [u]>',
+		
+		'label'			=> '<label id="[name]" [u]>[value]</label>',
+		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
+		
+		'progress'		=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
+					'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
+					
+		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
+		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
+		
+		'geo_link'		=> '<a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
+					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]">',
+	};
+	
+	return $elements;
+}
+
+sub get_tables_controled_by_AutoToken
+# //////////////////////////////////////////////////
+{
+	my $tables_controled_by_AutoToken = {
+		'AutoAppointments' => 'AutoAppID',
+		'AutoAppData' => 'AutoAppDataID',
+		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
+	};
+	
+	return $tables_controled_by_AutoToken;
+}
+
+sub get_geo_branches
+# //////////////////////////////////////////////////
+{
+	my $branch_geo = {
+		1 => [ '55.7420115', '37.6184734', ],
+		2 => [ '53.191534', '50.095994', ],
+		3 => [ '45.01503599999999', '38.97375699999998', ],
+		4 => [ '56.8318046', '60.615513700000065', ],
+		5 => [ '55.782051', '49.129489000000035', ],
+		6 => [ '54.7178522', '20.497306900000012', ],
+		7 => [ '52.5968568', '39.56752210000002', ],
+		8 => [ '56.323534', '44.02221499999996', ],
+		9 => [ '55.0243972', '82.92012199999999', ],
+		11 => [ '59.9340869', '30.3207489,17', ],
+		12 => [ '54.7286619', '55.94788270000004', ],
+		13 => [ '54.9717809', '73.40270800000008', ],
+		14 => [ '44.2243358', '43.08334519999994', ],
+		15 => [ '55.1661983', '61.40640499999995', ],
+		16 => [ '45.0043149', '41.92712489999997', ],
+		17 => [ '51.67589', '39.21556199999998', ],
+		18 => [ '54.3209128', '48.400032099999976', ],
+		19 => [ '47.219554', '39.71273700000006', ],
+		20 => [ '48.7000669', '44.5056527', ],
+		21 => [ '52.2869115', '104.28770970000005', ],
+		22 => [ '56.4797551', '84.9485994', ],
+		23 => [ '43.1129553', '131.9111166', ],
+		24 => [ '56.01107099999999', '92.85671100000002', ],
+		25 => [ '58.0135019', '56.23937339999998', ],
+		26 => [ '50.594371', '36.59324800000002', ],
+		27 => [ '64.5346717', '40.5237803', ],
+		33 => [ '61.7903448', '34.3707563', ],
+		38 => [ '57.816866', '28.3087423', ],
+		42 => [ '43.315049', '45.697579', ],
+	};
+		
+	return $branch_geo;
+};
 
 1;
