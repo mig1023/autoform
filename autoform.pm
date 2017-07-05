@@ -52,6 +52,7 @@ sub get_content_rules
 	my $current_page = shift;
 	my $full = shift;
 	my $token = shift;
+	my $need_to_init = shift;
 	
 	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
 	my $keys_in_current_page = {};
@@ -81,7 +82,7 @@ sub get_content_rules
 		}
 	}
 
-	$content = $self->init_add_param( $new_content, $token, $keys_in_current_page );
+	$content = ( $need_to_init ? $self->init_add_param( $new_content, $token, $keys_in_current_page ) : $new_content );
 	
 	if ( !$current_page ) {
 		return $content;
@@ -224,16 +225,21 @@ sub init_add_param
 	
 	if ( $keys_in_current_page->{ collectdate } ) {
 	
-		my $collect_dates = $vars->get_memd->get('autoform_collectdates');
+		$collect_dates = $vars->get_memd->get('autoform_collectdates');
 		
 		if ( !$collect_dates ) {
 			my $collect_dates_array = $self->query('selallkeys', "
 				SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1");
 			
 			for ( @$collect_dates_array ) {
-				$collect_dates->{ $_->{ ID } } = [ $_->{ CollectDate }, $_->{ cdSimpl }, $_->{ cdUrgent }, $_->{ cdCatD } ];
+				$collect_dates->{ $_->{ ID } } = { 
+					'CollectDate' => $_->{ CollectDate }, 
+					'cdSimpl' => $_->{ cdSimpl }, 
+					'cdUrgent' => $_->{ cdUrgent }, 
+					'cdCatD' => $_->{ cdCatD }
+				};
 			}
-			
+	
 			$vars->get_memd->set('autoform_collectdates', $collect_dates, 12*3600 );
 		}
 	}
@@ -265,10 +271,17 @@ sub init_add_param
 		for my $page ( keys %$content_rules ) {
 			next if $content_rules->{$page} =~ /^\[/;
 			for my $element ( @{ $content_rules->{$page} } ) {
-				if ( ref($element->{param}) ne 'HASH' ) {
-					my $param_array = $info_from_db->{ $element->{param} };
+				if ( ref($element->{ param } ) ne 'HASH' ) {
+					my $param_array = $info_from_db->{ $element->{ param } };
 					$element->{ param } = {};
 					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
+				}
+				
+				if ( exists $element->{ check_logic } and $token ) {
+					for ( @{ $element->{ check_logic } } ) {
+						$_->{ offset } = $self->get_collect_date( $collect_dates, $token)	
+							if $_->{ offset } =~ /\[collect_date_offset\]/;
+					}
 				}
 			}
 		}
@@ -276,6 +289,30 @@ sub init_add_param
 
 	return $content_rules;
 }	
+
+sub get_collect_date
+# //////////////////////////////////////////////////
+{
+	my ( $self, $collect_dates, $token ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	my ( $center_id, $category ) = $self->query('sel1', "
+		SELECT CenterID, Category FROM AutoAppointments
+		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
+		JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
+		WHERE Token = ?", $token );
+
+	$collect_dates = $collect_dates->{ $center_id };
+
+	return 0 unless $collect_dates->{ CollectDate };
+	
+	if ( $category eq 'D' ) {
+		return $collect_dates->{ cdCatD };
+	}
+	else {
+		return ( $collect_dates->{ cdUrgent } ? $collect_dates->{ cdUrgent } : $collect_dates->{ cdSimpl } );
+	}
+}
 
 sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
@@ -438,7 +475,7 @@ sub get_autoform_content
 		$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
 	}
 	
-	my $page = $self->get_content_rules( $step, 'full' );
+	my $page = $self->get_content_rules( $step, 'full', $token );
 
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
@@ -827,7 +864,7 @@ sub get_html_page
 	my $content = '';
 	my $template = 'autoform.tt2';
 	
-	my $page_content = $self->get_content_rules( $step, '', $token );
+	my $page_content = $self->get_content_rules( $step, undef, $token, 'init' );
 
 	if ( $page_content eq '[list_of_applicants]' ) {
 		return $self->get_list_of_app( $token );
@@ -1552,7 +1589,7 @@ sub check_data_from_form
 	my $token = shift;
 	my $step = shift;
 	
-	my $page_content = $self->get_content_rules( $step );
+	my $page_content = $self->get_content_rules( $step, undef, undef, 'init' );
 	my $tables_id = $self->get_current_table_id( $token );
 
 	return if $page_content =~ /^\[/;

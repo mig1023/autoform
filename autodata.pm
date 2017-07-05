@@ -189,7 +189,7 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'now_or_later',
-					#	'offset' => 3, 	# -----------------> collect_date в init_add_param
+						'offset' => '[collect_date_offset]',
 					},
 				],
 				'db' => {
@@ -211,14 +211,6 @@ sub get_content_rules_hash
 						'table' => 'Appointments',
 						'name' => 'SDate',
 						'error' => 'Дата начала поездки',
-					#	'offset' => 3,
-					},
-					{
-						'condition' => 'equal_or_earlier',
-						'table' => 'Appointments',
-						'name' => 'SDate',
-						'error' => 'Дата начала поездки',
-					#	'offset' => 3,
 					},
 				],
 				'db' => {
