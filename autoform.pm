@@ -222,27 +222,6 @@ sub init_add_param
 			$vars->get_memd->set('autoform_addparam', $info_from_db, 12*3600 );
 		}
 	}
-	
-	if ( $keys_in_current_page->{ collect_date } ) {
-	
-		$collect_dates = $vars->get_memd->get('autoform_collectdates');
-		
-		if ( !$collect_dates ) {
-			my $collect_dates_array = $self->query('selallkeys', "
-				SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1");
-			
-			for ( @$collect_dates_array ) {
-				$collect_dates->{ $_->{ ID } } = { 
-					'CollectDate' => $_->{ CollectDate }, 
-					'cdSimpl' => $_->{ cdSimpl }, 
-					'cdUrgent' => $_->{ cdUrgent }, 
-					'cdCatD' => $_->{ cdCatD }
-				};
-			}
-	
-			$vars->get_memd->set('autoform_collectdates', $collect_dates, 12*3600 );
-		}
-	}
 
 	if ( $token and $keys_in_current_page->{ persons_in_page } ) {
 
@@ -279,9 +258,9 @@ sub init_add_param
 					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
 				}
 				
-				if ( exists $element->{ check_logic } and $token ) {
+				if ( exists $element->{ check_logic } and $token and $keys_in_current_page->{ collect_date } ) {
 					for ( @{ $element->{ check_logic } } ) {
-						$_->{ offset } = $self->get_collect_date( $collect_dates, $token)	
+						$_->{ offset } = $self->get_collect_date( $token )	
 							if $_->{ offset } =~ /\[collect_date_offset\]/;
 					}
 				}
@@ -295,9 +274,29 @@ sub init_add_param
 sub get_collect_date
 # //////////////////////////////////////////////////
 {
-	my ( $self, $collect_dates, $token ) = @_;
+	my ( $self, $token ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
+
+	my $collect_dates = $vars->get_memd->get('autoform_collectdates');
+		
+	if ( !$collect_dates ) {
+		my $collect_dates_array = $self->query('selallkeys', "
+			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1");
+		$collect_dates = {};
+		
+		for ( @$collect_dates_array ) {
+			$collect_dates->{ $_->{ ID } } = { 
+				'CollectDate' => $_->{ CollectDate }, 
+				'cdSimpl' => $_->{ cdSimpl }, 
+				'cdUrgent' => $_->{ cdUrgent }, 
+				'cdCatD' => $_->{ cdCatD }
+			};
+		}
+
+		$vars->get_memd->set('autoform_collectdates', $collect_dates, 12*3600 );
+	}
+	
 	my ( $center_id, $category ) = $self->query('sel1', "
 		SELECT CenterID, Category FROM AutoAppointments
 		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
