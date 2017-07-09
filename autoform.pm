@@ -245,14 +245,15 @@ sub init_add_param
 			
 		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
-	
+
 	if ( $keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date } or $keys_in_current_page->{ persons_in_page } ) {
 
 		for my $page ( keys %$content_rules ) {
 		
 			next if $content_rules->{$page} =~ /^\[/;
 			for my $element ( @{ $content_rules->{$page} } ) {
-				if ( ref($element->{ param } ) ne 'HASH' ) {
+
+				if ( ref( $element->{ param } ) ne 'HASH' ) {
 					my $param_array = $info_from_db->{ $element->{ param } };
 					$element->{ param } = {};
 					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
@@ -277,7 +278,7 @@ sub get_collect_date
 	my ( $self, $token ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
-
+	
 	my $collect_dates = $vars->get_memd->get('autoform_collectdates');
 		
 	if ( !$collect_dates ) {
