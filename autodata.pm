@@ -76,7 +76,7 @@ sub get_content_rules_hash
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
 				'example' => 'mail@mail.ru',
-				'check' => 'z',
+				'check' => 'zWN\@\s\-\.\,\;',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'EMail',
@@ -189,7 +189,7 @@ sub get_content_rules_hash
 				'label' => 'Фамилия',
 				'comment' => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
 				'example' => 'Иванов',
-				'check' => 'zЁ',
+				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RLName',
@@ -201,7 +201,7 @@ sub get_content_rules_hash
 				'label' => 'Имя',
 				'comment' => 'Введите имя на русском языке так, как оно указана во внутреннем паспорте',
 				'example' => 'Иван',
-				'check' => 'zЁ',
+				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RFName',
@@ -213,7 +213,7 @@ sub get_content_rules_hash
 				'label' => 'Отчество',
 				'comment' => 'Введите отчество на русском языке так, как оно указана во внутреннем паспорте',
 				'example' => 'Иванович',
-				'check' => 'zЁ',
+				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RMName',
@@ -252,7 +252,7 @@ sub get_content_rules_hash
 				'label' => 'Фамилия',
 				'comment' => 'Введите фамилию на английском языке так, как она указана в загранпаспорте',
 				'example' => 'Ivanov',
-				'check' => 'zW',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'LName',
@@ -264,7 +264,7 @@ sub get_content_rules_hash
 				'label' => 'Имя',
 				'comment' => 'Введите имя на английском языке так, как оно указана в загранпаспорте',
 				'example' => 'Ivan',
-				'check' => 'zW',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FName',
@@ -276,7 +276,7 @@ sub get_content_rules_hash
 				'label' => '№ загранпаспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				'example' => '753500001',
-				'check' => 'zN',
+				'check' => 'zWN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PassNum',
@@ -302,6 +302,15 @@ sub get_content_rules_hash
 				'comment' => 'Введите дату окончания действия загранпаспорта, указанную в паспорте',
 				'example' => '01.01.2010',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'equal_or_later',
+						'table' => 'Appointments',
+						'name' => 'FDate',
+						'offset' => 90,
+						'error' => 'Дата окончания поездки',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PassTill',
@@ -314,7 +323,7 @@ sub get_content_rules_hash
 				'label' => 'Выдан',
 				'comment' => 'UFMS/FMS и номер подразделения',
 				'example' => 'FMS 12345',
-				'check' => 'z',
+				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PassWhom',
@@ -389,7 +398,7 @@ sub get_content_rules_hash
 				'label' => 'Место рождения',
 				'comment' => 'Укажите место рождения так, как оно указано в загранпаспорте, без знака /',
 				'example' => 'Moscow',
-				'check' => 'z',
+				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'BrhPlace',
@@ -467,7 +476,7 @@ sub get_content_rules_hash
 				'label' => 'Для несовершеннолетних',
 				'comment' => 'Фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей или законного представителя',
 				'example' => 'Ivanov Ivan, The Soviet Union',
-				'check' => '',
+				'check' => 'WN\s\n\-\,\.\;\_\\\/\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'KinderData',
@@ -479,7 +488,7 @@ sub get_content_rules_hash
 				'label' => 'Профессиональная деятельность',
 				'comment' => 'Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
 				'example' => 'Doctor',
-				'check' => '',
+				'check' => 'zWN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ProfActivity',
@@ -491,7 +500,7 @@ sub get_content_rules_hash
 				'label' => 'Работодатель: адрес, телефон',
 				'comment' => 'Данные заполняются в соответствии со справкой с места работы',
 				'example' => 'MedCenter, Moscow, ul.Lenina 1, (095) 123-4567',
-				'check' => '',
+				'check' => 'zWwN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'WorkOrg',
@@ -561,7 +570,7 @@ sub get_content_rules_hash
 				'name' => 'familyother',
 				'label' => 'Семейное положение',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zW',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FamilyOther',
@@ -586,7 +595,7 @@ sub get_content_rules_hash
 				'name' => 'vidno',
 				'label' => 'Вид на жительство №',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zN\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'VidNo',
@@ -623,7 +632,7 @@ sub get_content_rules_hash
 				'name' => 'visaother',
 				'label' => 'Основная цель поездки',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'VisaOther',
@@ -652,7 +661,7 @@ sub get_content_rules_hash
 				'label' => 'Город назначения',
 				'comment' => 'Город назначения',
 				'example' => 'Milan',
-				'check' => 'z',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'City',
@@ -677,7 +686,7 @@ sub get_content_rules_hash
 				'label' => 'Город первого въезда',
 				'comment' => 'Город первого въезда',
 				'example' => 'Roma',
-				'check' => 'z',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'NullaCity',
@@ -769,7 +778,7 @@ sub get_content_rules_hash
 				'name' => 'fingers',
 				'label' => 'Отпечатки предоставлены за последние 5 лет',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Fingers',
@@ -794,7 +803,7 @@ sub get_content_rules_hash
 				'label' => 'Кем выдано',
 				'comment' => 'Укажите, есть ли разрешение на въезд в страну конечного следования, если такое разрешение необходимо',
 				'example' => 'EMBASSY OF THE REPUBLIC OF BULGARIA Consular Section Moscow 552',
-				'check' => '',
+				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Permesso',
@@ -806,7 +815,7 @@ sub get_content_rules_hash
 				'label' => 'Действительно с',
 				'comment' => 'Начало действия разрешения',
 				'example' => '01.01.2025',
-				'check' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PermessoFD',
@@ -819,7 +828,7 @@ sub get_content_rules_hash
 				'label' => 'Действительно по',
 				'comment' => 'окончание действия разрешения',
 				'example' => '31.12.2025',
-				'check' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PermessoED',
@@ -912,7 +921,7 @@ sub get_content_rules_hash
 				'name' => 'prevvisafd',
 				'label' => 'Дата сдачи отпечатков, если известна',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FingersDate',
@@ -938,7 +947,7 @@ sub get_content_rules_hash
 				'name' => 'hostdatatype',
 				'label' => 'Вариант проживания',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zW',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataType',
@@ -967,7 +976,7 @@ sub get_content_rules_hash
 				'name' => 'hotels',
 				'label' => 'Название гостиницы или ФИО приглашающего',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Hotels',
@@ -978,7 +987,7 @@ sub get_content_rules_hash
 				'name' => 'hotelsaddr',
 				'label' => 'Адрес ',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'HotelAdresses',
@@ -1020,7 +1029,7 @@ sub get_content_rules_hash
 				'name' => 'p_name',
 				'label' => 'Имя',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataName',
@@ -1031,7 +1040,7 @@ sub get_content_rules_hash
 				'name' => 'p_last_name',
 				'label' => 'Фамилия',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataDenomination',
@@ -1042,7 +1051,7 @@ sub get_content_rules_hash
 				'name' => 'p_birthdate',
 				'label' => 'Дата рождения',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataDateOfBirth',
@@ -1054,7 +1063,7 @@ sub get_content_rules_hash
 				'name' => 'p_province',
 				'label' => 'Провинция',
 				'comment' => '',
-				'check' => 'zN',
+				'check' => 'zWN\.\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataProvince',
@@ -1066,7 +1075,7 @@ sub get_content_rules_hash
 				'name' => 'p_city',
 				'label' => 'Город',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataCity',
@@ -1077,7 +1086,7 @@ sub get_content_rules_hash
 				'name' => 'p_adress',
 				'label' => 'Адрес (без города)',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataAddress',
@@ -1088,7 +1097,7 @@ sub get_content_rules_hash
 				'name' => 'p_phone',
 				'label' => 'Телефон',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataPhoneNumber',
@@ -1099,7 +1108,7 @@ sub get_content_rules_hash
 				'name' => 'p_email',
 				'label' => 'Email',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\@\s\-\.\,\;',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataEmail',
@@ -1125,7 +1134,7 @@ sub get_content_rules_hash
 				'name' => 'a_province',
 				'label' => 'Провинция',
 				'comment' => '',
-				'check' => 'zN',
+				'check' => 'zWN\.\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataProvince',
@@ -1137,7 +1146,7 @@ sub get_content_rules_hash
 				'name' => 'a_city',
 				'label' => 'Город',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataCity',
@@ -1148,7 +1157,7 @@ sub get_content_rules_hash
 				'name' => 'a_company',
 				'label' => 'Название приглашающей компании',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ACompanyName',
@@ -1159,7 +1168,7 @@ sub get_content_rules_hash
 				'name' => 'a_companyaddr',
 				'label' => 'Адрес приглашающей компании',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ACompanyAddress',
@@ -1170,7 +1179,7 @@ sub get_content_rules_hash
 				'name' => 'a_phone',
 				'label' => 'Телефон компании',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ACompanyPhone',
@@ -1181,7 +1190,7 @@ sub get_content_rules_hash
 				'name' => 'a_fax',
 				'label' => 'Факс компании',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ACompanyFax',
@@ -1192,7 +1201,7 @@ sub get_content_rules_hash
 				'name' => 'a_person',
 				'label' => 'ФИО, адрес, телефон, email контактного лица',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\@\s\-\.\,\;',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ACopmanyPerson',
@@ -1240,7 +1249,7 @@ sub get_content_rules_hash
 				'name' => 'mezziwhomother',
 				'label' => 'Спонсор',
 				'comment' => '',
-				'check' => 'z',
+				'check' => 'zWN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'MezziWhomOther',
@@ -1330,7 +1339,7 @@ sub get_content_rules_hash
 				'name' => 'whomothersrc',
 				'label' => 'Иные средства',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zWwN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'MezziOtherSrc',
@@ -1355,7 +1364,7 @@ sub get_content_rules_hash
 				'name' => 'eu_lname',
 				'label' => 'Фамилия',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'EuLName',
@@ -1366,7 +1375,7 @@ sub get_content_rules_hash
 				'name' => 'eu_fname',
 				'label' => 'Имя',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'EuFName',
@@ -1377,7 +1386,7 @@ sub get_content_rules_hash
 				'name' => 'eu_bdate',
 				'label' => 'Дата рождения',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'EuBDate',
@@ -1389,7 +1398,7 @@ sub get_content_rules_hash
 				'name' => 'eu_citizenship',
 				'label' => 'Гражданство',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'EuCitizen',
@@ -1400,7 +1409,7 @@ sub get_content_rules_hash
 				'name' => 'eu_idnum',
 				'label' => 'Номер паспорта',
 				'comment' => '',
-				'check' => '',
+				'check' => 'zWN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'EuPassNum',
@@ -1519,7 +1528,7 @@ sub get_content_rules_hash
 				'label' => 'Кем выдан',
 				'comment' => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
 				'example' => 'ОВД по району Беговой города Москвы',
-				'check' => 'z',
+				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RPWhere',
@@ -1531,7 +1540,7 @@ sub get_content_rules_hash
 				'label' => 'Телефон',
 				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
 				'example' => '79161234567',
-				'check' => 'z',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'AppPhone',
@@ -1543,7 +1552,7 @@ sub get_content_rules_hash
 				'label' => 'Адрес',
 				'comment' => 'Полный адрес, включая индекс',
 				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
-				'check' => 'z',
+				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FullAddress',
@@ -1569,7 +1578,7 @@ sub get_content_rules_hash
 				'label' => 'Фамилия',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				'example' => '754300001',
-				'check' => 'zЁ',
+				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'LName',
@@ -1580,7 +1589,7 @@ sub get_content_rules_hash
 				'name' => 'dovfname',
 				'label' => 'Имя',
 				'comment' => '',
-				'check' => 'zЁ',
+				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'FName',
@@ -1591,7 +1600,7 @@ sub get_content_rules_hash
 				'name' => 'dovmname',
 				'label' => 'Отчество',
 				'comment' => '',
-				'check' => 'zЁ',
+				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'MName',
@@ -1627,7 +1636,7 @@ sub get_content_rules_hash
 				'label' => 'Кем выдан',
 				'comment' => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
 				'example' => 'ОВД по району Беговой города Москвы',
-				'check' => 'z',
+				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'PassWhom',
@@ -1639,7 +1648,7 @@ sub get_content_rules_hash
 				'label' => 'Телефон',
 				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
 				'example' => '79161234567',
-				'check' => 'z',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'Phone',
@@ -1651,7 +1660,7 @@ sub get_content_rules_hash
 				'label' => 'Адрес',
 				'comment' => 'Полный адрес, включая индекс',
 				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
-				'check' => 'z',
+				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'Address',
@@ -1692,7 +1701,7 @@ sub get_content_rules_hash
 				'label' => 'Адрес доставки',
 				'comment' => 'Введите для доставки документов документов; услуга платная',
 				'example' => 'Москва, ул.Ленина, 1',
-				'check' => 'Ё',
+				'check' => 'ЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'ShAddress',
