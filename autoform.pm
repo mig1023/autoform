@@ -513,7 +513,6 @@ sub check_relation
 	my $current_table_id = $self->get_current_table_id( $token ); 
 	
 	do {
-	
 		$skip_this_page = 0;
 
 		for my $relation ( keys %{ $page->[0]->{ relation } } ) {
@@ -842,6 +841,7 @@ sub get_back
 	
 	$self->save_data_from_form( $step, $self->get_current_table_id( $token ) );
 	$self->mod_last_change_date( $token );
+	
 	$step--;
 	
 	if ( $step == $self->get_step_by_content( $token, '[app_finish]' ) ) {
@@ -980,15 +980,12 @@ sub get_specials_of_element
 		'mask' => [],
 		'nearest_date' => [],
 		'timeslots' => [],
-		'comment' => [],
 	};
 	
 	for my $element ( @$page_content ) {
 		for my $spec_type ( keys %$special ) {
 			push( $special->{ $spec_type }, $element->{name} ) if $element->{special} =~ /$spec_type/;
 		}
-
-		push( $special->{ 'comment' }, $element->{name} ) if $element->{comment} ne '';
 	}
 	
 	return ($special);
@@ -1752,9 +1749,9 @@ sub text_error
 		'Вы должны полностью закончить все анкеты',
 		'Вы должны добавить по меньшей мере одного заявителя',
 		'"[name]" не может быть раньше, чем "[relation]"',
-		'"[name]" не может быть раньше, чем "[relation]", больше чем на [offset] дня',
+		'"[name]" не может быть раньше, чем "[relation]" + [offset] дня/дней',
 		'"[name]" не может быть позднее, чем "[relation]"',
-		'"[name]" не может быть позднее, чем "[relation]", больше чем на [offset] дня',
+		'"[name]" не может быть позднее, чем "[relation]" + [offset] дня/дней',
 		'Поле "[name]" уже встречается в актуальных записях.',
 		'В поле "[name]" нужно выбрать хотя бы одно значение',
 		'Недопустимая дата в поле "[name]"',
