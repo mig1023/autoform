@@ -655,7 +655,13 @@ sub set_appointment_finished
 		SELECT Draft FROM AutoToken WHERE Token = ?", 
 		$token );
 
-	return ( 0, 'draft' ) if $this_is_draft; 
+	if ( $this_is_draft ) {
+		$self->query('query', "
+			UPDATE AutoToken SET EndDate = now(), Step = 1 WHERE Token = ?", {}, 
+			$token );
+	
+		return ( 0, 'draft_app_num' );
+	}
 	
 	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment( $token );
 	
