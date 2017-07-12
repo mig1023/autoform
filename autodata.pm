@@ -803,7 +803,7 @@ sub get_content_rules_hash
 				'label' => 'Кем выдано',
 				'comment' => 'Укажите, есть ли разрешение на въезд в страну конечного следования, если такое разрешение необходимо',
 				'example' => 'EMBASSY OF THE REPUBLIC OF BULGARIA Consular Section Moscow 552',
-				'check' => 'zWN\s\-\_\.\,\;\'\"',
+				'check' => 'WN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Permesso',
@@ -815,7 +815,7 @@ sub get_content_rules_hash
 				'label' => 'Действительно с',
 				'comment' => 'Начало действия разрешения',
 				'example' => '01.01.2025',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PermessoFD',
@@ -828,7 +828,7 @@ sub get_content_rules_hash
 				'label' => 'Действительно по',
 				'comment' => 'окончание действия разрешения',
 				'example' => '31.12.2025',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PermessoED',
@@ -1677,7 +1677,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'services_text',
-				'label' => 'Дополнительные слуги',
+				'label' => 'Дополнительные услуги',
 				'font' => 'bold',
 			},
 			{
@@ -1687,7 +1687,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'sms',
 				'label' => 'SMS уведомление',
-				'comment' => 'Введите номер сотового телефона для получения СМС о готовности документов; услуга платная',
+				'comment' => 'Введите номер сотового телефона для получения СМС о готовности документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				'example' => '79051234578',
 				'check' => 'N',
 				'db' => {
@@ -1699,7 +1699,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'shipping',
 				'label' => 'Адрес доставки',
-				'comment' => 'Введите для доставки документов документов; услуга платная',
+				'comment' => 'Введите для доставки документов документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				'example' => 'Москва, ул.Ленина, 1',
 				'check' => 'ЁN\s\-\_\.\,\;\'\"',
 				'db' => {
@@ -1935,7 +1935,7 @@ sub get_html_elements
 		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
 		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 		
-		'geo_link'		=> '<a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
+		'geo_link'		=> '&nbsp;<a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
 					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]">',
 	};
 	

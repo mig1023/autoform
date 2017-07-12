@@ -1237,7 +1237,7 @@ sub get_html_for_element
 		$content =~ s/\[x\]/$x/;
 		$content =~ s/\[y\]/$y/;
 		
-		$content .= ' [ ' . $self->lang( "найти визовый центр на карте" ) . ' ]</a>';
+		$content .= '[ ' . $self->lang( "найти визовый центр на карте" ) . ' ]</a>';
 	}
 	
 	return $content;
@@ -1799,19 +1799,21 @@ sub create_new_appointment
 	my $tables_transfered_id = $self->get_current_table_id( $token );
 	my $db_rules = $self->get_content_db_rules();
 
-	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments', $tables_transfered_id, $db_rules );
+	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
+		$tables_transfered_id->{ AutoAppointments }, $db_rules );
 
 # insurance!
 	
 	my $allapp = $self->query('selallkeys', "
 		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
 		$tables_transfered_id->{ 'AutoAppointments' } );
-	
+
 	for my $app ( @$allapp ) {
 		
-		my $sch_appid = $self->create_table( 'AutoSchengenAppData', 'SchengenAppData', $tables_transfered_id, $db_rules );
+		my $sch_appid = $self->create_table( 'AutoSchengenAppData', 'SchengenAppData', $app->{ SchengenAppDataID }, $db_rules );
 		
-		my $appid = $self->create_table( 'AutoAppData', 'AppData', $tables_transfered_id, $db_rules, $new_appid, $sch_appid );
+		my $appid = $self->create_table( 'AutoAppData', 'AppData', $app->{ ID }, 
+			$db_rules, $new_appid, $sch_appid );
 	}
 	
 	my $appnum = $self->query('sel1', "
@@ -1826,13 +1828,13 @@ sub create_table
 	my $self = shift;
 	my $autoname = shift;
 	my $name = shift;
-	my $tables_transfered_id = shift;
+	my $transfered_id = shift;
 	my $db_rules = shift;
 
 	my $new_appid = shift;
 	my $sch_appid = shift;
 	
-	my $hash = $self->get_hash_table( $autoname, $tables_transfered_id->{ $autoname } );
+	my $hash = $self->get_hash_table( $autoname, $transfered_id );
 	
 	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid );
 	
