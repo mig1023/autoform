@@ -1808,7 +1808,10 @@ sub create_new_appointment
 	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
 		$tables_transfered_id->{ AutoAppointments }, $db_rules );
 
-# insurance!
+	my $insurance_line = $self->query('sel1', "
+		SELECT Insurance FROM AutoToken WHERE Token = ?", $token );
+ 	
+	my %insurance_list = map { $_ => 1 } split /,/, $insurance_line;
 	
 	my $allapp = $self->query('selallkeys', "
 		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
@@ -1819,7 +1822,7 @@ sub create_new_appointment
 		my $sch_appid = $self->create_table( 'AutoSchengenAppData', 'SchengenAppData', $app->{ SchengenAppDataID }, $db_rules );
 		
 		my $appid = $self->create_table( 'AutoAppData', 'AppData', $app->{ ID }, 
-			$db_rules, $new_appid, $sch_appid );
+			$db_rules, $new_appid, $sch_appid, ( exists $insurance_list{ $app->{ ID } } ? 1 : 0 ) );
 	}
 	
 	my $appnum = $self->query('sel1', "
@@ -1839,10 +1842,11 @@ sub create_table
 
 	my $new_appid = shift;
 	my $sch_appid = shift;
+	my $insurance = shift;
 	
 	my $hash = $self->get_hash_table( $autoname, $transfered_id );
 	
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid );
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance );
 	
 	my $new_appid = $self->insert_hash_table( $name, $hash );
 	
@@ -1860,6 +1864,7 @@ sub mod_hash
 	my $db_rules = shift;
 	my $appid = shift;
 	my $schappid = shift;
+	my $insurance = shift;
 	
 	for my $column ( keys %$hash ) {
 		if ( $db_rules->{ $table_name }->{ $column } eq 'nope') {
@@ -1876,7 +1881,8 @@ sub mod_hash
 	$hash->{AppID} = $appid if $appid;
 	$hash->{SchengenAppDataID} = $schappid if $schappid;
 	$hash->{Status} = 1 if exists $hash->{Status};
-	
+	$hash->{PolicyType} = 1 if $insurance;
+
 	if ( $table_name eq 'Appointments' ) {
 		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $vars);
 		$hash->{ AppNum }  = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
