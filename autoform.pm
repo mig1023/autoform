@@ -21,10 +21,7 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $task = shift;
-	my $id = shift;
-	my $template = shift;
+	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{'VCS::Vars'};
 	
@@ -48,11 +45,7 @@ sub getContent
 sub get_content_rules
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $current_page = shift;
-	my $full = shift;
-	my $token = shift;
-	my $need_to_init = shift;
+	my ( $self, $current_page, $full, $token, $need_to_init ) = @_;
 	
 	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
 	my $keys_in_current_page = {};
@@ -96,10 +89,7 @@ sub get_content_rules
 sub autoform
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $task = shift;
-	my $id = shift;
-	my $template = shift;
+	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	my ( $page_content, $special, $template_file, $title, $progress );
@@ -151,10 +141,7 @@ sub autoform
 sub autoselftest
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $task = shift;
-	my $id = shift;
-	my $template = shift;
+	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -168,8 +155,7 @@ sub autoselftest
 sub get_same_info_for_timeslots
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 	
 	my $appinfo = {};
 
@@ -188,17 +174,14 @@ sub get_same_info_for_timeslots
 sub init_add_param
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $content_rules = shift;
-	my $token = shift;
-	my $keys_in_current_page = shift;
+	my ( $self, $content_rules, $token, $keys_in_current_page ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $country_code = 'RUS';
 	my $age_for_agreements = 18;
 
-	my ( $info_from_db, $collect_dates ) = undef;
+	my $info_from_db = undef;
 	
 	if ( $keys_in_current_page->{ param } ) {
 	
@@ -287,7 +270,7 @@ sub get_collect_date
 		$collect_dates = {};
 		
 		for ( @$collect_dates_array ) {
-			$collect_dates->{ $_->{ ID } } = { 
+			$collect_dates->{ $_->{ ID } } = {
 				'CollectDate' => $_->{ CollectDate }, 
 				'cdSimpl' => $_->{ cdSimpl }, 
 				'cdUrgent' => $_->{ cdUrgent }, 
@@ -320,11 +303,10 @@ sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $token = $vars->getparam('t');
-
-	$token = lc( $token );
+	my $token = lc( $vars->getparam('t') );
 	$token =~ s/[^a-z0-9]//g;
 
 	if ( $token eq '' ) {
@@ -351,8 +333,8 @@ sub get_token_and_create_new_form_if_need
 sub create_clear_form
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
+	
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	$self->query('query', "
@@ -369,13 +351,12 @@ sub create_clear_form
 sub save_new_token_in_db
 # //////////////////////////////////////////////////
 {	
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 
 	$self->query('query', "
-		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, 
-		$token );
+		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, 
+		AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
+		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, $token );
 	
 	return $token;
 }
@@ -403,8 +384,8 @@ sub token_generation
 sub get_token_error
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $error_num = shift;
+	my ( $self, $error_num ) = @_;
+	
 	my $template = 'autoform.tt2';
 
 	my $error_type = [
@@ -423,8 +404,8 @@ sub get_token_error
 sub get_autoform_content
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
+	
 	my $last_error = '';
 	my $title;
 	
@@ -501,11 +482,7 @@ sub get_autoform_content
 sub check_relation
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $page = shift;
-	my $token = shift;
-	my $moonwalk = shift;
+	my ( $self, $step, $page, $token, $moonwalk ) = @_;
 
 	my $skip_this_page;
 	my $at_least_one_page_skipped = 0;
@@ -552,10 +529,7 @@ sub check_relation
 sub skip_page_by_relation
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $condition = shift;
-	my $relation = shift;
-	my $token = shift;
+	my ( $self, $condition, $relation, $token ) = @_;
 
 	my $current_table_id = $self->get_current_table_id( $token ); 
 	
@@ -568,10 +542,7 @@ sub skip_page_by_relation
 sub skip_by_condition
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $value = shift;
-	my $relation = shift;
-	my $condition = shift;
+	my ( $self, $value, $relation, $condition ) = @_;
 
 	my $skip_it = 0;
 	
@@ -591,9 +562,7 @@ sub skip_by_condition
 sub get_forward
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $token = shift;
+	my ( $self, $step, $token ) = @_;
 	
 	my $current_table_id = $self->get_current_table_id( $token );
 	
@@ -637,8 +606,7 @@ sub get_forward
 sub set_current_app_finished
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $appdata_id = shift;
+	my ( $self, $appdata_id ) = @_;
 	
 	$self->query('query', "
 		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, 
@@ -648,8 +616,7 @@ sub set_current_app_finished
 sub set_appointment_finished
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 	
 	my $this_is_draft = $self->query('sel1', "
 		SELECT Draft FROM AutoToken WHERE Token = ?", 
@@ -681,10 +648,7 @@ sub set_appointment_finished
 sub get_step_by_content
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
-	my $content = shift;
-	my $next = shift;
+	my ( $self, $token, $content, $next ) = @_;
 	
 	my $page_content = $self->get_content_rules();
 	my $step;
@@ -701,10 +665,7 @@ sub get_step_by_content
 sub set_step_by_content
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
-	my $content = shift;
-	my $next = shift;
+	my ( $self, $token, $content, $next ) = @_;
 
 	my $step = $self->get_step_by_content( $token, $content, $next );
 
@@ -718,10 +679,7 @@ sub set_step_by_content
 sub get_edit
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $appdata_id = shift; 
-	my $token = shift;
+	my ( $self, $step, $appdata_id, $token ) = @_;
 	
 	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 		
@@ -746,9 +704,7 @@ sub get_edit
 sub get_delete
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $appdata_id = shift; 
-	my $token = shift;
+	my ( $self, $appdata_id, $token ) = @_;
 	
 	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 	
@@ -770,9 +726,7 @@ sub get_delete
 sub check_existing_id_in_token
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $appdata_id = shift; 
-	my $token = shift;
+	my ( $self, $appdata_id, $token ) = @_;
 	
 	my $exist = 0;
 	
@@ -792,8 +746,7 @@ sub check_existing_id_in_token
 sub check_all_app_finished_and_not_empty
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 	
 	my $all_finished = 0;
 	
@@ -813,9 +766,7 @@ sub check_all_app_finished_and_not_empty
 sub get_add
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $app_id = shift;
-	my $token = shift;
+	my ( $self, $app_id, $token ) = @_;
 	
 	$self->query('query', "
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);");
@@ -841,9 +792,7 @@ sub get_add
 sub get_back
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $token = shift;
+	my ( $self, $step, $token ) = @_;
 	
 	$self->save_data_from_form( $step, $self->get_current_table_id( $token ) );
 	$self->mod_last_change_date( $token );
@@ -864,10 +813,7 @@ sub get_back
 sub get_html_page
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $token = shift;
-	my $appnum = shift;
+	my ( $self, $step, $token, $appnum ) = @_;
 	
 	my $content = '';
 	my $template = 'autoform.tt2';
@@ -895,10 +841,7 @@ sub get_html_page
 sub correct_values
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $current_values = shift;
-	my $appnum = shift;
-	my $token = shift;
+	my ( $self, $current_values, $appnum, $token ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 
@@ -940,15 +883,14 @@ sub correct_values
 sub get_list_of_app
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 	
 	my $content = $self->query('selallkeys', "
-			SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
-			FROM AutoToken 
-			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-			JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-			WHERE Token = ?", $token );
+		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
+		FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+		WHERE Token = ?", $token );
 		
 	if ( scalar(@$content) < 1 ) {
 		$content->[0]->{ID} = 'X';
@@ -1000,9 +942,7 @@ sub get_specials_of_element
 sub get_html_line
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $element = shift;
-	my $values = shift;
+	my ( $self, $element, $values ) = @_;
 
 	return $self->get_html_for_element( 'free_line' ) if $element->{type} eq 'free_line';
 	
@@ -1050,8 +990,7 @@ sub get_html_line
 sub get_cell
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $element = shift;
+	my ( $self, $element ) = @_;
 	
 	return $self->get_html_for_element( 'start_cell' ) . $element . $self->get_html_for_element( 'end_cell' );
 }
@@ -1059,8 +998,7 @@ sub get_cell
 sub get_progressbar
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $page = shift;
+	my ( $self, $page ) = @_;
 	
 	my $line;
 	my $content;
@@ -1093,9 +1031,7 @@ sub get_progressbar
 sub get_html_for_element
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	
-	my ( $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment ) = @_;
+	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment ) = @_;
 	
 	my $value = $self->lang( $value_original );
 	my $param = $self->lang( $param );
@@ -1252,9 +1188,7 @@ sub get_html_for_element
 sub add_css_class
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $html = shift;
-	my $new_class = shift;
+	my ( $self, $html, $new_class ) = @_;
 	
 	if ( $html =~ /\sclass="([^"]*)"/i ) {
 		my $classes = "$1 $new_class";
@@ -1270,9 +1204,7 @@ sub add_css_class
 sub resort_with_first_elements
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $country_hash = shift;
-	my $first_elements = shift;
+	my ( $self, $country_hash, $first_elements ) = @_;
 
 	if ( !$first_elements ) {
 		return sort keys %$country_hash;
@@ -1303,6 +1235,7 @@ sub get_center_id
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	
 	my $vars = $self->{'VCS::Vars'};
 	
 	my $center_id = $vars->getparam('center');
@@ -1313,9 +1246,7 @@ sub get_center_id
 sub save_data_from_form
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $table_id = shift;
+	my ( $self, $step, $table_id ) = @_;
 	
 	my $vars = $self->{'VCS::Vars'};
 
@@ -1339,7 +1270,7 @@ sub save_data_from_form
 
 		$self->query('query', "
 			UPDATE $table SET $request WHERE ID = ?", {}, 
-			@values, $table_id->{$table} );
+			@values, $table_id->{ $table } );
 		
 	}
 	
@@ -1349,21 +1280,17 @@ sub save_data_from_form
 sub change_current_appdata
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $current_app_id = shift;
-	my $table_id = shift;
+	my ( $self, $current_app_id, $table_id ) = @_;
 	
 	$self->query('query', "
 		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, 
-		$current_app_id, $table_id->{ AutoToken} );
+		$current_app_id, $table_id->{ AutoToken } );
 }
 
 sub check_special_in_rules_for_save
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $table_id = shift;
+	my ( $self, $step, $table_id ) = @_;
 	
 	my $vars = $self->{'VCS::Vars'};
 	my $elements = $self->get_content_rules( $step );
@@ -1403,9 +1330,7 @@ sub check_special_in_rules_for_save
 sub get_all_values
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $table_id = shift;
+	my ( $self, $step, $table_id ) = @_;
 
 	my $all_values = {};
 	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'full' );
@@ -1432,10 +1357,7 @@ sub get_all_values
 sub decode_data_from_db
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $element_name = shift;
-	my $value = shift;
+	my ( $self, $step, $element_name, $value ) = @_;
 	
 	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
 	
@@ -1447,10 +1369,7 @@ sub decode_data_from_db
 sub encode_data_for_db
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $element_name = shift;
-	my $value = shift;
+	my ( $self, $step, $element_name, $value ) = @_;
 	
 	my $element = $self->get_element_by_name( $step, $element_name );
 	
@@ -1472,9 +1391,7 @@ sub encode_data_for_db
 sub get_element_by_name
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $step = shift;
-	my $element_name = shift;
+	my ( $self, $step, $element_name ) = @_;
 	
 	my $page_content = $self->get_content_rules( $step );
 	my $element;
@@ -1498,9 +1415,7 @@ sub get_element_by_name
 sub get_names_db_for_save_or_get
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $page_content = shift;
-	my $save_or_get = shift;
+	my ( $self, $page_content, $save_or_get ) = @_;
 	
 	my $request_tables = {};
 
@@ -1526,8 +1441,7 @@ sub get_names_db_for_save_or_get
 sub get_current_table_id
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 	
 	my $tables_id = {};
 	my $request_tables = '';
@@ -1559,9 +1473,7 @@ sub get_current_table_id
 sub check_data_from_form
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
-	my $step = shift;
+	my ( $self, $token, $step ) = @_;
 	
 	my $page_content = $self->get_content_rules( $step, undef, $token, 'init' );
 	my $tables_id = $self->get_current_table_id( $token );
@@ -1598,8 +1510,7 @@ sub check_data_from_form
 sub check_checklist
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $element = shift;
+	my ( $self, $element ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -1615,8 +1526,7 @@ sub check_checklist
 sub check_chkbox
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $element = shift;
+	my ( $self, $element ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	my $value = $vars->getparam( $element->{ name } );
@@ -1627,8 +1537,7 @@ sub check_chkbox
 sub check_param
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $element = shift;
+	my ( $self, $element ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	my $value = $vars->getparam( $element->{ name } );
@@ -1662,8 +1571,7 @@ sub check_param
 sub check_captcha
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $element = shift;
+	my ( $self, $element ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	my $captcha = $vars->getcaptcha();
@@ -1681,9 +1589,7 @@ sub check_captcha
 sub check_logic
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $element = shift;
-	my $tables_id = shift;
+	my ( $self, $element, $tables_id ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	my $value = $vars->getparam( $element->{ name } );
@@ -1740,12 +1646,7 @@ sub check_logic
 sub text_error
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $error_code = shift;
-	my $element = shift;
-	my $incorrect_symbols = shift;
-	my $relation = shift;
-	my $offset = shift;
+	my ( $self, $error_code, $element, $incorrect_symbols, $relation, $offset ) = @_;
 	
 	my $text = [
 		'Поле "[name]" не заполнено',
@@ -1784,8 +1685,7 @@ sub text_error
 sub mod_last_change_date
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 	
 	my $lastip = $ENV{'HTTP_X_REAL_IP'};
 	
@@ -1797,8 +1697,7 @@ sub mod_last_change_date
 sub create_new_appointment
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $token = shift;
+	my ( $self, $token ) = @_;
 	
 	my $new_appid;
 	
@@ -1834,15 +1733,7 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $autoname = shift;
-	my $name = shift;
-	my $transfered_id = shift;
-	my $db_rules = shift;
-
-	my $new_appid = shift;
-	my $sch_appid = shift;
-	my $insurance = shift;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $insurance ) = @_;
 	
 	my $hash = $self->get_hash_table( $autoname, $transfered_id );
 	
@@ -1856,15 +1747,9 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $vars = $self->{ 'VCS::Vars' };
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance ) = @_;
 	
-	my $hash = shift;
-	my $table_name = shift;
-	my $db_rules = shift;
-	my $appid = shift;
-	my $schappid = shift;
-	my $insurance = shift;
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	for my $column ( keys %$hash ) {
 		if ( $db_rules->{ $table_name }->{ $column } eq 'nope') {
@@ -1894,8 +1779,7 @@ sub mod_hash
 sub visapurpose_assembler
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $hash = shift;
+	my ( $self, $hash ) = @_;
 
 	my $visa = '';
 	for (1..17) {
@@ -1909,8 +1793,7 @@ sub visapurpose_assembler
 sub mezzi_assembler
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $hash = shift;
+	my ( $self, $hash ) = @_;
 
 	my $mezzi = '';
 	for (1..7) {
@@ -1948,9 +1831,7 @@ sub get_content_db_rules
 sub get_hash_table
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $table_name = shift;
-	my $table_id = shift;
+	my ( $self, $table_name, $table_id ) = @_;
 	
 	my $hash_table = $self->query('selallkeys', "
 		SELECT * FROM $table_name WHERE ID = ?", $table_id );
@@ -1962,9 +1843,7 @@ sub get_hash_table
 sub insert_hash_table
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $table_name = shift;
-	my $hash = shift;
+	my ( $self, $table_name, $hash ) = @_;
 	
 	my $request_columns = '';
 	my $request_values = '';
@@ -2008,8 +1887,8 @@ sub age
 sub lang
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $text = shift;
+	my ( $self, $text ) = @_;
+	
 	my $vocabulary = $self->{ 'VCS::Vars' }->{ 'VCS::Resources' }->{ 'list' };
 
 	return if !$text;
@@ -2029,9 +1908,10 @@ sub query
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $vars = $self->{ 'VCS::Vars' };
 	my $type = shift;
-
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	
 	if ( $type eq 'sel1' ) {
 		my @result = $vars->db->sel1(@_);
 		return ( wantarray ? @result : $result[0] );
