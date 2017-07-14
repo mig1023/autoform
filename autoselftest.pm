@@ -101,7 +101,6 @@ sub get_test_list {
 						'autoform.tt2',
 						{
 							'nearest_date' => [ 'free_date' ],
-							'comment' => [ 'email' ],
 							'timeslots' => [],
 							'mask' => [],
 							'datepicker' => []
@@ -130,10 +129,6 @@ sub get_test_list {
 						'autoform.tt2',
 						{
 							'nearest_date' => [],
-							'comment' => [
-								's_date',
-								'f_date',
-							],
 							'timeslots' => [],
 							'mask' => [
 								's_date',
@@ -161,7 +156,6 @@ sub get_test_list {
 						'autoform.tt2',
 						{
 							'nearest_date' => [ 'free_date' ],
-							'comment' => [ 'email' ],
 							'timeslots' => [],
 							'mask' => [],
 							'datepicker' => []
@@ -491,9 +485,6 @@ sub get_test_list {
 						'nearest_date' => [
 							'free_date',
 						],
-						'comment' => [
-							  'email'
-							],
 						'timeslots' => [],
 						'mask' => [],
 						'datepicker' => []
@@ -557,7 +548,7 @@ sub get_test_list {
 						'example' => 'mail@mail.ru',
 						'name' => 'email',
 						'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
-						'check' => 'z',
+						'check' => 'zWN\@\s\-\.\,\;',
 						'type' => 'input',
 						'label' => 'Email',
 					},
@@ -1032,6 +1023,164 @@ my $first_page = '<tr><td><label id="text">Визовый центр</label></td
 
 my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">01.01.2025</span></td><tr><td><label id="text">Дата окончания поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">31.12.2025</span></td>';
 
+sub get_content_rules_hash
+# //////////////////////////////////////////////////
+{
+	my $content_rules = {
+	
+		'Начало записи' => [
+			{
+				'page_ord' => 1,
+				'progress' => 1,
+				'param' => 1,
+			},
+			{
+				'type' => 'select',
+				'name' => 'center',
+				'label' => 'Визовый центр',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'CenterID',
+				},
+				'param' => '[centers_from_db]',
+				'uniq_code' => 'onchange="update_nearest_date_free_date();"',
+			},
+			{
+				'type' => 'select',
+				'name' => 'vtype',
+				'label' => 'Тип визы',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'VType',
+				},
+				'param' => '[visas_from_db]',
+			},
+			{
+				'type' => 'info',
+				'name' => 'free_date',
+				'label' => 'Ближайшее доступное время',
+				'comment' => '',
+				'check' => '',
+				'special' => 'nearest_date',
+			},
+			{
+				'type' => 'input',
+				'name' => 'email',
+				'label' => 'Email',
+				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
+				'example' => 'mail@mail.ru',
+				'check' => 'zWN\@\s\-\.\,\;',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'EMail',
+				},
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'pers_info',
+				'label' => '',
+				'label_for' => 'я согласен на обработку персональных данных',
+				'comment' => '',
+				'check' => 'true',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PersonalDataPermission',
+					'transfer' => 'nope',
+				},
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'mobil_info',
+				'label' => '',
+				'label_for' => 'я согласен на условия работы с мобильными телефона на территории визового центра',
+				'comment' => '',
+				'check' => 'true',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'MobilPermission',
+					'transfer' => 'nope',
+				},
+				'relation' => {},
+			},
+		],
+		
+		'Данные поездки' => [
+			{
+				'page_ord' => 2,
+				'progress' => 2,
+				'collect_date' => 1,
+			},
+			{
+				'type' => 'input',
+				'name' => 's_date',
+				'label' => 'Дата начала поездки',
+				'comment' => 'Введите предполагаемую дату начала поездки',
+				'example' => '01.01.2025',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'now_or_later',
+						'offset' => '[collect_date_offset]',
+					},
+				],
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'SDate',
+				},
+				'special' => 'datepicker, mask',
+			},
+			{
+				'type' => 'input',
+				'name' => 'f_date',
+				'label' => 'Дата окончания поездки',
+				'comment' => 'Введите предполагаемую дату окончания поездки',
+				'example' => '31.12.2025',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'equal_or_later',
+						'table' => 'Appointments',
+						'name' => 'SDate',
+						'error' => 'Дата начала поездки',
+					},
+				],
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'FDate',
+				},
+				'special' => 'datepicker, mask',
+			},
+		],
+		
+		'Выберите лицо на которое будет оформлен договор' => [
+			{
+				'page_ord' => 23,
+				'progress' => 10,
+				'persons_in_page' => 1,
+			},
+			{
+				'type' => 'select',
+				'name' => 'visa_text',
+				'label' => 'Выберите на кого оформляется',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'PersonForAgreements',
+					'transfer' => 'nope',
+				},
+				'param' => '[persons_in_app]',
+			},
+		],
+	};
+	
+	return $content_rules;
+}
+
 sub selftest 
 # //////////////////////////////////////////////////
 {
@@ -1086,7 +1235,8 @@ sub get_tests
 	my $token_id = shift;
 
 	my @result = ();
-	
+	$self->{ this_is_self_testing } = 1;
+
 	my $tests = get_test_list();
 	
 	for my $test (@$tests) {
@@ -1132,7 +1282,7 @@ sub get_tests
 			for ( @{ $t->{param} } ) {
 				$vars->setparam( $_->{name} ,$_->{value} );
 			}
-
+			
 			my $test_result =  &{ $t->{tester} }( 
 				$t->{debug}, $t->{expected}, "$test->{comment}-$test_num", $self, 
 				&{ $test->{func} }( $self, @{ $t->{args} } )

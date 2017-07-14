@@ -47,7 +47,15 @@ sub get_content_rules
 {
 	my ( $self, $current_page, $full, $token, $need_to_init ) = @_;
 	
-	my $content = VCS::Site::autodata::get_content_rules_hash( $self );
+	my $content = undef;
+	
+	if ( exists $self->{ this_is_self_testing } ) {
+		$content = VCS::Site::autoselftest::get_content_rules_hash( $self );
+	}
+	else {
+		$content = VCS::Site::autodata::get_content_rules_hash( $self );
+	}
+	
 	my $keys_in_current_page = {};
 	
 	my $new_content = {};
@@ -1750,7 +1758,7 @@ sub mod_hash
 	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
-	
+
 	for my $column ( keys %$hash ) {
 		if ( $db_rules->{ $table_name }->{ $column } eq 'nope') {
 			delete $hash->{ $column };
