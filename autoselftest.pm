@@ -1181,6 +1181,30 @@ sub get_content_rules_hash
 	return $content_rules;
 }
 
+sub get_progressline
+# //////////////////////////////////////////////////
+{
+	my $progress_line = [ '',
+		{ big => 1, name => 'Начало', },
+		{ big => 0, name => 'Данные', },
+		{ big => 1, name => 'Заявители', },
+		{ big => 0, name => 'Паспорта', },
+		{ big => 0, name => 'Допданные', },
+		{ big => 0, name => 'Поездка', },
+		{ big => 0, name => 'Проживание', },
+		{ big => 0, name => 'Расходы', },
+		{ big => 0, name => 'Ещё?', },
+		{ big => 0, name => 'На кого?', },
+		{ big => 0, name => 'Данные', },
+		{ big => 1, name => 'Оформление', },
+		{ big => 0, name => 'Офис', },
+		{ big => 0, name => 'Подтверждение', },
+		{ big => 1, name => 'Готово!', },
+	];
+	
+	return $progress_line;
+}
+
 sub selftest 
 # //////////////////////////////////////////////////
 {

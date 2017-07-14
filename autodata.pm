@@ -4,7 +4,7 @@ use strict;
 sub get_progressline
 # //////////////////////////////////////////////////
 {
-	my $progress_line = [ '',
+	return [ '',
 		{ big => 1, name => 'Начало', },
 		{ big => 0, name => 'Данные', },
 		{ big => 1, name => 'Заявители', },
@@ -21,15 +21,13 @@ sub get_progressline
 		{ big => 0, name => 'Подтверждение', },
 		{ big => 1, name => 'Готово!', },
 	];
-	
-	return $progress_line;
 }
 		
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
 {
 
-	my $content_rules = {
+	return {
 	
 		'Начало записи' => [
 			{
@@ -1827,6 +1825,9 @@ sub get_content_rules_hash
 				'check' => '',
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'input',
 				'name' => 'captcha',
 				'label' => 'Введите текст с картинки',
@@ -1887,26 +1888,32 @@ sub get_content_rules_hash
 			},
 		],
 	};
-	
-	return $content_rules;
 }
 
 sub get_settings
 # //////////////////////////////////////////////////
 {
-	my $settings = {
-		'addr' => '/autoform/',
-		'addr_captcha' => '/vcs/static/files/',
-		'addr_vcs' => '/vcs/',
+	return {
+		'paths' => {
+			'addr' => '/autoform/',
+			'addr_captcha' => '/vcs/static/files/',
+			'addr_vcs' => '/vcs/',
+		},
+		
+		'age' => {
+			'age_for_agreements' => 18,
+		},
+		
+		'memcached' => {
+			'memcached_exptime' => 43200, # 12*3600 sec
+		},
 	};
-	
-	return $settings;
 }
 
 sub get_html_elements
 # //////////////////////////////////////////////////
 {
-	my $elements = { 
+	return { 
 		'start_line'		=> '<tr [u]>',
 		'end_line'		=> '</tr>',
 		'start_cell'		=> '<td [u]>',
@@ -1938,26 +1945,22 @@ sub get_html_elements
 		'geo_link'		=> '&nbsp;<a target="_blank" style="color: #FF6666; font-size: 12px; font-weight: normal; border-bottom:1px ' .
 					'dotted #DB121A; text-decoration:none;" href="http://maps.yandex.ru/?ll=[x],[y]">',
 	};
-	
-	return $elements;
 }
 
 sub get_tables_controled_by_AutoToken
 # //////////////////////////////////////////////////
 {
-	my $tables_controled_by_AutoToken = {
+	return {
 		'AutoAppointments' => 'AutoAppID',
 		'AutoAppData' => 'AutoAppDataID',
 		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
 	};
-	
-	return $tables_controled_by_AutoToken;
 }
 
 sub get_geo_branches
 # //////////////////////////////////////////////////
 {
-	my $branch_geo = {
+	return {
 		1 => [ '55.7420115', '37.6184734', ],
 		2 => [ '53.191534', '50.095994', ],
 		3 => [ '45.01503599999999', '38.97375699999998', ],
@@ -1988,8 +1991,6 @@ sub get_geo_branches
 		38 => [ '57.816866', '28.3087423', ],
 		42 => [ '43.315049', '45.697579', ],
 	};
-		
-	return $branch_geo;
 };
 
 1;

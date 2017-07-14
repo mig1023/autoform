@@ -25,7 +25,7 @@ sub getContent
 
 	my $vars = $self->{'VCS::Vars'};
 	
-	$self->{'autoform'} = VCS::Site::autodata::get_settings();
+	$self->{ autoform } = VCS::Site::autodata::get_settings();
 	
     	my $dispathcher = {
     		'index' => \&autoform,
@@ -34,7 +34,7 @@ sub getContent
     	
     	my $disp_link = $dispathcher->{$id};
 
-    	$vars->get_system->redirect( $vars->getform('fullhost').$self->{'autoform'}->{'addr'}.'index.htm' )
+    	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
     		if !$disp_link;
 	
     	&{$disp_link}( $self, $task, $id, $template );
@@ -57,8 +57,8 @@ sub get_content_rules
 	}
 	
 	my $keys_in_current_page = {};
-	
 	my $new_content = {};
+	
 	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content ) {
 		
 		my $page_ord = $content->{$page}->[0]->{page_ord};
@@ -87,9 +87,11 @@ sub get_content_rules
 	
 	if ( !$current_page ) {
 		return $content;
-	} elsif ( $current_page =~ /length/i ) {
+	}
+	elsif ( $current_page =~ /length/i ) {
 		return scalar( keys %$content );
-	} else {
+	}
+	else {
 		return $content->{ $current_page };
 	};
 }
@@ -110,7 +112,8 @@ sub autoform
 
 	if ( $token =~ /^\d\d$/ ) {
 		( $title, $page_content, $template_file ) = $self->get_token_error( $token );
-	} else {
+	}
+	else {
 		( $step, $title, $page_content, $last_error, $template_file, $special, $progress ) = 
 			$self->get_autoform_content( $token );
 	}
@@ -134,14 +137,14 @@ sub autoform
 		'token' => $token,
 		'step' => $step,
 		'max_step' => $self->get_content_rules('length'),
-		'addr' => $vars->getform('fullhost').$self->{'autoform'}->{'addr'},
+		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'last_error_name' => $last_error_name,
 		'last_error_text' => $last_error_text,
 		'special' => $special,
-		'vcs_tools' => $self->{'autoform'}->{'addr_vcs'},
+		'vcs_tools' => $self->{ autoform }->{ paths }->{ addr_vcs },
 		'appinfo' => $appinfo_for_timeslots,
 		'progress' => $progress,
-		'lang_in_link' => $self->{'lang'},
+		'lang_in_link' => $self->{ lang },
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -186,9 +189,6 @@ sub init_add_param
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $country_code = 'RUS';
-	my $age_for_agreements = 18;
-
 	my $info_from_db = undef;
 	
 	if ( $keys_in_current_page->{ param } ) {
@@ -210,7 +210,8 @@ sub init_add_param
 				$info_from_db->{ $_ } = $self->query('selall', $info_from_sql->{ $_ } );
 			}
 		
-			$vars->get_memd->set('autoform_addparam', $info_from_db, 12*3600 );
+			$vars->get_memd->set('autoform_addparam', $info_from_db, 
+				$self->{ autoform }->{ memcached }->{ memcached_exptime } );
 		}
 	}
 
@@ -229,7 +230,8 @@ sub init_add_param
 			push ( @{ $info_from_db->{ '[persons_in_app_for_insurance]' } },
 				[ $person->{ ID }, $person->{ person } ] );
 
-			next if $self->age( $person->{ birthdate }, $person->{ currentdate } ) < $age_for_agreements;
+			next if $self->age( $person->{ birthdate }, $person->{ currentdate } ) < 
+					$self->{ autoform }->{ memcached }->{ age_for_agreements };
 
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		}
@@ -286,7 +288,8 @@ sub get_collect_date
 			};
 		}
 
-		$vars->get_memd->set('autoform_collectdates', $collect_dates, 12*3600 );
+		$vars->get_memd->set('autoform_collectdates', $collect_dates, 
+			$self->{ autoform }->{ memcached }->{ memcached_exptime } );
 	}
 	
 	my ( $center_id, $category ) = $self->query('sel1', "
@@ -1008,10 +1011,15 @@ sub get_progressbar
 {
 	my ( $self, $page ) = @_;
 	
-	my $line;
-	my $content;
+	my ( $line, $content, $progress_line );
 	
-	my $progress_line = VCS::Site::autodata::get_progressline();
+	if ( exists $self->{ this_is_self_testing } ) {
+		$progress_line = VCS::Site::autoselftest::get_progressline();
+	}
+	else {
+		$progress_line = VCS::Site::autodata::get_progressline();
+	}
+	
 	my $current_progress = $page->[0]->{ progress };
 	my $big_element = 0;
 	
@@ -1140,7 +1148,7 @@ sub get_html_for_element
 	
 	if ( $type eq 'captcha' ) {
 		my $config = $vars->getConfig( 'captcha' );
-		my $addr_captcha = $self->{ 'autoform' }->{ 'addr_captcha' };
+		my $addr_captcha = $self->{ autoform }->{ paths} ->{ addr_captcha };
 		
 		my $captcha = $vars->getcaptcha();
 		my $ccode = $captcha->generate_code( $config->{ 'code_nums' } );
