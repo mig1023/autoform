@@ -6,18 +6,18 @@ sub get_progressline
 {
 	return [ '',
 		{ big => 1, name => 'Начало', },
-		{ big => 0, name => 'Данные', },
+		{ big => 0, name => 'Даты поездки', },
 		{ big => 1, name => 'Заявители', },
-		{ big => 0, name => 'Паспорта', },
-		{ big => 0, name => 'Допданные', },
-		{ big => 0, name => 'Поездка', },
+		{ big => 0, name => 'Данные паспортов', },
+		{ big => 0, name => 'Дополнительные данные', },
+		{ big => 0, name => 'Данные о поездке', },
 		{ big => 0, name => 'Проживание', },
 		{ big => 0, name => 'Расходы', },
-		{ big => 0, name => 'Ещё?', },
-		{ big => 0, name => 'На кого?', },
-		{ big => 0, name => 'Данные', },
+		{ big => 0, name => 'Добавление нового заявителя', },
 		{ big => 1, name => 'Оформление', },
-		{ big => 0, name => 'Офис', },
+		{ big => 0, name => 'Данные для договора', },
+		{ big => 0, name => 'Выбор даты записи', },
+		{ big => 0, name => 'Офис выдачи', },
 		{ big => 0, name => 'Подтверждение', },
 		{ big => 1, name => 'Готово!', },
 	];
@@ -109,7 +109,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Данные поездки' => [
+		'Даты поездки' => [
 			{
 				'page_ord' => 2,
 				'progress' => 2,
@@ -973,7 +973,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'hotels',
 				'label' => 'Название гостиницы или ФИО приглашающего',
-				'comment' => '',
+				'comment' => 'Укажите полное название гостиницы и данные приглашающего лица',
+				'example' => 'Grand Hotel, Mike Bowman',
 				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
@@ -984,7 +985,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'hotelsaddr',
 				'label' => 'Адрес ',
-				'comment' => '',
+				'comment' => 'Укажите адрес гостиницы с почтовым индексом',
+				'example' => 'Via Villafranca 10, Rome, 00185',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
@@ -995,7 +997,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'hotelpho',
 				'label' => 'Телефон',
-				'comment' => '',
+				'comment' => 'Укажите контактный телефон гостиницы',
+				'example' => '3964440384',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',

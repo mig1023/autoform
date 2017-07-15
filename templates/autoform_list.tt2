@@ -32,7 +32,7 @@
 	<tr>
 	<td>[% i %].</td>
 	<td [% IF i == 1 %]id = "applist"[% END %] width="90%">
-	[% IF !person.Finished %][draft][% END %] [% person.FName %] [% person.LName %]</td>
+	[% IF !person.Finished %][[% langreq('черновик') %]][% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% person.BirthDate %]</td>
 	<td><input class="edit_input" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
 	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
