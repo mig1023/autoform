@@ -880,7 +880,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'prevvisafd',
 				'label' => 'Дата начала',
-				'comment' => '',
+				'comment' => 'Начало действия разрешения',
+				'example' => '01.01.2016',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -892,7 +893,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'prevvised',
 				'label' => 'Дата окончания',
-				'comment' => '',
+				'comment' => 'Начало действия разрешения',
+				'example' => '01.06.2016',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -918,8 +920,9 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'prevvisafd',
 				'label' => 'Дата сдачи отпечатков, если известна',
-				'comment' => '',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'comment' => 'Укажите, если помните, дату, когда сдавались отпечатки пальцев для предыдущей визы',
+				'example' => '01.06.2016',
+				'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FingersDate',
@@ -1029,7 +1032,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'p_name',
 				'label' => 'Имя',
-				'comment' => '',
+				'comment' => 'Укажите имя приглашающего лица',
+				'example' => 'Mike',
 				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1040,7 +1044,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'p_last_name',
 				'label' => 'Фамилия',
-				'comment' => '',
+				'comment' => 'Укажите фамилию приглашающего лица',
+				'example' => 'Bowman',
 				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1051,7 +1056,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'p_birthdate',
 				'label' => 'Дата рождения',
-				'comment' => '',
+				'comment' => 'Укажите дату рождения приглашающего лица',
+				'example' => '01.01.1970',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1075,7 +1081,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'p_city',
 				'label' => 'Город',
-				'comment' => '',
+				'comment' => 'Укажите название города',
+				'example' => 'Rome',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1085,8 +1092,9 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'p_adress',
-				'label' => 'Адрес (без города)',
-				'comment' => '',
+				'label' => 'Адрес',
+				'comment' => 'Укажите адрес без названия города',
+				'example' => 'Via Villafranca 10',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1097,7 +1105,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'p_phone',
 				'label' => 'Телефон',
-				'comment' => '',
+				'comment' => 'Укажите контактный номер телефона',
+				'example' => '3964440384',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1108,7 +1117,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'p_email',
 				'label' => 'Email',
-				'comment' => '',
+				'comment' => 'Укажите адрес электронной почты',
+				'example' => 'mail@mail.it',
 				'check' => 'zWN\@\s\-\.\,\;',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1146,7 +1156,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'a_city',
 				'label' => 'Город',
-				'comment' => '',
+				'comment' => 'Укажите название города',
+				'example' => 'Rome',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1157,7 +1168,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'a_company',
 				'label' => 'Название приглашающей компании',
-				'comment' => '',
+				'comment' => 'Укажите полное название организации',
+				'example' => 'Microsoft Corporation',
 				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
@@ -1168,7 +1180,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'a_companyaddr',
 				'label' => 'Адрес приглашающей компании',
-				'comment' => '',
+				'comment' => 'Укажите адрес организации',
+				'example' => 'Via Villafranca 10, Rome, 00185',
 				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
@@ -1179,7 +1192,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'a_phone',
 				'label' => 'Телефон компании',
-				'comment' => '',
+				'comment' => 'Укажите контактный телефон организации',
+				'example' => '3964440384',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1190,7 +1204,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'a_fax',
 				'label' => 'Факс компании',
-				'comment' => '',
+				'comment' => 'Укажите контактный факс организации',
+				'example' => '3964440384',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1201,7 +1216,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'a_person',
 				'label' => 'ФИО, адрес, телефон, email контактного лица',
-				'comment' => '',
+				'comment' => 'Укажите данные кантактного лица организации',
+				'example' => 'Mike Bowman, Via Villafranca 10, Rome, 00185, 3964440384, mail@mail.it',
 				'check' => 'zWN\@\s\-\.\,\;',
 				'db' => {
 					'table' => 'AppData',
@@ -1339,7 +1355,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'whomothersrc',
 				'label' => 'Иные средства',
-				'comment' => '',
+				'comment' => 'Укажите иные средства',
 				'check' => 'zWwN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
@@ -1459,6 +1475,8 @@ sub get_content_rules_hash
 					}
 				},
 			},
+			
+
 			{
 				'type' => 'info',
 				'name' => 'info_rulname',
@@ -1577,8 +1595,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovlname',
 				'label' => 'Фамилия',
-				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '754300001',
+				'comment' => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
+				'example' => 'Иванов',
 				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'Appointments',
@@ -1589,7 +1607,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovfname',
 				'label' => 'Имя',
-				'comment' => '',
+				'comment' => 'Введите имя на русском языке так, как оно указана во внутреннем паспорте',
+				'example' => 'Иван',
 				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'Appointments',
@@ -1600,7 +1619,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovmname',
 				'label' => 'Отчество',
-				'comment' => '',
+				'comment' => 'Введите отчество на русском языке так, как оно указана во внутреннем паспорте',
+				'example' => 'Иванович',
 				'check' => 'zЁ\s\-',
 				'db' => {
 					'table' => 'Appointments',
@@ -1611,7 +1631,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'dovpassnum',
 				'label' => '№ паспорта',
-				'comment' => '',
+				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				'example' => '754300001',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -1738,7 +1759,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'ins_days',
 				'label' => 'Количество дней страховки',
-				'comment' => '',
+				'comment' => 'Укажите количество дней, на которые необходима страховка',
+				'example' => '14',
 				'check' => 'N',
 				'db' => {
 					'table' => 'Appointments',
