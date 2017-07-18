@@ -197,7 +197,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rufname',
 				'label' => 'Имя',
-				'comment' => 'Введите имя на русском языке так, как оно указана во внутреннем паспорте',
+				'comment' => 'Введите имя на русском языке так, как оно указано во внутреннем паспорте',
 				'example' => 'Иван',
 				'check' => 'zЁ\s\-',
 				'db' => {
@@ -209,7 +209,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'rumname',
 				'label' => 'Отчество',
-				'comment' => 'Введите отчество на русском языке так, как оно указана во внутреннем паспорте',
+				'comment' => 'Введите отчество на русском языке так, как оно указано во внутреннем паспорте',
 				'example' => 'Иванович',
 				'check' => 'zЁ\s\-',
 				'db' => {
@@ -260,7 +260,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'fname',
 				'label' => 'Имя',
-				'comment' => 'Введите имя на английском языке так, как оно указана в загранпаспорте',
+				'comment' => 'Введите имя на английском языке так, как оно указано в загранпаспорте',
 				'example' => 'Ivan',
 				'check' => 'zW\s\-',
 				'db' => {
@@ -1380,7 +1380,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'eu_lname',
 				'label' => 'Фамилия',
-				'comment' => '',
+				'comment' => 'Введите фамилию на английском языке так, как она указана в паспорте',
+				'example' => 'Ivanov',
 				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
@@ -1391,7 +1392,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'eu_fname',
 				'label' => 'Имя',
-				'comment' => '',
+				'comment' => 'Введите имя на английском языке так, как оно указано в паспорте',
+				'example' => 'Ivan',
 				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'AppData',
@@ -1402,7 +1404,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'eu_bdate',
 				'label' => 'Дата рождения',
-				'comment' => '',
+				'comment' => 'Введите дату рождения',
+				'example' => '01.01.1980',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -1414,7 +1417,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'eu_citizenship',
 				'label' => 'Гражданство',
-				'comment' => '',
+				'comment' => 'Укажите гражданство родственника',
+				'example' => 'ITALIANA',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
@@ -1425,7 +1429,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'eu_idnum',
 				'label' => 'Номер паспорта',
-				'comment' => '',
+				'comment' => 'Введите серию и номер паспорта как единый набор цифр и букв без пробелов',
+				'example' => '753500001',
 				'check' => 'zWN',
 				'db' => {
 					'table' => 'AppData',
