@@ -47,14 +47,10 @@ sub get_content_rules
 {
 	my ( $self, $current_page, $full, $token, $need_to_init ) = @_;
 	
-	my $content = undef;
-	
-	if ( exists $self->{ this_is_self_testing } ) {
-		$content = VCS::Site::autoselftest::get_content_rules_hash( $self );
-	}
-	else {
-		$content = VCS::Site::autodata::get_content_rules_hash( $self );
-	}
+	my $content = ( exists $self->{ this_is_self_testing } ?
+		VCS::Site::autoselftest::get_content_rules_hash( $self ) :
+		VCS::Site::autodata::get_content_rules_hash( $self )
+	);
 	
 	my $keys_in_current_page = {};
 	my $new_content = {};
@@ -175,7 +171,8 @@ sub get_same_info_for_timeslots
 		FROM AutoToken 
 		JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		WHERE Token = ?", $token );
+		WHERE Token = ?", $token
+	);
 		
 	$appinfo->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 
@@ -222,7 +219,8 @@ sub init_add_param
 			birthdate, CURRENT_DATE() as currentdate
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
-			WHERE AutoToken.Token = ?", $token);
+			WHERE AutoToken.Token = ?", $token
+		);
 
 		for my $person ( @$app_person_in_app ) {
 			$person->{ person } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
@@ -276,7 +274,8 @@ sub get_collect_date
 		
 	if ( !$collect_dates ) {
 		my $collect_dates_array = $self->query('selallkeys', "
-			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1");
+			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1"
+		);
 		$collect_dates = {};
 		
 		for ( @$collect_dates_array ) {
@@ -296,7 +295,8 @@ sub get_collect_date
 		SELECT CenterID, Category FROM AutoAppointments
 		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 		JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
-		WHERE Token = ?", $token );
+		WHERE Token = ?", $token
+	);
 
 	$collect_dates = $collect_dates->{ $center_id };
 
@@ -325,7 +325,8 @@ sub get_token_and_create_new_form_if_need
 	}
 	else {
 		my ( $token_exist, $finished ) = $self->query('sel1', "
-			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token );
+			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token
+		);
 	
 		if ( length($token) != 64 ) {
 			$token = '01';
@@ -350,13 +351,15 @@ sub create_clear_form
 	
 	$self->query('query', "
 		INSERT INTO AutoAppointments (RDate, Login, Draft) VALUES (now(), ?, 1)", {}, 
-		$vars->get_session->{'login'} );
+		$vars->get_session->{'login'}
+	);
 		
 	my $app_id = $self->query('sel1', "SELECT last_insert_id()") || 0;
 	
 	$self->query('query', "
 		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
-		$app_id, $token );
+		$app_id, $token
+	);
 }
 	
 sub save_new_token_in_db
@@ -367,7 +370,8 @@ sub save_new_token_in_db
 	$self->query('query', "
 		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, 
 		AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, $token );
+		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, $token
+	);
 	
 	return $token;
 }
@@ -386,7 +390,9 @@ sub token_generation
 			$token .= @alph[ int( rand( 35 ) ) ];
 		}
 		$token_existing = $self->query('sel1', "
-			SELECT ID FROM AutoToken WHERE Token = ?", $token ) || 0;
+			SELECT ID FROM AutoToken WHERE Token = ?", $token
+		) || 0;
+			
 	} while ( $token_existing );
 	
 	return $token;
@@ -423,7 +429,8 @@ sub get_autoform_content
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my ( $step, $app_id ) = $self->query('sel1', "
-		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token );
+		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token
+	);
 
 	my $action = $vars->getparam('action');
 	$action = lc($action);
@@ -530,8 +537,8 @@ sub check_relation
 
 	if ( $at_least_one_page_skipped ) {
 		$self->query('query', "
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-			$step, $token );
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+		);
 	}
 
 	return ( $step, $page );
@@ -545,7 +552,9 @@ sub skip_page_by_relation
 	my $current_table_id = $self->get_current_table_id( $token ); 
 	
 	my $value = $self->query('sel1', "
-		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?", $current_table_id->{ 'Auto'. $relation->{table} });
+		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?",
+		$current_table_id->{ 'Auto'. $relation->{table} }
+	);
 	
 	return $self->skip_by_condition( $value, $relation->{ value }, $condition ); 
 }
@@ -592,13 +601,14 @@ sub get_forward
 
 		$self->query('query', "
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, "$last_error[1] ($last_error[0], step $step)", $token );
+			$step, "$last_error[1] ($last_error[0], step $step)", $token
+		);
 	} else {
 		$step++;
 			
 		$self->query('query', "
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-			$step, $token );
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+		);
 	}
 
 	my $appnum = undef;
@@ -620,8 +630,8 @@ sub set_current_app_finished
 	my ( $self, $appdata_id ) = @_;
 	
 	$self->query('query', "
-		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, 
-		$appdata_id );
+		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, $appdata_id
+	);
 }
 
 sub set_appointment_finished
@@ -630,13 +640,13 @@ sub set_appointment_finished
 	my ( $self, $token ) = @_;
 	
 	my $this_is_draft = $self->query('sel1', "
-		SELECT Draft FROM AutoToken WHERE Token = ?", 
-		$token );
+		SELECT Draft FROM AutoToken WHERE Token = ?", $token
+	);
 
 	if ( $this_is_draft ) {
 		$self->query('query', "
-			UPDATE AutoToken SET EndDate = now(), Step = 1 WHERE Token = ?", {}, 
-			$token );
+			UPDATE AutoToken SET EndDate = now(), Step = 1 WHERE Token = ?", {}, $token
+		);
 	
 		return ( 0, 'draft_app_num' );
 	}
@@ -647,11 +657,13 @@ sub set_appointment_finished
 	
 	$self->query('query', "
 		UPDATE AutoToken SET EndDate = now(), Finished = 1, CreatedApp = ? WHERE Token = ?", {}, 
-		$new_appid, $token );
+		$new_appid, $token
+	);
 		
 	$self->query('query', "
-		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? WHERE ID = ?", {}, 
-		$ncount, $new_appid );
+		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? 
+		WHERE ID = ?", {}, $ncount, $new_appid
+	);
 		
 	return ( $new_appid, $appnum );
 }
@@ -681,8 +693,8 @@ sub set_step_by_content
 	my $step = $self->get_step_by_content( $token, $content, $next );
 
 	$self->query('query', "
-		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-		$step, $token );
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+	);
 
 	return $step;
 }
@@ -697,15 +709,17 @@ sub get_edit
 		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');;
 		
 		my $sch_id = $self->query('sel1', "
-			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id );
+			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
+		);
 		
 		$self->query('query', "
 			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
-			$step, $appdata_id, $sch_id, $token );
+			$step, $appdata_id, $sch_id, $token
+		);
 		
 		$self->query('query', "
-			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
-			$appdata_id );
+			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, $appdata_id
+		);
 	}
 	
 	$self->mod_last_change_date( $token );
@@ -720,15 +734,16 @@ sub get_delete
 	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 	
 		my $sch_id = $self->query('sel1', "
-			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id );
+			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
+		);
 	
 		$self->query('query', "
-			DELETE FROM AutoAppData WHERE ID = ?", {}, 
-			$appdata_id );
+			DELETE FROM AutoAppData WHERE ID = ?", {}, $appdata_id
+		);
 		
 		$self->query('query', "
-			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, 
-			$sch_id );
+			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, $sch_id
+		);
 
 		$self->mod_last_change_date( $token );
 	}
@@ -745,7 +760,8 @@ sub check_existing_id_in_token
 		SELECT AutoAppData.ID FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $token );
+		WHERE Token = ?", $token
+	);
 		
 	for my $app ( @$list_of_app_in_token ) {
 		$exist = 1 if ( $app->{ID} == $appdata_id );
@@ -765,7 +781,8 @@ sub check_all_app_finished_and_not_empty
 		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $token );
+		WHERE Token = ?", $token
+	);
 		
 	$all_finished = 1 if $app_finished < $app_count;
 	
@@ -780,13 +797,15 @@ sub get_add
 	my ( $self, $app_id, $token ) = @_;
 	
 	$self->query('query', "
-		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);");
+		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);"
+	);
 		
 	my $sch_id = $self->query('sel1', "SELECT last_insert_id()" ) || 0;
 	
 	$self->query('query', "
 		INSERT INTO AutoAppData (AnkDate, AppID, SchengenAppDataID) VALUES (now(), ?, ?)", {}, 
-		$app_id, $sch_id );
+		$app_id, $sch_id
+	);
 	
 	my $appdata_id = $self->query('sel1', "SELECT last_insert_id()" ) || 0;
 	
@@ -794,7 +813,8 @@ sub get_add
 	
 	$self->query('query', "
 		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $token );
+		$step, $appdata_id, $sch_id, $token
+	);
 	
 	$self->mod_last_change_date( $token );
 	return $step;
@@ -815,8 +835,8 @@ sub get_back
 	}
 	
 	$self->query('query', "
-		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, 
-		$step, $token);
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+	);
 		
 	return $step;
 }
@@ -862,7 +882,8 @@ sub correct_values
 	
 		my $current_barnch = $$current_values->{ 'new_app_branch' };
 		$$current_values->{ 'new_app_branch' } = $self->query('sel1', "
-			SELECT BName FROM Branches WHERE ID = ?", $$current_values->{ 'new_app_branch' } );
+			SELECT BName FROM Branches WHERE ID = ?", $$current_values->{ 'new_app_branch' }
+		);
 	
 		my $branch_geo = VCS::Site::autodata::get_geo_branches();
 		
@@ -875,7 +896,8 @@ sub correct_values
 		$$current_values->{ 'new_app_timedate' } = $self->query('sel1', "
 			SELECT AppDate FROM AutoAppointments 
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
-			WHERE AutoToken.Token = ?", $token );
+			WHERE AutoToken.Token = ?", $token
+		);
 
 		$$current_values->{ 'new_app_timedate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 	}
@@ -883,7 +905,8 @@ sub correct_values
 	if ( $$current_values->{ 'new_app_timeslot' } ) {
 	
 		my ( $start, $end ) = $self->query('sel1', "
-			SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $$current_values->{ 'new_app_timeslot' } );
+			SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $$current_values->{ 'new_app_timeslot' }
+		);
 		
 		$_ = $vars->get_system->time_to_str( $_ ) for ( $start, $end );
 		
@@ -901,7 +924,8 @@ sub get_list_of_app
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $token );
+		WHERE Token = ?", $token
+	);
 		
 	if ( scalar(@$content) < 1 ) {
 		$content->[0]->{ID} = 'X';
@@ -1011,14 +1035,12 @@ sub get_progressbar
 {
 	my ( $self, $page ) = @_;
 	
-	my ( $line, $content, $progress_line );
+	my ( $line, $content );
 	
-	if ( exists $self->{ this_is_self_testing } ) {
-		$progress_line = VCS::Site::autoselftest::get_progressline();
-	}
-	else {
-		$progress_line = VCS::Site::autodata::get_progressline();
-	}
+	my $progress_line = ( exists $self->{ this_is_self_testing } ?
+		VCS::Site::autoselftest::get_progressline() :
+		VCS::Site::autodata::get_progressline()
+	);
 	
 	my $current_progress = $page->[0]->{ progress };
 	my $big_element = 0;
@@ -1078,14 +1100,6 @@ sub get_html_for_element
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[comment\]/$comment/gi;
 	
-	if ( $uniq_code ) {
-		$uniq_code = 'style="font-weight:bold;"' if $uniq_code eq 'bold';
-		$content =~ s/\[u\]/$uniq_code/gi;
-	}
-	else {
-		$content =~ s/\s\[u\]\>/>/gi;
-	}
-	
 	if ( $type eq 'checkbox' ) {
 		$content =~ s/\[checked\]/checked/gi if $value_original;
 		$content =~ s/\s\[checked\]//gi;
@@ -1099,6 +1113,8 @@ sub get_html_for_element
 			my $selected = ( $value_original == $opt ? 'selected' : '' );
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{ $opt } . '</option>'; 
 		}
+
+		$content =~ s/\[u\]\>/data-timeslot="$value_original">/i if $name eq 'timeslot';
 		$content =~ s/\[options\]/$list/gi;
 	}
 	
@@ -1198,6 +1214,14 @@ sub get_html_for_element
 		$content .= '[ ' . $self->lang( "найти визовый центр на карте" ) . ' ]</a>';
 	}
 	
+	if ( $uniq_code ) {
+		$uniq_code = 'style="font-weight:bold;"' if $uniq_code eq 'bold';
+		$content =~ s/\[u\]/$uniq_code/gi;
+	}
+	else {
+		$content =~ s/\s\[u\]\>/>/gi;
+	}
+	
 	return $content;
 }
 
@@ -1285,9 +1309,8 @@ sub save_data_from_form
 		$request =~ s/,\s$//;			
 
 		$self->query('query', "
-			UPDATE $table SET $request WHERE ID = ?", {}, 
-			@values, $table_id->{ $table } );
-		
+			UPDATE $table SET $request WHERE ID = ?", {}, @values, $table_id->{ $table }
+		);
 	}
 	
 	$self->check_special_in_rules_for_save( $step, $table_id );
@@ -1299,8 +1322,8 @@ sub change_current_appdata
 	my ( $self, $current_app_id, $table_id ) = @_;
 	
 	$self->query('query', "
-		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, 
-		$current_app_id, $table_id->{ AutoToken } );
+		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, $current_app_id, $table_id->{ AutoToken }
+	);
 }
 
 sub check_special_in_rules_for_save
@@ -1317,17 +1340,20 @@ sub check_special_in_rules_for_save
 		if ( $element->{special} eq 'save_info_about_hastdatatype' ) {
 			
 			my $visa_type = $self->query('sel1', "
-				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData});
+				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData}
+			);
 
 			if ( $visa_type != 1 ) {
 				$self->query('query', "
 					UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {}, 
-					$table_id->{AutoSchengenAppData});
+					$table_id->{AutoSchengenAppData}
+				);
 			}
 		}
 		elsif ( $element->{special} eq 'insurer_many_id' ) {
 			my $all_insurer = $self->query('selallkeys', "
-				SELECT ID FROM AutoAppData WHERE AppID = ?", $table_id->{AutoAppointments} );
+				SELECT ID FROM AutoAppData WHERE AppID = ?", $table_id->{AutoAppointments}
+			);
 
 			my $new_list = '';
 				
@@ -1337,8 +1363,8 @@ sub check_special_in_rules_for_save
 			}
 
 			$self->query('query', "
-				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, 
-				$new_list, $table_id->{AutoToken} ) if $new_list;
+				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, $new_list, $table_id->{AutoToken}
+			) if $new_list;
 		}
 	}
 }
@@ -1358,7 +1384,8 @@ sub get_all_values
 		my $request = join ',', keys %{ $request_tables->{ $table } };
 		
 		my $result = $self->query('selallkeys', "
-			SELECT $request FROM $table WHERE ID = ?", $table_id->{ $table } );
+			SELECT $request FROM $table WHERE ID = ?", $table_id->{ $table }
+		);
 		$result = $result->[0];
 		
 		for my $value ( keys %$result ) {
@@ -1472,7 +1499,8 @@ sub get_current_table_id
 	$request_tables =~ s/,\s$//;
 
 	my @ids = $self->query('sel1', "
-		SELECT $request_tables FROM AutoToken WHERE Token = ?", $token);
+		SELECT $request_tables FROM AutoToken WHERE Token = ?", $token
+	);
 	
 	my $max_index = scalar( keys %$tables_controled_by_AutoToken ) - 1;
 	
@@ -1481,7 +1509,8 @@ sub get_current_table_id
 	};
 	
 	$tables_id->{ AutoToken } = $self->query('sel1', "
-		SELECT ID FROM AutoToken WHERE Token = ?", $token );
+		SELECT ID FROM AutoToken WHERE Token = ?", $token
+	);
 
 	return $tables_id;
 }
@@ -1619,7 +1648,8 @@ sub check_logic
 
 			my $datediff = $self->query('sel1', "
 				SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
-				$value, $tables_id->{ 'Auto'.$rule->{table} } );
+				$value, $tables_id->{ 'Auto'.$rule->{table} }
+			);
 
 			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
 				
@@ -1634,9 +1664,10 @@ sub check_logic
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 
 			my $datediff = $self->query('sel1', "
-				SELECT DATEDIFF( ?, now() )", $value );
+				SELECT DATEDIFF( ?, now() )", $value
+			);
 
-				my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
+			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
 
 			$first_error = $self->text_error( 12, $element, undef, $rule->{ error } )
 				if ( ( $datediff < $offset ) and ( $rule->{ condition } =~ /later$/ ) );
@@ -1645,10 +1676,8 @@ sub check_logic
 		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
 
 			my $id_in_db = $self->query('sel1', "
-				SELECT COUNT(ID) FROM $rule->{table} WHERE Status = 1 AND $rule->{name} = ?",
-				$value );
-
-			$error = 10 if $id_in_db;
+				SELECT COUNT(ID) FROM $rule->{table} WHERE Status = 1 AND $rule->{name} = ?", $value
+			);
 
 			$first_error = $self->text_error( 10, $element ) if $id_in_db;
 		}
@@ -1706,8 +1735,8 @@ sub mod_last_change_date
 	my $lastip = $ENV{'HTTP_X_REAL_IP'};
 	
 	$self->query('query', "
-		UPDATE AutoToken SET LastChange = now(), LastIP = ? WHERE Token = ?", {}, 
-		$lastip, $token );
+		UPDATE AutoToken SET LastChange = now(), LastIP = ? WHERE Token = ?", {}, $lastip, $token
+	);
 }
 
 sub create_new_appointment
@@ -1724,13 +1753,15 @@ sub create_new_appointment
 		$tables_transfered_id->{ AutoAppointments }, $db_rules );
 
 	my $insurance_line = $self->query('sel1', "
-		SELECT Insurance FROM AutoToken WHERE Token = ?", $token );
+		SELECT Insurance FROM AutoToken WHERE Token = ?", $token
+	);
  	
 	my %insurance_list = map { $_ => 1 } split /,/, $insurance_line;
 	
 	my $allapp = $self->query('selallkeys', "
 		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
-		$tables_transfered_id->{ 'AutoAppointments' } );
+		$tables_transfered_id->{ 'AutoAppointments' }
+	);
 
 	for my $app ( @$allapp ) {
 		
@@ -1741,7 +1772,8 @@ sub create_new_appointment
 	}
 	
 	my $appnum = $self->query('sel1', "
-		SELECT AppNum FROM Appointments WHERE ID = ?", $new_appid );
+		SELECT AppNum FROM Appointments WHERE ID = ?", $new_appid
+	);
 
 	return ( $new_appid, scalar @$allapp, $appnum );
 }
@@ -1850,7 +1882,9 @@ sub get_hash_table
 	my ( $self, $table_name, $table_id ) = @_;
 	
 	my $hash_table = $self->query('selallkeys', "
-		SELECT * FROM $table_name WHERE ID = ?", $table_id );
+		SELECT * FROM $table_name WHERE ID = ?", $table_id
+	);
+	
 	$hash_table = $hash_table->[0];
 
 	return $hash_table;
@@ -1872,8 +1906,8 @@ sub insert_hash_table
 	}
 	
 	$self->query('query', "
-		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, 
-		@request_values);
+		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, @request_values
+	);
 
 	my $current_id = $self->query('sel1', "SELECT last_insert_id()") || 0;
 

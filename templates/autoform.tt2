@@ -214,6 +214,8 @@ function update_timeslots() {
 	$('#timeslot').hide();
 	$('#timeslot').find('option').remove();
 	$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>");
+	
+	var reload_timeslot = $('#timeslot').attr('data-timeslot');
 
 	$.get("[% vcs_tools %]get_times.htm", {
 		'center': '[% appinfo.center %]', 
@@ -226,7 +228,8 @@ function update_timeslots() {
 			$(xml).find('node').each( function() {
 				var apptimeValue = $(this).find('id').text();
 				var apptimeText = $(this).find('title').text();
-				if (apptimeValue == "") {
+
+				if ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) {
 					$('#timeslot').append('<option value="' + apptimeValue + '" selected >'+ apptimeText + '</option>');
 				} else {
 					$('#timeslot').append('<option value="' + apptimeValue + '">'+ apptimeText + '</option>');
