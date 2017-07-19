@@ -32,7 +32,7 @@
 	<tr>
 	<td>[% i %].</td>
 	<td [% IF i == 1 %]id = "applist"[% END %] width="90%">
-	[% IF !person.Finished %][[% langreq('черновик') %]][% END %] [% person.FName %] [% person.LName %]</td>
+	[% IF !person.Finished %]<b>[[% langreq('черновик') %]]</b>[% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% person.BirthDate %]</td>
 	<td><input class="edit_input" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
 	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
@@ -40,9 +40,11 @@
 	[% END %]
 [% END %]
 
+[% IF i < max_applicants %]
 <tr><td colspan="5">
 	<input type="button" value="[% langreq('Добавить заявителя') %]" onclick="go_button('addapp');">
 </td></tr>
+[% END %]
 
 <tr><td colspan="5">&nbsp;
 </td></tr>
@@ -81,9 +83,11 @@ function edit_button(id) {
 };
 
 function delapp_button(id) {
-	$('#action').val('delapp');
-	$('#person').val(id);
-	document.dataform.submit();
+	if ( confirm("[% langreq("Вы уверены, что хотите удалить заявителя из записи?") %]") ) {
+		$('#action').val('delapp');
+		$('#person').val(id);
+		document.dataform.submit();
+	}
 };
 
 function go_button(where) {

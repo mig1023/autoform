@@ -1924,6 +1924,10 @@ sub get_settings
 # //////////////////////////////////////////////////
 {
 	return {
+		'general' => {
+			'max_applicants' => 10,
+		},
+	
 		'paths' => {
 			'addr' => '/autoform/',
 			'addr_captcha' => '/vcs/static/files/',
