@@ -92,21 +92,13 @@ function mobileScreenCheck() {
 		$(this).css( "font-size", mobilScreen ? '1.5em' : '' );
 	});
 	
-	if ( mobilScreen ) {
-		[% FOREACH picker IN special.datepicker %]
-			$('#[% picker %]').css( "width", '93%');
-		[% END %]
-		[% FOREACH mask IN special.mask %]
-			$("#[% mask %]").css( "width", '93%');
-		[% END %]
-	} else {
-		[% FOREACH picker IN special.datepicker %]
-			$('#[% picker %]').css( "width", '');
-		[% END %]
-		[% FOREACH mask IN special.mask %]
-			$("#[% mask %]").css( "width", '');
-		[% END %]
-	};
+	[% FOREACH picker IN special.datepicker %]
+		$('#[% picker %]').css( "width", mobilScreen ? '93%' : '' );
+	[% END %]
+	
+	[% FOREACH mask IN special.mask %]
+		$("#[% mask %]").css( "width", mobilScreen ? '93%' : '' );
+	[% END %]
 	
 	$(".mobil_hide").each(function(){
 		$(this).css( "display", ( mobilScreen ? 'none' : '' ) );

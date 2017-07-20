@@ -1010,7 +1010,8 @@ sub get_html_line
 		$self->get_cell(
 			$self->get_html_for_element(
 				$element->{ type }, $element->{ name }, $current_value, $element->{ param }, 
-				$element->{ uniq_code }, $element->{ first_elements }, $element->{ comment }
+				$element->{ uniq_code }, $element->{ first_elements }, $element->{ comment },
+				$element->{ check },
 			) . $label_for_need
 		);
 	
@@ -1070,7 +1071,7 @@ sub get_progressbar
 sub get_html_for_element
 # //////////////////////////////////////////////////
 {
-	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment ) = @_;
+	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment, $check ) = @_;
 	
 	my $value = $self->lang( $value_original );
 	my $param = $self->lang( $param );
@@ -1216,13 +1217,17 @@ sub get_html_for_element
 	}
 	
 	if ( $uniq_code ) {
-		$uniq_code = 'style="font-weight:bold;"' if $uniq_code eq 'bold';
+		$content = $self->add_css_class( $content, 'bold_text') if $uniq_code eq 'bold';
 		$content =~ s/\[u\]/$uniq_code/gi;
 	}
 	else {
 		$content =~ s/\s\[u\]\>/>/gi;
 	}
 	
+	if ( ( $type eq 'input' ) and ( $check !~ /^z/ ) ) {
+		$content = $self->add_css_class( $content, 'optional_field');
+	}
+
 	return $content;
 }
 
@@ -1236,7 +1241,7 @@ sub add_css_class
 		$html =~ s/\sclass="[^"]*"/ class="$classes"/i;
 	}
 	else {
-		$html =~ s/^\s*(\<[^\s]+\s)/$1class="$new_class"/;
+		$html =~ s/^\s*(\<[^\s]+\s)/$1class="$new_class" /;
 	}
 	
 	return $html;
