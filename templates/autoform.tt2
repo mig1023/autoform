@@ -45,6 +45,10 @@
 [% IF ( step == max_step ) %]
 	<input type="button" value="[% langreq('Перейти на страницу записи') %] ▷" onclick="go_button('app');">
 [% END %]
+[% IF step %]
+</td></tr><tr><td colspan="3">&nbsp;</td></tr>
+<tr><td colspan="3"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
+[% END %]
 </td></tr></table>
 
 </td></tr></table>
@@ -107,6 +111,13 @@ function mobileScreenCheck() {
 
 
 function go_button(where) {
+[% IF ( step == max_step ) %]
+	if (where == 'app') {
+		location.replace('[% vcs_tools %]info.htm?&t=[% token %]&lang=[% lang_in_link %]');
+		return;
+	}
+[% END %]
+
 	$('#action').val(where);
 	document.dataform.submit();
 };

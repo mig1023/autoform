@@ -441,7 +441,7 @@ sub get_autoform_content
 	$appdata_id =~ s/[^0-9]//g;
 	
 	my $appnum = undef;
-	
+
 	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
 		$step = $self->get_back( $step, $token );
 	}
@@ -1224,7 +1224,7 @@ sub get_html_for_element
 		$content =~ s/\s\[u\]\>/>/gi;
 	}
 	
-	if ( ( $type eq 'input' ) and ( $check !~ /^z/ ) ) {
+	if ( ( $type eq 'input' ) and ( ( $check !~ /^z/ ) and ( $check ne 'captcha_input' ) ) ) {
 		$content = $self->add_css_class( $content, 'optional_field');
 	}
 

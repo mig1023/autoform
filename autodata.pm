@@ -1976,7 +1976,7 @@ sub get_html_elements
 		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
 		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 		
-		'geo_link'		=> '&nbsp;<a target="_blank" class="geo_link_gen" href="http://maps.yandex.ru/?ll=[x],[y]">',
+		'geo_link'		=> '&nbsp;<a target="_blank" class="dotted_link" href="http://maps.yandex.ru/?ll=[x],[y]">',
 	};
 }
 
