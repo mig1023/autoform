@@ -81,15 +81,11 @@ sub get_content_rules
 
 	$content = ( $need_to_init ? $self->init_add_param( $new_content, $token, $keys_in_current_page ) : $new_content );
 	
-	if ( !$current_page ) {
-		return $content;
-	}
-	elsif ( $current_page =~ /length/i ) {
-		return scalar( keys %$content );
-	}
-	else {
-		return $content->{ $current_page };
-	};
+	return $content if !$current_page;
+	
+	return scalar( keys %$content ) if $current_page =~ /^length$/i;
+	
+	return $content->{ $current_page };
 }
 
 sub autoform
@@ -303,12 +299,9 @@ sub get_collect_date
 
 	return 0 unless $collect_dates->{ CollectDate };
 	
-	if ( $category eq 'D' ) {
-		return $collect_dates->{ cdCatD };
-	}
-	else {
-		return ( $collect_dates->{ cdUrgent } ? $collect_dates->{ cdUrgent } : $collect_dates->{ cdSimpl } );
-	}
+	return $collect_dates->{ cdCatD } if $category eq 'D';
+	
+	return ( $collect_dates->{ cdUrgent } ? $collect_dates->{ cdUrgent } : $collect_dates->{ cdSimpl } );
 }
 
 sub get_token_and_create_new_form_if_need
@@ -329,15 +322,9 @@ sub get_token_and_create_new_form_if_need
 			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token
 		);
 	
-		if ( length($token) != 64 ) {
-			$token = '01';
-		}
-		elsif ( !$token_exist ) {
-			$token = '02';
-		}
-		elsif ( $finished ) {
-			$token = '03';
-		}
+		return '01' if ( length($token) != 64 ) or ( $token !~ /^t/i );
+		return '02' if !$token_exist;
+		return '03' if $finished;
 	}
 	
 	return $token;
@@ -383,7 +370,7 @@ sub token_generation
 	my $self = shift;
 
 	my $token_existing = 1;
-	my $token = 'a';
+	my $token = 't';
 	
 	do {
 		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
@@ -416,7 +403,7 @@ sub get_token_error
 	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
 	$title = "<center>$title</center>";
 	
-	return ( $title, '', $template );
+	return ( $title, undef, $template );
 }
 
 sub get_autoform_content
@@ -554,7 +541,7 @@ sub skip_page_by_relation
 	
 	my $value = $self->query('sel1', "
 		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?",
-		$current_table_id->{ 'Auto'. $relation->{table} }
+		$current_table_id->{ 'Auto' . $relation->{table} }
 	);
 	
 	return $self->skip_by_condition( $value, $relation->{ value }, $condition ); 
@@ -682,7 +669,7 @@ sub get_step_by_content
 	}
 
 	$step++ if $next;
-			
+
 	return $step;
 }
 
@@ -867,6 +854,7 @@ sub get_html_page
 	for my $element ( @$page_content ) {
 		$content .= $self->get_html_line( $element, $current_values );
 	}
+	
 	return ( $content, $template );
 }
 
@@ -1178,7 +1166,7 @@ sub get_html_for_element
 	
 	if ( $type eq 'progress' ) {
 		
-		my $form = ( $first_elements ? 'big_progr pr_' : 'ltl_progr pr_' ) . $param;
+		my $form = ( $first_elements ? 'big' : 'ltl' ) . '_progr pr_' . $param;
 			
 		my $background_image = {
 			0 => {
@@ -1952,12 +1940,12 @@ sub lang
 	if ( ref( $text ) ne 'HASH' ) {
 		return $vocabulary->{ $text }->{ $self->{ 'lang' } } || $text;
 	}
-	else {
-		for ( keys %$text ) {
-			$text->{ $_ } = $vocabulary->{ $text->{ $_ } }->{ $self->{ 'lang' } } || $text->{ $_ };
-		}
-		return $text;
+	
+	for ( keys %$text ) {
+		$text->{ $_ } = $vocabulary->{ $text->{ $_ } }->{ $self->{ 'lang' } } || $text->{ $_ };
 	}
+	
+	return $text;
 }
 
 sub query

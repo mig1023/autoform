@@ -13,7 +13,7 @@ sub get_test_list {
 			'test' => {	
 				1 => { 	'tester' => \&test_regexp,
 					'args' => [],
-					'expected' => '^a[a-z0-9]{63}$',
+					'expected' => '^t[a-z0-9]{63}$',
 				},
 				2 => {	'tester' => \&test_line,
 					'args' => [],
