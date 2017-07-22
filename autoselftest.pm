@@ -303,7 +303,7 @@ sub get_test_list {
 				},
 				5 => { 	'tester' => \&test_line,
 					'args' => [ 'input', 'element', 'val', {}, 'uniq', undef, 'comm' ],
-					'expected' => '<input class="input_width input_gen" type="text" value="val" ' .
+					'expected' => '<input class="input_width input_gen optional_field" type="text" value="val" ' .
 						'name="element" id="element" title="comm" uniq>',
 				},
 				6 => { 	'tester' => \&test_line,
@@ -1012,14 +1012,12 @@ sub get_test_list {
 			'comment' => 'add_css_class',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'debug' => 1,
 					'args' => [ '<label class="info">text</label>', 'class2' ],
 					'expected' => '<label class="info class2">text</label>',
 				},
 				2 => { 	'tester' => \&test_line,
-					'debug' => 1,
-					'args' => [ '<label >text</label>', 'class2' ],
-					'expected' => '<label class="class2">text</label>',
+					'args' => [ '<label id="name">text</label>', 'class2' ],
+					'expected' => '<label class="class2" id="name">text</label>',
 				},
 			},
 		},
@@ -1030,13 +1028,149 @@ sub get_test_list {
 	return $test_obj;
 }
 
-my $progress_bar = '<td align="center" class="pr_size_gen pr_white_gray_gen"><div class="big_progr pr_current" title=""><div class="pr_in_gen">1</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">2</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Паспорта"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Допданные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Поездка"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Проживание"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Расходы"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Ещё?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="На кого?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">3</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Офис"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_white_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
+my $progress_bar = 
+	'<td align="center" class="pr_size_gen pr_white_gray_gen">' .
+	'<div class="big_progr pr_current" title="">' .
+	'<div class="pr_in_gen">1</div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Данные">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="big_progr pr_future" title="">' .
+	'<div class="pr_in_gen">2</div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Паспорта">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Допданные">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Поездка">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Проживание">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Расходы">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Ещё?">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="На кого?">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Данные">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="big_progr pr_future" title="">' .
+	'<div class="pr_in_gen">3</div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Офис">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Подтверждение">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_white_gen">' .
+	'<div class="big_progr pr_future" title="">' .
+	'<div class="pr_in_gen">4</div></div></td>' .
+	'</tr><tr><td class="stage_gen">Начало</td>' .
+	'<td class="stage_gen"></td><td class="stage_gen">Заявители</td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen">Оформление</td><td class="stage_gen">' .
+	'</td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
-my $progress_bar_2 = '<td align="center" class="pr_size_gen pr_white_red_gen"><div class="big_progr pr_past" title=""><div class="pr_in_gen">1</div></div></td><td align="center" class="pr_size_gen pr_red_gray_gen"><div class="ltl_progr pr_current" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">2</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Паспорта"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Допданные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Поездка"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Проживание"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Расходы"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Ещё?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="На кого?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">3</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Офис"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_white_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
+my $progress_bar_2 = 
+	'<td align="center" class="pr_size_gen pr_white_red_gen">' .
+	'<div class="big_progr pr_past" title="">' .
+	'<div class="pr_in_gen">1</div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_red_gray_gen">' .
+	'<div class="ltl_progr pr_current" title="Данные">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="big_progr pr_future" title="">' .
+	'<div class="pr_in_gen">2</div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Паспорта">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Допданные">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Поездка">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Проживание">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Расходы">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Ещё?">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="На кого?">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Данные">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="big_progr pr_future" title="">' .
+	'<div class="pr_in_gen">3</div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Офис">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_gray_gen">' .
+	'<div class="ltl_progr pr_future" title="Подтверждение">' .
+	'<div class="pr_in_gen"></div></div></td>' .
+	'<td align="center" class="pr_size_gen pr_gray_white_gen">' .
+	'<div class="big_progr pr_future" title="">' .
+	'<div class="pr_in_gen">4</div></div></td></tr><tr>' .
+	'<td class="stage_gen">Начало</td><td class="stage_gen">'.
+	'</td><td class="stage_gen">Заявители</td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen"></td><td class="stage_gen"></td>' .
+	'<td class="stage_gen">Оформление</td><td class="stage_gen">' .
+	'</td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
-my $first_page = '<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width" size = "1" name="center" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width" size = "1" name="vtype" id="vtype"></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" id="free_date"><b>[text]</b></label></td></tr><tr><td><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+my $first_page = 
+	'<tr><td><label id="text">Визовый центр</label></td>' .
+	'<td><select class="input_width" size = "1" name="center" ' .
+	'id="center" onchange="update_nearest_date_free_date();"></select>' .
+	'</td></tr><tr><td><label id="text">Тип визы</label></td>' .
+	'<td><select class="input_width" size = "1" name="vtype" id="vtype"></select></td>' .
+	'</tr><tr><td><label id="text">Ближайшее доступное время</label></td>' .
+	'<td><label class="info" id="free_date"><b>[text]</b></label></td></tr>' .
+	'<tr><td><label id="text">Email</label></td>' .
+	'<td><input class="input_width input_gen" type="text" value="" name="email" ' .
+	'id="email" title="Введите существующий адрес почты. На него будет выслано ' .
+	'подтверждение и запись в визовый центре"></td></tr>' .
+	'<tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen">' .
+	'<span class="exam_span_gen">mail@mail.ru</span></td>' .
+	'<tr><td><label id="text"></label></td><td>' .
+	'<input type="checkbox" value="pers_info" name="pers_info" id="pers_info">' .
+	'<label for="pers_info">я согласен на обработку персональных данных</label>' .
+	'</td></tr><tr><td><label id="text"></label></td>' .
+	'<td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info">' .
+	'<label for="mobil_info">я согласен на условия работы с мобильными телефона ' .
+	'на территории визового центра</label></td></tr>';
 
-my $second_page = '<tr><td><label id="text">Дата начала поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">01.01.2025</span></td><tr><td><label id="text">Дата окончания поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen"><span class="exam_span_gen">31.12.2025</span></td>';
+my $second_page = 
+	'<tr><td><label id="text">Дата начала поездки</label></td>' .
+	'<td><input class="input_width input_gen" type="text" value="" ' .
+	'name="s_date" id="s_date" title="Введите предполагаемую дату ' .
+	'начала поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td>' .
+	'<td class="exam_td_gen"><span class="exam_span_gen">01.01.2025</span>' .
+	'</td><tr><td><label id="text">Дата окончания поездки</label></td>' .
+	'<td><input class="input_width input_gen" type="text" value="" ' .
+	'name="f_date" id="f_date" title="Введите предполагаемую дату ' .
+	'окончания поездки"></td></tr><tr class="mobil_hide"><td>&nbsp;</td>' .
+	'<td class="exam_td_gen"><span class="exam_span_gen">31.12.2025</span></td>';
 
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
