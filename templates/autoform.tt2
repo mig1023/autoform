@@ -113,7 +113,7 @@ function mobileScreenCheck() {
 function go_button(where) {
 [% IF ( step == max_step ) %]
 	if (where == 'app') {
-		location.replace('[% vcs_tools %]info.htm?&t=[% token %]&lang=[% lang_in_link %]');
+		location.replace('[% vcs_tools %]info.htm?&t=[% token %]&appid=[% appid %]&lang=[% lang_in_link %]');
 		return;
 	}
 [% END %]

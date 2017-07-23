@@ -1579,7 +1579,7 @@ sub get_content_rules_hash
 				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'FullAddress',
+					'name' => 'FullAddress', # поле идёт в анкету! должно быть на английском!! в договор что-то иное!!
 				},
 			},
 		],

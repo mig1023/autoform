@@ -94,7 +94,7 @@ sub autoform
 	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
-	my ( $page_content, $special, $template_file, $title, $progress );
+	my ( $page_content, $special, $template_file, $title, $progress, $appid );
 	my $step = 0;
 	my $last_error = '';
 	
@@ -106,7 +106,7 @@ sub autoform
 		( $title, $page_content, $template_file ) = $self->get_token_error( $token );
 	}
 	else {
-		( $step, $title, $page_content, $last_error, $template_file, $special, $progress ) = 
+		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
 			$self->get_autoform_content( $token );
 	}
 
@@ -127,6 +127,7 @@ sub autoform
 		'title' => $title,
 		'content_text' => $page_content,
 		'token' => $token,
+		'appid' => $appid,
 		'step' => $step,
 		'max_step' => $self->get_content_rules('length'),
 		'max_applicants' => $self->{ autoform }->{ general }->{ max_applicants },
@@ -428,13 +429,14 @@ sub get_autoform_content
 	$appdata_id =~ s/[^0-9]//g;
 	
 	my $appnum = undef;
+	my $appid = undef;
 
 	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
 		$step = $self->get_back( $step, $token );
 	}
 
 	if ( ( $action eq 'forward' ) and ( $step < $self->get_content_rules('length') ) ) {
-		( $step, $last_error, $appnum ) = $self->get_forward( $step, $token );
+		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step, $token );
 	}
 
 	if ( ( $action eq 'edit' ) and $appdata_id ) {
@@ -482,7 +484,7 @@ sub get_autoform_content
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
-	return ( $step, $title, $content, $last_error, $template, $special, $progress );
+	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid );
 }
 
 sub check_relation
@@ -600,16 +602,17 @@ sub get_forward
 	}
 
 	my $appnum = undef;
+	my $appid = undef;
 	
 	if ( !$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
 		$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
 	}
 
 	if ( $step >= $self->get_content_rules( 'length' ) ) {
-		( undef, $appnum ) = $self->set_appointment_finished( $token );
+		( $appid, $appnum ) = $self->set_appointment_finished( $token );
 	}
 
-	return ( $step, $last_error, $appnum );
+	return ( $step, $last_error, $appnum, $appid );
 }
 
 sub set_current_app_finished
