@@ -211,11 +211,36 @@ sub get_content_rules_hash
 				'label' => 'Отчество',
 				'comment' => 'Введите отчество на русском языке так, как оно указано во внутреннем паспорте',
 				'example' => 'Иванович',
-				'check' => 'zЁ\s\-',
+				'check' => 'Ё\s\-',
+				'check_logic' => [
+					{
+						'condition' => 'free_only_if',
+						'table' => 'AppData',
+						'name' => 'NoRMName',
+						'error' => 'Нет отчества',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RMName',
 				},
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'no_rumname',
+				'label' => '',
+				'label_for' => 'нет отчества',
+				'comment' => '',
+				'check' => '',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'NoRMName',
+					'transfer' => 'nope',
+				},
+				'relation' => {},
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'input',

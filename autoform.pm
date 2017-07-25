@@ -1195,7 +1195,7 @@ sub get_html_for_element
 		$content =~ s/\[file\]/$back/;
 	}
 	
-	if ( $type eq 'info' and $value ) {
+	if ( $type eq 'info' ) {
 		$content =~ s/\[text\]/$value/;
 	}
 	
@@ -1679,6 +1679,16 @@ sub check_logic
 			$first_error = $self->text_error( 10, $element ) if $id_in_db;
 		}
 		
+		if ( $rule->{ condition } =~ /^free_only_if$/ ) {
+			
+			my $field_in_db = $self->query('sel1', "
+				SELECT $rule->{name} FROM Auto$rule->{table} WHERE ID = ?", 
+				$tables_id->{ 'Auto'.$rule->{table} }
+			);
+		
+			$first_error = $self->text_error( 13, $element, undef, $rule->{error} ) unless ( $field_in_db or $value );
+		}
+		
 		last if $first_error;
 	}
 	
@@ -1704,6 +1714,7 @@ sub text_error
 		'Поле "[name]" уже встречается в актуальных записях.',
 		'В поле "[name]" нужно выбрать хотя бы одно значение',
 		'Недопустимая дата в поле "[name]"',
+		'Необходимо заполнить поле "[name]" или установить флаг "[relation]"',
 	];
 	
 	if ( !defined($element) ) {
