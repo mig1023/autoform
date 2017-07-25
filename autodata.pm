@@ -388,7 +388,7 @@ sub get_content_rules_hash
 					'name' => 'BrhCountry',
 				},
 				'param' => '[brh_countries]',
-				'first_elements' => '70',
+				'first_elements' => '70,272',
 			},
 			{
 				'type' => 'input',
@@ -428,7 +428,7 @@ sub get_content_rules_hash
 					'name' => 'PrevCitizenship',
 				},
 				'param' => '[prevcitizenship_countries]',
-				'first_elements' => '70',
+				'first_elements' => '70,272',
 			},
 			{
 				'type' => 'radiolist',
