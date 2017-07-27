@@ -73,6 +73,13 @@
 	text-decoration:none;
 }
 
+.dotted_link_big{
+	color:#FF6666;
+	font-weight:normal;
+	border-bottom:1px dotted #DB121A;
+	text-decoration:none;
+}
+
 .optional_field{
 	background-color:#F5F5F5;
 }

@@ -1116,7 +1116,7 @@ sub get_html_for_element
 		my $list = '';
 		my $uniq_id = 0;
 		
-		for my $opt ( sort keys %$param ) {
+		for my $opt ( sort { $a <=> $b } keys %$param ) {
 			my $checked = ( $value_original eq $opt ? 'checked' : '' );
 			
 			$uniq_id++;
