@@ -1641,34 +1641,31 @@ sub check_logic
 
 	for my $rule ( @{ $element->{ check_logic } } ) {
 	
-		if ( $rule->{ condition } =~ /^equal_or_(later|earlier)$/ ) {
+		if ( $rule->{ condition } =~ /^(equal|now)_or_(later|earlier)$/ ) {
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
-
-			my $datediff = $self->query('sel1', "
-				SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
-				$value, $tables_id->{ 'Auto'.$rule->{table} }
-			);
+			
+			my $datediff;
+			
+			if ( $rule->{ condition } =~ /^equal/ ) {
+				$datediff = $self->query('sel1', "
+					SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
+					$value, $tables_id->{ 'Auto'.$rule->{table} }
+				);
+			}
+			else {
+				$datediff = $self->query('sel1', "
+					SELECT DATEDIFF( ?, now() )", $value
+				);
+			}
 
 			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
 				
 			$error = 6 if ( ( $datediff < ( $offset * -1 ) ) and ( $rule->{ condition } =~ /later$/ ) );
 			$error = 8 if ( ( $datediff > $offset ) and ( $rule->{ condition } =~ /earlier$/ ) );
-
+			$error = 12 if ( $error and $rule->{ condition } =~ /^now/ );
+			
 			$first_error = $self->text_error( ( $offset ? $error+1 : $error ), $element, undef, 
 				$rule->{ error }, $offset ) if $error;
-		}
-		
-		if ( $rule->{ condition } =~ /^now_or_later$/ ) {
-			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
-
-			my $datediff = $self->query('sel1', "
-				SELECT DATEDIFF( ?, now() )", $value
-			);
-
-			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
-
-			$first_error = $self->text_error( 12, $element, undef, $rule->{ error } )
-				if ( ( $datediff < $offset ) and ( $rule->{ condition } =~ /later$/ ) );
 		}
 		
 		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
@@ -1712,7 +1709,7 @@ sub text_error
 		'"[name]" не может быть раньше, чем "[relation]" на [offset]',
 		'"[name]" не может быть позднее, чем "[relation]"',
 		'"[name]" не может быть позднее, чем "[relation]" на [offset]',
-		'Поле "[name]" уже встречается в актуальных записях.',
+		'Поле "[name]" уже встречается в актуальных записях',
 		'В поле "[name]" нужно выбрать хотя бы одно значение',
 		'Недопустимая дата в поле "[name]"',
 		'Необходимо заполнить поле "[name]" или установить флаг "[relation]"',
