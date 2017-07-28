@@ -7,6 +7,7 @@ use VCS::Site::autoselftest;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
+use POSIX;
 
 
 sub new
@@ -1708,9 +1709,9 @@ sub text_error
 		'Вы должны полностью заполнить анкеты или удалить ненужные черновики',
 		'Вы должны добавить по меньшей мере одного заявителя',
 		'"[name]" не может быть раньше, чем "[relation]"',
-		'"[name]" не может быть раньше, чем "[relation]" + [offset] дня/дней',
+		'"[name]" не может быть раньше, чем "[relation]" на [offset]',
 		'"[name]" не может быть позднее, чем "[relation]"',
-		'"[name]" не может быть позднее, чем "[relation]" + [offset] дня/дней',
+		'"[name]" не может быть позднее, чем "[relation]" на [offset]',
 		'Поле "[name]" уже встречается в актуальных записях.',
 		'В поле "[name]" нужно выбрать хотя бы одно значение',
 		'Недопустимая дата в поле "[name]"',
@@ -1727,12 +1728,68 @@ sub text_error
 	my $current_error = $self->lang( $text->[ $error_code ] );
 	$current_error =~ s/\[name\]/$name_of_element/;
 	$current_error =~ s/\[relation\]/$relation/;
+	
+	$offset = $self->offset_calc( $offset ) if $offset;
+	
 	$current_error =~ s/\[offset\]/$offset/;
 	
 	my $text_error = "$element->{name}|$current_error";
 	$text_error .= ': ' . $incorrect_symbols if $error_code == 2;
 	
 	return $text_error;	
+}
+
+sub offset_calc
+# //////////////////////////////////////////////////
+{
+	my ( $self, $offset ) = @_;
+
+	if ( $offset >= 365 ) {
+		$offset = floor( $offset / 365 );
+		
+		$offset =~ /(\d)?(\d)/;
+		
+		if ( $1 == 1 ) {
+			$offset .= " лет";
+		}
+		else {
+			if ( $2 == 1 ) {
+				$offset .= " год";
+			}
+			elsif ( ( $2 >= 2 ) and ( $2 <= 4 ) ) {
+				$offset .= " года";
+			}
+			else {
+				$offset .= " лет";
+			}
+		}
+	}
+	elsif ( $offset >= 60 ) {
+	
+		$offset = floor( $offset / 30 );
+		
+		if ( ( $offset >= 2 ) and ( $offset <= 4) ) {
+			$offset .= " месяца";
+		}
+		else {
+			$offset .= " месяцев";
+		}
+	}
+	else {
+		$offset =~ /(\d)?(\d)/;
+		
+		if ( ( $1 == 1 ) or ( $2 == 0 ) or ( $2 >= 5 ) ) {
+			$offset .= " дней";
+		}
+		elsif ( ( $2 >= 2 ) and ( $2 <= 4) ) {
+			$offset .= " дня";
+		}
+		else {
+			$offset .= " день";
+		}
+	}
+	
+	return $offset;
 }
 
 sub mod_last_change_date
