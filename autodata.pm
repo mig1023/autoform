@@ -757,6 +757,10 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'AppSDate',
 				},
+				'load_if_free_field' => {
+					'table' => 'Appointments',
+					'name' => 'SDate',
+				},
 				'special' => 'datepicker, mask',
 			},
 			{
@@ -769,6 +773,10 @@ sub get_content_rules_hash
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'AppFDate',
+				},
+				'load_if_free_field' => {
+					'table' => 'Appointments',
+					'name' => 'FDate',
 				},
 				'special' => 'datepicker, mask',
 			},

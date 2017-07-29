@@ -1304,6 +1304,7 @@ sub save_data_from_form
 	for my $table ( keys %$request_tables ) {
 		
 		next if !$table_id->{$table};
+		next if $table eq 'alternative_data_source';
 	
 		my $request = '';
 		my @values = ();
@@ -1389,6 +1390,7 @@ sub get_all_values
 	for my $table ( keys %$request_tables ) {
 
 		next if !$table_id->{ $table };
+		next if $table eq 'alternative_data_source';
 
 		my $request = join ',', keys %{ $request_tables->{ $table } };
 		
@@ -1398,8 +1400,24 @@ sub get_all_values
 		$result = $result->[0];
 		
 		for my $value ( keys %$result ) {
-			$all_values->{$request_tables->{ $table }->{ $value } } = 
+			$all_values->{ $request_tables->{ $table }->{ $value } } = 
 				$self->decode_data_from_db( $step, $request_tables->{ $table }->{ $value }, $result->{ $value } );
+		}
+	}
+
+	if ( $request_tables->{ alternative_data_source } ) {
+	
+		my $alt = $request_tables->{ alternative_data_source };
+
+		for my $field ( keys %{ $alt } ) {
+			if ( !$all_values->{ $field } ) {
+				my $alt_value = $self->query('sel1', "
+					SELECT $alt->{ $field }->{ field } FROM $alt->{ $field }->{ table } WHERE ID = ?", 
+					$table_id->{ $alt->{ $field }->{ table } }
+				);
+				
+				$all_values->{ $field } = $self->decode_data_from_db( $step, $alt->{ $field }->{ field }, $alt_value );
+			}
 		}
 	}
 
@@ -1428,11 +1446,7 @@ sub encode_data_for_db
 	$value =~ s/^\s+|\s+$//g;
 
 	if ( $element->{type} =~ /checkbox|checklist/ ) {
-		if ( $value eq $element_name ) {
-			$value = 1;
-		} else {
-			$value = 0;
-		};
+		$value = ( ( $value eq $element_name ) ? 1 : 0 );
 	};
 	
 	$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
@@ -1449,19 +1463,17 @@ sub get_element_by_name
 	my $element;
 	for my $element_search ( @$page_content ) {
 		if ( $element_search->{name} eq $element_name ) {
-			$element = $element_search;
+			return $element_search;
 		};
 		
 		if ( $element_search->{db}->{name} eq 'complex' ) {
 			for my $sub_element ( keys %{ $element_search->{param} } ) {
 				if ( $sub_element eq $element_name ) {
-					$element = $element_search;
+					return $element_search;
 				}
 			}
 		};
 	};
-	
-	return $element;
 }
 
 sub get_names_db_for_save_or_get
@@ -1470,22 +1482,31 @@ sub get_names_db_for_save_or_get
 	my ( $self, $page_content, $save_or_get ) = @_;
 	
 	my $request_tables = {};
+	my $alternative_data_source = {};
 
 	return if $page_content =~ /^\[/;
 	
 	for my $element (@$page_content) {
-		next if ($element->{special} eq 'insurer_many_id') and ($save_or_get eq 'save');
-		next if ($element->{type} eq 'info') and ($save_or_get eq 'save');
+		next if ( $element->{ special } eq 'insurer_many_id' ) and ( $save_or_get eq 'save' );
+		next if ( $element->{ type } eq 'info' ) and ( $save_or_get eq 'save' );
 
-		if ( $element->{db}->{name} eq 'complex' ) {
-			for my $sub_element (keys %{ $element->{param} }) {
-				$request_tables->{ 'Auto' . $element->{db}->{table} }->{ $element->{param}->{$sub_element}->{db} } = $sub_element;
+		if ( $element->{ db }->{ name } eq 'complex' ) {
+			for my $sub_element ( keys %{ $element->{ param } } ) {
+				$request_tables->{ 'Auto' . $element->{ db }->{ table } }->{ $element->{ param }->{ $sub_element }->{ db } } = 
+					$sub_element;
 			}
 		}
 		else { 
-			$request_tables->{ 'Auto' . $element->{db}->{table} }->{ $element->{db}->{name} } = $element->{name};
+			$request_tables->{ 'Auto' . $element->{ db }->{ table } }->{ $element->{ db }->{ name } } = $element->{ name };
+			
+			if ( $element->{ load_if_free_field } ) {
+				$alternative_data_source->{ $element->{ name } }->{ table } = 'Auto' . $element->{ load_if_free_field }->{ table };
+				$alternative_data_source->{ $element->{ name } }->{ field } = $element->{ load_if_free_field }->{ name };
+			}
 		}
 	}
+	
+	$request_tables->{ alternative_data_source } = $alternative_data_source;
 
 	return $request_tables;
 }
@@ -1675,8 +1696,10 @@ sub check_logic
 			$error = 8 if ( ( $datediff > $offset ) and ( $rule->{ condition } =~ /earlier$/ ) );
 			$error = 12 if ( $error and $rule->{ condition } =~ /^now/ );
 			
-			$first_error = $self->text_error( ( $offset ? $error+1 : $error ), $element, undef, 
-				$rule->{ error }, $offset ) if $error;
+			$error++ if ( $offset and ( $error == 6 or $error == 8 ) );
+			
+			$first_error = $self->text_error( $error , $element, undef, $rule->{ error }, $offset ) 
+				if $error;
 		}
 		
 		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
