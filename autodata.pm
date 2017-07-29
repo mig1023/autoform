@@ -320,6 +320,9 @@ sub get_content_rules_hash
 						'offset' => 3650,
 						'error' => 'Дата начала поездки',
 					},
+					{
+						'condition' => 'now_or_earlier',
+					},
 				],
 				'db' => {
 					'table' => 'AppData',
@@ -1574,6 +1577,11 @@ sub get_content_rules_hash
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
 				'example' => '01.01.2010',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'now_or_earlier',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RPWhen',
@@ -1685,6 +1693,11 @@ sub get_content_rules_hash
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
 				'example' => '01.01.2010',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'now_or_earlier',
+					},
+				],
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'PassDate',

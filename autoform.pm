@@ -98,13 +98,21 @@ sub autoform
 	my ( $page_content, $special, $template_file, $title, $progress, $appid );
 	my $step = 0;
 	my $last_error = '';
+	my $js_check_need = 1;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
 	$self->{'lang'} = 'en' if $vars->getparam( 'lang' ) =~ /^en$/i ;
 
 	if ( $token =~ /^\d\d$/ ) {
-		( $title, $page_content, $template_file ) = $self->get_token_error( $token );
+	
+		( $title, $page_content, $template_file ) = $self->get_page_error( $token );
+	}
+	elsif ( $vars->getparam( 'script' ) ) {
+	
+		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
+		
+		$js_check_need = 0;
 	}
 	else {
 		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
@@ -140,6 +148,7 @@ sub autoform
 		'appinfo' => $appinfo_for_timeslots,
 		'progress' => $progress,
 		'lang_in_link' => $self->{ lang },
+		'js_check_need' => $js_check_need,
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -325,7 +334,9 @@ sub get_token_and_create_new_form_if_need
 		);
 	
 		return '01' if ( length($token) != 64 ) or ( $token !~ /^t/i );
+		
 		return '02' if !$token_exist;
+		
 		return '03' if $finished;
 	}
 	
@@ -388,7 +399,7 @@ sub token_generation
 	return $token;
 }
 
-sub get_token_error
+sub get_page_error
 # //////////////////////////////////////////////////
 {
 	my ( $self, $error_num ) = @_;
@@ -396,7 +407,7 @@ sub get_token_error
 	my $template = 'autoform.tt2';
 
 	my $error_type = [
-		'внутренняя ошибка',
+		'для правильной работы анкеты необходимо, чтобы в браузере был включён javascript',
 		'неправильный токен',
 		'такого токена не существует',
 		'запись уже завершена',

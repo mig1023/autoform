@@ -13,6 +13,13 @@
 [% IF special.mask %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 [% END %]
+
+[% IF js_check_need %]
+<noscript>
+	<meta http-equiv="refresh" content="0; url=[% addr %]?t=[% token %]&script=no">
+</noscript>
+[% END %]
+
 </head>
 
 <font face="arial">
