@@ -403,6 +403,7 @@ sub get_content_rules_hash
 				'page_ord' => 5,
 				'progress' => 5,
 				'param' => 1,
+				'ussr_or_rf_first' => 1,
 			},
 			{
 				'type' => 'text',
@@ -425,7 +426,7 @@ sub get_content_rules_hash
 					'name' => 'BrhCountry',
 				},
 				'param' => '[brh_countries]',
-				'first_elements' => '70,272',
+				'first_elements' => '70, 272', # chng in init_add_param
 			},
 			{
 				'type' => 'input',
@@ -441,7 +442,7 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'select',
-				'name' => 'сitizenshipype',
+				'name' => 'сitizenship',
 				'label' => 'Гражданство в настоящее время',
 				'comment' => 'Если у вас два гражданства, то укажите гражданство по паспорту той страны, который подаёте на визу',
 				'example' => 'The Russian Federation',
@@ -455,7 +456,7 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'select',
-				'name' => 'prev_сitizenshipype',
+				'name' => 'prev_сitizenship',
 				'label' => 'Гражданство при рождении',
 				'comment' => 'Для тех, кто родился до 1992 необходимо указывать The Soviet Union, позднее - The Russian Federation',
 				'example' => 'The Russian Federation',
@@ -465,7 +466,7 @@ sub get_content_rules_hash
 					'name' => 'PrevCitizenship',
 				},
 				'param' => '[prevcitizenship_countries]',
-				'first_elements' => '70,272',
+				'first_elements' => '70, 272', # chng in init_add_param
 			},
 			{
 				'type' => 'radiolist',

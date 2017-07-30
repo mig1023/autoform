@@ -63,7 +63,7 @@ sub get_content_rules
 		$new_content->{ $page_ord } = $content->{ $page };
 		
 		if ( $current_page == $page_ord ) {
-			for ( 'persons_in_page', 'collect_date', 'param' ) {
+			for ( 'persons_in_page', 'collect_date', 'param', 'ussr_or_rf_first' ) {
 				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[0]->{ $_ } ? 1 : 0 );
 			}
 		}
@@ -195,6 +195,7 @@ sub init_add_param
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $info_from_db = undef;
+	my $ussr_first = 0;
 	
 	if ( $keys_in_current_page->{ param } ) {
 	
@@ -244,8 +245,20 @@ sub init_add_param
 			
 		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
+	
+	if ( $token and $keys_in_current_page->{ ussr_or_rf_first } ) {
+	
+		my $birthdate = $self->query('sel1', "
+			SELECT DATEDIFF(AutoAppData.BirthDate, '1991-12-26')
+			FROM AutoAppData JOIN AutoToken ON AutoAppData.ID = AutoToken.AutoAppDataID 
+			WHERE AutoToken.Token = ?", $token
+		);
+	
+		$ussr_first = 1 if $birthdate < 0;
+	}
 
-	if ( $keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date } or $keys_in_current_page->{ persons_in_page } ) {
+	if ( $keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date } or 
+		$keys_in_current_page->{ persons_in_page } or $keys_in_current_page->{ ussr_or_rf_first } ) {
 
 		for my $page ( keys %$content_rules ) {
 		
@@ -263,6 +276,10 @@ sub init_add_param
 						$_->{ offset } = $self->get_collect_date( $token )	
 							if $_->{ offset } =~ /\[collect_date_offset\]/;
 					}
+				}
+				
+				if ( $element->{ name } =~ /^(brhcountry|prev_сitizenship)$/ ) {
+					$element->{ first_elements } = '272, 70' if $ussr_first;
 				}
 			}
 		}
