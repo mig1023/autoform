@@ -210,12 +210,23 @@ sub init_add_param
 				'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
 				'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
+				'[eu_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
 			};
 			
 			for ( keys %$info_from_sql ) {
 				$info_from_db->{ $_ } = $self->query('selall', $info_from_sql->{ $_ } );
 			}
-		
+			
+			my $add_eu_countries = [
+				[ 37, "BULGARIA" ],
+				[ 47, "CIPRO" ],
+				[ 104, "IRLANDA" ],
+				[ 201, "REGNO UNITO DI GRAN BRETAGNA E DI IRLANDA DEL NORD" ],
+				[ 215, "ROMANIA" ],
+			];
+
+			push ( @{ $info_from_db->{ '[eu_countries]' } }, $_ ) for @$add_eu_countries;
+
 			$vars->get_memd->set('autoform_addparam', $info_from_db, 
 				$self->{ autoform }->{ memcached }->{ memcached_exptime } );
 		}

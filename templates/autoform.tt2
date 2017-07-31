@@ -103,14 +103,6 @@ function mobileScreenCheck() {
 		$(this).css( "font-size", mobilScreen ? '1.5em' : '' );
 	});
 	
-	[% FOREACH picker IN special.datepicker %]
-		$('#[% picker %]').css( "width", mobilScreen ? '93%' : '' );
-	[% END %]
-	
-	[% FOREACH mask IN special.mask %]
-		$("#[% mask %]").css( "width", mobilScreen ? '93%' : '' );
-	[% END %]
-	
 	$(".mobil_hide").each(function(){
 		$(this).css( "display", ( mobilScreen ? 'none' : '' ) );
 	});
@@ -160,7 +152,7 @@ function init_comm(pos_x, pos_y) {
 			}, 1 );  
 		}, 
 		showOn: 'both',
-		buttonImage: '/vcs/static/images/calendar.png',
+		buttonImage: '/vcs/static/images/1x1.png',
 		buttonImageOnly:true
 	}).keyup(function(e) {
 		if(e.keyCode == 8 || e.keyCode == 46) {
@@ -200,8 +192,8 @@ function init_comm(pos_x, pos_y) {
 			function(xml) {
 				$(xml).find('node').each( function() {
 					$('#vtype').append('<option value="' + $(this).find('id').text() + '"'+(parseInt($(this).find('default').text()) ? ' selected'  : '')+'>'+$(this).find('title').text() + '</option>');
-					
-					if ($(this).find('title').text() == selected_el) { restore_el = 1; };
+				
+					if ($(this).find('id').text() == selected_el) { restore_el = 1; };
 				});
 				
 				if (restore_el) {

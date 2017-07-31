@@ -249,6 +249,11 @@ sub get_content_rules_hash
 				'comment' => 'Введите дату рождения',
 				'example' => '01.01.1980',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'now_or_earlier',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'BirthDate',
@@ -300,6 +305,13 @@ sub get_content_rules_hash
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				'example' => '753500001',
 				'check' => 'zWN',
+				'check_logic' => [
+					{
+						'condition' => 'unique_in_pending',
+						'table' => 'Appointments',
+						'name' => 'PassNum',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PassNum',
@@ -418,7 +430,7 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'brhcountry',
 				'label' => 'Страна рождения',
-				'comment' => '',
+				'comment' => 'Для тех, кто родился до 1992 необходимо указывать The Soviet Union, позднее - The Russian Federation',
 				'example' => 'The Soviet Union',
 				'check' => 'zN',
 				'db' => {
@@ -524,7 +536,7 @@ sub get_content_rules_hash
 				'label' => 'Профессиональная деятельность',
 				'comment' => 'Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
 				'example' => 'Doctor',
-				'check' => 'zWN\s_\.\,\"\'\-\(\)\#\*',
+				'check' => 'WN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ProfActivity',
@@ -692,18 +704,6 @@ sub get_content_rules_hash
 				'type' => 'free_line',
 			},
 			{
-				'type' => 'input',
-				'name' => 'city',
-				'label' => 'Город назначения',
-				'comment' => 'Город назначения',
-				'example' => 'Milan',
-				'check' => 'zW\s\-',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'City',
-				},
-			},
-			{
 				'type' => 'select',
 				'name' => 'nulla',
 				'label' => 'Страна первого въезда',
@@ -838,8 +838,42 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'permi_text',
-				'label' => 'Разрешение на въезд, если необходимо',
+				'label' => 'Родственник в ЕС',
 				'font' => 'bold',
+				'comment' => '',
+				'check' => '',
+			},
+			{
+				'type' => 'radiolist',
+				'name' => 'femrel',
+				'label' => 'Степень родства',
+				'comment' => '',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FamRel',
+				},
+				'param' => { 
+					0 => 'нет', 
+					1 => 'супруг',
+					2 => 'ребёнок',
+					3 => 'иные близкие родственники',
+					4 => 'иждивенец',
+				},
+			},
+		],
+		
+		'Разрешение на въезд, если необходимо' => [
+			{
+				'page_ord' => 10,
+				'progress' => 6,
+				'relation' => {
+					'only_if' => {
+						'table' => 'Appointments',
+						'name' => 'VType',
+						'value' => '14',
+					}
+				},
 			},
 			{
 				'type' => 'input',
@@ -879,40 +913,11 @@ sub get_content_rules_hash
 				},
 				'special' => 'mask',
 			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'text',
-				'name' => 'permi_text',
-				'label' => 'Родственник в ЕС',
-				'font' => 'bold',
-				'comment' => '',
-				'check' => '',
-			},
-			{
-				'type' => 'radiolist',
-				'name' => 'femrel',
-				'label' => 'Степень родства',
-				'comment' => '',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'FamRel',
-				},
-				'param' => { 
-					0 => 'нет', 
-					1 => 'супруг',
-					2 => 'ребёнок',
-					3 => 'иные близкие родственники',
-					4 => 'иждивенец',
-				},
-			},
 		],
 		
 		'Сроки действия последней визы' => [
 			{
-				'page_ord' => 10,
+				'page_ord' => 11,
 				'progress' => 6,
 				'relation' => {
 					'only_if' => {
@@ -952,7 +957,7 @@ sub get_content_rules_hash
 		
 		'Дата сдачи отпечатков' => [
 			{
-				'page_ord' => 11,
+				'page_ord' => 12,
 				'progress' => 6,
 				'relation' => {
 					'only_if' => {
@@ -979,7 +984,7 @@ sub get_content_rules_hash
 		
 		'Проживание' => [
 			{
-				'page_ord' => 12,
+				'page_ord' => 13,
 				'progress' => 7,
 				'relation' => {
 					'only_if' => {
@@ -1006,9 +1011,9 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Гостиница' => [
+		'Информация о проживании' => [
 			{
-				'page_ord' => 13,
+				'page_ord' => 14,
 				'progress' => 7,
 				'relation' => {
 					'only_if_not' => {
@@ -1024,7 +1029,7 @@ sub get_content_rules_hash
 				'label' => 'Название гостиницы или ФИО приглашающего',
 				'comment' => 'Укажите полное название гостиницы и данные приглашающего лица',
 				'example' => 'Grand Hotel, Mike Bowman',
-				'check' => 'zWN\s\-\,\;',
+				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Hotels',
@@ -1058,7 +1063,7 @@ sub get_content_rules_hash
 		
 		'Приглашение' => [
 			{
-				'page_ord' => 14,
+				'page_ord' => 15,
 				'progress' => 7,
 				'param' => 1,
 				'relation' => {
@@ -1175,7 +1180,7 @@ sub get_content_rules_hash
 	
 		'Приглашение организации' => [
 			{
-				'page_ord' => 15,
+				'page_ord' => 16,
 				'progress' => 7,
 				'param' => 1,
 				'relation' => {
@@ -1216,7 +1221,7 @@ sub get_content_rules_hash
 				'label' => 'Название приглашающей компании',
 				'comment' => 'Укажите полное название организации',
 				'example' => 'Microsoft Corporation',
-				'check' => 'zWN\s\-\,\;',
+				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ACompanyName',
@@ -1274,7 +1279,7 @@ sub get_content_rules_hash
 		
 		'Расходы заявителя' => [
 			{
-				'page_ord' => 16,
+				'page_ord' => 17,
 				'progress' => 8,
 			},
 			{
@@ -1297,7 +1302,7 @@ sub get_content_rules_hash
 		
 		'Уточните спонсора' => [
 			{
-				'page_ord' => 17,
+				'page_ord' => 18,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1322,7 +1327,7 @@ sub get_content_rules_hash
 		
 		'Средства заявителя' => [
 			{
-				'page_ord' => 18,
+				'page_ord' => 19,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1355,7 +1360,7 @@ sub get_content_rules_hash
 		
 		'Средства спонсора' => [
 			{
-				'page_ord' => 19,
+				'page_ord' => 20,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1387,7 +1392,7 @@ sub get_content_rules_hash
 		
 		'Уточните иные средства' => [
 			{
-				'page_ord' => 20,
+				'page_ord' => 21,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1412,8 +1417,9 @@ sub get_content_rules_hash
 				
 		'Данные родственника в ЕС' => [
 			{
-				'page_ord' => 21,
+				'page_ord' => 22,
 				'progress' => 8,
+				'param' => 1,
 				'relation' => {
 					'only_if_not' => {
 						'table' => 'AppData',
@@ -1460,16 +1466,17 @@ sub get_content_rules_hash
 				'special' => 'mask',
 			},
 			{
-				'type' => 'input',
+				'type' => 'select',
 				'name' => 'eu_citizenship',
 				'label' => 'Гражданство',
 				'comment' => 'Укажите гражданство родственника',
-				'example' => 'ITALIANA',
-				'check' => 'zWN\s\-\_\.\,\;\'\"',
+				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'EuCitizen',
 				},
+				'param' => '[eu_countries]',
+				'first_elements' => '133',
 			},
 			{
 				'type' => 'input',
@@ -1487,7 +1494,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				'page_ord' => 22,
+				'page_ord' => 23,
 				'progress' => 9,
 				'replacer' => '[app_finish]',
 			},
@@ -1495,7 +1502,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				'page_ord' => 23,
+				'page_ord' => 24,
 				'progress' => 10,
 				'persons_in_page' => 1,
 			},
@@ -1516,7 +1523,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные для договора' => [
 			{
-				'page_ord' => 24,
+				'page_ord' => 25,
 				'progress' => 11,
 				'relation' => {
 					'only_if_not' => {
@@ -1567,13 +1574,6 @@ sub get_content_rules_hash
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				'example' => '754300001',
 				'check' => 'zN',
-				'check_logic' => [
-					{
-						'condition' => 'unique_in_pending',
-						'table' => 'Appointments',
-						'name' => 'PassNum',
-					},
-				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RPassNum',
@@ -1637,7 +1637,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные доверенного лица' => [
 			{
-				'page_ord' => 25,
+				'page_ord' => 26,
 				'progress' => 11,
 				'relation' => {
 					'only_if' => {
@@ -1753,7 +1753,7 @@ sub get_content_rules_hash
 		
 		'Оформление записи' => [
 			{
-				'page_ord' => 26,
+				'page_ord' => 27,
 				'progress' => 12,
 				'persons_in_page' => 1,
 			},
@@ -1870,7 +1870,7 @@ sub get_content_rules_hash
 		
 		'Предпочтительный офис выдачи документов' => [
 			{
-				'page_ord' => 27,
+				'page_ord' => 28,
 				'progress' => 13,
 				'relation' => {
 					'only_if' => {
@@ -1900,7 +1900,7 @@ sub get_content_rules_hash
 		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 28,
+				'page_ord' => 29,
 				'progress' => 14,
 			},
 			{
@@ -1924,7 +1924,7 @@ sub get_content_rules_hash
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 29,
+				'page_ord' => 30,
 				'progress' => 15,
 			},
 			{
@@ -2012,7 +2012,7 @@ sub get_html_elements
 		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
-		'select'		=> '<select class="input_width" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
+		'select'		=> '<select class="input_width select_gen" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
 		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">'.
