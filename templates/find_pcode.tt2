@@ -1,0 +1,1 @@
+[%cb%]({"cmps":[[% SET i = 0 %][% FOREACH aid IN alist %][% IF i > 0 %],[% END %]{"cid":"[% aid.ID %]","cname":"[% aid.CName %]","pcode":"[% aid.PCode %]","cdefault":"[% aid.isDefault %]"}[% SET i = i + 1%][% END %]],"totalResultsCount":[% i %]})
