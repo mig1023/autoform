@@ -31,9 +31,10 @@ sub getContent
     	my $dispathcher = {
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
+		'findpcode' => \&find_pcode,
     	};
     	
-    	my $disp_link = $dispathcher->{$id};
+    	my $disp_link = $dispathcher->{ $id };
 
     	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
     		if !$disp_link;
@@ -995,6 +996,7 @@ sub get_specials_of_element
 		'mask' => [],
 		'nearest_date' => [],
 		'timeslots' => [],
+		'post_index' => [],
 	};
 	
 	for my $element ( @$page_content ) {
@@ -1739,14 +1741,23 @@ sub check_logic
 			$first_error = $self->text_error( 10, $element ) if $id_in_db;
 		}
 		
-		if ( $rule->{ condition } =~ /^free_only_if$/ ) {
+		if ( $rule->{ condition } =~ /^free_only_if(_not)?$/ ) {
+			
+			my $not = $1;
 			
 			my $field_in_db = $self->query('sel1', "
 				SELECT $rule->{name} FROM Auto$rule->{table} WHERE ID = ?", 
 				$tables_id->{ 'Auto'.$rule->{table} }
 			);
-		
-			$first_error = $self->text_error( 13, $element, undef, $rule->{error} ) unless ( $field_in_db or $value );
+
+			if ( $not ) {
+				$first_error = $self->text_error( 14, $element, undef, $rule->{error} ) 
+					if ( $field_in_db and !$value );
+			}
+			else {
+				$first_error = $self->text_error( 13, $element, undef, $rule->{error} ) 
+					unless ( $field_in_db or $value );
+			}
 		}
 		
 		last if $first_error;
@@ -1774,7 +1785,8 @@ sub text_error
 		'Поле "[name]" уже встречается в актуальных записях',
 		'В поле "[name]" нужно выбрать хотя бы одно значение',
 		'Недопустимая дата в поле "[name]"',
-		'Необходимо заполнить поле "[name]" или установить флаг "[relation]"',
+		'Необходимо заполнить поле "[name]" или указать "[relation]"',
+		'Необходимо заполнить поле "[name]", если заполнено "[relation]"',
 	];
 	
 	if ( !defined($element) ) {
@@ -2036,6 +2048,57 @@ sub insert_hash_table
 	my $current_id = $self->query('sel1', "SELECT last_insert_id()") || 0;
 
 	return $current_id;
+}
+
+sub find_pcode
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	my $req = $vars->getparam( 'name_startsWith' ) || '';
+	my $reqlim = $vars->getparam( 'maxRows' ) || 20;
+	my $cb = $vars->getparam('callback') || "";
+	
+	$reqlim =~ s/[^0-9]//g;
+	$reqlim = 20 if ( $reqlim eq '' ) || ( $reqlim == 0 ) || ( $reqlim > 100 );
+
+	my $rws = [];
+	
+	if ( $req ne '' ) {
+		if ( $req =~ /[^0-9]/ ) {
+		
+			$rws = $vars->db->selallkeys("
+				SELECT ID, CName, RName, PCode, isDefault FROM DHL_Cities 
+				WHERE (CName LIKE (" . $vars->db->{ 'dbh' }->quote( $req.'%' ) . ") OR 
+				RName LIKE (" . $vars->db->{ 'dbh' }->quote( '%'.$req.'%' ) . ")) AND isDeleted=0 
+				ORDER BY CName, isDefault DESC, PCode LIMIT $reqlim"
+			);		
+		}
+		else {
+			$rws = $vars->db->selallkeys("
+				SELECT ID, CName, RName, PCode, isDefault FROM DHL_Cities 
+				WHERE PCode LIKE (" . $vars->db->{ 'dbh' }->quote( $req.'%' ) . ") AND isDeleted=0 
+				ORDER BY CName, isDefault DESC, PCode LIMIT $reqlim"
+			);		
+		}
+		
+		for my $rk (@$rws) {
+			$rk->{'CName'} = ( $rk->{'RName'} ne '' ? 
+				$vars->get_system->converttext($rk->{'RName'}) : 
+				$vars->get_system->converttext($rk->{'CName'}) 
+			);
+			$rk->{'PCode'} = $rk->{'PCode'};
+		}
+	}
+	
+	$vars->get_system->pheaderJSON( $vars );
+	
+	my $tvars = {
+		'alist' => $rws,
+		'cb' => $cb
+	};
+	
+	$template->process( 'find_pcode.tt2', $tvars );
 }
 
 sub age

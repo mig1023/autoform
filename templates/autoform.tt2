@@ -5,12 +5,13 @@
 <link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
 
-[% IF special.datepicker %]
+[% IF (special.datepicker.0 || special.post_index.0 ) %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 [% END %]
-[% IF special.mask %]
+
+[% IF special.mask.0 %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 [% END %]
 
@@ -89,6 +90,15 @@ function mobileScreenCheck() {
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	$('.info').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
+	
+	[% IF special.post_index.0 %]
+		$('.post_index').css( "font-size", ( mobilScreen ? '16px' : '12px' ) );
+	[% END %]
+	
+	[% FOREACH post_index IN special.post_index %]	
+		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
+		//$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '16px' : '12px' )});
+	[% END %]
 	
 	$("#app_table").each(function(){
 		$("td",this).each(function(){
@@ -209,47 +219,46 @@ function init_comm(pos_x, pos_y) {
 
 [% FOREACH timeslot IN special.timeslots %]
 
-update_timeslots();
+	update_timeslots();
 
-function update_timeslots() {
+	function update_timeslots() {
+				
+		$('#timeslot').hide();
+		$('#timeslot').find('option').remove();
+		$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>");
+		
+		var reload_timeslot = $('#timeslot').attr('data-timeslot');
+
+		$.get("[% vcs_tools %]get_times.htm", {
+			'center': '[% appinfo.center %]', 
+			'persons': '[% appinfo.persons %]', 
+			'appdate':$('#app_date').val(),
+			'fdate': '[% appinfo.fdate %]', 
+			'lang': 'ru',
 			
-	$('#timeslot').hide();
-	$('#timeslot').find('option').remove();
-	$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>");
-	
-	var reload_timeslot = $('#timeslot').attr('data-timeslot');
+			}, function(xml) {
+				$(xml).find('node').each( function() {
+					var apptimeValue = $(this).find('id').text();
+					var apptimeText = $(this).find('title').text();
 
-	$.get("[% vcs_tools %]get_times.htm", {
-		'center': '[% appinfo.center %]', 
-		'persons': '[% appinfo.persons %]', 
-		'appdate':$('#app_date').val(),
-		'fdate': '[% appinfo.fdate %]', 
-		'lang': 'ru',
-		
-		}, function(xml) {
-			$(xml).find('node').each( function() {
-				var apptimeValue = $(this).find('id').text();
-				var apptimeText = $(this).find('title').text();
-
-				if ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) {
-					$('#timeslot').append('<option value="' + apptimeValue + '" selected >'+ apptimeText + '</option>');
-				} else {
-					$('#timeslot').append('<option value="' + apptimeValue + '">'+ apptimeText + '</option>');
-				}
+					if ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) {
+						$('#timeslot').append('<option value="' + apptimeValue + '" selected >'+ apptimeText + '</option>');
+					} else {
+						$('#timeslot').append('<option value="' + apptimeValue + '">'+ apptimeText + '</option>');
+					}
+				
+			});
 			
-		});
-		
-		$('#tmp_img').remove();
-		$('#timeslot').show();
-		
-		var al = $(xml).find('urgent_flag');
-		if (al.text() != '') {
-			var alertText = al.text();
-			alert(alertText);
-		}
-    }, 'xml');
-};
-
+			$('#tmp_img').remove();
+			$('#timeslot').show();
+			
+			var al = $(xml).find('urgent_flag');
+			if (al.text() != '') {
+				var alertText = al.text();
+				alert(alertText);
+			}
+	    }, 'xml');
+	};
 [% END %]
 
 [% IF last_error_name %]
@@ -263,30 +272,72 @@ function update_timeslots() {
 			return [curtop];
 		}
 	}
-$(document).ready(function() {
+	$(document).ready(function() {
 
-	var mobScreen = isMobile();
-	var error_x = ( mobScreen ? 'inner-left' : 'left' );
-	var error_y = ( mobScreen ? 'top' : 'center' );
-	var offset_x = ( mobScreen ? 0 : 5 );
-	var offset_y = ( mobScreen ? 5 : 0 );
-	
-	
-	window.scroll(0,findPos(document.getElementById("[% last_error_name %]")));
-	$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
-	$('#[% last_error_name %]').poshytip({
-		className: 'tip-redsimple',
-		content: '[% langreq(last_error_text) %]',
-		showOn: 'none',
-		alignTo: 'target',
-		alignX: error_x,
-		alignY: error_y,
-		offsetX: offset_x,
-		offsetY: offset_y,
+		var mobScreen = isMobile();
+		var error_x = ( mobScreen ? 'inner-left' : 'left' );
+		var error_y = ( mobScreen ? 'top' : 'center' );
+		var offset_x = ( mobScreen ? 0 : 5 );
+		var offset_y = ( mobScreen ? 5 : 0 );
+		
+		
+		window.scroll(0,findPos(document.getElementById("[% last_error_name %]")));
+		$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
+		$('#[% last_error_name %]').poshytip({
+			className: 'tip-redsimple',
+			content: '[% langreq(last_error_text) %]',
+			showOn: 'none',
+			alignTo: 'target',
+			alignX: error_x,
+			alignY: error_y,
+			offsetX: offset_x,
+			offsetY: offset_y,
+		});
+		$('#[% last_error_name %]').poshytip('show');
 	});
-	$('#[% last_error_name %]').poshytip('show');
-});
 [% END %]
+
+[% FOREACH post_index IN special.post_index %]
+
+	$('#[% post_index %]').autocomplete({
+		source:function( request, response ) {
+				$.ajax({
+					url: "/autoform/findpcode.htm",
+					dataType: "jsonp",
+					data: {
+						maxRows: 8,
+						name_startsWith: request.term
+					},
+					success: function( data ) {
+						response( $.map( data.cmps, function( item ) {
+							return {
+								value: item.pcode,
+								desc: item.cname,
+								cdefault: item.cdefault,
+								cid: item.cid
+							}
+						}));
+					}
+				});
+			},
+		delay:10,
+		minLength:3,
+		select: function( event, ui ) {
+			$('#[% post_index %]').html( ui.item.value + ', ' + ui.item.desc );
+			return false;
+		},
+		open: function(event, ui) {
+			$('#[% post_index %]').val( '' );
+		}		
+	})
+	.data( "autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li></li>" )
+			.data( "item.autocomplete", item )
+			.append( "<a>" + (item.cdefault=='1' ? '<b>' : '') + item.value + (item.cdefault=='1' ? '</b>' : '') + '<br><span class="post_index">' + item.desc + "</span></a>" )
+			.appendTo( ul );
+	};
+[% END %]
+	
 </script>
 
 </div>

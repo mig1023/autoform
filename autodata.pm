@@ -536,7 +536,7 @@ sub get_content_rules_hash
 				'label' => 'Профессиональная деятельность',
 				'comment' => 'Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
 				'example' => 'Doctor',
-				'check' => 'WN\s_\.\,\"\'\-\(\)\#\*',
+				'check' => 'zWN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ProfActivity',
@@ -1780,11 +1780,40 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
+				'name' => 'ship_index',
+				'label' => 'Индекс доставки',
+				'comment' => 'Введите индекс для доставки документов документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
+				'example' => '101000',
+				'check' => 'N',
+				'check_logic' => [
+					{
+						'condition' => 'free_only_if_not',
+						'table' => 'Appointments',
+						'name' => 'ShAddress',
+						'error' => 'Адрес доставки',
+					},
+				],
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'ShIndex',
+				},
+				'special' => 'post_index',
+			},
+			{
+				'type' => 'input',
 				'name' => 'shipping',
 				'label' => 'Адрес доставки',
-				'comment' => 'Введите для доставки документов документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
+				'comment' => 'Введите адрес для доставки документов документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				'example' => 'Москва, ул.Ленина, 1',
 				'check' => 'ЁN\s\-\_\.\,\;\'\"',
+				'check_logic' => [
+					{
+						'condition' => 'free_only_if_not',
+						'table' => 'Appointments',
+						'name' => 'ShIndex',
+						'error' => 'Индекс доставки',
+					},
+				],
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'ShAddress',
