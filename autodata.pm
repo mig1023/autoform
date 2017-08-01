@@ -192,6 +192,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'RLName',
 				},
+				'format' => 'capitalized'
 			},
 			{
 				'type' => 'input',
@@ -204,6 +205,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'RFName',
 				},
+				'format' => 'capitalized'
 			},
 			{
 				'type' => 'input',
@@ -224,6 +226,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'RMName',
 				},
+				'format' => 'capitalized'
 			},
 			{
 				'type' => 'checkbox',
@@ -285,6 +288,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'LName',
 				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'input',
@@ -297,6 +301,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'FName',
 				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'input',
@@ -375,6 +380,20 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'PassWhom',
 				},
+				'format' => 'capslock'
+			},
+			{
+				'type' => 'input',
+				'name' => 'fulladdress',
+				'label' => 'Домашний адрес',
+				'comment' => 'Фактический адрес проживания заявителя',
+				'example' => 'Moscow, Lermontov st., 10',
+				'check' => 'zWN\s\-\_\.\,\;\'\"\/',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'FullAddress',
+				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'free_line',
@@ -451,6 +470,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'BrhPlace',
 				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'select',
@@ -529,6 +549,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'KinderData',
 				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'input',
@@ -541,6 +562,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'ProfActivity',
 				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'input',
@@ -553,6 +575,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'WorkOrg',
 				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'free_line',
@@ -623,6 +646,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'FamilyOther',
 				},
+				'format' => 'capslock'
 			},
 		],
 		
@@ -685,6 +709,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'VisaOther',
 				},
+				'format' => 'capslock',
 			},
 		],
 		
@@ -727,6 +752,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'NullaCity',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'free_line',
@@ -886,6 +912,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'Permesso',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1034,6 +1061,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'Hotels',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1046,6 +1074,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'HotelAdresses',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1090,6 +1119,7 @@ sub get_content_rules_hash
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataName',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1102,6 +1132,7 @@ sub get_content_rules_hash
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataDenomination',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1127,6 +1158,7 @@ sub get_content_rules_hash
 					'name' => 'HostDataProvince',
 				},
 				'param' => '[schengen_provincies]',
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1139,6 +1171,7 @@ sub get_content_rules_hash
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataCity',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1151,6 +1184,7 @@ sub get_content_rules_hash
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataAddress',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1202,6 +1236,7 @@ sub get_content_rules_hash
 					'name' => 'HostDataProvince',
 				},
 				'param' => '[schengen_provincies]',
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1214,6 +1249,7 @@ sub get_content_rules_hash
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataCity',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1226,6 +1262,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'ACompanyName',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1238,6 +1275,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'ACompanyAddress',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1274,6 +1312,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'ACopmanyPerson',
 				},
+				'format' => 'capslock',
 			},
 		],
 		
@@ -1322,6 +1361,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'MezziWhomOther',
 				},
+				'format' => 'capslock',
 			},
 		],
 		
@@ -1412,6 +1452,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'MezziOtherSrc',
 				},
+				'format' => 'capslock',
 			},
 		],
 				
@@ -1439,6 +1480,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'EuLName',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1451,6 +1493,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'EuFName',
 				},
+				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
@@ -1489,6 +1532,7 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'EuPassNum',
 				},
+				'format' => 'capslock',
 			},
 		],
 		
@@ -1925,7 +1969,7 @@ sub get_content_rules_hash
 				},
 				'param' => { 
 					0 => 'Малый Толмачёвский, д.6 стр.1',
-					1 => 'ул. Киевская, вл. 2, 3 этаж',
+					39 => 'ул. Киевская, вл. 2, 3 этаж',
 				},
 			},
 		],

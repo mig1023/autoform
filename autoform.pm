@@ -1470,14 +1470,14 @@ sub encode_data_for_db
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step, $element_name, $value ) = @_;
-	
+	my $vars = $self->{'VCS::Vars'};
 	my $element = $self->get_element_by_name( $step, $element_name );
 	
 	$value =~ s/^\s+|\s+$//g;
-
-	if ( $element->{type} =~ /checkbox|checklist/ ) {
-		$value = ( ( $value eq $element_name ) ? 1 : 0 );
-	};
+	
+	$value = ( ( $value eq $element_name ) ? 1 : 0 ) if $element->{type} =~ /checkbox|checklist/;
+	$value = $vars->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
+	$value = $vars->get_system->to_upper_case_first( $value ) if $element->{ format } eq 'capitalized';
 	
 	$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 	
@@ -1650,8 +1650,8 @@ sub check_param
 
 	$value =~ s/^\s+|\s+$//g;
 
-	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( $value eq '' );
-	return if $rules eq 'z'; 
+	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( ( $value eq '' ) or ( $value eq '0' ) );
+	return if $rules eq 'z';
 
 	if ( $rules =~ /D/ ) {
 		$rules =~ s/(z|D)//g;
