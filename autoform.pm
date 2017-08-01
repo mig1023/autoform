@@ -1700,6 +1700,8 @@ sub check_logic
 	my $value = $vars->getparam( $element->{ name } );
 	my $first_error = '';
 	my $error = 0;
+	
+	$value =~ s/^\s+|\s+$//g;
 
 	for my $rule ( @{ $element->{ check_logic } } ) {
 	
@@ -1760,10 +1762,34 @@ sub check_logic
 			}
 		}
 		
+		if ( $rule->{ condition } =~ /^existing_postcode$/ and $value ) {
+			
+			my ( $postcode_id, undef ) = $self->get_postcode_id( $value );
+			
+			$first_error = $self->text_error( 15, $element ) unless ( $postcode_id );
+		}
+		
 		last if $first_error;
 	}
 	
 	return $first_error;	
+}
+
+sub get_postcode_id
+# //////////////////////////////////////////////////
+{
+	my ( $self, $value ) = @_;
+	
+	my ( $index, $city ) = split /,/, $value;
+	
+	s/^\s+|\s+$//g for ( $index, $city );
+	
+	my $postcode_in_db = $self->query('sel1', "
+		SELECT ID FROM DHL_Cities WHERE PCode = ? AND RName = ?", 
+		$index, $city
+	);
+	
+	return ( $postcode_in_db, $city );
 }
 
 sub text_error
@@ -1787,6 +1813,7 @@ sub text_error
 		'Недопустимая дата в поле "[name]"',
 		'Необходимо заполнить поле "[name]" или указать "[relation]"',
 		'Необходимо заполнить поле "[name]", если заполнено "[relation]"',
+		'Введён недопустимый индекс или город в поле "[name]", попробуйте указать другой',
 	];
 	
 	if ( !defined($element) ) {
@@ -1944,13 +1971,24 @@ sub mod_hash
 	$hash = $self->visapurpose_assembler( $hash ) if exists $hash->{ VisaPurpose };
 	$hash = $self->mezzi_assembler( $hash ) if exists $hash->{ Mezzi1 };
 	
+	if ( $hash->{ ShIndex } ) {
+	
+		# my ( $postcode_id, $city ) = $self->get_postcode_id( $hash->{ ShIndex } );
+		
+		$hash->{ Shipping } = 1;
+		$hash->{ ShAddress } = $hash->{ ShIndex } . ", " . $hash->{ ShAddress };
+		delete $hash->{ ShIndex }		
+	}
+	
+	$hash->{ SMS } = 1 if $hash->{ Mobile };
+	
 	delete $hash->{ ID } if ( exists $hash->{ ID } );
 	delete $hash->{ Finished } if ( exists $hash->{ Finished } and $table_name eq 'AppData' );
 
-	$hash->{AppID} = $appid if $appid;
-	$hash->{SchengenAppDataID} = $schappid if $schappid;
-	$hash->{Status} = 1 if exists $hash->{Status};
-	$hash->{PolicyType} = 1 if $insurance;
+	$hash->{ AppID } = $appid if $appid;
+	$hash->{ SchengenAppDataID } = $schappid if $schappid;
+	$hash->{ Status } = 1 if exists $hash->{ Status };
+	$hash->{ PolicyType } = 1 if $insurance;
 
 	if ( $table_name eq 'Appointments' ) {
 		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $vars);

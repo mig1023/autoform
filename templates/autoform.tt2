@@ -91,13 +91,9 @@ function mobileScreenCheck() {
 	$('.info').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
 	
-	[% IF special.post_index.0 %]
-		$('.post_index').css( "font-size", ( mobilScreen ? '16px' : '12px' ) );
-	[% END %]
-	
 	[% FOREACH post_index IN special.post_index %]	
 		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
-		//$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '16px' : '12px' )});
+		$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
 	[% END %]
 	
 	$("#app_table").each(function(){
@@ -309,6 +305,7 @@ function init_comm(pos_x, pos_y) {
 						name_startsWith: request.term
 					},
 					success: function( data ) {
+						$('#[% post_index %]').poshytip('hide');
 						response( $.map( data.cmps, function( item ) {
 							return {
 								value: item.pcode,
@@ -323,17 +320,17 @@ function init_comm(pos_x, pos_y) {
 		delay:10,
 		minLength:3,
 		select: function( event, ui ) {
-			$('#[% post_index %]').html( ui.item.value + ', ' + ui.item.desc );
+			$('#[% post_index %]').val( ui.item.value + ', ' + ui.item.desc );
 			return false;
 		},
 		open: function(event, ui) {
-			$('#[% post_index %]').val( '' );
+			//$('#[% post_index %]').val( '' );
 		}		
 	})
 	.data( "autocomplete" )._renderItem = function( ul, item ) {
 		return $( "<li></li>" )
 			.data( "item.autocomplete", item )
-			.append( "<a>" + (item.cdefault=='1' ? '<b>' : '') + item.value + (item.cdefault=='1' ? '</b>' : '') + '<br><span class="post_index">' + item.desc + "</span></a>" )
+			.append( "<a>" + item.value + '<br><span class="post_index">' + item.desc + "</span></a>" )
 			.appendTo( ul );
 	};
 [% END %]
