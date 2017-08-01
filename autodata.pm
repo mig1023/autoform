@@ -1028,7 +1028,7 @@ sub get_content_rules_hash
 				'name' => 'hotels',
 				'label' => 'Название гостиницы или ФИО приглашающего',
 				'comment' => 'Укажите полное название гостиницы и данные приглашающего лица',
-				'example' => 'Grand Hotel, Mike Bowman',
+				'example' => 'Grand Hotel',
 				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'AppData',
@@ -1533,7 +1533,6 @@ sub get_content_rules_hash
 					}
 				},
 			},
-			
 
 			{
 				'type' => 'info',
@@ -1569,7 +1568,7 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'rupassnum',
+				'name' => 'info_passnum',
 				'label' => '№ паспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				'example' => '754300001',
@@ -1581,7 +1580,7 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'passdate',
+				'name' => 'info_passdate',
 				'label' => 'Дата выдачи',
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
 				'example' => '01.01.2010',
@@ -1599,7 +1598,7 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'rupasswhere',
+				'name' => 'info_rupasswhere',
 				'label' => 'Кем выдан',
 				'comment' => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
 				'example' => 'ОВД по району Беговой города Москвы',
@@ -1611,7 +1610,7 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'phone',
+				'name' => 'info_phone',
 				'label' => 'Телефон',
 				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
 				'example' => '79161234567',
@@ -1623,14 +1622,15 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'address',
+				'name' => 'info_address',
 				'label' => 'Адрес',
 				'comment' => 'Полный адрес, включая индекс',
 				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
 				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'FullAddress', # поле идёт в анкету! должно быть на английском!! в договор что-то иное!!
+					'name' => 'RAddress',
+					'transfer' => 'nope',
 				},
 			},
 		],

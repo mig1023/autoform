@@ -1359,10 +1359,10 @@ sub save_data_from_form
 sub change_current_appdata
 # //////////////////////////////////////////////////
 {
-	my ( $self, $current_app_id, $table_id ) = @_;
+	my ( $self, $new_app_id, $table_id ) = @_;
 	
 	$self->query('query', "
-		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, $current_app_id, $table_id->{ AutoToken }
+		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, $new_app_id, $table_id->{ AutoToken }
 	);
 }
 
@@ -1445,7 +1445,7 @@ sub get_all_values
 					SELECT $alt->{ $field }->{ field } FROM $alt->{ $field }->{ table } WHERE ID = ?", 
 					$table_id->{ $alt->{ $field }->{ table } }
 				);
-				
+
 				$all_values->{ $field } = $self->decode_data_from_db( $step, $alt->{ $field }->{ field }, $alt_value );
 			}
 		}
@@ -1908,16 +1908,29 @@ sub create_new_appointment
 	my ( $self, $token ) = @_;
 	
 	my $new_appid;
+	my $info_for_contract = "from_db";
 	
 	my $tables_transfered_id = $self->get_current_table_id( $token );
 	my $db_rules = $self->get_content_db_rules();
 
-	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
-		$tables_transfered_id->{ AutoAppointments }, $db_rules );
-
-	my $insurance_line = $self->query('sel1', "
-		SELECT Insurance FROM AutoToken WHERE Token = ?", $token
+	my ( $insurance_line, $person_for_contract ) = $self->query('sel1', "
+		SELECT Insurance, PersonForAgreements FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $token
 	);
+
+	if ( $person_for_contract ) {
+	
+		$info_for_contract = $self->query('selallkeys', "
+			SELECT RLName as LName, RFName as FName, RMName as MName, RPassNum as PassNum, 
+			RPWhen as PassDate, RPWhere as PassWhom, AppPhone as Phone, RAddress as Address 
+			FROM AutoAppData WHERE ID = ?", $person_for_contract
+		);
+		$info_for_contract = $info_for_contract->[0];
+	}
+	
+	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
+		$tables_transfered_id->{ AutoAppointments }, $db_rules, undef, undef, undef, $info_for_contract );
  	
 	my %insurance_list = map { $_ => 1 } split /,/, $insurance_line;
 	
@@ -1925,13 +1938,14 @@ sub create_new_appointment
 		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
 		$tables_transfered_id->{ 'AutoAppointments' }
 	);
-
+	
 	for my $app ( @$allapp ) {
 		
 		my $sch_appid = $self->create_table( 'AutoSchengenAppData', 'SchengenAppData', $app->{ SchengenAppDataID }, $db_rules );
 		
 		my $appid = $self->create_table( 'AutoAppData', 'AppData', $app->{ ID }, 
-			$db_rules, $new_appid, $sch_appid, ( exists $insurance_list{ $app->{ ID } } ? 1 : 0 ) );
+			$db_rules, $new_appid, $sch_appid, ( exists $insurance_list{ $app->{ ID } } ? 1 : 0 )
+		);
 	}
 	
 	my $appnum = $self->query('sel1', "
@@ -1944,11 +1958,11 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $insurance ) = @_;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract ) = @_;
 	
 	my $hash = $self->get_hash_table( $autoname, $transfered_id );
-	
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance );
+
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract );
 	
 	my $new_appid = $self->insert_hash_table( $name, $hash );
 	
@@ -1958,8 +1972,8 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance ) = @_;
-	
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, $info_for_contract ) = @_;
+
 	my $vars = $self->{ 'VCS::Vars' };
 
 	for my $column ( keys %$hash ) {
@@ -1977,14 +1991,14 @@ sub mod_hash
 		
 		$hash->{ Shipping } = 1;
 		$hash->{ ShAddress } = $hash->{ ShIndex } . ", " . $hash->{ ShAddress };
-		delete $hash->{ ShIndex }		
+		delete $hash->{ ShIndex };
 	}
 	
 	$hash->{ SMS } = 1 if $hash->{ Mobile };
 	
 	delete $hash->{ ID } if ( exists $hash->{ ID } );
 	delete $hash->{ Finished } if ( exists $hash->{ Finished } and $table_name eq 'AppData' );
-
+	
 	$hash->{ AppID } = $appid if $appid;
 	$hash->{ SchengenAppDataID } = $schappid if $schappid;
 	$hash->{ Status } = 1 if exists $hash->{ Status };
@@ -1993,6 +2007,10 @@ sub mod_hash
 	if ( $table_name eq 'Appointments' ) {
 		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $vars);
 		$hash->{ AppNum }  = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
+
+		if ( ref( $info_for_contract ) eq 'HASH' ) {
+			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
+		}
 	}
 		
 	return $hash;
