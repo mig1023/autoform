@@ -248,6 +248,12 @@ function init_comm(pos_x, pos_y) {
 			$('#tmp_img').remove();
 			$('#timeslot').show();
 			
+			[% IF last_error_name == 'timeslot' %]
+				$(document).ready(function() {
+					show_error_tip();
+				});
+			[% END %]
+			
 			var al = $(xml).find('urgent_flag');
 			if (al.text() != '') {
 				var alertText = al.text();
@@ -259,7 +265,13 @@ function init_comm(pos_x, pos_y) {
 
 [% IF last_error_name %]
 
-	function findPos(obj) {
+	[% IF last_error_name != 'timeslot' %]
+		$(document).ready(function() {
+			show_error_tip();
+		});
+	[% END %]
+
+	function find_pos(obj) {
 		var curtop = 0;
 		if (obj.offsetParent) {
 			do {
@@ -268,8 +280,8 @@ function init_comm(pos_x, pos_y) {
 			return [curtop];
 		}
 	}
-	$(document).ready(function() {
 
+	function show_error_tip() {
 		var mobScreen = isMobile();
 		var error_x = ( mobScreen ? 'inner-left' : 'left' );
 		var error_y = ( mobScreen ? 'top' : 'center' );
@@ -277,7 +289,7 @@ function init_comm(pos_x, pos_y) {
 		var offset_y = ( mobScreen ? 5 : 0 );
 		
 		
-		window.scroll(0,findPos(document.getElementById("[% last_error_name %]")));
+		window.scroll(0,find_pos(document.getElementById("[% last_error_name %]")));
 		$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
 		$('#[% last_error_name %]').poshytip({
 			className: 'tip-redsimple',
@@ -290,7 +302,7 @@ function init_comm(pos_x, pos_y) {
 			offsetY: offset_y,
 		});
 		$('#[% last_error_name %]').poshytip('show');
-	});
+	}
 [% END %]
 
 [% FOREACH post_index IN special.post_index %]
