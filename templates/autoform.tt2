@@ -5,6 +5,10 @@
 <link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
 
+[% IF (special.with_map.0) %]
+<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
+[% END %]
+
 [% IF (special.datepicker.0 || special.post_index.0 ) %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
@@ -42,6 +46,20 @@
 
 [% content_text %]
 
+[% IF (special.with_map.0) %]
+<tr><td colspan="3">&nbsp;</td></tr>
+<tr><td colspan="3"><div id="YMapsID" style="width:600px;height:400px"></div></td></tr>
+<tr><td colspan="3">&nbsp;</td></tr>
+
+<script type="text/javascript">
+    YMaps.jQuery(function () {
+        var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+        map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
+	map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "Визовый центр VMS<br>Адрес");
+    })
+</script>
+[% END %]
+
 <tr><td colspan="3"><br>
 [% IF ( step > 1 ) && ( step != max_step ) %]
 	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
@@ -50,6 +68,7 @@
 [% IF ( step < max_step ) && ( step > 0 ) %]
 	<input type="button" value="[% langreq('Далее') %] ▷" onclick="go_button('forward');">
 [% END %]
+
 [% IF ( step == max_step ) %]
 	<input type="button" value="[% langreq('Перейти на страницу записи') %] ▷" onclick="go_button('app');">
 [% END %]

@@ -2029,6 +2029,7 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'CenterID',
 				},
+				'special' => 'with_map',
 			},
 			{
 				'type' => 'info',
@@ -2107,8 +2108,6 @@ sub get_html_elements
 					
 		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
 		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
-		
-		'geo_link'		=> '&nbsp;<a target="_blank" class="dotted_link" href="http://maps.yandex.ru/?ll=[x],[y]">',
 	};
 }
 
@@ -2135,7 +2134,7 @@ sub get_geo_branches
 		7 => [ '52.5968568', '39.56752210000002', ],
 		8 => [ '56.323534', '44.02221499999996', ],
 		9 => [ '55.0243972', '82.92012199999999', ],
-		11 => [ '59.9340869', '30.3207489,17', ],
+		11 => [ '59.9340869', '30.3207489', ],
 		12 => [ '54.7286619', '55.94788270000004', ],
 		13 => [ '54.9717809', '73.40270800000008', ],
 		14 => [ '44.2243358', '43.08334519999994', ],

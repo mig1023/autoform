@@ -96,9 +96,9 @@ sub autoform
 	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
-	my ( $page_content, $special, $template_file, $title, $progress, $appid );
+	my ( $page_content, $template_file, $title, $progress, $appid, $last_error );
 	my $step = 0;
-	my $last_error = '';
+	my $special = {};
 	my $js_check_need = 1;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
@@ -122,7 +122,15 @@ sub autoform
 
 	my ( $last_error_name, $last_error_text ) = split /\|/, $last_error;
 	
-	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots( $token );
+	my ( $appinfo_for_timeslots, $map_in_page );
+
+	if ( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) ) {
+		$appinfo_for_timeslots = $self->get_same_info_for_timeslots( $token );
+	}
+
+	if ( ( ref( $special->{ with_map } ) eq 'ARRAY' ) and ( @{ $special->{ with_map } } > 0 ) ) {
+		$map_in_page = $self->get_geo_info( $token );
+	}
 
 	$vars->get_system->pheader( $vars );
 	my $tvars = {
@@ -143,6 +151,7 @@ sub autoform
 		'progress' => $progress,
 		'lang_in_link' => $self->{ lang },
 		'js_check_need' => $js_check_need,
+		'map_in_page' => $map_in_page,
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -175,10 +184,26 @@ sub get_same_info_for_timeslots
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $token
 	);
-		
+	
 	$appinfo->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 
 	return $appinfo;
+}
+
+sub get_geo_info
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+	
+	my $center = $self->query('sel1', "
+		SELECT CenterID	FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $token
+	);
+	
+	my $branches = VCS::Site::autodata::get_geo_branches();
+	
+	return $branches->{ $center };
 }
 
 sub init_add_param
@@ -906,15 +931,9 @@ sub correct_values
 
 	if ( $$current_values->{ 'new_app_branch' } ) {
 	
-		my $current_barnch = $$current_values->{ 'new_app_branch' };
 		$$current_values->{ 'new_app_branch' } = $self->query('sel1', "
 			SELECT BName FROM Branches WHERE ID = ?", $$current_values->{ 'new_app_branch' }
 		);
-	
-		my $branch_geo = VCS::Site::autodata::get_geo_branches();
-		
-		$$current_values->{ 'new_app_branch' } .= $self->get_html_for_element( 'geo_link', 
-			"$branch_geo->{ $current_barnch }->[1]|$branch_geo->{ $current_barnch }->[0]" );
 	};
 	
 	if ( $$current_values->{ 'new_app_timedate' } ) {
@@ -990,6 +1009,7 @@ sub get_specials_of_element
 		'nearest_date' => [],
 		'timeslots' => [],
 		'post_index' => [],
+		'with_map' => [],
 	};
 	
 	for my $element ( @$page_content ) {
@@ -1232,14 +1252,6 @@ sub get_html_for_element
 	
 	if ( $type eq 'info' ) {
 		$content =~ s/\[text\]/$value/;
-	}
-	
-	if ( $type eq 'geo_link' ) {
-		my ( $x, $y ) = split /\|/, $name;
-		$content =~ s/\[x\]/$x/;
-		$content =~ s/\[y\]/$y/;
-		
-		$content .= '[ ' . $self->lang( "найти визовый центр на карте" ) . ' ]</a>';
 	}
 	
 	if ( $uniq_code ) {
