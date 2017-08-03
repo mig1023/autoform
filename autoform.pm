@@ -41,7 +41,7 @@ sub getContent
 	
     	&{$disp_link}( $self, $task, $id, $template );
     	
-    	return 1;	
+	return 1;
 }
 
 sub get_content_rules
@@ -127,13 +127,6 @@ sub autoform
 	$vars->get_system->pheader( $vars );
 	my $tvars = {
 		'langreq' => sub { return $vars->getLangSesVar(@_) },
-		'vars' => {
-				'lang' => $vars->{'lang'},
-				'page_title'  => 'Autoform'
-				},
-		'form' => {
-				'action' => $vars->getform('action')
-				},
 		'title' => $title,
 		'content_text' => $page_content,
 		'token' => $token,
@@ -249,8 +242,8 @@ sub init_add_param
 			push ( @{ $info_from_db->{ '[persons_in_app_for_insurance]' } },
 				[ $person->{ ID }, $person->{ person } ] );
 
-			next if $self->age( $person->{ birthdate }, $person->{ currentdate } ) < 
-					$self->{ autoform }->{ memcached }->{ age_for_agreements };
+			next if ( $self->age( $person->{ birthdate }, $person->{ currentdate } ) < 
+					$self->{ autoform }->{ age }->{ age_for_agreements } );
 
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		}
@@ -1650,7 +1643,8 @@ sub check_param
 
 	$value =~ s/^\s+|\s+$//g;
 
-	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( ( $value eq '' ) or ( $value eq '0' ) );
+	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( ( $value eq '' ) or 
+			( ( $value eq '0' ) and ( $element->{ name } eq 'timeslot') ) );
 	return if $rules eq 'z';
 
 	if ( $rules =~ /D/ ) {
@@ -2111,39 +2105,39 @@ sub find_pcode
 	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
-	my $req = $vars->getparam( 'name_startsWith' ) || '';
-	my $reqlim = $vars->getparam( 'maxRows' ) || 20;
-	my $cb = $vars->getparam('callback') || "";
+	my $request = $vars->getparam( 'name_startsWith' ) || '';
+	my $request_limit = $vars->getparam( 'maxRows' ) || 20;
+	my $callback = $vars->getparam( 'callback' ) || "";
 	
-	$reqlim =~ s/[^0-9]//g;
-	$reqlim = 20 if ( $reqlim eq '' ) || ( $reqlim == 0 ) || ( $reqlim > 100 );
+	$request_limit =~ s/[^0-9]//g;
+	$request_limit = 20 if ( $request_limit eq '' ) || ( $request_limit == 0 ) || ( $request_limit > 100 );
 
 	my $rws = [];
 	
-	if ( $req ne '' ) {
-		if ( $req =~ /[^0-9]/ ) {
+	if ( $request ne '' ) {
+		if ( $request =~ /[^0-9]/ ) {
 		
 			$rws = $vars->db->selallkeys("
 				SELECT ID, CName, RName, PCode, isDefault FROM DHL_Cities 
-				WHERE (CName LIKE (" . $vars->db->{ 'dbh' }->quote( $req.'%' ) . ") OR 
-				RName LIKE (" . $vars->db->{ 'dbh' }->quote( '%'.$req.'%' ) . ")) AND isDeleted=0 
-				ORDER BY CName, isDefault DESC, PCode LIMIT $reqlim"
+				WHERE (CName LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ") OR 
+				RName LIKE (" . $vars->db->{ 'dbh' }->quote( '%'.$request.'%' ) . ")) AND isDeleted=0 
+				ORDER BY CName, isDefault DESC, PCode LIMIT $request_limit"
 			);		
 		}
 		else {
 			$rws = $vars->db->selallkeys("
 				SELECT ID, CName, RName, PCode, isDefault FROM DHL_Cities 
-				WHERE PCode LIKE (" . $vars->db->{ 'dbh' }->quote( $req.'%' ) . ") AND isDeleted=0 
-				ORDER BY CName, isDefault DESC, PCode LIMIT $reqlim"
+				WHERE PCode LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ") AND isDeleted=0 
+				ORDER BY CName, isDefault DESC, PCode LIMIT $request_limit"
 			);		
 		}
 		
-		for my $rk (@$rws) {
-			$rk->{'CName'} = ( $rk->{'RName'} ne '' ? 
-				$vars->get_system->converttext($rk->{'RName'}) : 
-				$vars->get_system->converttext($rk->{'CName'}) 
+		for my $rk ( @$rws ) {
+			$rk->{ CName } = ( $rk->{ RName } ne '' ? 
+				$vars->get_system->converttext( $rk->{ RName } ) : 
+				$vars->get_system->converttext( $rk->{ CName } ) 
 			);
-			$rk->{'PCode'} = $rk->{'PCode'};
+			$rk->{ PCode } = $rk->{ PCode };
 		}
 	}
 	
@@ -2151,10 +2145,10 @@ sub find_pcode
 	
 	my $tvars = {
 		'alist' => $rws,
-		'cb' => $cb
+		'callback' => $callback
 	};
 	
-	$template->process( 'find_pcode.tt2', $tvars );
+	$template->process( 'autoform_pcode.tt2', $tvars );
 }
 
 sub age
