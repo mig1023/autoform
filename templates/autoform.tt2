@@ -196,7 +196,7 @@ function init_comm(pos_x, pos_y) {
 			
 	function update_nearest_date_[% near %]()
 	{	
-		$("#[% near %]").html("<img src='/files/wait.gif'>");
+		$("#[% near %]").html("<img src='/files/autoform_wait.gif'>");
 		$.get("[% vcs_tools %]get_nearest.htm", {
 			'center': $('#center').val(), 
 			'persons': 1, 
@@ -210,7 +210,7 @@ function init_comm(pos_x, pos_y) {
 		var restore_el = 0;
 		
 		$('#vtype').hide();
-		$('#vtype').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>");
+		$('#vtype').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif'>");
 		$('#vtype').find('option').remove();
 		
 		$.get("[% vcs_tools %]get_vtypes.htm", 
@@ -241,7 +241,7 @@ function init_comm(pos_x, pos_y) {
 				
 		$('#timeslot').hide();
 		$('#timeslot').find('option').remove();
-		$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/wait.gif'>");
+		$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif'>");
 		
 		var reload_timeslot = $('#timeslot').attr('data-timeslot');
 
