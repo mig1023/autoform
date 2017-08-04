@@ -55,7 +55,8 @@
     YMaps.jQuery(function () {
         var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
         map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
-	map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "Визовый центр VMS<br>Адрес");
+	map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
+	map.addControl(new YMaps.Zoom());
     })
 </script>
 [% END %]

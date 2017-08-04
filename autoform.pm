@@ -195,14 +195,17 @@ sub get_geo_info
 {
 	my ( $self, $token ) = @_;
 	
-	my $center = $self->query('sel1', "
-		SELECT CenterID	FROM AutoToken 
+	my ( $center, $addr ) = $self->query('sel1', "
+		SELECT CenterID, BAddr FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN Branches ON AutoAppointments.CenterID = Branches.ID
 		WHERE Token = ?", $token
 	);
-	
+
 	my $branches = VCS::Site::autodata::get_geo_branches();
-	
+	$addr =~ s/\r?\n/<br>/g;
+	$branches->{ $center }->[ 2 ] = $addr;
+
 	return $branches->{ $center };
 }
 
