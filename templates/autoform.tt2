@@ -25,6 +25,12 @@
 </noscript>
 [% END %]
 
+<script>
+function isMobile() {
+	return ( document.body.clientWidth < 700 ? 1 : 0);
+}
+</script>
+
 </head>
 
 <font face="arial">
@@ -47,17 +53,21 @@
 [% content_text %]
 
 [% IF (special.with_map.0) %]
-<tr><td colspan="3">&nbsp;</td></tr>
-<tr><td colspan="3"><div id="YMapsID" style="width:600px;height:400px"></div></td></tr>
-<tr><td colspan="3">&nbsp;</td></tr>
+<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+<tr class="ymap"><td colspan="3"><div id="YMapsID" style="width:600px;height:400px"></div></td></tr>
+<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
 
 <script type="text/javascript">
-    YMaps.jQuery(function () {
-        var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
-        map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
-	map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
-	map.addControl(new YMaps.Zoom());
-    })
+if ( isMobile() ) {
+	$(".ymap").hide();
+} else {
+	YMaps.jQuery(function () {
+		var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+		map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
+		map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
+		map.addControl(new YMaps.Zoom());
+	});
+}
 </script>
 [% END %]
 
@@ -88,10 +98,6 @@
 $(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
 
-function isMobile() {
-	return ( document.body.clientWidth < 700 ? 1 : 0);
-}
-
 function mobileScreenCheck() {
 
 	var mobilScreen = 0;		
@@ -110,6 +116,13 @@ function mobileScreenCheck() {
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	$('.info').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
+	
+	$(':checkbox, :radio').css( "-ms-transform", ( mobilScreen ? "scale(1.5)" : "" ) );
+	$(':checkbox, :radio').css( "-moz-transform:", ( mobilScreen ? "scale(1.5)" : "" ) );
+	$(':checkbox, :radio').css( "-webkit-transform", ( mobilScreen ? "scale(1.5)" : "" ) );
+	$(':checkbox, :radio').css( "-o-transform", ( mobilScreen ? "scale(1.5)" : "" ) );
+	$(':checkbox, :radio').css( "margin-right", ( mobilScreen ? "10px" : "" ) );
+	$(':checkbox, :radio').css( "margin-top", ( mobilScreen ? "20px" : "" ) );
 	
 	[% FOREACH post_index IN special.post_index %]	
 		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
