@@ -39,7 +39,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'center',
 				'label' => 'Визовый центр',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -52,7 +51,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'vtype',
 				'label' => 'Тип визы',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -63,9 +61,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'info',
 				'name' => 'free_date',
-				'label' => 'Ближайшее доступное время',
-				'comment' => '',
-				'check' => '',
+				'label' => 'Ближайшая доступная дата',
 				'special' => 'nearest_date',
 			},
 			{
@@ -83,9 +79,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'pers_info',
-				'label' => '',
 				'label_for' => 'я согласен <a class="dotted_link_big" target="_blank" href="">на обработку персональных данных</a>',
-				'comment' => '',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -96,9 +90,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				'label' => '',
 				'label_for' => 'я согласен <a class="dotted_link_big" target="_blank" href="">на условия работы</a> с мобильными телефона на территории визового центра',
-				'comment' => '',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -175,8 +167,6 @@ sub get_content_rules_hash
 				'name' => 'rupass_text',
 				'label' => 'Данные внутреннего паспорта',
 				'font' => 'bold',
-				'comment' => '',
-				'check' => '',
 			},
 			{
 				'type' => 'free_line',
@@ -231,10 +221,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'no_rumname',
-				'label' => '',
 				'label_for' => 'нет отчества',
-				'comment' => '',
-				'check' => '',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'NoRMName',
@@ -271,8 +258,6 @@ sub get_content_rules_hash
 				'name' => 'rupass_text',
 				'label' => 'Данные загранпаспорта',
 				'font' => 'bold',
-				'comment' => '',
-				'check' => '',
 			},
 			{
 				'type' => 'free_line',
@@ -403,8 +388,6 @@ sub get_content_rules_hash
 				'name' => 'ischild',
 				'label' => 'Если ребёнок вписан в паспорт родителей',
 				'label_for' => 'вписан в паспорт',
-				'comment' => '',
-				'check' => '',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'isChild',
@@ -419,8 +402,6 @@ sub get_content_rules_hash
 				'name' => 'nres',
 				'label' => 'Если заявитель не является гражданином или резидентом страны пребывания',
 				'label_for' => 'не резидент',
-				'comment' => '',
-				'check' => '',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'NRes',
@@ -504,7 +485,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'gender',
 				'label' => 'Пол',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -519,7 +499,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'family',
 				'label' => 'Семейное положение',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -584,7 +563,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'n_rezident',
 				'label' => 'Страна пребывания',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -602,7 +580,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'purpose',
 				'label' => 'Основная цель поездки',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -640,7 +617,6 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'familyother',
 				'label' => 'Семейное положение',
-				'comment' => '',
 				'check' => 'zW',
 				'db' => {
 					'table' => 'AppData',
@@ -666,7 +642,6 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'vidno',
 				'label' => 'Вид на жительство №',
-				'comment' => '',
 				'check' => 'zN\s\-',
 				'db' => {
 					'table' => 'AppData',
@@ -677,7 +652,6 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'brhplace',
 				'label' => 'Действителен до',
-				'comment' => '',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -732,7 +706,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'nulla',
 				'label' => 'Страна первого въезда',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -832,7 +805,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'prevvisa',
 				'label' => 'Были ли визы за последние три года',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -847,7 +819,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'fingers',
 				'label' => 'Отпечатки предоставлены за последние 5 лет',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -866,14 +837,11 @@ sub get_content_rules_hash
 				'name' => 'permi_text',
 				'label' => 'Родственник в ЕС',
 				'font' => 'bold',
-				'comment' => '',
-				'check' => '',
 			},
 			{
 				'type' => 'radiolist',
 				'name' => 'femrel',
 				'label' => 'Степень родства',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1025,7 +993,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'hostdatatype',
 				'label' => 'Вариант проживания',
-				'comment' => '',
 				'check' => 'zW',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1151,7 +1118,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'p_province',
 				'label' => 'Провинция',
-				'comment' => '',
 				'check' => 'zWN\.\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1229,7 +1195,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'a_province',
 				'label' => 'Провинция',
-				'comment' => '',
 				'check' => 'zWN\.\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1325,7 +1290,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'mezziwhom',
 				'label' => 'Расходы заявителя оплачивает',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1355,7 +1319,6 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'mezziwhomother',
 				'label' => 'Спонсор',
-				'comment' => '',
 				'check' => 'zWN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
@@ -1381,7 +1344,6 @@ sub get_content_rules_hash
 				'type' => 'checklist',
 				'name' => 'mezzi',
 				'label' => 'Средства',
-				'comment' => '',
 				'check' => 'at_least_one',
 				'db' => {
 					'table' => 'AppData',
@@ -1414,7 +1376,6 @@ sub get_content_rules_hash
 				'type' => 'checklist',
 				'name' => 'sponsor_mezzi',
 				'label' => 'Средства',
-				'comment' => '',
 				'check' => 'at_least_one',
 				'db' => {
 					'table' => 'AppData',
@@ -1554,7 +1515,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'visa_text',
 				'label' => 'Выберите на кого оформляется',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -1600,8 +1560,6 @@ sub get_content_rules_hash
 				'type' => 'info',
 				'name' => 'info_rumname',
 				'label' => 'Отчество',
-				'comment' => '',
-				'check' => '',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RMName',
@@ -1882,7 +1840,6 @@ sub get_content_rules_hash
 				'type' => 'checklist_insurer',
 				'name' => 'insurance',
 				'label' => 'Включить заявителей в полис',
-				'comment' => '',
 				'check' => 'N',
 				'db' => {
 					'table' => 'Token',
@@ -1920,7 +1877,6 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'app_date',
 				'label' => 'Дата записи в Визовый центр',
-				'comment' => '',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'Appointments',
@@ -1933,7 +1889,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'timeslot',
 				'label' => 'Время',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -1961,7 +1916,6 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'mezziwhom',
 				'label' => 'Выберите офис выдачи документов',
-				'comment' => '',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -1982,9 +1936,6 @@ sub get_content_rules_hash
 			{
 				'type' => 'captcha',
 				'name' => 'captcha_picture',
-				'label' => '',
-				'comment' => '',
-				'check' => '',
 			},
 			{
 				'type' => 'free_line',
