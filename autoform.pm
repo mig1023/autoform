@@ -133,6 +133,7 @@ sub autoform
 	}
 
 	$vars->get_system->pheader( $vars );
+	
 	my $tvars = {
 		'langreq' => sub { return $vars->getLangSesVar(@_) },
 		'title' => $title,
@@ -203,7 +204,9 @@ sub get_geo_info
 	);
 
 	my $branches = VCS::Site::autodata::get_geo_branches();
+	
 	$addr =~ s/\r?\n/<br>/g;
+	
 	$branches->{ $center }->[ 2 ] = $addr;
 
 	return $branches->{ $center };
@@ -265,6 +268,7 @@ sub init_add_param
 		);
 
 		for my $person ( @$app_person_in_app ) {
+		
 			$person->{ person } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 			
 			push ( @{ $info_from_db->{ '[persons_in_app_for_insurance]' } },
@@ -296,9 +300,11 @@ sub init_add_param
 		for my $page ( keys %$content_rules ) {
 		
 			next if $content_rules->{$page} =~ /^\[/;
+			
 			for my $element ( @{ $content_rules->{$page} } ) {
 
 				if ( ref( $element->{ param } ) ne 'HASH' ) {
+				
 					my $param_array = $info_from_db->{ $element->{ param } };
 					$element->{ param } = {};
 					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
@@ -331,6 +337,7 @@ sub get_collect_date
 	my $collect_dates = $vars->get_memd->get('autoform_collectdates');
 		
 	if ( !$collect_dates ) {
+	
 		my $collect_dates_array = $self->query('selallkeys', "
 			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1"
 		);
@@ -373,6 +380,7 @@ sub get_token_and_create_new_form_if_need
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $token = lc( $vars->getparam('t') );
+	
 	$token =~ s/[^a-z0-9]//g;
 
 	if ( $token eq '' ) {
@@ -437,6 +445,7 @@ sub token_generation
 	
 	do {
 		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
+		
 		for (1..63) {
 			$token .= @alph[ int( rand( 35 ) ) ];
 		}
@@ -464,9 +473,8 @@ sub get_page_error
 	];
 	
 	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
-	$title = "<center>$title</center>";
 	
-	return ( $title, undef, $template );
+	return ( "<center>$title</center>", undef, $template );
 }
 
 sub get_autoform_content
@@ -483,8 +491,7 @@ sub get_autoform_content
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token
 	);
 
-	my $action = $vars->getparam('action');
-	$action = lc($action);
+	my $action = lc( $vars->getparam('action') );
 	$action =~ s/[^a-z]//g;
 	
 	my $appdata_id = $vars->getparam('person');
@@ -520,6 +527,7 @@ sub get_autoform_content
 			$step = $self->set_step_by_content( $token, '[app_finish]', 'next' );
 		} else {
 			$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
+			
 			$last_error = $self->text_error( ( $app_status == 1 ? 4 : 5 ), { 'name' => 'applist' }, undef);
 		}
 	}
@@ -588,6 +596,7 @@ sub check_relation
 	} while ( $skip_this_page );
 
 	if ( $at_least_one_page_skipped ) {
+	
 		$self->query('query', "
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
 		);
@@ -636,10 +645,12 @@ sub get_forward
 {
 	my ( $self, $step, $token ) = @_;
 	
+	my $vars = $self->{ 'VCS::Vars' };
+	
 	my $current_table_id = $self->get_current_table_id( $token );
 	
 	if ( !$current_table_id->{AutoAppointments} ) {
-		$self->create_clear_form( $token, $self->get_center_id() );
+		$self->create_clear_form( $token, $vars->getparam( 'center' ) );
 		$current_table_id = $self->get_current_table_id( $token );
 	}
 	
@@ -983,19 +994,13 @@ sub get_list_of_app
 		}
 	}
 	
-	my $template = 'autoform_list.tt2';
-	
-	return ( $content, $template );
+	return ( $content, 'autoform_list.tt2' );
 }
 
 sub get_finish
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	
-	my $template = 'autoform_finish.tt2';
-	
-	return ( undef, $template );
+	return ( undef, 'autoform_finish.tt2' );
 }
 
 sub get_specials_of_element
@@ -1021,7 +1026,7 @@ sub get_specials_of_element
 		}
 	}
 	
-	return ($special);
+	return ( $special );
 }
 
 sub get_html_line
@@ -1029,19 +1034,20 @@ sub get_html_line
 {
 	my ( $self, $element, $values ) = @_;
 
-	return $self->get_html_for_element( 'free_line' ) if $element->{type} eq 'free_line';
+	return $self->get_html_for_element( 'free_line' ) if $element->{ type } eq 'free_line';
 	
 	my $content = $self->get_html_for_element( 'start_line' );
 	
-	if ( $element->{type} eq 'text' ) {
-		$content .= $self->get_html_for_element('text', $element->{ name }, $element->{ label }, 
+	if ( $element->{ type } eq 'text' ) {
+		$content .= $self->get_html_for_element( 'text', $element->{ name }, $element->{ label }, 
 				undef, $element->{ font } );
-		$content .= $self->get_html_for_element('end_line');
+		$content .= $self->get_html_for_element( 'end_line' );
 	
 		return $content;
 	}	
 	
-	my $label_for_need = ( $element->{label_for} ? $self->get_html_for_element( 'label_for', $element->{name}, $element->{label_for} ) : '' );
+	my $label_for_need = ( $element->{ label_for } ? 
+		$self->get_html_for_element( 'label_for', $element->{ name }, $element->{ label_for } ) : '' );
 	
 	my $current_value = $values->{ $element->{name} };
 
@@ -1278,6 +1284,7 @@ sub add_css_class
 	my ( $self, $html, $new_class ) = @_;
 	
 	if ( $html =~ /\sclass="([^"]*)"/i ) {
+	
 		my $classes = "$1 $new_class";
 		$html =~ s/\sclass="[^"]*"/ class="$classes"/i;
 	}
@@ -1304,6 +1311,7 @@ sub resort_with_first_elements
 	for my $f ( @first_elements ) {
 	
 		$f =~ s/^\s+|\s+$//g;
+		
 		for my $e (keys %$country_hash) {
 			push @array_with_first_elements, $f if $e == $f;
 		}
@@ -1316,18 +1324,6 @@ sub resort_with_first_elements
 	}
 
 	return @array_with_first_elements;
-}
-
-sub get_center_id
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-	
-	my $vars = $self->{'VCS::Vars'};
-	
-	my $center_id = $vars->getparam('center');
-	
-	return $center_id;
 }
 
 sub save_data_from_form
@@ -1348,8 +1344,11 @@ sub save_data_from_form
 		my @values = ();
 	
 		for my $row ( keys %{$request_tables->{$table}} ) { 
+		
 			$request .=  "$row = ?, ";
+			
 			my $value = $vars->getparam( $request_tables->{$table}->{$row} );
+			
 			push ( @values, $self->encode_data_for_db( $step, $request_tables->{$table}->{$row}, $value) );
 			
 			$self->change_current_appdata( $value, $table_id ) if $row eq 'PersonForAgreements';
@@ -1399,6 +1398,7 @@ sub check_special_in_rules_for_save
 			}
 		}
 		elsif ( $element->{special} eq 'insurer_many_id' ) {
+		
 			my $all_insurer = $self->query('selallkeys', "
 				SELECT ID FROM AutoAppData WHERE AppID = ?", $table_id->{AutoAppointments}
 			);
@@ -1428,6 +1428,7 @@ sub get_all_values
 	for my $table ( keys %$request_tables ) {
 
 		next if !$table_id->{ $table };
+		
 		next if $table eq 'alternative_data_source';
 
 		my $request = join ',', keys %{ $request_tables->{ $table } };
@@ -1561,7 +1562,9 @@ sub get_current_table_id
 	my $tables_controled_by_AutoToken = VCS::Site::autodata::get_tables_controled_by_AutoToken();
 	
 	for my $table_controlled (keys %$tables_controled_by_AutoToken) {
+	
 		$request_tables .= $tables_controled_by_AutoToken->{$table_controlled} . ', ';
+		
 		push @$tables_list, $table_controlled;
 	}
 	$request_tables =~ s/,\s$//;
@@ -1688,13 +1691,13 @@ sub check_captcha
 	my ( $self, $element ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
+	
 	my $captcha = $vars->getcaptcha();
 	
-	my $capverify = $vars->getparam( $element->{ name } ) || '';
-	my $rcode = $vars->getparam('code') || '';
-	my $c_status = $captcha->check_code( $capverify, $rcode );
+	my $c_status = $captcha->check_code( $vars->getparam( $element->{ name } ), $vars->getparam( 'code' ) );
 	
 	my $captcha_error = $vars->getCaptchaErr( $c_status );
+	
 	$captcha_error = "$element->{name}|$captcha_error" if $captcha_error;
 	
 	return $captcha_error;
@@ -1715,11 +1718,13 @@ sub check_logic
 	for my $rule ( @{ $element->{ check_logic } } ) {
 	
 		if ( $rule->{ condition } =~ /^(equal|now)_or_(later|earlier)$/ ) {
+		
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 			
 			my $datediff;
 			
 			if ( $rule->{ condition } =~ /^equal/ ) {
+			
 				$datediff = $self->query('sel1', "
 					SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
 					$value, $tables_id->{ 'Auto'.$rule->{table} }
@@ -1833,6 +1838,7 @@ sub text_error
 				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
 	
 	my $current_error = $self->lang( $text->[ $error_code ] );
+	
 	$current_error =~ s/\[name\]/$name_of_element/;
 	$current_error =~ s/\[relation\]/$relation/;
 	
@@ -1920,6 +1926,7 @@ sub create_new_appointment
 	my $info_for_contract = "from_db";
 	
 	my $tables_transfered_id = $self->get_current_table_id( $token );
+	
 	my $db_rules = $self->get_content_db_rules();
 
 	my ( $insurance_line, $person_for_contract ) = $self->query('sel1', "
@@ -2031,6 +2038,7 @@ sub visapurpose_assembler
 	my ( $self, $hash ) = @_;
 
 	my $visa = '';
+	
 	for (1..17) {
 		$visa .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ VisaPurpose } == $_ ? '1' : '0' );
 	};
@@ -2045,8 +2053,10 @@ sub mezzi_assembler
 	my ( $self, $hash ) = @_;
 
 	my $mezzi = '';
+	
 	for (1..7) {
 		$mezzi .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
+		
 		delete $hash->{ 'Mezzi' . $_ };
 	};
 
@@ -2061,6 +2071,7 @@ sub get_content_db_rules
 	my $self = shift;
 	
 	my $content = $self->get_content_rules();
+	
 	my $db_rules = {};
 
 	for my $page ( keys %$content ) {
@@ -2103,6 +2114,7 @@ sub insert_hash_table
 	for (keys %$hash) {
 		$request_columns .= ( $request_columns ? ',' : '' ) . $_;
 		$request_values .= ( $request_values ? ',' : '' ) . '?';
+		
 		push @request_values, $hash->{ $_ };
 	}
 	
@@ -2172,15 +2184,14 @@ sub age
 	my $self = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
-	my $gconfig = $vars->getConfig('general');
-	my $age_free_days = $gconfig->{'age_free_days'} + 0;
+	my $age_free_days = $vars->getConfig( 'general' )->{ age_free_days } + 0;
 
 	my ( $birth_year, $birth_month, $birth_day ) = split /\-/, shift; 
 	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
 	
 	my $age = $year - $birth_year;
-	$age-- unless sprintf("%02d%02d", $month, $day)
-		>= sprintf("%02d%02d", $birth_month, $birth_day);
+	$age-- unless sprintf( "%02d%02d", $month, $day )
+		>= sprintf( "%02d%02d", $birth_month, $birth_day );
 	$age = 0 if $age < 0;
 
 	return $age;
@@ -2215,7 +2226,9 @@ sub query
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	if ( $type eq 'sel1' ) {
+	
 		my @result = $vars->db->sel1(@_);
+		
 		return ( wantarray ? @result : $result[0] );
 	}
 		
