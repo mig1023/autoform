@@ -52,7 +52,7 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_regexp,
 					'args' => [],
-					'expected' => '^a[a-z0-9]{63}$',
+					'expected' => '^t[a-z0-9]{63}$',
 				},
 			},
 		},
@@ -66,12 +66,13 @@ sub get_test_list {
 				},
 			},
 		},
-		{ 	'func' 	=> \&{ VCS::Site::autoform::get_token_error },
-			'comment' => 'get_token_error',
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_page_error },
+			'comment' => 'get_page_error',
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
 					'args' => [ '0' ],
-					'expected' => [ '<center>ошибка: внутренняя ошибка</center>', '', 'autoform.tt2' ],
+					'expected' => [ '<center>ошибка: для правильной работы анкеты необходимо, чтобы в браузере' .
+							' был включён javascript</center>', '', 'autoform.tt2' ],
 				},
 				2 => { 	'tester' => \&test_array,
 					'args' => [ '1' ],
@@ -270,18 +271,6 @@ sub get_test_list {
 				},
 			},
 		},
-		{ 	'func' 	=> \&{ VCS::Site::autoform::get_center_id },
-			'comment' => 'get_center_id',
-			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [],
-					'param' => [
-						{ 'name' => 'center', 'value' => '999' },
-					],
-					'expected' => '999',
-				},
-			},
-		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_html_for_element },
 			'comment' => 'get_html_for_element',
 			'test' => { 	
@@ -317,7 +306,7 @@ sub get_test_list {
 				8 => { 	'tester' => \&test_line,
 					'args' => [ 'select', 'element', '3', { 1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth' }, undef, '2' ],
 					'expected' => 
-						'<select class="input_width" size = "1" name="element" id="element">' .
+						'<select class="input_width select_gen" size = "1" name="element" id="element">' .
 						'<option  value="2">second</option><option  value="1">first</option>' .
 						'<option  value="4">fourth</option><option selected value="3">third</option></select>',
 				},
@@ -487,7 +476,9 @@ sub get_test_list {
 						],
 						'timeslots' => [],
 						'mask' => [],
-						'datepicker' => []
+						'datepicker' => [],
+						'post_index' => [],
+						'with_map' => [],
 					},
 
 				},
@@ -570,7 +561,8 @@ sub get_test_list {
 							'EMail' => 'email',
 							'MobilPermission' => 'mobil_info',
 							'VType' => 'vtype'
-						}
+						},
+						'alternative_data_source' => {},
 					}
 				},
 			},
@@ -895,22 +887,22 @@ sub get_test_list {
 			'comment' => 'query',
 			'test' => { 	
 				1 => { 	'tester' => \&test_write_db,
-					'args' => [ 'query', 'UPDATE AutoAppData SET Finished = 5 WHERE ID = ?', {}, '[appdata_id]' ],
+					'args' => [ 'query', 'test', 'UPDATE AutoAppData SET Finished = 5 WHERE ID = ?', {}, '[appdata_id]' ],
 					'expected' => '[appdata_id]:AutoAppData:Finished:5',
 				},
 				2 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_query,
-					'args' => [ 'sel1', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+					'args' => [ 'sel1', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => '15',
 				},
 				3 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_query,
-					'args' => [ 'selall', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+					'args' => [ 'selall', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => [ [ [ '15' ] ] ],
 				},
 				4 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_query,
-					'args' => [ 'selallkeys', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+					'args' => [ 'selallkeys', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => [ [ { 'Finished' => '15' } ] ],
 				},
 			},
@@ -934,7 +926,6 @@ sub get_test_list {
 						'JAddr' => 'г.Москва',
 						'AddrEqualled' => '0',
 						'SenderID' => '1',
-						'SenderCity' => '26',
 						'CTemplate' => 'rtf',
 						'isConcil' => '0',
 						'isSMS' => '1',
@@ -1492,12 +1483,12 @@ sub get_tests
 			for ( @{ $t->{param} } ) {
 				$vars->setparam( $_->{name} ,$_->{value} );
 			}
-			
+	
 			my $test_result =  &{ $t->{tester} }( 
 				$t->{debug}, $t->{expected}, "$test->{comment}-$test_num", $self, 
 				&{ $test->{func} }( $self, @{ $t->{args} } )
 			);
-			
+	
 			if ( $test_result ) {
 				$err_line .= ( $err_line ? ', ' : '' ) . $test_num;
 			}
@@ -1754,10 +1745,11 @@ sub pre_corrupt_token
 	my ( $self, $type, $test, $num, $token ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
-		$$token =~ s/^a/F/;
+		$self->{ test_token_save } = $$token;
+		$$token =~ s/\w$/F/;
 	}
 	else {
-		$$token =~ s/^F/a/;
+		$$token = $self->{ test_token_save };
 	}	
 }
 
@@ -1818,12 +1810,12 @@ sub pre_init_param
 	if ( $type eq 'PREPARE' ) { 
 		$vars->db->query("
 			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
-			Insurance, BAddr, JAddr, AddrEqualled, SenderID, SenderCity, CTemplate, isConcil, 
+			Insurance, BAddr, JAddr, AddrEqualled, SenderID, CTemplate, isConcil, 
 			isSMS, isUrgent, posShipping, isDover, calcInsurance, cdSimpl, cdUrgent, cdCatD, 
 			CollectDate, siteLink, calcConcil, ConsNDS, genbank, isTranslate, shengen, isAnketa, 
 			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
 			DefaultPaymentMethod, DisableAppSameDay) 
-			VALUES (1, 'Moscow', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 26, 'rtf', 
+			VALUES (1, 'Moscow', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 'rtf', 
 			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)");
 	} 
 	else {

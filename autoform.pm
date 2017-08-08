@@ -2228,7 +2228,7 @@ sub query
 	my $vars = $self->{ 'VCS::Vars' };
 	my $return;
 	
-	my $time_start = [ gettimeofday() ];
+	# my $time_start = [ gettimeofday() ];
 
 	$return = $vars->db->selall(@_) if $type eq 'selall';
 	$return = $vars->db->selallkeys(@_) if $type eq 'selallkeys';
@@ -2236,8 +2236,8 @@ sub query
 	
 	my @result = $vars->db->sel1(@_) if $type eq 'sel1';
 	
-	my $milliseconds = tv_interval( $time_start ) * 1000;
-	warn Dumper( \@_ ) . '>' x 25 . " line $line - $milliseconds ms" if $milliseconds > 1; 
+	# my $milliseconds = tv_interval( $time_start ) * 1000;
+	# warn Dumper( \@_ ) . '>' x 25 . " line $line - $milliseconds ms" if $milliseconds > 1; 
 	
 	return ( wantarray ? @result : $result[0] ) if $type eq 'sel1';
 	
