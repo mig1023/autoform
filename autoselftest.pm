@@ -104,9 +104,12 @@ sub get_test_list {
 							'nearest_date' => [ 'free_date' ],
 							'timeslots' => [],
 							'mask' => [],
-							'datepicker' => []
+							'datepicker' => [],
+							'with_map' => [],
+							'post_index' => [],
 						},
 						'[progress_bar]',
+						undef,
 					],
 				},
 				2 => { 	'tester' => \&test_array,
@@ -139,8 +142,11 @@ sub get_test_list {
 								's_date',
 								'f_date',
 							],
+							'with_map' => [],
+							'post_index' => [],
 						},
 						'[progress_bar_2]',
+						undef,
 					],
 				},
 				3 => { 	'tester' => \&test_array,
@@ -152,16 +158,19 @@ sub get_test_list {
 					'expected' => [
 						'1', 
 						'Начало записи', 
-						'[first_page]', 
+						'[first_page_selected]', 
 						'',
 						'autoform.tt2',
 						{
 							'nearest_date' => [ 'free_date' ],
 							'timeslots' => [],
 							'mask' => [],
-							'datepicker' => []
+							'datepicker' => [],
+							'with_map' => [],
+							'post_index' => [],
 						},
 						'[progress_bar]',
+						undef,
 					],
 				},
 				
@@ -1168,26 +1177,50 @@ my $progress_bar_2 =
 
 my $first_page = 
 	'<tr><td><label id="text">Визовый центр</label></td>' .
-	'<td><select class="input_width" size = "1" name="center" ' .
-	'id="center" onchange="update_nearest_date_free_date();"></select>' .
-	'</td></tr><tr><td><label id="text">Тип визы</label></td>' .
-	'<td><select class="input_width" size = "1" name="vtype" id="vtype"></select></td>' .
-	'</tr><tr><td><label id="text">Ближайшее доступное время</label></td>' .
-	'<td><label class="info" id="free_date"><b>[text]</b></label></td></tr>' .
-	'<tr><td><label id="text">Email</label></td>' .
-	'<td><input class="input_width input_gen" type="text" value="" name="email" ' .
-	'id="email" title="Введите существующий адрес почты. На него будет выслано ' .
+	'<td><select class="input_width select_gen" size = "1" name="center" ' .
+	'id="center" onchange="update_nearest_date_free_date();"></select></td>' .
+	'</tr><tr><td><label id="text">Тип визы</label></td>' .
+	'<td><select class="input_width select_gen" size = "1" name="vtype" ' .
+	'id="vtype"><option  value="13">Turismo</option></select></td></tr>' .
+	'<tr><td><label id="text">Ближайшее доступное время</label></td>' .
+	'<td><label class="info" id="free_date"><b></b></label></td></tr>' .
+	'<tr><td><label id="text">Email</label></td><td><input class="input_width ' .
+	'input_gen" type="text" value="" name="email" id="email" ' .
+	'title="Введите существующий адрес почты. На него будет выслано ' .
 	'подтверждение и запись в визовый центре"></td></tr>' .
 	'<tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen">' .
 	'<span class="exam_span_gen">mail@mail.ru</span></td>' .
-	'<tr><td><label id="text"></label></td><td>' .
-	'<input type="checkbox" value="pers_info" name="pers_info" id="pers_info">' .
+	'<tr><td><label id="text"></label></td><td><input type="checkbox" ' .
+	'value="pers_info" name="pers_info" id="pers_info">' .
 	'<label for="pers_info">я согласен на обработку персональных данных</label>' .
-	'</td></tr><tr><td><label id="text"></label></td>' .
-	'<td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info">' .
-	'<label for="mobil_info">я согласен на условия работы с мобильными телефона ' .
-	'на территории визового центра</label></td></tr>';
+	'</td></tr><tr><td><label id="text"></label></td><td>' .
+	'<input type="checkbox" value="mobil_info" name="mobil_info" ' .
+	'id="mobil_info"><label for="mobil_info">я согласен на условия работы ' .
+	'с мобильными телефона на территории визового центра</label></td></tr>';
 
+my $first_page_selected = 
+	'<tr><td><label id="text">Визовый центр</label></td>' .
+	'<td><select class="input_width select_gen" size = "1" name="center" ' .
+	'id="center" onchange="update_nearest_date_free_date();"></select></td>' .
+	'</tr><tr><td><label id="text">Тип визы</label></td>' .
+	'<td><select class="input_width select_gen" size = "1" name="vtype" ' .
+	'id="vtype"><option selected value="13">Turismo</option></select></td></tr>' .
+	'<tr><td><label id="text">Ближайшее доступное время</label></td>' .
+	'<td><label class="info" id="free_date"><b></b></label></td></tr>' .
+	'<tr><td><label id="text">Email</label></td><td><input class="input_width ' .
+	'input_gen" type="text" value="" name="email" id="email" ' .
+	'title="Введите существующий адрес почты. На него будет выслано ' .
+	'подтверждение и запись в визовый центре"></td></tr>' .
+	'<tr class="mobil_hide"><td>&nbsp;</td><td class="exam_td_gen">' .
+	'<span class="exam_span_gen">mail@mail.ru</span></td>' .
+	'<tr><td><label id="text"></label></td><td><input type="checkbox" ' .
+	'value="pers_info" name="pers_info" id="pers_info">' .
+	'<label for="pers_info">я согласен на обработку персональных данных</label>' .
+	'</td></tr><tr><td><label id="text"></label></td><td>' .
+	'<input type="checkbox" value="mobil_info" name="mobil_info" ' .
+	'id="mobil_info"><label for="mobil_info">я согласен на условия работы ' .
+	'с мобильными телефона на территории визового центра</label></td></tr>';
+	
 my $second_page = 
 	'<tr><td><label id="text">Дата начала поездки</label></td>' .
 	'<td><input class="input_width input_gen" type="text" value="" ' .
@@ -1468,6 +1501,7 @@ sub get_tests
 				s/\[progress_bar\]/$progress_bar/g;
 				s/\[progress_bar_2\]/$progress_bar_2/g;
 				s/\[first_page\]/$first_page/g;
+				s/\[first_page_selected\]/$first_page_selected/g;
 				s/\[second_page\]/$second_page/g;
 				
 				$_ = $self->get_content_rules( 1, 'full' ) if /\[page1\]/;
