@@ -2108,16 +2108,12 @@ sub insert_hash_table
 {
 	my ( $self, $table_name, $hash ) = @_;
 	
-	my $request_columns = '';
-	my $request_values = '';
 	my @request_values = ();
 	
-	for (keys %$hash) {
-		$request_columns .= ( $request_columns ? ',' : '' ) . $_;
-		$request_values .= ( $request_values ? ',' : '' ) . '?';
-		
-		push @request_values, $hash->{ $_ };
-	}
+	my $request_columns = join ',', keys %$hash;
+	my $request_values = join ',', '?' x keys %$hash;
+	
+	push @request_values, $hash->{ $_ } for keys %$hash;
 	
 	$self->query( 'query', __LINE__, "
 		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, @request_values
