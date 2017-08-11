@@ -23,6 +23,10 @@
 <noscript>
 	<meta http-equiv="refresh" content="0; url=[% addr %]?t=[% token %]&script=no">
 </noscript>
+[% ELSE %]
+<script>
+	window.location.href = "[% addr %]?t=[% token %]";
+</script>
 [% END %]
 
 <script>
