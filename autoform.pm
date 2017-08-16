@@ -840,20 +840,18 @@ sub check_all_app_finished_and_not_empty
 {
 	my ( $self, $token ) = @_;
 	
-	my $all_finished = 0;
-	
 	my ( $app_count, $app_finished ) = $self->query( 'sel1', __LINE__, "
 		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $token
 	);
-		
-	$all_finished = 1 if $app_finished < $app_count;
+
+	return 2 if $app_count < 1;
 	
-	$all_finished = 2 if $app_count < 1;
+	return 1 if $app_finished < $app_count;
 	
-	return $all_finished;
+	return 0;
 }
 
 sub get_add
@@ -1784,6 +1782,29 @@ sub check_logic
 			$first_error = $self->text_error( 15, $element ) unless ( $postcode_id );
 		}
 		
+		if ( $rule->{ condition } =~ /^email_not_blocked$/ and $value ) {
+		
+			my $center = $self->query( 'sel1', __LINE__, "
+				SELECT CenterID FROM AutoAppointments WHERE ID = ?", 
+				$tables_id->{ 'AutoAppointments' }
+			);
+			
+			my $blocket_emails = VCS::Site::autodata::get_blocked_emails();
+			
+			for my $m ( @$blocket_emails ) {
+				
+				next if $m->{ email } !~ /^$value$/i;
+				
+				if ( ref( $m->{ for_centers } ) eq 'ARRAY' ) {
+				
+					my %centers = map { $_ => 1 } @{ $m->{ for_centers } };
+					next unless exists $centers{ $center };
+				}
+				
+				$first_error = $self->text_error( 16 + ( $m->{ show_truth } ? 1 : 0 ) , $element ); 
+			};
+		}
+		
 		last if $first_error;
 	}
 	
@@ -1829,6 +1850,8 @@ sub text_error
 		'Необходимо заполнить поле "[name]" или указать "[relation]"',
 		'Необходимо заполнить поле "[name]", если заполнено "[relation]"',
 		'Введён недопустимый индекс или город в поле "[name]", попробуйте указать другой',
+		'Вы ввели недопустимый адрес электронной почты',
+		'Этот электронный адрес был заблокирован. Вы превысили допустимое количество записей',
 	];
 	
 	if ( !defined($element) ) {

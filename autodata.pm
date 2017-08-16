@@ -71,6 +71,11 @@ sub get_content_rules_hash
 				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
 				'example' => 'mail@mail.ru',
 				'check' => 'zWN\@\s\-\.\,\;',
+				'check_logic' => [
+					{
+						'condition' => 'email_not_blocked',
+					},
+				],
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'EMail',
@@ -2106,6 +2111,18 @@ sub get_geo_branches
 		38 => [ '57.816866', '28.3087423', ],
 		42 => [ '43.315049', '45.697579', ],
 	};
+};
+
+sub get_blocked_emails
+# //////////////////////////////////////////////////
+{
+	return [
+		{
+			'email' => 'blocked_mail@mail.com',
+			'for_centers' => [ 1 ],
+			'show_truth' => 0,
+		},
+	];
 };
 
 1;
