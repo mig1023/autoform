@@ -1,0 +1,66 @@
+<head>
+<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
+<link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+<link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+<link href="/css/autoform.css" rel="stylesheet" type="text/css">
+</head>
+
+<font face="arial">
+
+<center>
+<div id="app_form" style = "margin: 50px ">
+
+<form action = "[% addr %]" method = "POST" name = "dataform">
+<input type = "hidden" value = "nothing" name = "action" id = "action">
+
+<table width="100%">
+
+<tr><td align="center">
+<table width="400px" id="app_table">
+
+<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
+
+<tr><td colspan="3"><span class="suppl_text">[% langreq('Уважаемые представители туристических агентств и туроператоров.<br><br>
+Убедительно просим Вас соблюдать правила подачи документов в Визовый Центр Италии!<br><br>Напоминаем Вам, что именно Вы должны обеспечивать ПРИСУТСТВИЕ заявителей для снятия Биометрии в Визовом Центре в день подачи Вами комплекта документов. Это полностью Ваша ответственность!<br><br>Несоблюдение данного правила приводит к нарушению бизнес-процессов Визового Центра, существенно затрудняет рабочий процесс и взаимодействие с Генеральным Консульством, и может повлиять на сроки рассмотрения документов. Также Визовый Центр не имеет возможности и не обязан хранить документы Ваших туристов, не явившихся на сдачу биометрии в назначенное время. Все эти нарушения в свою очередь могут привести к следующим трудностям:<br><br>1. Возникновению ошибок;<br>2. Изменению (увеличению) сроков рассмотрения запроса на визу, так как рассмотрение документов начинается ТОЛЬКО после того, как клиентами будут сданы отпечатки пальцев. И в случае, если отпечатки пальцев не сданы вовремя и сроки Вылета поджимают, может возникнуть необходимость оплаты (доплаты) оформления визы по срочному тарифу;<br>3. Изменению (смещению, переносу) дат вылета.<br><br>Просим Вас соблюдать правила Визового центра для обеспечения предоставления Вашим клиентам качественных услуг.') %]<br><br><br></span>
+</td></tr>
+
+<tr><td><label id="text">Логин</label></td><td><input class="input_width input_gen" type="text" value="" name="login" id="login" title="Введите логин"></td></tr>
+<tr><td><label id="text">Пароль</label></td><td><input class="input_width input_gen" type="password" value="" name="email" id="email" title="Введите пароль"></td></tr>
+
+<tr><td colspan="3"><br>
+	<input type="button" value="[% langreq('Далее') %] ▷" onclick="go_button('forward');">
+</td></tr><tr><td colspan="3">&nbsp;</td></tr>
+<tr><td colspan="3"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
+</td></tr></table>
+
+</td></tr></table>
+
+</form>
+
+<script>
+
+function go_button(where) {
+	$('#action').val(where);
+	document.dataform.submit();
+};
+
+function init_comm(pos_x, pos_y) {
+	$('.input_gen').poshytip('destroy');
+
+	$('.input_gen').poshytip({
+		className: 'tip-yellowsimple',
+		showOn: 'focus',
+		alignTo: 'target',
+		alignX: pos_x,
+		alignY: pos_y,
+		offsetX: 5,
+		showTimeout: 100
+	});
+}
+
+init_comm( 'right', 'center' );
+
+</script>
+
+</div>

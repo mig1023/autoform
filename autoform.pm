@@ -33,6 +33,7 @@ sub getContent
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
 		'findpcode' => \&find_pcode,
+		'agency' => \&agency,
     	};
     	
     	my $disp_link = $dispathcher->{ $id };
@@ -2196,6 +2197,25 @@ sub find_pcode
 	};
 	
 	$template->process( 'autoform_pcode.tt2', $tvars );
+}
+
+sub agency
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	warn "agency";
+	
+	$vars->get_system->pheader( $vars );
+	
+	my $tvars = {
+		'langreq' => sub { return $vars->getLangSesVar(@_) },
+		'title' => 'Вход в личный кабинет',
+		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+	};
+	$template->process( 'autoform_agency.tt2', $tvars );
 }
 
 sub age

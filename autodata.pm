@@ -2021,6 +2021,7 @@ sub get_settings
 			'addr' => '/autoform/',
 			'addr_captcha' => '/vcs/static/files/',
 			'addr_vcs' => '/vcs/',
+			'agency' => '/autoform/agency.htm',
 		},
 		
 		'age' => {
