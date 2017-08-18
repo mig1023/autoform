@@ -29,12 +29,13 @@ sub getContent
 	my $vars = $self->{'VCS::Vars'};
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
-	
+
     	my $dispathcher = {
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
 		'findpcode' => \&find_pcode,
 		'agency' => \&autoagency,
+		'docstatus' => \&docstatus,
     	};
     	
     	my $disp_link = $dispathcher->{ $id };
@@ -187,6 +188,32 @@ sub autoagency
 	$autoagency->{ af } = $self;
 	
 	$autoagency->agency( $task, $id, $template );
+}
+
+sub docstatus
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+
+	my $app = $vars->getparam('app') || '';
+	
+	$app =~ s/[^0-9]//g;
+
+	my $status = 0;
+
+	if ( $app ne '' ) {
+	
+		$status = $vars->db->sel1("
+			SELECT PStatus FROM DocPack JOIN Appointments ON Appointments.PacketID = DocPack.ID 
+			WHERE Appointments.ID = ? ORDER BY Appointments.ID DESC LIMIT 1", $app
+		) || 0;
+	}
+	
+	$vars->get_system->pheader($vars);
+	
+	print $status;
 }
 
 sub get_same_info_for_timeslots
@@ -481,18 +508,17 @@ sub get_page_error
 {
 	my ( $self, $error_num ) = @_;
 	
-	my $template = 'autoform.tt2';
-
 	my $error_type = [
 		'для правильной работы анкеты необходимо, чтобы в браузере был включён javascript',
 		'неправильный токен',
 		'такого токена не существует',
 		'запись уже завершена',
+		'логин или пароль были введены неверно',
 	];
 	
 	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
 	
-	return ( "<center>$title</center>", undef, $template );
+	return ( "<center>$title</center>", undef, 'autoform.tt2' );
 }
 
 sub get_autoform_content

@@ -17,11 +17,14 @@
 <table width="100%">
 
 <tr><td align="center">
-<table width="400px" id="app_table">
+
+<table width="[% IF login_error %]800px[% ELSE %]400px[% END %]" id="app_table">
 
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
-[% IF !login %]
+[% IF login_error %]
+
+[% ELSIF !login %]
 
 <tr><td colspan="3"><span class="suppl_text">[% langreq('Уважаемые представители туристических агентств и туроператоров.<br><br>
 Убедительно просим Вас соблюдать правила подачи документов в Визовый Центр Италии!<br><br>Напоминаем Вам, что именно Вы должны обеспечивать <b>присутствие</b> заявителей для снятия Биометрии в Визовом Центре в день подачи Вами комплекта документов. Это полностью Ваша ответственность!<br><br>Несоблюдение данного правила приводит к нарушению бизнес-процессов Визового Центра, существенно затрудняет рабочий процесс и взаимодействие с Генеральным Консульством, и может повлиять на сроки рассмотрения документов. Также Визовый Центр не имеет возможности и не обязан хранить документы Ваших туристов, не явившихся на сдачу биометрии в назначенное время. Все эти нарушения в свою очередь могут привести к следующим трудностям:<br><br>1. Возникновению ошибок;<br>2. Изменению (увеличению) сроков рассмотрения запроса на визу, так как рассмотрение документов начинается <b>только</b> после того, как клиентами будут сданы отпечатки пальцев. И в случае, если отпечатки пальцев не сданы вовремя и сроки Вылета поджимают, может возникнуть необходимость оплаты (доплаты) оформления визы по срочному тарифу;<br>3. Изменению (смещению, переносу) дат вылета.<br><br>Просим Вас соблюдать правила Визового центра для обеспечения предоставления Вашим клиентам качественных услуг.') %]<br><br><br></span>
@@ -34,15 +37,51 @@
 	<input type="button" value="[% langreq('Далее') %] ▷" onclick="go_button('forward');">
 </td></tr><tr><td colspan="3">&nbsp;</td></tr>
 
+<tr><td colspan="3"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
+</td></tr>
+
 [% ELSE %]
 
-<tr><td colspan="3">[% login %]<br><br><br></span>
+[% n = 0 %]
+
+<tr><td colspan="3">&nbsp;</td></tr>
+<tr><td colspan="3"><b>[% langreq('Незавершённые ноты') %]</b>
+</td></tr>
+<tr><td colspan="3">&nbsp;</td></tr>
+
+[% FOREACH autoapp IN auto_appointments %]
+[% n = n + 1 %]
+<tr><td>[% n %]</td><td>[% autoapp.RDate %]</td><td><input type="button" value="[% langreq('Дооформить') %] ▷" onclick="go_button('forward');">
+</td></tr>
+[% END %]
+<tr><td colspan="3"><input type="button" value="[% langreq('Создать новую ноту') %]" onclick="go_button('forward');"></td></tr>
+
+[% n = 0 %]
+
+<tr><td colspan="3">&nbsp;</td></tr>
+<tr><td colspan="3"><b>[% langreq('Уже поданные ноты') %]</b>
+<tr><td colspan="3">&nbsp;</td></tr>
+
+[% FOREACH app IN appointments %]
+[% n = n + 1 %]
+<tr><td>[% n %]</td><td>[% app.AppNum %]</td><td>
+[% IF app.Status == 1 %][% langreq('подана') %]
+[% ELSIF app.Status == 2 %][% langreq('отменена') %]
+[% ELSIF app.Status == 3 %][% langreq('скрыта') %]
+[% ELSIF app.Status == 4 %]<div id="[% app.ID %]" class="docstatus"><img src='/files/autoform_wait.gif'></div>
+[% ELSIF app.Status == 5 %][% langreq('повторное') %]
+[% ELSE %][% langreq('ошибка') %][% END %]
+</td></tr>
+[% END %]
+
+<tr><td colspan="3">&nbsp;</td></tr>
+
+<tr><td colspan="3"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 </td></tr>
 
 [% END %]
 
-<tr><td colspan="3"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
-</td></tr></table>
+</table>
 
 </td></tr></table>
 
@@ -69,7 +108,32 @@ function init_comm(pos_x, pos_y) {
 	});
 }
 
+function check_docstatus() {
+	$('.docstatus').each(function(){
+		var app_id = this.id;
+		$.ajax({
+			url: '/autoform/docstatus.htm?app=' + app_id,
+			type: 'POST',
+			success: function(data) {
+				doc_status = 'ошибка';
+			
+				if ( data == 1 ) { doc_status = '[% langreq('ожидает оплаты') %]'; }
+				else if ( data == 2 ) { doc_status = '[% langreq('оплачена') %]'; }
+				else if  ( ( data == 3 ) || ( data > 7 ) ) { doc_status = '[% langreq('в консульстве') %]'; }
+				else if ( data == 4 ) { doc_status = '[% langreq('документы готовы') %]'; }
+				else if ( data == 5 ) { doc_status = '[% langreq('доставка') %]'; }
+				else if ( data == 6 ) { doc_status = '[% langreq('завершён') %]'; }
+				else if ( data == 7 ) { doc_status = '[% langreq('удалён') %]'; }
+			
+				$('#' + app_id).html( doc_status );
+			} 
+		});
+
+	});
+}
+
 init_comm( 'right', 'center' );
+check_docstatus();
 
 </script>
 

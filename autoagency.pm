@@ -20,33 +20,30 @@ sub agency
 	my ( $self, $task, $id, $template ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
+	my $login_error = undef;
+	my $title = 'Вход в личный кабинет';
+	my $appointments = [];
+	my $auto_appointments = [];
 
 	my ( $login, $company, $type ) = $self->get_agency_session();
 		
 	if ( $type eq 'workflow' ) {
-	
+		$title = '';
+		( $appointments, $auto_appointments ) = $self->get_agency_main( $company );
 	}
 	
-	elsif ( $type eq 'login_pass_error' ) {
-	
-	}
-	
-	elsif ( $type eq 'login_form' ) {
-	
-	}
-	
-	else {
-		return;
-	}
+	( $title, undef, $login_error ) = $self->{ af }->get_page_error( 4 ) if $type eq 'login_pass_error';
 	
 	$vars->get_system->pheader( $vars );
 	
 	my $tvars = {
 		'langreq' => sub { return $vars->getLangSesVar(@_) },
-		'title' => 'Вход в личный кабинет',
+		'title' => $title,
 		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ agency },
+		'appointments' => $appointments,
+		'auto_appointments' => $auto_appointments,
 		'login' => $login,
-		#'content_text' => $content,
+		'login_error' => $login_error,
 	};
 	$template->process( 'autoform_agency.tt2', $tvars );
 }
@@ -57,16 +54,16 @@ sub get_agency_session
 	my $self = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
-	
+
 	my ( $login, $company, $session ) = $self->get_session_from_memcached( $self->get_session_from_cookies() );
-	
+
 	if ( $login ) {
-	
+
 		$self->update_in_memcached( $login, $company, $session );
 		
 		return ( $login, $company, 'workflow' );
 	}
-	
+
 	if ( $vars->getparam( 'login' ) ) {
 	
 		( $login, $company ) = $self->check_login_from_param();
@@ -76,13 +73,13 @@ sub get_agency_session
 			$session = $self->session_generation( $login );
 		
 			$self->update_in_cookies( $self->update_in_memcached( $login, $company, $session ) );
+			
 			return;
 		}
 		else {
 			return ( undef, undef, 'login_pass_error' );
 		}
 	}
-
 	return ( undef, undef, 'login_form' );
 }
 
@@ -186,7 +183,26 @@ sub check_login_from_param
 		WHERE Login = ? AND Pass = PASSWORD(?)", $login_param, $pass
 	);
 	
-	return( $login, $company );
+	return ( $login, $company );
+}
+
+sub get_agency_main
+# //////////////////////////////////////////////////
+{
+	my ( $self, $company ) = @_;
+	
+	my $vars = $self->{ af }->{ 'VCS::Vars' };
+	
+	my $appointments = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT ID, AppNum, Status FROM Appointments WHERE CompanyID = ? LIMIT 10", $company
+	);
+	
+	my $auto_appointments = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT RDate, Token FROM AutoToken JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID 
+		WHERE CompanyID = ? AND Finished = 0 LIMIT 10", $company
+	);
+	
+	return ( $appointments, $auto_appointments );
 }
 
 1;
