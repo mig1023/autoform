@@ -3,6 +3,7 @@ use strict;
 
 use VCS::Vars;
 use VCS::Site::autodata;
+use VCS::Site::autoagency;
 use VCS::Site::autoselftest;
 
 use Data::Dumper;
@@ -33,7 +34,7 @@ sub getContent
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
 		'findpcode' => \&find_pcode,
-		'agency' => \&agency,
+		'agency' => \&autoagency,
     	};
     	
     	my $disp_link = $dispathcher->{ $id };
@@ -173,6 +174,21 @@ sub autoselftest
 	print $self_test_result;
 }
 
+sub autoagency
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my $autoagency = VCS::Site::autoagency->new('VCS::Site::autoagency', $vars);
+	
+	$autoagency->{ autoform } = VCS::Site::autodata::get_settings();
+	$autoagency->{ af } = $self;
+	
+	$autoagency->agency( $task, $id, $template );
+}
+
 sub get_same_info_for_timeslots
 # //////////////////////////////////////////////////
 {
@@ -226,7 +242,7 @@ sub init_add_param
 	
 	if ( $keys_in_current_page->{ param } ) {
 	
-		$info_from_db = $vars->get_memd->get('autoform_addparam');
+		$info_from_db = $vars->get_memd->get( 'autoform_addparam' );
 		
 		if ( !$info_from_db ) {
 			my $info_from_sql = {
@@ -336,7 +352,7 @@ sub get_collect_date
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $collect_dates = $vars->get_memd->get('autoform_collectdates');
+	my $collect_dates = $vars->get_memd->get( 'autoform_collectdates' );
 		
 	if ( !$collect_dates ) {
 	
@@ -448,7 +464,7 @@ sub token_generation
 	do {
 		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
 		
-		for (1..63) {
+		for ( 1..63 ) {
 			$token .= @alph[ int( rand( 35 ) ) ];
 		}
 		$token_existing = $self->query( 'sel1', __LINE__, "
@@ -552,7 +568,8 @@ sub get_autoform_content
 
 	my ( $content, $template ) = $self->get_html_page( $step, $token, $appnum );
 
-	my $progress = $self->get_progressbar( $page );
+	# hide progressbar!!!!!!!
+	my $progress = ''; # $self->get_progressbar( $page );
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
@@ -2197,25 +2214,6 @@ sub find_pcode
 	};
 	
 	$template->process( 'autoform_pcode.tt2', $tvars );
-}
-
-sub agency
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	warn "agency";
-	
-	$vars->get_system->pheader( $vars );
-	
-	my $tvars = {
-		'langreq' => sub { return $vars->getLangSesVar(@_) },
-		'title' => 'Вход в личный кабинет',
-		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
-	};
-	$template->process( 'autoform_agency.tt2', $tvars );
 }
 
 sub age

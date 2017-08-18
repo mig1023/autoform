@@ -2030,6 +2030,7 @@ sub get_settings
 		
 		'memcached' => {
 			'memcached_exptime' => 43200, # 12*3600 sec
+			'session_duration' => 600,
 		},
 	};
 }
