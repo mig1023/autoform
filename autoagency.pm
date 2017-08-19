@@ -26,7 +26,21 @@ sub agency
 	my $auto_appointments = [];
 
 	my ( $login, $company, $type ) = $self->get_agency_session();
+	
+	if ( lc( $vars->getparam( 'action' ) ) eq "new_app" ) {
+	
+		my $token = $self->{ af }->save_new_token_in_db( $self->{ af }->token_generation(), $company );
 		
+		$self->{ af }->create_clear_form( $token );
+		
+		$vars->get_system->redirect( 
+			$vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 
+			'?t=' . $token
+		);
+			
+		return;
+	}
+	
 	if ( $type eq 'workflow' ) {
 		$title = '';
 		( $appointments, $auto_appointments ) = $self->get_agency_main( $company );
@@ -198,9 +212,12 @@ sub get_agency_main
 	);
 	
 	my $auto_appointments = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT RDate, Token FROM AutoToken JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID 
-		WHERE CompanyID = ? AND Finished = 0 LIMIT 10", $company
+		SELECT StartDate, Token FROM AutoToken WHERE Company = ? AND Finished = 0 LIMIT 10", $company
 	);
+	
+	my $months = [ '', 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря' ];
+	
+	$_->{ StartDate } =~ s/(\d{4})\-(\d{2})\-(\d{2})/$3 $months->[$2] $1/ for @$auto_appointments;
 	
 	return ( $appointments, $auto_appointments );
 }

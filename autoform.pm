@@ -469,12 +469,15 @@ sub create_clear_form
 sub save_new_token_in_db
 # //////////////////////////////////////////////////
 {	
-	my ( $self, $token ) = @_;
+	my ( $self, $token, $company ) = @_;
+	
+	$company =~ s/[^0-9]//g;
+	$company = 'NULL' if $company eq '';
 
 	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, 
+		INSERT INTO AutoToken (Token, Company, AutoAppID, AutoAppDataID, 
 		AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, $token
+		VALUES (?, $company, 0, 0, 0, 1, '', 0, 0)", {}, $token
 	);
 	
 	return $token;
@@ -594,8 +597,7 @@ sub get_autoform_content
 
 	my ( $content, $template ) = $self->get_html_page( $step, $token, $appnum );
 
-	# hide progressbar!!!!!!!
-	my $progress = ''; # $self->get_progressbar( $page );
+	my $progress = $self->get_progressbar( $page );
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
@@ -1997,8 +1999,8 @@ sub create_new_appointment
 	
 	my $db_rules = $self->get_content_db_rules();
 
-	my ( $insurance_line, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
-		SELECT Insurance, PersonForAgreements FROM AutoToken 
+	my ( $insurance_line, $person_for_contract, $company ) = $self->query( 'sel1', __LINE__, "
+		SELECT Insurance, PersonForAgreements, Company FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $token
 	);
@@ -2014,7 +2016,8 @@ sub create_new_appointment
 	}
 	
 	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
-		$tables_transfered_id->{ AutoAppointments }, $db_rules, undef, undef, undef, $info_for_contract );
+		$tables_transfered_id->{ AutoAppointments }, $db_rules, undef, undef, undef, 
+		$info_for_contract, $company );
  	
 	my %insurance_list = map { $_ => 1 } split /,/, $insurance_line;
 	
@@ -2042,11 +2045,13 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract ) = @_;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, 
+		$insurance, $info_for_contract, $company ) = @_;
 	
 	my $hash = $self->get_hash_table( $autoname, $transfered_id );
 
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract );
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, 
+			$info_for_contract, $company );
 	
 	my $new_appid = $self->insert_hash_table( $name, $hash );
 	
@@ -2056,7 +2061,8 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, $info_for_contract ) = @_;
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, 
+		$info_for_contract, $company ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 
@@ -2089,8 +2095,12 @@ sub mod_hash
 	$hash->{ PolicyType } = 1 if $insurance;
 
 	if ( $table_name eq 'Appointments' ) {
+	
 		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $vars);
-		$hash->{ AppNum }  = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
+		
+		$hash->{ AppNum } = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
+		
+		$hash->{ CompanyID } = $company;
 
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
 			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
