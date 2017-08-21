@@ -123,8 +123,8 @@ function check_docstatus() {
 				else if  ( ( data == 3 ) || ( data > 7 ) ) { doc_status = '[% langreq('в консульстве') %]'; }
 				else if ( data == 4 ) { doc_status = '[% langreq('документы готовы') %]'; }
 				else if ( data == 5 ) { doc_status = '[% langreq('доставка') %]'; }
-				else if ( data == 6 ) { doc_status = '[% langreq('завершён') %]'; }
-				else if ( data == 7 ) { doc_status = '[% langreq('удалён') %]'; }
+				else if ( data == 6 ) { doc_status = '[% langreq('договор завершён') %]'; }
+				else if ( data == 7 ) { doc_status = '[% langreq('договор удалён') %]'; }
 			
 				$('#' + app_id).html( doc_status );
 			} 

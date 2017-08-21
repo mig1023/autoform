@@ -100,7 +100,7 @@ sub autoform
 	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
-	my ( $page_content, $template_file, $title, $progress, $appid, $last_error );
+	my ( $page_content, $template_file, $title, $progress, $appid, $last_error, $company );
 	my $step = 0;
 	my $special = {};
 	my $js_check_need = 1;
@@ -120,7 +120,7 @@ sub autoform
 		$js_check_need = 0;
 	}
 	else {
-		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
+		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $company ) = 
 			$self->get_autoform_content( $token );
 	}
 
@@ -136,6 +136,8 @@ sub autoform
 		$map_in_page = $self->get_geo_info( $token );
 	}
 
+	my $min_step = ( $company ? 2 : 1 );
+
 	$vars->get_system->pheader( $vars );
 	
 	my $tvars = {
@@ -145,9 +147,11 @@ sub autoform
 		'token' => $token,
 		'appid' => $appid,
 		'step' => $step,
+		'min_step' => $min_step,
 		'max_step' => $self->get_content_rules('length'),
 		'max_applicants' => $self->{ autoform }->{ general }->{ max_applicants },
 		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'agency' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ agency },
 		'last_error_name' => $last_error_name,
 		'last_error_text' => $last_error_text,
 		'special' => $special,
@@ -157,6 +161,7 @@ sub autoform
 		'lang_in_link' => $self->{ lang },
 		'js_check_need' => $js_check_need,
 		'map_in_page' => $map_in_page,
+		'company' => $company,
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -534,8 +539,8 @@ sub get_autoform_content
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token
+	my ( $step, $app_id, $company ) = $self->query( 'sel1', __LINE__, "
+		SELECT Step, AutoAppID, Company FROM AutoToken WHERE Token = ?", $token
 	);
 
 	my $action = lc( $vars->getparam('action') );
@@ -601,7 +606,7 @@ sub get_autoform_content
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
-	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid );
+	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $company );
 }
 
 sub check_relation
@@ -663,7 +668,7 @@ sub skip_page_by_relation
 		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?",
 		$current_table_id->{ 'Auto' . $relation->{table} }
 	);
-	
+
 	return $self->skip_by_condition( $value, $relation->{ value }, $condition ); 
 }
 
@@ -683,7 +688,7 @@ sub skip_by_condition
 	if ( $condition eq 'only_if_not' ) {
 		$skip_it = 1 if exists $relation{ $value };
 	}
-	
+
 	return $skip_it;
 }
 

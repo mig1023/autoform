@@ -34,6 +34,13 @@ sub get_content_rules_hash
 				'page_ord' => 1,
 				'progress' => 1,
 				'param' => 1,
+				'relation' => {
+					'only_if' => {
+						'table' => 'Token',
+						'name' => 'Company',
+						'value' => '0',
+					}
+				},
 			},
 			{
 				'type' => 'select',
@@ -106,9 +113,53 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Даты поездки' => [
+		'Начало ноты' => [
 			{
 				'page_ord' => 2,
+				'progress' => 1,
+				'param' => 1,
+				'relation' => {
+					'only_if_not' => {
+						'table' => 'Token',
+						'name' => 'Company',
+						'value' => '0',
+					}
+				},
+			},
+			{
+				'type' => 'select',
+				'name' => 'center',
+				'label' => 'Визовый центр',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'CenterID',
+				},
+				'param' => '[centers_from_db]',
+				'uniq_code' => 'onchange="update_nearest_date_free_date();"',
+			},
+			{
+				'type' => 'select',
+				'name' => 'vtype',
+				'label' => 'Тип визы',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'VType',
+				},
+				'param' => '[visas_from_db]',
+			},
+			{
+				'type' => 'info',
+				'name' => 'free_date',
+				'label' => 'Ближайшая доступная дата',
+				'special' => 'nearest_date',
+			},
+		],
+		
+		'Даты поездки' => [
+			{
+				'page_ord' => 3,
 				'progress' => 2,
 				'collect_date' => 1,
 			},
@@ -156,7 +207,7 @@ sub get_content_rules_hash
 		
 		'Список заявителей' => [
 			{
-				'page_ord' => 3,
+				'page_ord' => 4,
 				'progress' => 3,
 				'replacer' => '[list_of_applicants]',
 			},
@@ -164,7 +215,7 @@ sub get_content_rules_hash
 		
 		'Данные паспортов' => [
 			{
-				'page_ord' => 4,
+				'page_ord' => 5,
 				'progress' => 4,
 			},
 			{
@@ -417,7 +468,7 @@ sub get_content_rules_hash
 		
 		'Дополнительные данные' => [
 			{
-				'page_ord' => 5,
+				'page_ord' => 6,
 				'progress' => 5,
 				'param' => 1,
 				'ussr_or_rf_first' => 1,
@@ -608,7 +659,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по семейному положению' => [
 			{
-				'page_ord' => 6,
+				'page_ord' => 7,
 				'progress' => 5,
 				'relation' => {
 					'only_if' => {
@@ -633,7 +684,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по стране пребывания' => [
 			{
-				'page_ord' => 7,
+				'page_ord' => 8,
 				'progress' => 5,
 				'relation' => {
 					'only_if' => {
@@ -668,7 +719,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по цели посещения' => [
 			{
-				'page_ord' => 8,
+				'page_ord' => 9,
 				'progress' => 5,
 				'relation' => {
 					'only_if' => {
@@ -694,7 +745,7 @@ sub get_content_rules_hash
 		
 		'Данные о поездке' => [
 			{
-				'page_ord' => 9,
+				'page_ord' => 10,
 				'progress' => 6,
 				'param' => 1,
 			},
@@ -864,7 +915,7 @@ sub get_content_rules_hash
 		
 		'Разрешение на въезд, если необходимо' => [
 			{
-				'page_ord' => 10,
+				'page_ord' => 11,
 				'progress' => 6,
 				'relation' => {
 					'only_if' => {
@@ -917,7 +968,7 @@ sub get_content_rules_hash
 		
 		'Сроки действия последней визы' => [
 			{
-				'page_ord' => 11,
+				'page_ord' => 12,
 				'progress' => 6,
 				'relation' => {
 					'only_if' => {
@@ -957,7 +1008,7 @@ sub get_content_rules_hash
 		
 		'Дата сдачи отпечатков' => [
 			{
-				'page_ord' => 12,
+				'page_ord' => 13,
 				'progress' => 6,
 				'relation' => {
 					'only_if' => {
@@ -984,7 +1035,7 @@ sub get_content_rules_hash
 		
 		'Проживание' => [
 			{
-				'page_ord' => 13,
+				'page_ord' => 14,
 				'progress' => 7,
 				'relation' => {
 					'only_if' => {
@@ -1012,7 +1063,7 @@ sub get_content_rules_hash
 		
 		'Информация о проживании' => [
 			{
-				'page_ord' => 14,
+				'page_ord' => 15,
 				'progress' => 7,
 				'relation' => {
 					'only_if_not' => {
@@ -1064,7 +1115,7 @@ sub get_content_rules_hash
 		
 		'Приглашение' => [
 			{
-				'page_ord' => 15,
+				'page_ord' => 16,
 				'progress' => 7,
 				'param' => 1,
 				'relation' => {
@@ -1185,7 +1236,7 @@ sub get_content_rules_hash
 	
 		'Приглашение организации' => [
 			{
-				'page_ord' => 16,
+				'page_ord' => 17,
 				'progress' => 7,
 				'param' => 1,
 				'relation' => {
@@ -1288,7 +1339,7 @@ sub get_content_rules_hash
 		
 		'Расходы заявителя' => [
 			{
-				'page_ord' => 17,
+				'page_ord' => 18,
 				'progress' => 8,
 			},
 			{
@@ -1310,7 +1361,7 @@ sub get_content_rules_hash
 		
 		'Уточните спонсора' => [
 			{
-				'page_ord' => 18,
+				'page_ord' => 19,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1335,7 +1386,7 @@ sub get_content_rules_hash
 		
 		'Средства заявителя' => [
 			{
-				'page_ord' => 19,
+				'page_ord' => 20,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1367,7 +1418,7 @@ sub get_content_rules_hash
 		
 		'Средства спонсора' => [
 			{
-				'page_ord' => 20,
+				'page_ord' => 21,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1398,7 +1449,7 @@ sub get_content_rules_hash
 		
 		'Уточните иные средства' => [
 			{
-				'page_ord' => 21,
+				'page_ord' => 22,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1424,7 +1475,7 @@ sub get_content_rules_hash
 				
 		'Данные родственника в ЕС' => [
 			{
-				'page_ord' => 22,
+				'page_ord' => 23,
 				'progress' => 8,
 				'param' => 1,
 				'relation' => {
@@ -1504,7 +1555,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				'page_ord' => 23,
+				'page_ord' => 24,
 				'progress' => 9,
 				'replacer' => '[app_finish]',
 			},
@@ -1512,7 +1563,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				'page_ord' => 24,
+				'page_ord' => 25,
 				'progress' => 10,
 				'persons_in_page' => 1,
 			},
@@ -1532,7 +1583,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные для договора' => [
 			{
-				'page_ord' => 25,
+				'page_ord' => 26,
 				'progress' => 11,
 				'relation' => {
 					'only_if_not' => {
@@ -1644,7 +1695,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные доверенного лица' => [
 			{
-				'page_ord' => 26,
+				'page_ord' => 27,
 				'progress' => 11,
 				'relation' => {
 					'only_if' => {
@@ -1760,7 +1811,7 @@ sub get_content_rules_hash
 		
 		'Оформление записи' => [
 			{
-				'page_ord' => 27,
+				'page_ord' => 28,
 				'progress' => 12,
 				'persons_in_page' => 1,
 			},
@@ -1906,7 +1957,7 @@ sub get_content_rules_hash
 		
 		'Предпочтительный офис выдачи документов' => [
 			{
-				'page_ord' => 28,
+				'page_ord' => 29,
 				'progress' => 13,
 				'relation' => {
 					'only_if' => {
@@ -1935,7 +1986,7 @@ sub get_content_rules_hash
 		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 29,
+				'page_ord' => 30,
 				'progress' => 14,
 			},
 			{
@@ -1956,7 +2007,7 @@ sub get_content_rules_hash
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 30,
+				'page_ord' => 31,
 				'progress' => 15,
 			},
 			{

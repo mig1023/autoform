@@ -50,6 +50,10 @@
 </td></tr>
 
 <tr><td colspan="5">
+[% IF company %]
+	<input type="button" value="◁ [% langreq('Вернуться к списку нот') %]" onclick="go_button('back_to_main');">
+	&nbsp;
+[% END %]
 	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="go_button('tofinish');">
@@ -91,6 +95,13 @@ function delapp_button(id) {
 };
 
 function go_button(where) {
+	[% IF company %]
+		if (where == 'back_to_main') {
+			location.replace('[% agency %][% IF lang_in_link %]?lang=[% lang_in_link %][% END %]');
+			return;
+		}
+	[% END %]
+
 	$('#action').val(where);
 	document.dataform.submit();
 };

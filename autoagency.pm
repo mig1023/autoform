@@ -208,11 +208,13 @@ sub get_agency_main
 	my $vars = $self->{ af }->{ 'VCS::Vars' };
 	
 	my $appointments = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT ID, AppNum, Status FROM Appointments WHERE CompanyID = ? LIMIT 10", $company
+		SELECT ID, AppNum, Status FROM Appointments WHERE CompanyID = ? 
+		ORDER BY ID DESC LIMIT 10", $company
 	);
 	
 	my $auto_appointments = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT StartDate, Token FROM AutoToken WHERE Company = ? AND Finished = 0 LIMIT 10", $company
+		SELECT StartDate, Token FROM AutoToken WHERE Company = ? AND Finished = 0 
+		ORDER BY ID DESC  LIMIT 10", $company
 	);
 	
 	my $months = [ '', 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря' ];
