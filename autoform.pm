@@ -2026,13 +2026,12 @@ sub mod_hash
 	$hash = $self->mezzi_assembler( $hash ) if exists $hash->{ Mezzi1 };
 	
 	if ( $hash->{ ShIndex } ) {
-	
 		# my ( $postcode_id, $city ) = $self->get_postcode_id( $hash->{ ShIndex } );
 		
 		$hash->{ Shipping } = 1;
 		$hash->{ ShAddress } = $hash->{ ShIndex } . ", " . $hash->{ ShAddress };
-		delete $hash->{ ShIndex };
 	}
+	delete $hash->{ ShIndex };
 	
 	$hash->{ SMS } = 1 if $hash->{ Mobile };
 	
@@ -2137,7 +2136,7 @@ sub insert_hash_table
 	
 	my $request_columns = join ',', keys %$hash;
 
-	my $request_values = join ',', '?' x keys %$hash;
+	my $request_values = join ',', split //, '?' x keys %$hash;
 	
 	push @request_values, $hash->{ $_ } for keys %$hash;
 	
