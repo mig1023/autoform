@@ -76,10 +76,6 @@ if ( isMobile() ) {
 [% END %]
 
 <tr><td colspan="3"><br>
-[% IF company %]
-	<input type="button" value="◁ [% langreq('Вернуться к списку нот') %]" onclick="go_button('back_to_main');">
-	&nbsp;
-[% END %]
 [% IF ( step > min_step ) && ( step != max_step ) %]
 	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
@@ -161,13 +157,6 @@ function go_button(where) {
 	[% IF ( step == max_step ) %]
 		if (where == 'app') {
 			location.replace('[% vcs_tools %]info.htm?&t=[% token %]&appid=[% appid %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
-			return;
-		}
-	[% END %]
-	
-	[% IF company %]
-		if (where == 'back_to_main') {
-			location.replace('[% agency %][% IF lang_in_link %]?lang=[% lang_in_link %][% END %]');
 			return;
 		}
 	[% END %]

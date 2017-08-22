@@ -2,7 +2,6 @@ CREATE TABLE AutoToken (
 	ID INT NOT NULL AUTO_INCREMENT,
 	Token VARCHAR(64),
 	LastIP VARCHAR(15),
-	Company INT(11),
 	StartDate DATETIME,
 	LastChange DATETIME,
 	EndDate DATETIME,

@@ -3,7 +3,6 @@ use strict;
 
 use VCS::Vars;
 use VCS::Site::autodata;
-use VCS::Site::autoagency;
 use VCS::Site::autoselftest;
 
 use Data::Dumper;
@@ -34,8 +33,6 @@ sub getContent
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
 		'findpcode' => \&find_pcode,
-		'agency' => \&autoagency,
-		'docstatus' => \&docstatus,
     	};
     	
     	my $disp_link = $dispathcher->{ $id };
@@ -100,7 +97,7 @@ sub autoform
 	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
-	my ( $page_content, $template_file, $title, $progress, $appid, $last_error, $company );
+	my ( $page_content, $template_file, $title, $progress, $appid, $last_error );
 	my $step = 0;
 	my $special = {};
 	my $js_check_need = 1;
@@ -120,7 +117,7 @@ sub autoform
 		$js_check_need = 0;
 	}
 	else {
-		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $company ) = 
+		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
 			$self->get_autoform_content( $token );
 	}
 
@@ -136,8 +133,6 @@ sub autoform
 		$map_in_page = $self->get_geo_info( $token );
 	}
 
-	my $min_step = ( $company ? 2 : 1 );
-
 	$vars->get_system->pheader( $vars );
 	
 	my $tvars = {
@@ -147,11 +142,10 @@ sub autoform
 		'token' => $token,
 		'appid' => $appid,
 		'step' => $step,
-		'min_step' => $min_step,
+		'min_step' => 1,
 		'max_step' => $self->get_content_rules('length'),
 		'max_applicants' => $self->{ autoform }->{ general }->{ max_applicants },
 		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
-		'agency' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ agency },
 		'last_error_name' => $last_error_name,
 		'last_error_text' => $last_error_text,
 		'special' => $special,
@@ -161,7 +155,6 @@ sub autoform
 		'lang_in_link' => $self->{ lang },
 		'js_check_need' => $js_check_need,
 		'map_in_page' => $map_in_page,
-		'company' => $company,
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -178,47 +171,6 @@ sub autoselftest
 	$vars->get_system->pheader( $vars );
 	
 	print $self_test_result;
-}
-
-sub autoagency
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	my $autoagency = VCS::Site::autoagency->new('VCS::Site::autoagency', $vars);
-	
-	$autoagency->{ autoform } = VCS::Site::autodata::get_settings();
-	$autoagency->{ af } = $self;
-	
-	$autoagency->agency( $task, $id, $template );
-}
-
-sub docstatus
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $vars = $self->{ 'VCS::Vars' };
-
-	my $app = $vars->getparam('app') || '';
-	
-	$app =~ s/[^0-9]//g;
-
-	my $status = 0;
-
-	if ( $app ne '' ) {
-	
-		$status = $vars->db->sel1("
-			SELECT PStatus FROM DocPack JOIN Appointments ON Appointments.PacketID = DocPack.ID 
-			WHERE Appointments.ID = ? ORDER BY Appointments.ID DESC LIMIT 1", $app
-		) || 0;
-	}
-	
-	$vars->get_system->pheader($vars);
-	
-	print $status;
 }
 
 sub get_same_info_for_timeslots
@@ -474,15 +426,12 @@ sub create_clear_form
 sub save_new_token_in_db
 # //////////////////////////////////////////////////
 {	
-	my ( $self, $token, $company ) = @_;
-	
-	$company =~ s/[^0-9]//g;
-	$company = 'NULL' if $company eq '';
+	my ( $self, $token ) = @_;
 
 	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoToken (Token, Company, AutoAppID, AutoAppDataID, 
+		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, 
 		AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
-		VALUES (?, $company, 0, 0, 0, 1, '', 0, 0)", {}, $token
+		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, $token
 	);
 	
 	return $token;
@@ -521,7 +470,6 @@ sub get_page_error
 		'неправильный токен',
 		'такого токена не существует',
 		'запись уже завершена',
-		'логин или пароль были введены неверно',
 	];
 	
 	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
@@ -539,8 +487,8 @@ sub get_autoform_content
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my ( $step, $app_id, $company ) = $self->query( 'sel1', __LINE__, "
-		SELECT Step, AutoAppID, Company FROM AutoToken WHERE Token = ?", $token
+	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token
 	);
 
 	my $action = lc( $vars->getparam('action') );
@@ -606,7 +554,7 @@ sub get_autoform_content
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
-	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $company );
+	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid );
 }
 
 sub check_relation
@@ -2004,8 +1952,8 @@ sub create_new_appointment
 	
 	my $db_rules = $self->get_content_db_rules();
 
-	my ( $insurance_line, $person_for_contract, $company ) = $self->query( 'sel1', __LINE__, "
-		SELECT Insurance, PersonForAgreements, Company FROM AutoToken 
+	my ( $insurance_line, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
+		SELECT Insurance, PersonForAgreements FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $token
 	);
@@ -2022,7 +1970,7 @@ sub create_new_appointment
 	
 	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
 		$tables_transfered_id->{ AutoAppointments }, $db_rules, undef, undef, undef, 
-		$info_for_contract, $company );
+		$info_for_contract );
  	
 	my %insurance_list = map { $_ => 1 } split /,/, $insurance_line;
 	
@@ -2050,24 +1998,21 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, 
-		$insurance, $info_for_contract, $company ) = @_;
-	
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract ) = @_;
+
 	my $hash = $self->get_hash_table( $autoname, $transfered_id );
 
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, 
-			$info_for_contract, $company );
-	
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract );
+
 	my $new_appid = $self->insert_hash_table( $name, $hash );
-	
+
 	return $new_appid;
 }
 
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, 
-		$info_for_contract, $company ) = @_;
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, $info_for_contract ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 
@@ -2105,8 +2050,6 @@ sub mod_hash
 		
 		$hash->{ AppNum } = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
 		
-		$hash->{ CompanyID } = $company;
-
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
 			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
 		}
@@ -2193,6 +2136,7 @@ sub insert_hash_table
 	my @request_values = ();
 	
 	my $request_columns = join ',', keys %$hash;
+
 	my $request_values = join ',', '?' x keys %$hash;
 	
 	push @request_values, $hash->{ $_ } for keys %$hash;
