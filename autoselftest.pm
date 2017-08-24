@@ -173,9 +173,6 @@ sub get_test_list {
 						undef,
 					],
 				},
-				
-				# .......
-				
 			},
 		},
 		
@@ -224,6 +221,10 @@ sub get_test_list {
 					'args' => [ { VisaPurpose => '13' } ],
 					'expected' => 'VisaPurpose:0|0|0|0|0|0|0|0|0|0|0|0|1|0|0|0|0',
 				},
+				2 => { 	'tester' => \&test_line_in_hash,
+					'args' => [ { VisaPurpose => '2' } ],
+					'expected' => 'VisaPurpose:0|1|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0',
+				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::mod_hash },
@@ -245,8 +246,10 @@ sub get_test_list {
 					'args' => [ { Status => '3' }, 'TableName', {}, '999' ],
 					'expected' => 'AppID:999',
 				},
-				
-				# .......
+				5 => { 	'tester' => \&test_line_in_hash,
+					'args' => [ { ID => '100' } ],
+					'expected' => 'ID:',
+				},
 			},
 		},
 		
@@ -269,6 +272,11 @@ sub get_test_list {
 					'args' => [ 4 ],
 					'expected' => '|Вы должны полностью заполнить анкеты или удалить ненужные черновики',
 				},
+				5 => { 	'tester' => \&test_line,
+					'args' => [ 7, { 'name' => 'test', 'label_for' => 'label_for' }, 
+						undef, 'label2', 400 ],
+					'expected' => 'test|"label_for" не может быть раньше, чем "label2" на 1 год',
+				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::resort_with_first_elements },
@@ -277,6 +285,10 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_array,
 					'args' => [ { 10 => 'first', 20 => 'second', 30 => 'third', 40 => 'fourth' }, '20, 40' ],
 					'expected' => [ 20, 40, 10, 30 ],
+				},
+				2 => { 	'tester' => \&test_array,
+					'args' => [ { 10 => 'first', 20 => 'second', 30 => 'third', 40 => 'fourth' } ],
+					'expected' => [ 10, 20, 30, 40 ],
 				},
 			},
 		},
@@ -491,6 +503,24 @@ sub get_test_list {
 					},
 
 				},
+				2 => { 	'tester' => \&test_hash,
+					'args' => [ 2 ],
+					'expected' => {
+						'nearest_date' => [],
+						'timeslots' => [],
+						'mask' => [
+							's_date',
+							'f_date',
+						],
+						'datepicker' => [
+							's_date',
+							'f_date',
+						],
+						'post_index' => [],
+						'with_map' => [],
+					},
+
+				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::decode_data_from_db },
@@ -676,18 +706,22 @@ sub get_test_list {
 			'comment' => 'skip_by_condition',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'args' => [ 9, '8,9,10', 'only_if' ],
+					'args' => [ 12, '12', 'only_if' ],
 					'expected' => '0',
 				},
 				2 => { 	'tester' => \&test_line,
+					'args' => [ 9, '8,9,10', 'only_if' ],
+					'expected' => '0',
+				},
+				3 => { 	'tester' => \&test_line,
 					'args' => [ 9, '7,8,10', 'only_if' ],
 					'expected' => '1',
 				},
-				3 => { 	'tester' => \&test_line,
+				4 => { 	'tester' => \&test_line,
 					'args' => [ 9, '6,8,10', 'only_if_not' ],
 					'expected' => '0',
 				},
-				4 => { 	'tester' => \&test_line,
+				5 => { 	'tester' => \&test_line,
 					'args' => [ 9, '10,9,8', 'only_if_not' ],
 					'expected' => '1',
 				},
@@ -701,6 +735,14 @@ sub get_test_list {
 					'expected' => '0',
 				},
 				2 => { 	'tester' => \&test_line,
+					'args' => [ 'only_if', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+					'expected' => '1',
+				},
+				3 => { 	'tester' => \&test_line,
+					'args' => [ 'only_if_not', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+					'expected' => '0',
+				},
+				4 => { 	'tester' => \&test_line,
 					'args' => [ 'only_if_not', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
 					'expected' => '1',
 				},
@@ -981,8 +1023,6 @@ sub get_test_list {
 					],
 					'expected' => '^[1-9]\d*$',
 				},
-				
-				# .......
 			},
 		},
 		{	'func' 	=> \&{ VCS::Site::autoform::age },
@@ -1005,6 +1045,11 @@ sub get_test_list {
 					'prepare' => \&pre_lang_1,
 					'args' => [ 'Дата вылета' ],
 					'expected' => 'Departure date',
+				},
+				2 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_lang_1,
+					'args' => [ 'Фраза не имеющая никакого перевода' ],
+					'expected' => 'Фраза не имеющая никакого перевода',
 				},
 			},
 		},
@@ -1481,7 +1526,7 @@ sub get_tests
 		for( sort { $a <=> $b } keys %{ $test->{test} } ) {
 	
 			$test_num++;
-	
+
 			my $t = $test->{test}->{$_};
 			
 			&{ $t->{prepare} }( $self, 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
@@ -1515,10 +1560,10 @@ sub get_tests
 			}
 			
 			for ( @{ $t->{param} } ) {
-				$vars->setparam( $_->{name} ,$_->{value} );
+				$vars->setparam( $_->{name}, $_->{value} );
 			}
-	
-			my $test_result =  &{ $t->{tester} }( 
+
+			my $test_result = &{ $t->{tester} }( 
 				$t->{debug}, $t->{expected}, "$test->{comment}-$test_num", $self, 
 				&{ $test->{func} }( $self, @{ $t->{args} } )
 			);

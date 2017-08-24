@@ -718,12 +718,12 @@ sub set_appointment_finished
 	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment( $token );
 	
 	$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
-	
+
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET EndDate = now(), Finished = 1, CreatedApp = ? WHERE Token = ?", {}, 
 		$new_appid, $token
 	);
-		
+
 	$self->query( 'query', __LINE__, "
 		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? 
 		WHERE ID = ?", {}, $ncount, $new_appid
@@ -2031,13 +2031,10 @@ sub mod_hash
 		$hash->{ Shipping } = 1;
 		$hash->{ ShAddress } = $hash->{ ShIndex } . ", " . $hash->{ ShAddress };
 	}
-	delete $hash->{ ShIndex };
+	
+	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'Finished');
 	
 	$hash->{ SMS } = 1 if $hash->{ Mobile };
-	
-	delete $hash->{ ID } if ( exists $hash->{ ID } );
-	delete $hash->{ Finished } if ( exists $hash->{ Finished } and $table_name eq 'AppData' );
-	
 	$hash->{ AppID } = $appid if $appid;
 	$hash->{ SchengenAppDataID } = $schappid if $schappid;
 	$hash->{ Status } = 1 if exists $hash->{ Status };
@@ -2063,12 +2060,13 @@ sub visapurpose_assembler
 	my ( $self, $hash ) = @_;
 
 	my $visa = '';
-	
+
 	for (1..17) {
 		$visa .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ VisaPurpose } == $_ ? '1' : '0' );
 	};
+
 	$hash->{ VisaPurpose } = $visa;
-	
+
 	return $hash;
 }
 
