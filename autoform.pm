@@ -2033,7 +2033,9 @@ sub mod_hash
 		$hash->{ ShAddress } = $hash->{ ShIndex } . ", " . $hash->{ ShAddress };
 	}
 	
-	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'Finished');
+	$hash->{ FullAddress } .= ' ' . $hash->{ AppEMail } if exists $hash->{ FullAddress };
+	
+	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'Finished', 'AppEMail' );
 	
 	$hash->{ SMS } = 1 if $hash->{ Mobile };
 	$hash->{ AppID } = $appid if $appid;

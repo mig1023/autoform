@@ -388,6 +388,36 @@ sub get_content_rules_hash
 				'format' => 'capslock'
 			},
 			{
+				'type' => 'input',
+				'name' => 'appemail',
+				'label' => 'Email',
+				'comment' => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
+				'example' => 'mail@mail.ru',
+				'check' => 'zWN\@\s\-\.\,\;',
+				'check_logic' => [
+					{
+						'condition' => 'email_not_blocked',
+					},
+				],
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppEMail',
+				},
+				'format' => 'capslock'
+			},
+			{
+				'type' => 'input',
+				'name' => 'appphone',
+				'label' => 'Телефон',
+				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				'example' => '79161234567',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppPhone',
+				},
+			},
+			{
 				'type' => 'free_line',
 			},
 			{
@@ -489,6 +519,9 @@ sub get_content_rules_hash
 				'first_elements' => '70, 272', # chng in init_add_param
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'radiolist',
 				'name' => 'gender',
 				'label' => 'Пол',
@@ -503,9 +536,13 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'select',
 				'name' => 'family',
 				'label' => 'Семейное положение',
+				'example' => 'женат/замужем',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -522,14 +559,11 @@ sub get_content_rules_hash
 				},
 			},
 			{
-				'type' => 'free_line',
-			},
-			{
 				'type' => 'input',
 				'name' => 'kinderdata',
 				'label' => 'Для несовершеннолетних',
 				'comment' => 'Фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей или законного представителя',
-				'example' => 'Ivanov Ivan, The Soviet Union',
+				'example' => 'Ivanov Ivan, The Russian Federation',
 				'check' => 'WN\s\n\-\,\.\;\_\\\/\'\"',
 				'db' => {
 					'table' => 'AppData',
@@ -713,6 +747,8 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'nulla',
 				'label' => 'Страна первого въезда',
+				'comment' => 'Укажите страну первого въезда в шенгенскую зону в рамках запланированной поездки',
+				'example' => 'ITALIA',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -722,26 +758,11 @@ sub get_content_rules_hash
 				'first_elements' => '133',
 			},
 			{
-				'type' => 'input',
-				'name' => 'nullacity',
-				'label' => 'Город первого въезда',
-				'comment' => 'Город первого въезда',
-				'example' => 'Roma',
-				'check' => 'zW\s\-',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'NullaCity',
-				},
-				'format' => 'capslock',
-			},
-			{
-				'type' => 'free_line',
-			},
-			{
 				'type' => 'select',
 				'name' => 'visanum',
 				'label' => 'Виза запрашивается для',
 				'comment' => 'Виза с однократным въездом даёт возможность пересечь границу Шенгена только один раз. После того как Вы покинете зону Шенгена по данной визе, она будет закрыта и перестанет действовать. Виза с двукратным въездом позволяет въехать и покинуть зону Шенгена два раза в период действия визы. Виза с многократным въездом даёт возможность пересекать границу зоны Шенгенского соглашения в период действия визы',
+				'example' => 'двукратного въезда',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -793,7 +814,7 @@ sub get_content_rules_hash
 				'label' => 'Продолжительность пребывания',
 				'comment' => 'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
 				'example' => '14',
-				'check' => 'zN',
+				'check' => 'zN+',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'CalcDuration',
@@ -807,6 +828,9 @@ sub get_content_rules_hash
 				'name' => 'permi_text',
 				'label' => 'Предыдущие шенгенские визы',
 				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'radiolist',
@@ -933,7 +957,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'prevvisafd',
 				'label' => 'Дата начала',
-				'comment' => 'Начало действия разрешения',
+				'comment' => 'Укажите дату начала действия визы',
 				'example' => '01.01.2016',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
@@ -946,7 +970,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'prevvised',
 				'label' => 'Дата окончания',
-				'comment' => 'Начало действия разрешения',
+				'comment' => 'Укажите дату окончания действия визы',
 				'example' => '01.06.2016',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
@@ -1619,18 +1643,6 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'info_phone',
-				'label' => 'Телефон',
-				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
-				'example' => '79161234567',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'AppPhone',
-				},
-			},
-			{
-				'type' => 'input',
 				'name' => 'info_address',
 				'label' => 'Адрес',
 				'comment' => 'Полный адрес, включая индекс',
@@ -1640,6 +1652,15 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'RAddress',
 					'transfer' => 'nope',
+				},
+			},
+			{
+				'type' => 'info',
+				'name' => 'info_phone',
+				'label' => 'Телефон',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppPhone',
 				},
 			},
 		],
@@ -2053,7 +2074,7 @@ sub get_html_elements
 		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">'.
 					'<span class="exam_span_gen">[value]</span></td>',
 
-		'info'			=> '<label class="info" id="[name]" [u]><b>[text]</b></label>',
+		'info'			=> '<label class="info" id="[name]" [u]>[text]</label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',
 		'checklist_insurer'	=> '[options]',
 		'captcha'		=> '<img src="[captcha_file]" width="100%"><input type="hidden" name="code" value="[captcha_code]" [u]>',
