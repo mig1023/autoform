@@ -1019,11 +1019,12 @@ sub get_specials_of_element
 	};
 	
 	for my $element ( @$page_content ) {
+	
 		for my $spec_type ( keys %$special ) {
-			push( $special->{ $spec_type }, $element->{name} ) if $element->{special} =~ /$spec_type/;
+			push( $special->{ $spec_type }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
 		}
 	}
-	
+
 	return ( $special );
 }
 

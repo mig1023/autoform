@@ -39,6 +39,7 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'center',
 				'label' => 'Визовый центр',
+				'comment' => 'Выберите визовый центр для подачи документов',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -51,6 +52,7 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'vtype',
 				'label' => 'Тип визы',
+				'comment' => 'Выберите тип запрашиваемой визы',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -2045,7 +2047,7 @@ sub get_html_elements
 		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
-		'select'		=> '<select class="input_width select_gen" size = "1" name="[name]" id="[name]" [u]>[options]</select>',
+		'select'		=> '<select class="input_width select_gen" size = "1" name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
 		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">'.
