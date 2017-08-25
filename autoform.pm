@@ -9,7 +9,8 @@ use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
 use Time::HiRes qw[gettimeofday tv_interval];
 use POSIX;
-
+use JSON;
+use HTTP::Tiny;
 
 sub new
 # //////////////////////////////////////////////////
@@ -1219,14 +1220,23 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'captcha' ) {
-		my $config = $vars->getConfig( 'captcha' );
-		my $addr_captcha = $self->{ autoform }->{ paths} ->{ addr_captcha };
-		
-		my $captcha = $vars->getcaptcha();
-		my $ccode = $captcha->generate_code( $config->{ 'code_nums' } );
 	
-		$content =~ s!\[captcha_file\]!$addr_captcha$ccode.png!;
-		$content =~ s/\[captcha_code\]/$ccode/;
+		my $key = $self->{ autoform }->{ captcha }->{ public_key };
+		my $widget_api = $self->{ autoform }->{ captcha }->{ widget_api };
+		
+		my $json_options = to_json(
+			{ 
+				sitekey => $key, 
+				theme => 'light' 
+			}, 
+			$self->{json_options} || {}
+		);
+		
+		my $captch_id = 'recaptcha_' . substr($key, 0, 10);
+		
+		$content =~ s/\[captch_id\]/$captch_id/gi;
+		$content =~ s/\[json_options\]/$json_options/gi;
+		$content =~ s/\[widget_api\]/$widget_api/gi;
 	}
 	
 	
@@ -1270,7 +1280,7 @@ sub get_html_for_element
 		$content =~ s/\s\[u\]\>/>/gi;
 	}
 	
-	if ( ( $type eq 'input' ) and ( ( $check !~ /^z/ ) and ( $check ne 'captcha_input' ) ) ) {
+	if ( ( $type eq 'input' ) and ( ( $check !~ /^z/ ) ) ) {
 		$content = $self->add_css_class( $content, 'optional_field');
 	}
 
@@ -1598,14 +1608,12 @@ sub check_data_from_form
 	my $first_error = '';
 	
 	for my $element (@$page_content) {
+
 		last if $first_error;
 		
 		if ( $element->{check} ) {
 			if ( $element->{type} =~ /checkbox/ ) {
 				$first_error = $self->check_chkbox( $element );
-			}
-			elsif ( ( $element->{type} =~ /input/ ) and ( $element->{check} =~ /captcha_input/ ) ) {
-				$first_error = $self->check_captcha( $element );
 			}
 			elsif ( $element->{type} =~ /checklist/ ) {
 				$first_error = $self->check_checklist( $element );
@@ -1614,11 +1622,14 @@ sub check_data_from_form
 				$first_error = $self->check_param( $element );
 			}
 		}
-		
+
+		$first_error = $self->check_captcha() if $element->{type} =~ /captcha/;
+
 		if ( !$first_error and $element->{check_logic} ) {
 			$first_error = $self->check_logic( $element, $tables_id );
 		}
 	}
+	
 	return $first_error;
 }
 
@@ -1687,19 +1698,27 @@ sub check_param
 sub check_captcha
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element ) = @_;
+	my $self = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $captcha = $vars->getcaptcha();
+	my $response = $vars->getparam( 'g-recaptcha-response' ) || '';
 	
-	my $c_status = $captcha->check_code( $vars->getparam( $element->{ name } ), $vars->getparam( 'code' ) );
+	my $request = HTTP::Tiny->new();
+
+	my $result = $request->post_form(
+		$self->{ autoform }->{ captcha }->{ verify_api },
+		{ 
+			secret => $self->{ autoform }->{ captcha }->{ private_key }, 
+			response  => $response
+		}
+	);
 	
-	my $captcha_error = $vars->getCaptchaErr( $c_status );
+	if ( $result->{ success } ) {
 	
-	$captcha_error = "$element->{name}|$captcha_error" if $captcha_error;
-	
-	return $captcha_error;
+		return if decode_json( $result->{ content } )->{ success };
+	}
+	return 'captha_div' . $self->text_error( 18 );
 }
 
 sub check_logic
@@ -1852,6 +1871,7 @@ sub text_error
 		'Введён недопустимый индекс или город в поле "[name]", попробуйте указать другой',
 		'Вы ввели недопустимый адрес электронной почты',
 		'Этот электронный адрес был заблокирован. Вы превысили допустимое количество записей',
+		'Капча введена неверно.<br>Пожалуйста, попробуйте ещё раз',
 	];
 	
 	if ( !defined($element) ) {

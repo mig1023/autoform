@@ -336,9 +336,13 @@ function init_comm(pos_x, pos_y) {
 		var offset_x = ( mobScreen ? 0 : 5 );
 		var offset_y = ( mobScreen ? 5 : 0 );
 		
+		[% IF last_error_name == 'captha_div' %]
+			error_x = 'inner-left';
+			offset_x = ( mobScreen ? 0 : 20 );
+		[% END %]
 		
 		window.scroll(0,find_pos(document.getElementById("[% last_error_name %]")));
-		$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
+		
 		$('#[% last_error_name %]').poshytip({
 			className: 'tip-redsimple',
 			content: '[% langreq(last_error_text) %]',
@@ -350,6 +354,14 @@ function init_comm(pos_x, pos_y) {
 			offsetY: offset_y,
 		});
 		$('#[% last_error_name %]').poshytip('show');
+		
+		[% IF last_error_name == 'captha_div' %]
+			$('.tip-redsimple').each( function() {
+				$(this).css('top', (parseFloat($(this).css('top')) + 38) );
+			});
+		[% ELSE %]
+			$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
+		[% END %]
 	}
 [% END %]
 

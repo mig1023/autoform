@@ -1963,17 +1963,6 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'captcha',
-				'name' => 'captcha_picture',
-			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'input',
-				'name' => 'captcha',
-				'label' => 'Введите текст с картинки',
-				'comment' => '',
-				'check' => 'captcha_input',
 			},
 		],
 		
@@ -2042,7 +2031,6 @@ sub get_settings
 	
 		'paths' => {
 			'addr' => '/autoform/',
-			'addr_captcha' => '/vcs/static/files/',
 			'addr_vcs' => '/vcs/',
 		},
 		
@@ -2052,6 +2040,13 @@ sub get_settings
 		
 		'memcached' => {
 			'memcached_exptime' => 43200, # 12*3600 sec
+		},
+		
+		'captcha' => {
+			'public_key' => '',
+			'private_key' => '',
+			'widget_api' => 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit',
+			'verify_api' => 'https://www.google.com/recaptcha/api/siteverify',
 		},
 	};
 }
@@ -2068,16 +2063,19 @@ sub get_html_elements
 		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
-		'select'		=> '<select class="input_width select_gen" size = "1" name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
+		'select'		=> '<select class="input_width select_gen" size = "1" ' .
+					'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
-		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">'.
+		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">' .
 					'<span class="exam_span_gen">[value]</span></td>',
 
 		'info'			=> '<label class="info" id="[name]" [u]>[text]</label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',
 		'checklist_insurer'	=> '[options]',
-		'captcha'		=> '<img src="[captcha_file]" width="100%"><input type="hidden" name="code" value="[captcha_code]" [u]>',
+		'captcha'		=> '<script type="text/javascript">var onloadCallback = function(){grecaptcha.render(' .
+					"'[captch_id]'" . ', [json_options]);};</script><script src="[widget_api]" ' .
+					'type="text/javascript"></script><div id="captha_div"><div id="[captch_id]"></div></div>',
 		
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
