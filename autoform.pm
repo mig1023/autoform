@@ -927,7 +927,7 @@ sub get_html_page
 	$self->correct_values( \$current_values, $appnum, $token );
 	
 	for my $element ( @$page_content ) {
-		$content .= $self->get_html_line( $element, $current_values );
+		$content .= $self->get_html_line( $element, $current_values, $token );
 	}
 	
 	return ( $content, $template );
@@ -1032,7 +1032,7 @@ sub get_specials_of_element
 sub get_html_line
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element, $values ) = @_;
+	my ( $self, $element, $values, $token ) = @_;
 
 	return $self->get_html_for_element( 'free_line' ) if $element->{ type } eq 'free_line';
 	
@@ -1065,7 +1065,8 @@ sub get_html_line
 		$self->get_cell(
 			$self->get_html_for_element(
 				$element->{ type }, $element->{ name }, $current_value, $element->{ param }, 
-				$element->{ uniq_code }, $element->{ first_elements }, $element->{ comment },
+				$element->{ uniq_code }, $element->{ first_elements },
+				$self->check_comments_alter_version( $element->{ comment }, $token ),
 				$element->{ check },
 			) . $label_for_need
 		);
@@ -1285,6 +1286,25 @@ sub get_html_for_element
 	}
 
 	return $content;
+}
+
+sub check_comments_alter_version
+# //////////////////////////////////////////////////
+{
+	my ( $self, $comment, $token ) = @_;
+	
+	return $comment unless ref( $comment ) eq 'HASH';
+	
+	my $current_center = $self->query( 'sel1', __LINE__, "
+		SELECT CenterID FROM AutoAppointments 
+		JOIN AutoToken ON AutoToken.AutoAppID = AutoAppointments.ID 
+		WHERE AutoToken.Token = ?", $token
+	);
+	
+	for ( keys %$comment ) {
+		my %centers = map { $_ => 1 } split /,/, $_;
+		return $comment->{ $_ } if exists $centers{ $current_center };
+	}
 }
 
 sub add_css_class

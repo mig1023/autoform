@@ -812,7 +812,12 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'calcdur',
 				'label' => 'Продолжительность пребывания',
-				'comment' => 'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
+				'comment' => {
+					'1,31,2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,39,40,42,44,45' =>
+						'При запросе многократной визы на год необходимо указать 180 дней, при запросе визы на 2 года — 360 дней',
+					'27,33,38,11,30,34,29,43,37' =>
+						'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
+				},
 				'example' => '14',
 				'check' => 'zN+',
 				'db' => {
@@ -2043,8 +2048,8 @@ sub get_settings
 		},
 		
 		'captcha' => {
-			'public_key' => '',
-			'private_key' => '',
+			'public_key' => '6LcfHC4UAAAAAF3nHjWJqZlBXGQNNqNtTsSanIKv',
+			'private_key' => '6LcfHC4UAAAAALilayLSCFAxZCc3AvHTrQS9Gl2A',
 			'widget_api' => 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit',
 			'verify_api' => 'https://www.google.com/recaptcha/api/siteverify',
 		},
