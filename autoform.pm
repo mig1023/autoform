@@ -227,7 +227,7 @@ sub init_add_param
 	
 	if ( $keys_in_current_page->{ param } ) {
 	
-		$info_from_db = $vars->get_memd->get( 'autoform_addparam' );
+		$info_from_db = $self->cached( 'autoform_addparam' );
 		
 		if ( !$info_from_db ) {
 			my $info_from_sql = {
@@ -337,7 +337,7 @@ sub get_collect_date
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $collect_dates = $vars->get_memd->get( 'autoform_collectdates' );
+	my $collect_dates = $self->cached( 'autoform_collectdates' );
 		
 	if ( !$collect_dates ) {
 	
@@ -2282,6 +2282,18 @@ sub lang
 	}
 	
 	return $text;
+}
+
+sub cached
+# //////////////////////////////////////////////////
+{
+	my ( $self, $name ) = @_;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	return if exists $self->{ this_is_self_testing };
+		
+	return $vars->get_memd->get( $name );
 }
 
 sub query
