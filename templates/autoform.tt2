@@ -19,7 +19,7 @@
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 [% END %]
 
-[% IF js_check_need %]
+[% IF javascript_check %]
 <noscript>
 	<meta http-equiv="refresh" content="0; url=[% addr %]?t=[% token %]&script=no">
 </noscript>

@@ -101,7 +101,7 @@ sub autoform
 	my ( $page_content, $template_file, $title, $progress, $appid, $last_error );
 	my $step = 0;
 	my $special = {};
-	my $js_check_need = 1;
+	my $javascript_check = 1;
 	
 	my $token = $self->get_token_and_create_new_form_if_need();
 	
@@ -115,7 +115,7 @@ sub autoform
 	
 		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
 		
-		$js_check_need = 0;
+		$javascript_check = 0;
 	}
 	else {
 		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
@@ -154,7 +154,7 @@ sub autoform
 		'appinfo' => $appinfo_for_timeslots,
 		'progress' => $progress,
 		'lang_in_link' => $self->{ lang },
-		'js_check_need' => $js_check_need,
+		'javascript_check' => $javascript_check,
 		'map_in_page' => $map_in_page,
 	};
 	$template->process( $template_file, $tvars );
@@ -281,7 +281,7 @@ sub init_add_param
 					$self->{ autoform }->{ age }->{ age_for_agreements } );
 
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
-		}
+		};
 			
 		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
@@ -346,13 +346,10 @@ sub get_collect_date
 		);
 		$collect_dates = {};
 		
-		for ( @$collect_dates_array ) {
-			$collect_dates->{ $_->{ ID } } = {
-				'CollectDate' => $_->{ CollectDate }, 
-				'cdSimpl' => $_->{ cdSimpl }, 
-				'cdUrgent' => $_->{ cdUrgent }, 
-				'cdCatD' => $_->{ cdCatD }
-			};
+		for my $date ( @$collect_dates_array ) {
+
+			$collect_dates->{ $date->{ ID } }->{ $_ } = $date->{ $_ }
+				for ( 'CollectDate', 'cdSimpl', 'cdUrgent', 'cdCatD' );
 		}
 
 		$vars->get_memd->set('autoform_collectdates', $collect_dates, 
@@ -416,7 +413,9 @@ sub create_clear_form
 		$vars->get_session->{'login'}
 	);
 		
-	my $app_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+	my $app_id = $self->query( 'sel1', __LINE__, "
+		SELECT last_insert_id()"
+	) || 0;
 	
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
@@ -785,9 +784,10 @@ sub get_edit
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, $appdata_id
 		);
+		
+		$self->mod_last_change_date( $token );
 	}
 	
-	$self->mod_last_change_date( $token );
 	return $step;
 }
 
@@ -880,6 +880,7 @@ sub get_add
 	);
 	
 	$self->mod_last_change_date( $token );
+	
 	return $step;
 }
 
@@ -1115,6 +1116,7 @@ sub get_progressbar
 	
 		$line .= $self->get_html_for_element( 'progress', $big_element, $progress_line->[ $_ ]->{ name }, 
 				$past_current_future, $add_el, $progress_line->[ $_ ]->{ big } );
+				
 		$content .= $self->get_html_for_element( 'stages', undef, $progress_line->[ $_ ]->{ name }, 
 				$past_current_future, undef, $progress_line->[ $_ ]->{ big } );
 	}
@@ -1230,10 +1232,10 @@ sub get_html_for_element
 				sitekey => $key, 
 				theme => 'light' 
 			}, 
-			$self->{json_options} || {}
+			$self->{ json_options } || {}
 		);
 		
-		my $captch_id = 'recaptcha_' . substr($key, 0, 10);
+		my $captch_id = 'recaptcha_' . substr( $key, 0, 10 );
 		
 		$content =~ s/\[captch_id\]/$captch_id/gi;
 		$content =~ s/\[json_options\]/$json_options/gi;
@@ -1302,6 +1304,7 @@ sub check_comments_alter_version
 	);
 	
 	for ( keys %$comment ) {
+	
 		my %centers = map { $_ => 1 } split /,/, $_;
 		return $comment->{ $_ } if exists $centers{ $current_center };
 	}
@@ -1315,6 +1318,7 @@ sub add_css_class
 	if ( $html =~ /\sclass="([^"]*)"/i ) {
 	
 		my $classes = "$1 $new_class";
+		
 		$html =~ s/\sclass="[^"]*"/ class="$classes"/i;
 	}
 	else {
@@ -1329,9 +1333,7 @@ sub resort_with_first_elements
 {
 	my ( $self, $country_hash, $first_elements ) = @_;
 
-	if ( !$first_elements ) {
-		return sort keys %$country_hash;
-	}	
+	return sort keys %$country_hash if !$first_elements;	
 	
 	my @first_elements = split /,/, $first_elements;
 
@@ -1528,17 +1530,15 @@ sub get_element_by_name
 	my ( $self, $step, $element_name ) = @_;
 	
 	my $page_content = $self->get_content_rules( $step );
+	
 	my $element;
+	
 	for my $element_search ( @$page_content ) {
-		if ( $element_search->{name} eq $element_name ) {
-			return $element_search;
-		};
+		return $element_search if $element_search->{name} eq $element_name;
 		
 		if ( $element_search->{db}->{name} eq 'complex' ) {
 			for my $sub_element ( keys %{ $element_search->{param} } ) {
-				if ( $sub_element eq $element_name ) {
-					return $element_search;
-				}
+				return $element_search if $sub_element eq $element_name;
 			}
 		};
 	};
@@ -1693,6 +1693,7 @@ sub check_param
 
 	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( ( $value eq '' ) or 
 			( ( $value eq '0' ) and ( $element->{ name } eq 'timeslot') ) );
+			
 	return if $rules eq 'z';
 
 	if ( $rules =~ /D/ ) {
@@ -1701,10 +1702,13 @@ sub check_param
 	}
 	else {
 		my $regexp = '';
+		
 		$regexp .= 'A-Za-z' if $rules =~ /W/; 
 		$regexp .= 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя' if $rules =~ /Ё/;
 		$regexp .= '0-9' if $rules =~ /N/;
+		
 		$rules =~ s/(z|W|Ё|N)//g;
+		
 		my $revers_regexp = '[' . $regexp . $rules . ']';
 		$regexp = '[^' . $regexp . $rules . ']';
 
@@ -2163,9 +2167,7 @@ sub get_hash_table
 		SELECT * FROM $table_name WHERE ID = ?", $table_id
 	);
 	
-	$hash_table = $hash_table->[0];
-
-	return $hash_table;
+	return $hash_table->[0];
 }
 
 sub insert_hash_table
@@ -2185,7 +2187,9 @@ sub insert_hash_table
 		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, @request_values
 	);
 
-	my $current_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+	my $current_id = $self->query( 'sel1', __LINE__, 
+		"SELECT last_insert_id()"
+	) || 0;
 
 	return $current_id;
 }
@@ -2200,7 +2204,7 @@ sub find_pcode
 	my $callback = $vars->getparam( 'callback' ) || "";
 	
 	$request_limit =~ s/[^0-9]//g;
-	$request_limit = 20 if ( $request_limit eq '' ) || ( $request_limit == 0 ) || ( $request_limit > 100 );
+	$request_limit = 20 if ( $request_limit eq '' ) or ( $request_limit == 0 ) or ( $request_limit > 100 );
 
 	my $rws = [];
 	
