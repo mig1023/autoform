@@ -1,0 +1,109 @@
+
+        <div>
+          <title>E-mail Template</title>
+          <link
+            href="http://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800"
+            rel="stylesheet" type="text/css">
+          <meta name="viewport" content="initial-scale=1,
+            maximum-scale=1">
+          <table style="font-family: 'Open Sans', sans-serif;
+            font-size:12px;margin-top:10px;" width="750" align="center"
+            border="0" cellpadding="0" cellspacing="0">
+            <tbody style="background-color:rgba(241, 245, 247,
+              0.5);vertical-align: top;line-height: 28px;">
+              <tr>
+                <td style="background-color:#ffffff;padding: 30px
+                  40px;border: 1px solid #c2c2c2;">
+                  <div style="border-bottom: 1px solid
+                    #e5e5e5;padding-bottom: 20px;margin-bottom: 20px;">
+                    <div style="color:#637374;font-size: 15px;margin:
+                      15px 0px 0px;font-weight: 600;">[%app_tx%]<br></div>
+                  </div>
+                  <div style="border-bottom: 1px solid
+                    #e5e5e5;margin-bottom: 20px;padding-bottom: 15px;">
+                    <div style="position: relative;display:
+                      inline-block;width: 100%;opacity: 50%;"> <label
+                        style="color:#788a95;font-size:15px;">[%date_tx%] </label>
+                      <p style="display: inline-block;margin:
+                        0;color:#637374;font-size:15px;">[%date_time%]</p>
+                    </div>
+                    <div style="position: relative;display:
+                      inline-block;width: 100%;"> <label
+                        style="color:#788a95;font-size:15px;">[%num_tx%] </label>
+                      <p style="display: inline-block;margin:
+                        0;color:#637374;font-size:15px;">[%app_num%]</p>
+                    </div>
+                    <div style="position: relative;display:
+                      inline-block;width: 100%;"> <label
+                        style="color:#788a95;font-size:15px;">[%doc_tx%] </label>
+                      <p style="display: inline-block;margin:
+                        0;color:#637374;font-size:15px;">[%app_person%]</p>
+                    </div>
+                    <div style="position: relative;display:
+                      inline-block;width: 100%; word-wrap: break-word;"><div
+                        style="color:#788a95;font-size:15px;">[%list_tx%] </div>
+                      <p style="display: inline-block;margin:
+                        0;color:#637374;font-size:15px;font-weight: bold;">[%app_list%]</p>
+                    </div>
+                  </div>
+                  <div>
+                    <dl>
+                      <dd style="color:#788a95;font-size:15px;margin:0;">[%vms_tx%]</dd>
+                    </dl>
+                  </div>
+			<div style="color:rgba(68, 87, 98, 0.69);font-size:100%;font-size: 8px; line-height: 1.5;"> 
+			<strong>[%dis_head%]</strong> <br>
+			[%dis_tx%]</div>
+                </td>
+                <td style="background-color:rgba(241, 245, 247, 0.5);padding:20px;border-top-right-radius:
+                  7px;border-bottom-right-radius: 7px;">
+                  <div style="width: 158px; line-height:0px;padding :
+                    2px;"><img moz-do-not-send="true" src="[%link_image%]img/logo.png"
+                      style="height: auto; width: 158px;border-radius:
+                      5px;margin-bottom: 20px;"></div>
+                  <div style="color:#95a5a6;width:150px;">[%branch_tx%]</div>
+                  <dl style="margin:0px;color:#95a5a6;line-height:
+                    20px;width: 170px;">
+                    <dd style="margin:0 0 5px 0; margin-top: 5px;">[%branch_addr%]</dd>
+                    <span>Email: <a href="mailto:[%app_email%]"
+                      style="color:#33c3ba; text-decoration:none;">[%app_email%]</a></span><br>
+                    <span>Website: <a href=""
+                      style="margin:0 0 5px 0; cursor:
+                      pointer; text-decoration: none;color: #33c3ba;">[%app_website%]</a></span>
+                  </dl>
+                  <br>
+                  <a moz-do-not-send="true" href="[%link_site%]/vcs/info.htm?appid=[%app_id%]&token=[%app_token%]"
+                    style="width: 177px;text-decoration:
+                    none;text-align: center;display: block;padding: 1px
+                    0px;border: 1px solid #cad3d9;border-radius:
+                    4px;color: #33c3ba;background:
+                    #f7f9fa;margin-bottom: 7px;">[%info_btn%]</a> <a
+                    moz-do-not-send="true" href="[%link_site%]/vcs/reschedule.htm?appid=[%app_id%]&token=[%app_token%]"
+                    style="width: 177px;text-decoration:
+                    none;text-align: center;display: block;padding: 1px
+                    0px;border: 1px solid #cad3d9;border-radius:
+                    4px;color: #33c3ba;background:
+                    #f7f9fa;margin-bottom: 7px;">[%resh_btn%]</a>
+                    <a moz-do-not-send="true" href="[%link_site%]/vcs/cancel.htm?appid=[%app_id%]&token=[%app_token%]"
+                    style="width: 177px;text-decoration:
+                    none;text-align: center;display: block;padding: 1px
+                    0px;border: 1px solid #cad3d9;border-radius:
+                    4px;color: #33c3ba;background:
+                    #f7f9fa;margin-bottom: 7px;">[%canc_btn%]</a>
+                    <a moz-do-not-send="true" href="[%link_site%]/vcs/print.htm?appid=[%app_id%]&token=[%app_token%]"
+                    style="width: 177px;text-decoration:
+                    none;text-align: center;display: block;padding: 1px
+                    0px;border: 1px solid #cad3d9;border-radius:
+                    4px;color: #33c3ba;background:
+                    #f7f9fa;margin-bottom: 7px;">[%prnt_btn%]</a>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" style="padding: 15px
+                  0px;background-color: #fff;">
+                 
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>

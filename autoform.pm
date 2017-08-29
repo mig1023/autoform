@@ -728,6 +728,8 @@ sub set_appointment_finished
 		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? 
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
+	
+	$self->send_app_confirm( $appnum, $new_appid, $token, $self->{'lang'} );
 		
 	return ( $new_appid, $appnum );
 }
@@ -2243,6 +2245,211 @@ sub find_pcode
 	};
 	
 	$template->process( 'autoform_pcode.tt2', $tvars );
+}
+
+sub send_app_confirm
+# //////////////////////////////////////////////////
+{
+	my ( $self, $maxnum, $appid, $recovery_token, $langid ) = @_; 
+	
+	$langid = 'ru' unless $langid;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+
+	my $data = $self->query( 'selallkeys', __LINE__, "
+		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName
+		FROM Appointments WHERE ID = ? ORDER BY ID DESC LIMIT 1", $appid
+	)->[0];
+	
+	my $list_of_appl = "Name<br>Name<br>Name";
+	
+	my $lang_local = {
+		'months' => {
+			'ru' => 'января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря',
+			'en' => 'January|February|March|April|May|June|July|August|September|October|November|December',
+			'it' => 'Gennaio|Febbraio|Marzo|Aprile|Maggio|Giugno|Luglio|Agosto|Settembre|Ottobre|Novembre|Dicembre',
+		},
+		
+		'pers' => {
+			'ru' => 'лично',
+			'en' => 'in person',
+			'it' => 'di persona',
+		},
+	
+		'by_the_doc' => {
+			'ru' => 'по доверенности на имя',
+			'en' => 'with the Power of attorney',
+			'it' => 'da un delegato',
+		},
+		
+		'app_tx' => {
+			'ru' => 'Запись в визовый центр.',
+			'en' => 'Application appointment.',
+			'it' => 'Registrazione dell`apuntamento.',
+		},
+		
+		'date_tx' => {
+			'ru' => 'Дата и время записи:',
+			'en' => 'Appointment date and time:',
+			'it' => 'Data e ora dell`appuntamento:',
+		},
+		
+		'num_tx' => {
+			'ru' => 'Номер записи:',
+			'en' => 'Appointment number:',
+			'it' => 'Numero dell`appuntamento:',
+		},
+		
+		'doc_tx' => {
+			'ru' => 'Документы подаются:',
+			'en' => 'The documents are submited:',
+			'it' => 'I documenti saranno consegnati:',
+		},
+		
+		'list_tx' => {
+			'ru' => 'Список заявителей:',
+			'en' => 'List of application appointments:',
+			'it' => 'Lista degli appuntamenti:',
+		},
+		
+		'vms_tx' => {
+			'ru' => 'С уважением, VMS',
+			'en' => 'Kind regards, VMS',
+			'it' => 'Cordiali saluti, VMS',
+		},
+		
+		'dis_head' => {
+			'ru' => 'Отказ от ответственности',
+			'en' => 'Disclaimer',
+			'it' => 'Disclaimer',
+		},
+		
+		'dis_tx' => {
+			'ru' => 'Информация в этом сообщении предназначена исключительно для конкретных лиц, которым она адресована. В сообщении может содержаться конфиденциальная информация, которая не может быть раскрыта или использована кем-либо кроме адресатов. Если вы не адресат этого сообщения, то использование, переадресация, копирование или распространение содержания сообщения или его части незаконно и запрещено. Если Вы получили это сообщение ошибочно, пожалуйста, незамедлительно сообщите отправителю об этом и удалите со всем содержимым само сообщение и любые возможные его копии и приложения.',
+			'en' => 'The information contained in this message is intended solely for the use of the individual or entity to whom it is addressed . It may contain confidential or legally privileged information. The contents may not be disclosed or used by anyone other than the addressee. If you are not the intended recipient(s), any use, disclosure, copying, distribution or any action taken or omitted to be taken in reliance on it is prohibited and may be unlawful. If you have received this message in error please notify us immediately by responding to this email and then delete the e-mail and all attachments and any copies thereof.',
+			'it' => 'Le informazioni contenute in questo messaggio di posta elettronica sono di carattere privato e confidenziale ed esclusivamente rivolte al destinatario sopra indicato. Nel caso aveste ricevuto questo messaggio di posta elettronica per errore, vi comunichiamo che ai sensi di Legge e vietato l`uso, la diffusione, distribuzione o riproduzione da parte di ogni altra persona. Siete pregati di segnalarlo immediatamente, rispondendo al mittente e distruggere quanto ricevuto (compresi i file allegati) senza farne copia o leggerne il contenuto.',
+		},
+		
+		'info_btn' => {
+			'ru' => 'Информация о записи',
+			'en' => 'Appointment details',
+			'it' => 'Informazioni sull`appuntamento',
+		},
+		
+		'resh_btn' => {
+			'ru' => 'Изменить время записи',
+			'en' => 'Reschedule appointment',
+			'it' => 'Cambiare l`appuntamento',
+		},
+		
+		'canc_btn' => {
+			'ru' => 'Отменить запись',
+			'en' => 'Cancel an appointment',
+			'it' => 'Cancellare un appuntamento',
+		},
+		
+		'prnt_btn' => {
+			'ru' => 'Распечатать запись',
+			'en' => 'Print  confirmation',
+			'it' => 'Stampa la conferma',
+		},
+		
+		'branch_tx' => {
+			'ru' => 'Визовый центр Италии',
+			'en' => 'Italian visa center',
+			'it' => 'Centro visti per l`Italia',
+		},
+	};
+
+	my $messages = $vars->getConfig( 'messages' );
+	my $appnumber = $vars->get_system->appnum_to_str( $maxnum );
+
+	undef $/;
+	
+	my $subject = $messages->{ SendAppointment }->{ subject } . ', #' . $appnumber;
+	
+	open HTM_FILE, '<', '/usr/local/VMS/www/htdocs/vcs/templates/autoform/autoform_confirm.tt2' or die;
+	
+	my $html_test = <HTM_FILE>;
+	
+	$list_of_appl =~ s/\<br\>$//;
+	
+	my $center_addr = $vars->getGLangVar( 'Address-' . $data->{ CenterID }, $langid );
+	
+	if ( $center_addr eq 'Address-' . $data->{ CenterID } ) {
+	
+		$center_addr = $vars->db->sel1("
+			SELECT BAddr FROM Branches WHERE ID=?", $data->{ CenterID } );
+	}
+	$center_addr = $vars->get_system->converttext( $center_addr );
+	$center_addr =~ s/_?(x005F|x000D)_?//g;
+	
+	my ( $tstart,$tend ) = $vars->db->sel1("
+		SELECT TStart,TEnd FROM TimeData WHERE SlotID=?",
+		$data->{ TimeslotID } );
+		
+	my @date_sp = split /\-/, $data->{ AppDate };
+
+	my @months = split /\|/, $lang_local->{ months }->{ $langid };
+
+	my $datetime = 
+		$date_sp[ 2 ] . ' ' . $months[ $date_sp[ 1 ] + 1 ] . ' ' . $date_sp[ 0 ] . ', ' . 
+		$vars->get_system->time_to_str($tstart) . ' - ' .
+		$vars->get_system->time_to_str($tend);
+	
+	my $app_person = ( $data->{ dwhom } ? '<b>' . $lang_local->{ pers }->{ $langid } . '</b>' : 
+		$lang_local->{ by_the_doc }->{ $langid } . ' <b>' . 
+		$data->{ LName } . ' ' . $data->{ FName } . ' ' .  $data->{ SName } . '</b>' 
+	);
+	
+	my $html_website = '';
+	my $html_email = '';
+	
+	if ( $data->{ CenterID } =~ /^(11|28|27|29|33|30)$/ ) {
+		$html_website = '';
+		$html_email = '';
+	}
+	
+	my $link_image = '';
+	my $link_site = '';
+	
+	$html_test =~ s/\[%date_time%\]/$datetime/g;
+	$html_test =~ s/\[%app_num%\]/$appnumber/g;
+	$html_test =~ s/\[%app_list%\]/$list_of_appl/g;
+	$html_test =~ s/\[%branch_addr%\]/$center_addr/g;
+	$html_test =~ s/\[%app_id%\]/$appid/g;
+	$html_test =~ s/\[%app_token%\]/$recovery_token/g;
+	$html_test =~ s/\[%app_person%\]/$app_person/g;
+	$html_test =~ s/\[%app_email%\]/$html_email/g;
+	$html_test =~ s/\[%app_website%\]/$html_website/g;
+	$html_test =~ s/\[%link_site%\]/$link_site/g;
+	$html_test =~ s/\[%link_image%\]/$link_image/g;
+	
+	for (keys %$lang_local) {
+		$html_test =~ s/\[%$_%\]/$lang_local->{ $_ }->{ $langid }/g;
+	};
+	
+	my $atach = {
+		'0' => {
+			'filename' => 'Appointment_' . $maxnum . '.pdf', 
+			'data' => VCS::Docs::appointments->new( 'VCS::Docs::appointments', $vars )->createPDF( $appid ), 
+			'ContentType' => 'application/pdf',
+		}
+	};
+		 
+	open AGREEM, '<', '/usr/local/www/data/htdocs/pers_data_agreement.docx' or die;
+	
+	my $agreem = <AGREEM>;
+	
+	close AGREEM;
+	
+	$atach->{ 1 } = {
+		'filename' => 'Согласие.docx', 
+		'data' => $agreem, 
+		'ContentType' => 'application/docx' 
+	};
+	
+	my $status = $vars->get_system->send_mail( $vars, $data->{ EMail }, $subject, $html_test, 1, $atach );
 }
 
 sub age
