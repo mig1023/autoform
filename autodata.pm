@@ -2048,11 +2048,22 @@ sub get_settings
 		},
 		
 		'captcha' => {
-			'public_key' => '6LcfHC4UAAAAAF3nHjWJqZlBXGQNNqNtTsSanIKv',
-			'private_key' => '6LcfHC4UAAAAALilayLSCFAxZCc3AvHTrQS9Gl2A',
+			'public_key' => '',
+			'private_key' => '',
 			'widget_api' => 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit',
 			'verify_api' => 'https://www.google.com/recaptcha/api/siteverify',
 		},
+		
+		'confirm' => {
+			'tt' => '/usr/local/VMS/www/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
+			'pers_data' => '/usr/local/www/data/htdocs/pers_data_agreement.docx',
+			'link_image' => '',
+			'link_site' =>  '',
+			'html_website' => '',
+			'html_email' => '',
+			'spb_html_website' => '',
+			'spb_html_email' => '',
+		}
 	};
 }
 
@@ -2149,6 +2160,114 @@ sub get_blocked_emails
 			'show_truth' => 0,
 		},
 	];
+};
+
+sub get_appointment_text
+# //////////////////////////////////////////////////
+{
+	return {
+		'subject' => {
+			'ru' => 'Вы зарегистрированы для подачи документов на визу', 
+			'en' => 'Вы зарегистрированы для подачи документов на визу', 
+			'it' => 'Вы зарегистрированы для подачи документов на визу', 
+		},
+	
+		'months' => {
+			'ru' => 'января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря',
+			'en' => 'January|February|March|April|May|June|July|August|September|October|November|December',
+			'it' => 'Gennaio|Febbraio|Marzo|Aprile|Maggio|Giugno|Luglio|Agosto|Settembre|Ottobre|Novembre|Dicembre',
+		},
+		
+		'pers' => {
+			'ru' => 'лично',
+			'en' => 'in person',
+			'it' => 'di persona',
+		},
+	
+		'by_the_doc' => {
+			'ru' => 'по доверенности на имя',
+			'en' => 'with the Power of attorney',
+			'it' => 'da un delegato',
+		},
+		
+		'app_tx' => {
+			'ru' => 'Запись в визовый центр.',
+			'en' => 'Application appointment.',
+			'it' => 'Registrazione dell`apuntamento.',
+		},
+		
+		'date_tx' => {
+			'ru' => 'Дата и время записи:',
+			'en' => 'Appointment date and time:',
+			'it' => 'Data e ora dell`appuntamento:',
+		},
+		
+		'num_tx' => {
+			'ru' => 'Номер записи:',
+			'en' => 'Appointment number:',
+			'it' => 'Numero dell`appuntamento:',
+		},
+		
+		'doc_tx' => {
+			'ru' => 'Документы подаются:',
+			'en' => 'The documents are submited:',
+			'it' => 'I documenti saranno consegnati:',
+		},
+		
+		'list_tx' => {
+			'ru' => 'Список заявителей:',
+			'en' => 'List of application appointments:',
+			'it' => 'Lista degli appuntamenti:',
+		},
+		
+		'vms_tx' => {
+			'ru' => 'С уважением, VMS',
+			'en' => 'Kind regards, VMS',
+			'it' => 'Cordiali saluti, VMS',
+		},
+		
+		'dis_head' => {
+			'ru' => 'Отказ от ответственности',
+			'en' => 'Disclaimer',
+			'it' => 'Disclaimer',
+		},
+		
+		'dis_tx' => {
+			'ru' => 'Информация в этом сообщении предназначена исключительно для конкретных лиц, которым она адресована. В сообщении может содержаться конфиденциальная информация, которая не может быть раскрыта или использована кем-либо кроме адресатов. Если вы не адресат этого сообщения, то использование, переадресация, копирование или распространение содержания сообщения или его части незаконно и запрещено. Если Вы получили это сообщение ошибочно, пожалуйста, незамедлительно сообщите отправителю об этом и удалите со всем содержимым само сообщение и любые возможные его копии и приложения.',
+			'en' => 'The information contained in this message is intended solely for the use of the individual or entity to whom it is addressed . It may contain confidential or legally privileged information. The contents may not be disclosed or used by anyone other than the addressee. If you are not the intended recipient(s), any use, disclosure, copying, distribution or any action taken or omitted to be taken in reliance on it is prohibited and may be unlawful. If you have received this message in error please notify us immediately by responding to this email and then delete the e-mail and all attachments and any copies thereof.',
+			'it' => 'Le informazioni contenute in questo messaggio di posta elettronica sono di carattere privato e confidenziale ed esclusivamente rivolte al destinatario sopra indicato. Nel caso aveste ricevuto questo messaggio di posta elettronica per errore, vi comunichiamo che ai sensi di Legge e vietato l`uso, la diffusione, distribuzione o riproduzione da parte di ogni altra persona. Siete pregati di segnalarlo immediatamente, rispondendo al mittente e distruggere quanto ricevuto (compresi i file allegati) senza farne copia o leggerne il contenuto.',
+		},
+		
+		'info_btn' => {
+			'ru' => 'Информация о записи',
+			'en' => 'Appointment details',
+			'it' => 'Informazioni sull`appuntamento',
+		},
+		
+		'resh_btn' => {
+			'ru' => 'Изменить время записи',
+			'en' => 'Reschedule appointment',
+			'it' => 'Cambiare l`appuntamento',
+		},
+		
+		'canc_btn' => {
+			'ru' => 'Отменить запись',
+			'en' => 'Cancel an appointment',
+			'it' => 'Cancellare un appuntamento',
+		},
+		
+		'prnt_btn' => {
+			'ru' => 'Распечатать запись',
+			'en' => 'Print  confirmation',
+			'it' => 'Stampa la conferma',
+		},
+		
+		'branch_tx' => {
+			'ru' => 'Визовый центр Италии',
+			'en' => 'Italian visa center',
+			'it' => 'Centro visti per l`Italia',
+		},
+	};
 };
 
 1;
