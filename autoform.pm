@@ -995,7 +995,7 @@ sub get_list_of_app
 			$app->{BirthDate} =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 		}
 	}
-	
+
 	return ( $content, 'autoform_list.tt2' );
 }
 
@@ -2097,6 +2097,10 @@ sub mod_hash
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
 			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
+			$hash->{ dwhom } = 0;
+		}
+		else {
+			$hash->{ dwhom } = 1;
 		}
 	}
 		
@@ -2250,7 +2254,7 @@ sub find_pcode
 sub send_app_confirm
 # //////////////////////////////////////////////////
 {
-	my ( $self, $appnumber, $appid, $recovery_token, $langid ) = @_; 
+	my ( $self, $appnumber, $appid, $token, $langid ) = @_; 
 	
 	$langid = 'ru' unless $langid;
 	
@@ -2259,14 +2263,16 @@ sub send_app_confirm
 	my $replacer = {
 		app_num => $appnumber,
 		app_id => $appid,
-		app_token => $recovery_token,
+		app_token => $token,
 	};
 	
-# ////////	
-	$replacer->{ app_list } = "Name<br>Name<br>Name";
+	my ( $app_list, undef ) = $self->get_list_of_app( $token );
+	
+	for ( @$app_list ) {
+		$replacer->{ app_list } .= $_->{ FName } . ' ' . $_->{ LName } . '<br>';
+	}
 	$replacer->{ app_list } =~ s/\<br\>$//;
 	
-# ////////	
 	my $lang_local = VCS::Site::autodata::get_appointment_text();
 
 	my $subject = $lang_local->{ subject }->{ $langid } . ', #' . $vars->get_system->appnum_to_str( $appnumber );
@@ -2301,7 +2307,7 @@ sub send_app_confirm
 		$date_sp[ 2 ] . ' ' . $months[ $date_sp[ 1 ] + 1 ] . ' ' . $date_sp[ 0 ] . ', ' . 
 		$vars->get_system->time_to_str($tstart) . ' - ' . $vars->get_system->time_to_str($tend);
 	
-	$replacer->{ app_person } = ( $data->{ dwhom } ? '<b>' . $lang_local->{ pers }->{ $langid } .'</b>' : 
+	$replacer->{ app_person } = ( !$data->{ dwhom } ? '<b>' . $lang_local->{ pers }->{ $langid } .'</b>' : 
 		$lang_local->{ by_the_doc }->{ $langid } . ' <b>' . 
 		$data->{ LName } . ' ' . $data->{ FName } . ' ' .  $data->{ MName } . '</b>' 
 	);
