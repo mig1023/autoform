@@ -86,7 +86,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'pers_info',
-				'label_for' => 'я согласен <a class="dotted_link_big" target="_blank" href="">на обработку персональных данных</a>',
+				'label_for' => 'я согласен на обработку персональных данных',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -97,7 +97,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				'label_for' => 'я согласен <a class="dotted_link_big" target="_blank" href="">на условия работы</a> с мобильными телефона на территории визового центра',
+				'label_for' => 'я согласен на условия работы с мобильными телефона на территории визового центра',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
