@@ -156,7 +156,7 @@ function go_button(where) {
 
 	[% IF ( step == max_step ) %]
 		if (where == 'app') {
-			location.replace('[% vcs_tools %]info.htm?&t=[% token %]&appid=[% appid %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
+			location.replace('[% vcs_tools %]info.htm?&token=[% token %]&appid=[% appid %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
 			return;
 		}
 	[% END %]

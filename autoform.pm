@@ -658,6 +658,9 @@ sub get_forward
 	$self->mod_last_change_date( $token );
 	
 	my $last_error = $self->check_data_from_form( $token, $step );
+	
+	my $appnum = undef;
+	my $appid = undef;
 
 	if ( $last_error ) {
 		my @last_error = split /\|/, $last_error;
@@ -672,17 +675,12 @@ sub get_forward
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
 		);
-	}
-
-	my $appnum = undef;
-	my $appid = undef;
+		
+		$self->set_current_app_finished( $current_table_id->{ AutoAppData } ) 
+			if $step == $self->get_step_by_content($token, '[app_finish]');
 	
-	if ( !$last_error and ( $step == $self->get_step_by_content($token, '[app_finish]') ) ) {
-		$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
-	}
-
-	if ( $step >= $self->get_content_rules( 'length' ) ) {
-		( $appid, $appnum ) = $self->set_appointment_finished( $token );
+		( $appid, $appnum ) = $self->set_appointment_finished( $token )
+			if $step == $self->get_content_rules( 'length' );
 	}
 
 	return ( $step, $last_error, $appnum, $appid );
@@ -2011,8 +2009,7 @@ sub create_new_appointment
 			SELECT RLName as LName, RFName as FName, RMName as MName, RPassNum as PassNum, 
 			RPWhen as PassDate, RPWhere as PassWhom, AppPhone as Phone, RAddress as Address 
 			FROM AutoAppData WHERE ID = ?", $person_for_contract
-		);
-		$info_for_contract = $info_for_contract->[0];
+		)->[0];
 	}
 	
 	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
