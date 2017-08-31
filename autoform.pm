@@ -2114,7 +2114,7 @@ sub visapurpose_assembler
 
 	my $visa = '';
 
-	for (1..17) {
+	for ( 1..17 ) {
 		$visa .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ VisaPurpose } == $_ ? '1' : '0' );
 	};
 
@@ -2130,7 +2130,7 @@ sub mezzi_assembler
 
 	my $mezzi = '';
 	
-	for (1..7) {
+	for ( 1..7 ) {
 		$mezzi .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
 		
 		delete $hash->{ 'Mezzi' . $_ };
@@ -2287,14 +2287,14 @@ sub send_app_confirm
 	
 	$replacer->{ branch_addr } = $vars->getGLangVar( 'Address-' . $data->{ CenterID }, $langid );
 	
-	$replacer->{ branch_addr } = $vars->db->sel1("
+	$replacer->{ branch_addr } = $self->query( 'sel1', __LINE__, "
 		SELECT BAddr FROM Branches WHERE ID=?", $data->{ CenterID }
 	) if $replacer->{ branch_addr } eq 'Address-' . $data->{ CenterID };
 
 	$replacer->{ branch_addr } = $vars->get_system->converttext( $replacer->{ branch_addr } );
 	$replacer->{ branch_addr } =~ s/_?(x005F|x000D)_?//g;
 	
-	my ( $tstart,$tend ) = $vars->db->sel1("
+	my ( $tstart,$tend ) = $self->query( 'sel1', __LINE__, "
 		SELECT TStart,TEnd FROM TimeData WHERE SlotID=?",
 		$data->{ TimeslotID }
 	);
