@@ -233,12 +233,12 @@ sub init_add_param
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
 				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
-				'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries ORDER BY EnglishName',
-				'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0 ORDER BY EnglishName',
+				'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries',
+				'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0',
 				'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
-				'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
+				'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
-				'[eu_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1 order by EnglishName',
+				'[eu_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1',
 			};
 			
 			for ( keys %$info_from_sql ) {
@@ -1333,7 +1333,8 @@ sub resort_with_first_elements
 {
 	my ( $self, $country_hash, $first_elements ) = @_;
 
-	return sort keys %$country_hash if !$first_elements;	
+	return sort { $country_hash->{ $a } cmp $country_hash->{ $b } } keys %$country_hash
+		if !$first_elements;	
 	
 	my @first_elements = split /,/, $first_elements;
 
