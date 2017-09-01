@@ -1795,7 +1795,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'services_text',
-				'label' => 'Дополнительные платные услуги',
+				'label' => 'СМС-оповещение о готовности документов (платная услуга)',
 				'font' => 'bold',
 			},
 			{
@@ -1812,6 +1812,18 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'Mobile',
 				},
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'text',
+				'name' => 'services_text',
+				'label' => 'Доставка документов DHL (платная услуга)',
+				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
 			},
 			{
 				'type' => 'input',
