@@ -72,7 +72,7 @@ sub get_content_rules_hash
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
 				'example' => 'mail@mail.ru',
-				'check' => 'zWN\@\s\-\.\,\;',
+				'check' => 'zWN\@\-\_\.',
 				'check_logic' => [
 					{
 						'condition' => 'email_not_blocked',
@@ -393,7 +393,7 @@ sub get_content_rules_hash
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
 				'example' => 'mail@mail.ru',
-				'check' => 'zWN\@\s\-\.\,\;',
+				'check' => 'zWN\@\s\-\.',
 				'check_logic' => [
 					{
 						'condition' => 'email_not_blocked',
