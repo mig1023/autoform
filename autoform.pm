@@ -1121,9 +1121,7 @@ sub get_progressbar
 				$past_current_future, undef, $progress_line->[ $_ ]->{ big } );
 	}
 	
-	$content = $line . $self->get_html_for_element( 'end_line' ) . $self->get_html_for_element( 'start_line' ) . $content;
-	
-	return $content;
+	return $line . $self->get_html_for_element( 'end_line' ) . $self->get_html_for_element( 'start_line' ) . $content;
 }
 
 sub get_html_for_element
@@ -2049,9 +2047,7 @@ sub create_table
 
 	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract );
 
-	my $new_appid = $self->insert_hash_table( $name, $hash );
-
-	return $new_appid;
+	return $self->insert_hash_table( $name, $hash );
 }
 
 sub mod_hash
