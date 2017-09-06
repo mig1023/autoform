@@ -1231,6 +1231,7 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'a_province',
 				'label' => 'Провинция',
+				'example' => 'Rome',
 				'check' => 'zWN\.\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1244,7 +1245,7 @@ sub get_content_rules_hash
 				'name' => 'a_city',
 				'label' => 'Город',
 				'comment' => 'Укажите название города',
-				'example' => 'Rome',
+				'example' => 'Fiumicino',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1333,7 +1334,7 @@ sub get_content_rules_hash
 				},
 				'param' => { 
 					0 => 'сам заявитель', 
-					1 => 'упомянутый ранее спонсор (приглашающее лицо, компания)',
+					1 => 'упомянутый ранее спонсор',
 					2 => 'иной спонсор',
 				},
 			},
@@ -2095,8 +2096,8 @@ sub get_html_elements
 					'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 		'radiolist'		=> '<div id="[name]">[options]</div>',
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
-		'example'		=> '<tr class="mobil_hide" [u]><td>&nbsp;</td><td class="exam_td_gen">' .
-					'<span class="exam_span_gen">[value]</span></td>',
+		'example'		=> '<tr class="mobil_hide" [u]><td class="exam_td_gen">' .
+					'<span class="exam_span_gen">[example]: [value]</span></td>',
 
 		'info'			=> '<label class="info" id="[name]" [u]>[text]</label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',

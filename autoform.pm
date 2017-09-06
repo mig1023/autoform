@@ -1061,7 +1061,7 @@ sub get_html_line
 	$content .= $self->get_cell(
 			$self->get_html_for_element(
 				'label', 'text', $element->{ label }
-			) 
+			), $element->{ example }
 		) .
 		$self->get_cell(
 			$self->get_html_for_element(
@@ -1084,9 +1084,14 @@ sub get_html_line
 sub get_cell
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element ) = @_;
+	my ( $self, $element, $rowspan ) = @_;
 	
-	return $self->get_html_for_element( 'start_cell' ) . $element . $self->get_html_for_element( 'end_cell' );
+	my $start_cell = ( ( $rowspan eq '' ) ?
+		$self->get_html_for_element( 'start_cell' ) :
+		$self->get_html_for_element( 'start_cell', undef, undef, undef, 'rowspan=2' )
+	);
+	
+	return $start_cell . $element . $self->get_html_for_element( 'end_cell' );
 }
 
 sub get_progressbar
@@ -1132,12 +1137,14 @@ sub get_html_for_element
 	my $value = $self->lang( $value_original );
 	my $param = $self->lang( $param );
 	my $comment = $self->lang( $comment );
+	my $example = $self->lang( 'пример' );
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $elements = VCS::Site::autodata::get_html_elements();
 	
 	my $content = $elements->{ $type };
+	
 	
 	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {
 		$content =~ s/\[name\]//gi;
@@ -1155,8 +1162,10 @@ sub get_html_for_element
 		$content =~ s/\[progress_stage\]/$value/gi;
 	}
 	
+	
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[comment\]/$comment/gi;
+	$content =~ s/\[example\]/$example/gi;
 	
 	if ( $type eq 'checkbox' ) {
 		$content =~ s/\[checked\]/checked/gi if $value_original;
