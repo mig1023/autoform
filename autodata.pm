@@ -1795,6 +1795,45 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'text',
+				'name' => 'appdate_text',
+				'label' => 'Дата записи',
+				'font' => 'bold',
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'input',
+				'name' => 'app_date',
+				'label' => 'Дата записи в Визовый центр',
+				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'AppDate',
+				},
+				'special' => 'datepicker, mask',
+				'uniq_code' => 'onchange="update_timeslots();"',
+			},
+			{
+				'type' => 'select',
+				'name' => 'timeslot',
+				'label' => 'Время',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'TimeslotID',
+				},
+				'param' => '[free]',
+				'special' => 'timeslots',
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'text',
 				'name' => 'services_text',
 				'label' => 'СМС-оповещение о готовности документов (платная услуга)',
 				'font' => 'bold',
@@ -1906,42 +1945,6 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'Duration',
 				},
-			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'text',
-				'name' => 'appdate_text',
-				'label' => 'Дата записи',
-				'font' => 'bold',
-			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'input',
-				'name' => 'app_date',
-				'label' => 'Дата записи в Визовый центр',
-				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'AppDate',
-				},
-				'special' => 'datepicker, mask',
-				'uniq_code' => 'onchange="update_timeslots();"',
-			},
-			{
-				'type' => 'select',
-				'name' => 'timeslot',
-				'label' => 'Время',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'TimeslotID',
-				},
-				'param' => '[free]',
-				'special' => 'timeslots',
 			},
 		],
 		
