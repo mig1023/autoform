@@ -128,6 +128,8 @@ function mobileScreenCheck() {
 	$(':checkbox, :radio').css( "margin-right", ( mobilScreen ? "10px" : "" ) );
 	$(':checkbox, :radio').css( "margin-top", ( mobilScreen ? "20px" : "" ) );
 	
+	$('#ui-datepicker-div').css( "font-size", ( mobilScreen ? (document.body.clientWidth/25) : "12" ) );
+	
 	[% FOREACH post_index IN special.post_index %]	
 		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
 		$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
