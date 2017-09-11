@@ -1844,13 +1844,11 @@ sub check_logic
 			
 			for my $m ( @$blocket_emails ) {
 				
-				next if $m->{ email } !~ /^$value$/i;
-				
-				if ( ref( $m->{ for_centers } ) eq 'ARRAY' ) {
-				
-					my %centers = map { $_ => 1 } @{ $m->{ for_centers } };
-					next unless exists $centers{ $center };
-				}
+				my %check = map { $_ => 1 } @{ $m->{ emails } };
+				next unless exists $check{ $value };
+
+				%check = map { $_ => 1 } @{ $m->{ for_centers } };
+				next unless exists $check{ $center };
 				
 				$first_error = $self->text_error( 16 + ( $m->{ show_truth } ? 1 : 0 ) , $element ); 
 			};
@@ -1902,7 +1900,7 @@ sub text_error
 		'Необходимо заполнить поле "[name]", если заполнено "[relation]"',
 		'Введён недопустимый индекс или город в поле "[name]", попробуйте указать другой',
 		'Вы ввели недопустимый адрес электронной почты',
-		'Этот электронный адрес был заблокирован. Вы превысили допустимое количество записей',
+		'Этот электронный адрес был заблокирован.<br>Вы превысили допустимое количество записей',
 		'Капча введена неверно.<br>Пожалуйста, попробуйте ещё раз',
 	];
 	

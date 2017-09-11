@@ -1830,9 +1830,6 @@ sub get_content_rules_hash
 				'type' => 'free_line',
 			},
 			{
-				'type' => 'free_line',
-			},
-			{
 				'type' => 'text',
 				'name' => 'services_text',
 				'label' => 'СМС-оповещение о готовности документов (платная услуга)',
@@ -2171,9 +2168,12 @@ sub get_blocked_emails
 {
 	return [
 		{
-			'email' => 'blocked_mail@mail.com',
+			
 			'for_centers' => [ 1 ],
 			'show_truth' => 0,
+			'emails' => [
+				'blocked_mail@mail.com',
+			],
 		},
 	];
 };
