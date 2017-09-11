@@ -72,8 +72,6 @@
 		offsetX: 0,
 		offsetY: 5
 	});
-
-	$('#[% last_error_name %]').poshytip('show');
 [% END %]
 
 function edit_button(id) {
@@ -113,6 +111,11 @@ function mobileScreenCheck() {
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
 	$('.edit_input').attr("value", ( mobilScreen ? '✎' : '[% langreq('Редактировать') %]' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
+	
+	[% IF last_error_name %]
+		$('#[% last_error_name %]').poshytip('hide');
+		$('#[% last_error_name %]').poshytip('show');
+	[% END %]
 }
 
 </script>
