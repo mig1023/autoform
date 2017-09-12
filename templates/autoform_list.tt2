@@ -54,7 +54,11 @@
 	&nbsp;
 	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="go_button('tofinish');">
 	
-</td></tr></table>
+</td></tr>
+<tr><td colspan="5">&nbsp;</td></tr>
+<tr><td colspan="5"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
+</td></tr>
+</table>
 
 </td></tr></table>
 

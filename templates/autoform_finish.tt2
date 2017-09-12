@@ -33,6 +33,9 @@
 	&nbsp;
 	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="finish_button();">
 </td></tr>
+<tr><td colspan="5">&nbsp;</td></tr>
+<tr><td colspan="5"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
+</td></tr>
 </table>
 
 </form>
