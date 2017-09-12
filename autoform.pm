@@ -1145,6 +1145,7 @@ sub get_html_for_element
 	
 	my $content = $elements->{ $type };
 	
+	$value =~ s/"/&quot;/g;
 	
 	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {
 		$content =~ s/\[name\]//gi;
