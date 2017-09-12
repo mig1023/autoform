@@ -26,7 +26,7 @@ sub getContent
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $vars = $self->{'VCS::Vars'};
+	my $vars = $self->{ 'VCS::Vars' };
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 
@@ -41,7 +41,7 @@ sub getContent
     	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
     		if !$disp_link;
 	
-    	&{$disp_link}( $self, $task, $id, $template );
+    	&{ $disp_link }( $self, $task, $id, $template );
     	
 	return 1;
 }
@@ -1919,6 +1919,8 @@ sub text_error
 	$offset = $self->offset_calc( $offset ) if $offset;
 	
 	$current_error =~ s/\[offset\]/$offset/;
+	
+	$incorrect_symbols =~ s/'/\\'/g if $incorrect_symbols;
 	
 	my $text_error = "$element->{name}|$current_error";
 	$text_error .= ': ' . $incorrect_symbols if $error_code == 2;
