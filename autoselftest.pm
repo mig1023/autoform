@@ -1032,12 +1032,12 @@ sub get_test_list {
 			'comment' => 'lang',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_lang_1,
+					'prepare' => \&pre_lang,
 					'args' => [ 'Дата вылета' ],
 					'expected' => 'Departure date',
 				},
 				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_lang_1,
+					'prepare' => \&pre_lang,
 					'args' => [ 'Фраза не имеющая никакого перевода' ],
 					'expected' => 'Фраза не имеющая никакого перевода',
 				},
@@ -1093,7 +1093,40 @@ sub get_test_list {
 				},
 			},
 		},
-		
+		{ 	'func' 	=> \&{ VCS::Site::autoform::cached },
+			'comment' => 'cached',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_cach,
+					'args' => [ 'cach_selftest' ],
+					'expected' => 'cash_ok',
+				},
+				2 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_cach,
+					'args' => [ 'cach_selftest_fail' ],
+					'expected' => '',
+				},
+				3 => { 	'tester' => \&test_line,
+					'args' => [ 'cach_selftest' ],
+					'expected' => '',
+				},
+				
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_file_content },
+			'comment' => 'get_file_content',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_file,
+					'args' => [ '/tmp/autoform_selftest_file' ],
+					'expected' => 'file_ok',
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ '/tmp/autoform_not_existing_file' ],
+					'expected' => '',
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -1767,7 +1800,7 @@ sub pre_query
 	}
 }
 
-sub pre_lang_1
+sub pre_lang
 # //////////////////////////////////////////////////
 {
 	my ( $self, $type ) = @_;
@@ -1777,6 +1810,35 @@ sub pre_lang_1
 	}
 	else {
 		$self->{ lang } = 'ru';
+	}
+}
+
+sub pre_cach
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->get_memd->set( 'cach_selftest', 'cash_ok', 60 );
+		$self->{ this_is_self_testing } = undef;
+	}
+	else {
+		$vars->get_memd->delete( 'cach_selftest' );
+		$self->{ this_is_self_testing } = 1;
+	}
+}
+sub pre_file
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		open my $test_file, '>', '/tmp/autoform_selftest_file';
+		print $test_file 'file_ok';
+		close $test_file;
+	}
+	else {
+		unlink '\tmp\autoform_selftest_file';
 	}
 }
 

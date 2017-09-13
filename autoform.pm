@@ -2359,7 +2359,7 @@ sub get_file_content
 
 	undef $/;
 	
-	open my $file, '<', shift or die;
+	open my $file, '<', shift or return;
 	
 	my $content = <$file>;
 	
@@ -2414,7 +2414,7 @@ sub cached
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	return if exists $self->{ this_is_self_testing };
+	return if $self->{ this_is_self_testing };
 		
 	return $vars->get_memd->get( $name );
 }
