@@ -1127,6 +1127,24 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_postcode_id },
+			'comment' => 'get_postcode_id',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'args' => [ '655000,       Абакан' ],
+					'expected' => 1,
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ '      655000, Абакан' ],
+					'expected' => 1,
+				},
+				3 => { 	'tester' => \&test_line,
+				debug => 1,
+					'args' => [ '123456, Спрингфилд' ],
+					'expected' => [ 0, 'Спрингфилд' ],
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
