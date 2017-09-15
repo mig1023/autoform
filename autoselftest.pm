@@ -678,6 +678,71 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::check_logic },
+			'comment' => 'check_logic',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_logic_1,
+					'args' => [ 
+						{
+							name => 'field_name',
+							check_logic => [ 
+								{
+									condition => 'unique_in_pending',
+									table => 'AutoAppData',
+									name => 'Finished',
+								},
+							]
+						},
+						0,
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '21' },
+					],
+					'expected' => 'field_name|Поле "field_name" уже встречается в актуальных записях',
+				},
+				2 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_logic_1,
+					'args' => [ 
+						{
+							name => 'field_name',
+							check_logic => [ 
+								{
+									condition => 'unique_in_pending',
+									table => 'AutoAppData',
+									name => 'Finished',
+								},
+							]
+						},
+						0,
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '20' },
+					],
+					'expected' => '',
+				},
+				3 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{
+							name => 'field_name',
+							check_logic => [ 
+								{
+									condition => 'unique_in_pending',
+									table => 'AutoAppData',
+									name => 'Finished',
+								},
+							]
+						},
+						0,
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '21' },
+					],
+					'expected' => '',
+				},
+			},
+		},
+		
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_current_table_id },
 			'comment' => 'get_current_table_id',
 			'test' => { 	
@@ -1138,10 +1203,9 @@ sub get_test_list {
 					'args' => [ '      655000, Абакан' ],
 					'expected' => 1,
 				},
-				3 => { 	'tester' => \&test_line,
-				debug => 1,
+				3 => { 	'tester' => \&test_array,
 					'args' => [ '123456, Спрингфилд' ],
-					'expected' => [ 0, 'Спрингфилд' ],
+					'expected' => [ undef, 'Спрингфилд' ],
 				},
 			},
 		},
@@ -1446,7 +1510,7 @@ sub get_tests
 					}
 				}
 			}
-			
+		
 			for ( @{ $t->{param} } ) {
 				$vars->setparam( $_->{name}, $_->{value} );
 			}
@@ -1589,7 +1653,7 @@ sub test_line
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 
-	warn "$expected\n$result" if $debug;
+	warn "expect: $expected\nresult:$result" if $debug;
 	
 	if ( lc( $expected ) ne lc( $result ) ) {
 		return $comm;
@@ -1857,6 +1921,23 @@ sub pre_file
 	}
 	else {
 		unlink '\tmp\autoform_selftest_file';
+	}
+}
+
+sub pre_logic_1
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			UPDATE AutoAppData SET Finished = 21, Status = 1 WHERE ID = ?", {}, 
+			$appdataid );
+	}
+	else {
+		$vars->db->query("
+			UPDATE AutoAppData SET Finished = 0, Status = 0 WHERE ID = ?", {}, 
+			$appdataid );
 	}
 }
 
