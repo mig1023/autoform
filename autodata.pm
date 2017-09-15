@@ -2168,7 +2168,6 @@ sub get_blocked_emails
 {
 	return [
 		{
-			
 			'for_centers' => [ 1 ],
 			'show_truth' => 0,
 			'emails' => [

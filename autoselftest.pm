@@ -684,8 +684,7 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_logic_1,
 					'args' => [ 
-						{
-							name => 'field_name',
+						{	name => 'field_name',
 							check_logic => [ 
 								{
 									condition => 'unique_in_pending',
@@ -704,8 +703,7 @@ sub get_test_list {
 				2 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_logic_1,
 					'args' => [ 
-						{
-							name => 'field_name',
+						{	name => 'field_name',
 							check_logic => [ 
 								{
 									condition => 'unique_in_pending',
@@ -723,8 +721,7 @@ sub get_test_list {
 				},
 				3 => { 	'tester' => \&test_line,
 					'args' => [ 
-						{
-							name => 'field_name',
+						{	name => 'field_name',
 							check_logic => [ 
 								{
 									condition => 'unique_in_pending',
@@ -740,6 +737,184 @@ sub get_test_list {
 					],
 					'expected' => '',
 				},
+				4 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'email_not_blocked', }, ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => 'blocked1mail@mail.com' },
+					],
+					'expected' => 'field_name|Вы ввели недопустимый адрес электронной почты',
+				},
+				5 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'email_not_blocked', }, ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => 'blocked2mail@mail.com' },
+					],
+					'expected' => 'field_name|Этот электронный адрес был заблокирован.<br>Вы превысили допустимое количество записей',
+				},
+				6 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'email_not_blocked', }, ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => 'blocked3mail@mail.com' },
+					],
+					'expected' => '',
+				},
+				7 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'email_not_blocked', }, ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => 'blocked4mail@mail.com' },
+					],
+					'expected' => '',
+				},
+				8 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ 
+								{ 	'condition' => 'free_only_if',
+									'table' => 'Appointments',
+									'name' => 'Draft',
+									'error' => 'Драфт',
+								}, 
+							]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '' },
+					],
+					'expected' => '',
+				},
+				9 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ 
+								{ 	'condition' => 'free_only_if',
+									'table' => 'Appointments',
+									'name' => 'PrintSrv',
+									'error' => 'PrintSrv',
+								}, 
+							]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => 'PrintSrv' },
+					],
+					'expected' => '',
+				},
+				10 => { 	'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ 
+								{ 	'condition' => 'free_only_if',
+									'table' => 'Appointments',
+									'name' => 'PrintSrv',
+									'error' => 'PrintSrv',
+								}, 
+							]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '' },
+					],
+					'expected' => 'field_name|Необходимо заполнить поле "field_name" или указать "PrintSrv"',
+				},
+				11 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ 
+								{ 	'condition' => 'free_only_if_not',
+									'table' => 'Appointments',
+									'name' => 'PrintSrv',
+									'error' => 'PrintSrv',
+								}, 
+							]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '' },
+					],
+					'expected' => '',
+				},
+				12 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ 
+								{ 	'condition' => 'free_only_if_not',
+									'table' => 'Appointments',
+									'name' => 'PrintSrv',
+									'error' => 'PrintSrv',
+								}, 
+							]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => 'PrintSrv' },
+					],
+					'expected' => '',
+				},
+				13 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ 
+								{ 	'condition' => 'free_only_if_not',
+									'table' => 'Appointments',
+									'name' => 'Draft',
+									'error' => 'Draft',
+								}, 
+							]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '' },
+					],
+					'expected' => 'field_name|Необходимо заполнить поле "field_name", если заполнено "Draft"',
+					debug => 1,
+				},				
+
 			},
 		},
 		
@@ -1412,6 +1587,35 @@ sub get_progressline
 	return $progress_line;
 }
 
+
+sub get_blocked_emails
+# //////////////////////////////////////////////////
+{
+	return [
+		{
+			'for_centers' => [ 1 ],
+			'show_truth' => 0,
+			'emails' => [
+				'blocked1mail@mail.com',
+			],
+		},
+		{
+			'for_centers' => [ 1 ],
+			'show_truth' => 1,
+			'emails' => [
+				'blocked2mail@mail.com',
+			],
+		},
+		{
+			'for_centers' => [ 5 ],
+			'show_truth' => 0,
+			'emails' => [
+				'blocked3mail@mail.com',
+			],
+		},
+	];
+};
+
 sub selftest 
 # //////////////////////////////////////////////////
 {
@@ -1500,7 +1704,7 @@ sub get_tests
 				s/\[first_page\]/$first_page/g;
 				s/\[first_page_selected\]/$first_page_selected/g;
 				s/\[second_page\]/$second_page/g;
-				
+	
 				$_ = $self->get_content_rules( 1, 'full' ) if /\[page1\]/;
 				
 				if ( ref($_) eq 'HASH' ) {
@@ -1653,7 +1857,7 @@ sub test_line
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 
-	warn "expect: $expected\nresult:$result" if $debug;
+	warn "$expected\n$result" if $debug;
 	
 	if ( lc( $expected ) ne lc( $result ) ) {
 		return $comm;

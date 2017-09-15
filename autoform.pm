@@ -51,7 +51,7 @@ sub get_content_rules
 {
 	my ( $self, $current_page, $full, $token, $need_to_init ) = @_;
 	
-	my $content = ( exists $self->{ this_is_self_testing } ?
+	my $content = ( $self->{ this_is_self_testing } ?
 		VCS::Site::autoselftest::get_content_rules_hash( $self ) :
 		VCS::Site::autodata::get_content_rules_hash( $self )
 	);
@@ -1104,7 +1104,7 @@ sub get_progressbar
 	
 	my ( $line, $content );
 	
-	my $progress_line = ( exists $self->{ this_is_self_testing } ?
+	my $progress_line = ( $self->{ this_is_self_testing } ?
 		VCS::Site::autoselftest::get_progressline() :
 		VCS::Site::autodata::get_progressline()
 	);
@@ -1843,8 +1843,11 @@ sub check_logic
 				SELECT CenterID FROM AutoAppointments WHERE ID = ?", 
 				$tables_id->{ 'AutoAppointments' }
 			);
-			
-			my $blocket_emails = VCS::Site::autodata::get_blocked_emails();
+
+			my $blocket_emails = ( $self->{ this_is_self_testing } ?
+				VCS::Site::autoselftest::get_blocked_emails() :
+				VCS::Site::autodata::get_blocked_emails()
+			);
 			
 			for my $m ( @$blocket_emails ) {
 				
