@@ -126,11 +126,14 @@ sub autoform
 	
 	my ( $appinfo_for_timeslots, $map_in_page );
 
-	if ( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) ) {
+	if ( ( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) ) or
+		( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) ) ) {
+		
 		$appinfo_for_timeslots = $self->get_same_info_for_timeslots( $token );
 	}
 
 	if ( ( ref( $special->{ with_map } ) eq 'ARRAY' ) and ( @{ $special->{ with_map } } > 0 ) ) {
+	
 		$map_in_page = $self->get_geo_info( $token );
 	}
 
@@ -2209,39 +2212,46 @@ sub find_pcode
 	my ( $self, $task, $id, $template ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
+	
 	my $request = $vars->getparam( 'name_startsWith' ) || '';
 	my $request_limit = $vars->getparam( 'maxRows' ) || 20;
 	my $callback = $vars->getparam( 'callback' ) || "";
+	my $center = $vars->getparam( 'center' ) || 1;
 	
-	$request_limit =~ s/[^0-9]//g;
+	$request =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя]//g;
+	$_ =~ s/[^0-9]//g for ( $request_limit, $center );
 	$request_limit = 20 if ( $request_limit eq '' ) or ( $request_limit == 0 ) or ( $request_limit > 100 );
 
 	my $rws = [];
 	
 	if ( $request ne '' ) {
 		if ( $request =~ /[^0-9]/ ) {
-		
-			$rws = $self->query( 'selallkeys', __LINE__, "
-				SELECT ID, CName, RName, PCode, isDefault FROM DHL_Cities 
-				WHERE (CName LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ") OR 
-				RName LIKE (" . $vars->db->{ 'dbh' }->quote( '%'.$request.'%' ) . ")) AND isDeleted=0 
-				ORDER BY CName, isDefault DESC, PCode LIMIT $request_limit"
-			);		
+			$request = "(CName LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ") OR 
+				RName LIKE (" . $vars->db->{ 'dbh' }->quote( '%'.$request.'%' ) . "))";
 		}
 		else {
-			$rws = $self->query( 'selallkeys', __LINE__, "
-				SELECT ID, CName, RName, PCode, isDefault FROM DHL_Cities 
-				WHERE PCode LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ") AND isDeleted=0 
-				ORDER BY CName, isDefault DESC, PCode LIMIT $request_limit"
-			);		
+			$request = "DHL_Cities.PCode LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ")";
 		}
 		
+		$rws = $self->query( 'selallkeys', __LINE__, "
+			SELECT DHL_Cities.ID, CName, RName, DHL_Cities.PCode, DHL_Cities.isDefault
+			FROM DHL_Cities 
+			JOIN DHL_Prices ON DHL_Prices.PCode = DHL_Cities.ID
+			JOIN Branches ON DHL_Prices.SenderID = Branches.SenderID
+			WHERE $request AND DHL_Cities.isDeleted=0
+			AND RateID = (
+				SELECT MAX(ID) FROM DHL_Rates WHERE RDate <= curdate()
+			)
+			AND Branches.ID = $center AND DPrice > 0
+			ORDER BY CName, DHL_Cities.isDefault DESC, DHL_Cities.PCode
+			LIMIT $request_limit"
+		);
+
 		for my $rk ( @$rws ) {
 			$rk->{ CName } = ( $rk->{ RName } ne '' ? 
 				$vars->get_system->converttext( $rk->{ RName } ) : 
 				$vars->get_system->converttext( $rk->{ CName } ) 
 			);
-			$rk->{ PCode } = $rk->{ PCode };
 		}
 	}
 	

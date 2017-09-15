@@ -382,7 +382,8 @@ function init_comm(pos_x, pos_y) {
 					dataType: "jsonp",
 					data: {
 						maxRows: 8,
-						name_startsWith: request.term
+						name_startsWith: request.term,
+						center: [% appinfo.center %], 
 					},
 					success: function( data ) {
 						$('#[% post_index %]').poshytip('hide');
