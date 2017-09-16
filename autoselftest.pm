@@ -685,13 +685,11 @@ sub get_test_list {
 					'prepare' => \&pre_logic_1,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{
-									condition => 'unique_in_pending',
-									table => 'AutoAppData',
-									name => 'Finished',
-								},
-							]
+							check_logic => [ {
+								condition => 'unique_in_pending',
+								table => 'AutoAppData',
+								name => 'Finished',
+							} ]
 						},
 						0,
 					],
@@ -704,13 +702,11 @@ sub get_test_list {
 					'prepare' => \&pre_logic_1,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{
-									condition => 'unique_in_pending',
-									table => 'AutoAppData',
-									name => 'Finished',
-								},
-							]
+							check_logic => [ {
+								condition => 'unique_in_pending',
+								table => 'AutoAppData',
+								name => 'Finished',
+							} ]
 						},
 						0,
 					],
@@ -722,13 +718,11 @@ sub get_test_list {
 				3 => { 	'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{
-									condition => 'unique_in_pending',
-									table => 'AutoAppData',
-									name => 'Finished',
-								},
-							]
+							check_logic => [ {
+								condition => 'unique_in_pending',
+								table => 'AutoAppData',
+								name => 'Finished',
+							} ]
 						},
 						0,
 					],
@@ -796,13 +790,12 @@ sub get_test_list {
 				8 => { 	'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{ 	'condition' => 'free_only_if',
-									'table' => 'Appointments',
-									'name' => 'Draft',
-									'error' => 'Драфт',
-								}, 
-							]
+							check_logic => [ {
+								'condition' => 'free_only_if',
+								'table' => 'Appointments',
+								'name' => 'Draft',
+								'error' => 'Драфт',
+							} ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
@@ -816,13 +809,12 @@ sub get_test_list {
 				9 => { 	'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{ 	'condition' => 'free_only_if',
-									'table' => 'Appointments',
-									'name' => 'PrintSrv',
-									'error' => 'PrintSrv',
-								}, 
-							]
+							check_logic => [ {
+								'condition' => 'free_only_if',
+								'table' => 'Appointments',
+								'name' => 'PrintSrv',
+								'error' => 'PrintSrv',
+							} ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
@@ -836,13 +828,12 @@ sub get_test_list {
 				10 => { 	'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{ 	'condition' => 'free_only_if',
-									'table' => 'Appointments',
-									'name' => 'PrintSrv',
-									'error' => 'PrintSrv',
-								}, 
-							]
+							check_logic => [ {
+								'condition' => 'free_only_if',
+								'table' => 'Appointments',
+								'name' => 'PrintSrv',
+								'error' => 'PrintSrv',
+							} ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
@@ -856,13 +847,12 @@ sub get_test_list {
 				11 => { 'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{ 	'condition' => 'free_only_if_not',
-									'table' => 'Appointments',
-									'name' => 'PrintSrv',
-									'error' => 'PrintSrv',
-								}, 
-							]
+							check_logic => [ { 	
+								'condition' => 'free_only_if_not',
+								'table' => 'Appointments',
+								'name' => 'PrintSrv',
+								'error' => 'PrintSrv',
+							} ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
@@ -876,13 +866,12 @@ sub get_test_list {
 				12 => { 'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{ 	'condition' => 'free_only_if_not',
-									'table' => 'Appointments',
-									'name' => 'PrintSrv',
-									'error' => 'PrintSrv',
-								}, 
-							]
+							check_logic => [ {
+								'condition' => 'free_only_if_not',
+								'table' => 'Appointments',
+								'name' => 'PrintSrv',
+								'error' => 'PrintSrv',
+							} ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
@@ -896,13 +885,11 @@ sub get_test_list {
 				13 => { 'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ 
-								{ 	'condition' => 'free_only_if_not',
-									'table' => 'Appointments',
-									'name' => 'Draft',
-									'error' => 'Draft',
-								}, 
-							]
+							check_logic => [ { 	'condition' => 'free_only_if_not',
+								'table' => 'Appointments',
+								'name' => 'Draft',
+								'error' => 'Draft',
+							} ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
@@ -912,9 +899,154 @@ sub get_test_list {
 						{ 'name' => 'field_name', 'value' => '' },
 					],
 					'expected' => 'field_name|Необходимо заполнить поле "field_name", если заполнено "Draft"',
-					debug => 1,
 				},				
 
+				14 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'now_or_later' } ]
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '2100-01-01' },
+					],
+					'expected' => '',
+				},
+				15 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'now_or_later' } ]
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '1999-01-01' },
+					],
+					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
+				},
+				16 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'now_or_earlier' } ]
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '1999-01-01' },
+					],
+					'expected' => '',
+				},
+				17 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'now_or_earlier' } ]
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '2100-01-01' },
+					],
+					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
+				},
+				18 => { 'tester' => \&test_line,
+					'prepare' => \&pre_logic_2,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'equal_or_later',
+								'table' => 'Appointments',
+								'name' => 'SDate',
+								'error' => 'Draft',
+							} ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '2011-01-01' },
+					],
+					'expected' => '',
+				},
+				19 => { 'tester' => \&test_line,
+					'prepare' => \&pre_logic_2,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'equal_or_later',
+								'table' => 'Appointments',
+								'name' => 'SDate',
+								'error' => 'Draft',
+							} ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '2008-01-01' },
+					],
+					'expected' => 'field_name|"field_name" не может быть раньше, чем "Draft"',
+				},
+				20 => { 'tester' => \&test_line,
+					'prepare' => \&pre_logic_2,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'equal_or_earlier',
+								'table' => 'Appointments',
+								'name' => 'SDate',
+								'error' => 'Draft',
+							} ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '2008-01-01' },
+					],
+					'expected' => '',
+				},
+				21 => { 'tester' => \&test_line,
+					'prepare' => \&pre_logic_2,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'equal_or_earlier',
+								'table' => 'Appointments',
+								'name' => 'SDate',
+								'error' => 'Draft',
+							} ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '2011-01-01' },
+					],
+					'expected' => 'field_name|"field_name" не может быть позднее, чем "Draft"',
+				},
+				22 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'now_or_earlier' } ]
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '01.01.2009' },
+					],
+					'expected' => '',
+				},
+				23 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'now_or_earlier' } ]
+						},
+					],
+					'param' => [
+						{ 'name' => 'field_name', 'value' => '01.01.2113' },
+					],
+					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
+				},
 			},
 		},
 		
@@ -2142,6 +2274,23 @@ sub pre_logic_1
 		$vars->db->query("
 			UPDATE AutoAppData SET Finished = 0, Status = 0 WHERE ID = ?", {}, 
 			$appdataid );
+	}
+}
+
+sub pre_logic_2
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			UPDATE AutoAppointments SET SDate = '2010-01-01' WHERE ID = ?", {}, 
+			$appid );
+	}
+	else {
+		$vars->db->query("
+			UPDATE AutoAppointments SET SDate = '0000-00-00' WHERE ID = ?", {}, 
+			$appid );
 	}
 }
 
