@@ -209,7 +209,10 @@ sub get_geo_info
 		WHERE Token = ?", $token
 	);
 
-	my $branches = VCS::Site::autodata::get_geo_branches();
+	my $branches = ( $self->{ this_is_self_testing } ?
+		VCS::Site::autoselftest::get_geo_branches() :
+		VCS::Site::autodata::get_geo_branches()
+	);
 	
 	$addr =~ s/\r?\n/<br>/g;
 	
@@ -345,7 +348,8 @@ sub get_collect_date
 	if ( !$collect_dates ) {
 	
 		my $collect_dates_array = $self->query( 'selallkeys', __LINE__, "
-			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD from Branches where isDeleted = 0 and Display = 1"
+			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD
+			FROM Branches where isDeleted = 0 and Display = 1"
 		);
 		$collect_dates = {};
 		

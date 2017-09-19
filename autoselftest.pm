@@ -1516,6 +1516,31 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_geo_info },
+			'comment' => 'get_geo_info',
+			'test' => { 	
+				1 => { 	'tester' => \&test_array,
+					'prepare' => \&pre_geo_or_collect,
+					'args' => [ '[token]' ],
+					'expected' => [ [ 55, 49, 'Казань' ] ],
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_collect_date },
+			'comment' => 'get_collect_date',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_geo_or_collect,
+					'args' => [ '[token]' ],
+					'expected' => '7',
+				},
+				2 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_collect2,
+					'args' => [ '[token]' ],
+					'expected' => '14',
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -1746,6 +1771,14 @@ sub get_blocked_emails
 			],
 		},
 	];
+};
+
+sub get_geo_branches
+# //////////////////////////////////////////////////
+{
+	return {
+		5 => [ '55', '49', ],
+	};
 };
 
 sub selftest 
@@ -2293,5 +2326,64 @@ sub pre_logic_2
 			$appid );
 	}
 }
+
+sub pre_geo_or_collect
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
+			Insurance, BAddr, JAddr, AddrEqualled, SenderID, CTemplate, isConcil, 
+			isSMS, isUrgent, posShipping, isDover, calcInsurance, cdSimpl, cdUrgent, cdCatD, 
+			CollectDate, siteLink, calcConcil, ConsNDS, genbank, isTranslate, shengen, isAnketa, 
+			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
+			DefaultPaymentMethod, DisableAppSameDay) 
+			VALUES (5, 'Kazan', 90, 3, 0, 0, 1, 0, 'Казань', NULL, 1, 1, 'rtf', 0, 1, 0, 
+			1, 1, 0, 7, 0, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 1, 0, 0, 67, 0, '0', 1, 0)"
+		);
+			
+	}
+	else {
+		$vars->db->query("
+			DELETE FROM Branches"
+		);
+	}
+}
+
+sub pre_collect2
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
+			Insurance, BAddr, JAddr, AddrEqualled, SenderID, CTemplate, isConcil, 
+			isSMS, isUrgent, posShipping, isDover, calcInsurance, cdSimpl, cdUrgent, cdCatD, 
+			CollectDate, siteLink, calcConcil, ConsNDS, genbank, isTranslate, shengen, isAnketa, 
+			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
+			DefaultPaymentMethod, DisableAppSameDay) 
+			VALUES (5, 'Kazan', 90, 3, 0, 0, 1, 0, 'Казань', NULL, 1, 1, 'rtf', 0, 1, 0, 
+			1, 1, 0, 7, 0, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 1, 0, 0, 67, 0, '0', 1, 0)"
+		);
+		
+		$vars->db->query("
+			UPDATE VisaTypes SET category = 'D' WHERE ID = 13"
+		);
+		
+	}
+	else {
+		$vars->db->query("
+			DELETE FROM Branches"
+		);
+		
+		$vars->db->query("
+			UPDATE VisaTypes SET category = 'C' WHERE ID = 13"
+		);
+	}
+}
+
 
 1;
