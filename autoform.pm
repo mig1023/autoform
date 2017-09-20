@@ -52,8 +52,8 @@ sub get_content_rules
 	my ( $self, $current_page, $full, $token, $need_to_init ) = @_;
 	
 	my $content = ( $self->{ this_is_self_testing } ?
-		VCS::Site::autoselftest::get_content_rules_hash( $self ) :
-		VCS::Site::autodata::get_content_rules_hash( $self )
+		VCS::Site::autoselftest::get_content_rules_hash() :
+		VCS::Site::autodata::get_content_rules_hash()
 	);
 	
 	my $keys_in_current_page = {};

@@ -1541,6 +1541,23 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::check_relation },
+			'comment' => 'check_relation',
+			'test' => { 	
+				1 => { 	'tester' => \&test_array,
+					'args' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' }, '[token]', 0 ],
+					'expected' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' } ],
+				},
+				2 => { 	'tester' => \&test_array,
+					'args' => [ 1, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Начало записи' }, '[token]', 0 ],
+					'expected' => [ 2, get_content_rules_hash( 'with_raltion', undef, 'add' )->{ 'Данные поездки' } ],
+				},
+				3 => { 	'tester' => \&test_array,
+					'args' => [ 2, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Данные поездки' }, '[token]', 'moonwalk' ],
+					'expected' => [ 1, get_content_rules_hash( 'with_raltion', undef, 'add' )->{ 'Начало записи' } ],
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -1565,6 +1582,8 @@ my $second_page =
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
 {
+	my ( $with_raltion, $skip_this, $add_page_name ) = @_;
+
 	my $content_rules = {
 	
 		'Начало записи' => [
@@ -1717,6 +1736,14 @@ sub get_content_rules_hash
 		],
 	};
 	
+	for ( 'Начало записи', 'Данные поездки', 'Выберите лицо на которое будет оформлен договор' ) {
+		$content_rules->{ $_ }->[ 0 ]->{ relation } = {} if $with_raltion;
+		
+		$content_rules->{ $_ }->[ 0 ]->{ relation } = { 'only_if' => 
+			{ 'table' => 'Appointments', 'name' => 'CenterID', 'value' => '99' } } if $skip_this;
+		$content_rules->{ $_ }->[ 0 ]->{ page_name } = $_ if $add_page_name;
+	}
+
 	return $content_rules;
 }
 
