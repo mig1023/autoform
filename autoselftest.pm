@@ -1558,6 +1558,32 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_step_by_content },
+			'comment' => 'get_step_by_content',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'args' => [ '[token]', '[list_of_applicants]', 0 ],
+					'expected' => '3',
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ '[token]', '[list_of_applicants]', 'next' ],
+					'expected' => '4',
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::set_step_by_content },
+			'comment' => 'set_step_by_content',
+			'test' => { 	
+				1 => { 	'tester' => \&test_write_db,
+					'args' => [ 'Token', '[list_of_applicants]', 0 ],
+					'expected' => 'Token:AutoToken:Step:3',
+				},
+				2 => { 	'tester' => \&test_write_db,
+					'args' => [ 'Token', '[list_of_applicants]', 'next' ],
+					'expected' => 'Token:AutoToken:Step:4',
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -1732,6 +1758,13 @@ sub get_content_rules_hash
 					'transfer' => 'nope',
 				},
 				'param' => '[persons_in_app]',
+			},
+		],
+		'Список заявителей' => [
+			{
+				'page_ord' => 3,
+				'progress' => 3,
+				'replacer' => '[list_of_applicants]',
 			},
 		],
 	};
@@ -2160,6 +2193,8 @@ sub test_write_db
 	
 	my $value = $vars->db->sel1("
 			SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
+
+	warn "$db_value\n$value" if $debug;
 
 	if ( lc( $db_value ) ne lc( $value ) ) {
 		return $comment;
