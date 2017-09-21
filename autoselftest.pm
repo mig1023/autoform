@@ -60,9 +60,9 @@ sub get_test_list {
 			'comment' => 'save_new_token_in_db',
 			'test' => { 	
 				1 => { 	'tester' => \&test_write_db,
-					'args' => [ 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171' ],
-					'expected' => 'abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171'.
-						':AutoToken:Token:abcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171',
+					'args' => [ 'tbcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171' ],
+					'expected' => 'tbcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171'.
+						':AutoToken:Token:tbcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171',
 				},
 			},
 		},
@@ -675,6 +675,10 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_line,
 					'args' => [ '[appdata_id]', '[token]' ],
 					'expected' => '1',
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ '1', '[token]' ],
+					'expected' => '0',
 				},
 			},
 		},
@@ -1584,6 +1588,111 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_forward },
+			'comment' => 'get_forward',
+			'test' => { 
+				1 => { 	'tester' => \&test_array,
+					'args' => [ 1, 'Token' ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '1' },
+						{ 'name' => 'vtype', 'value' => '13' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
+						{ 'name' => 'pers_info', 'value' => '1' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => [ 2, '', undef, undef],
+				},			
+				2 => { 	'tester' => \&test_array,
+					'args' => [ 1, 'Token' ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '1' },
+						{ 'name' => 'vtype', 'value' => '' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
+						{ 'name' => 'pers_info', 'value' => '1' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => [ 1, 'vtype|Поле "Тип визы" не заполнено', undef, undef],
+				},
+				3 => { 	'tester' => \&test_array,
+					'args' => [ 1, 'Token' ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '1' },
+						{ 'name' => 'vtype', 'value' => '13' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
+						{ 'name' => 'pers_info', 'value' => '' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => [ 1, 'pers_info|Вы должны указать поле "я согласен на обработку персональных данных"', 
+						undef, undef],
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_back },
+			'comment' => 'get_back',
+			'test' => { 
+				1 => { 	'tester' => \&test_line,
+					'args' => [ 2, 'Token' ],
+					'expected' => 1,
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ 6, 'Token' ],
+					'expected' => 3,
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::set_appointment_finished },
+			'comment' => 'set_appointment_finished',
+			'test' => { 	
+				1 => { 	'tester' => \&test_regexp,
+					'args' => [ 'Token' ],
+					'expected' => '^[1-9]\d*$',
+				},
+				2 => { 	'tester' => \&test_array,
+					'prepare' => \&pre_draft,
+					'args' => [ 'Token' ],
+					'expected' => [ 0, 'draft_app_num' ],
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_edit },
+			'comment' => 'get_edit',
+			'test' => { 	
+				1 => { 	'tester' => \&test_write_db,
+					'args' => [ 1, '[appdata_id]', '[token]' ],
+					'expected' => '[token]:AutoToken:AutoAppDataID:[appdata_id]',
+				},
+				2 => { 	'tester' => \&test_write_db,
+					'args' => [ 1, '111', '[token]' ],
+					'expected' => '[token]:AutoToken:AutoAppDataID:[appdata_id]',
+				},
+				3 => { 	'tester' => \&test_write_db,
+					'args' =>[ 1, '[appdata_id]', '[token]' ],
+					'expected' => '[token]:AutoToken:Step:4',
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::check_all_app_finished_and_not_empty },
+			'comment' => 'check_all_app_finished_and_not_empty',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_all_finished,
+					'args' => [ '[token]' ],
+					'expected' => 0,
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ '[token]' ],
+					'expected' => 1,
+				},
+				3 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_nobody,
+					'args' => [ '[token]' ],
+					'expected' => 2,
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -1737,6 +1846,14 @@ sub get_content_rules_hash
 					'name' => 'FDate',
 				},
 				'special' => 'datepicker, mask',
+			},
+		],
+		
+		'Страница окончания записи' => [
+			{
+				'page_ord' => 5,
+				'progress' => 5,
+				'replacer' => '[app_finish]',
 			},
 		],
 		
@@ -2189,7 +2306,7 @@ sub test_write_db
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $field = ( $token_or_appid =~ /^(a[a-z0-9]{63}|Token)$/ ? "Token" : "ID" );
+	my $field = ( $token_or_appid =~ /^(t[a-z0-9]{63}|Token)$/ ? "Token" : "ID" );
 	
 	my $value = $vars->db->sel1("
 			SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
@@ -2447,5 +2564,59 @@ sub pre_collect2
 	}
 }
 
+sub pre_draft
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			UPDATE AutoToken SET Draft = 1 WHERE Token = 'Token'"
+		);
+	}
+	else {
+		$vars->db->query("
+			UPDATE AutoToken SET Draft = 0 WHERE Token = 'Token'"
+		);
+	}
+}
+
+sub pre_all_finished
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {},
+			$appdataid
+		);
+	}
+	else {
+		$vars->db->query("
+			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {},
+			$appdataid
+		);
+	}
+}
+
+sub pre_nobody
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+
+	if ( $type eq 'PREPARE' ) { 
+		$vars->db->query("
+			UPDATE AutoAppData SET AppID = 0 WHERE ID = ?", {},
+			$appdataid
+		);
+	}
+	else {
+		$vars->db->query("
+			UPDATE AutoAppData SET AppID = ? WHERE ID = ?", {},
+			$appid, $appdataid
+		);
+	}
+}
 
 1;

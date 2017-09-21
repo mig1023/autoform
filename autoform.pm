@@ -777,7 +777,7 @@ sub get_edit
 	
 	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
 		
-		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');;
+		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');
 		
 		my $sch_id = $self->query( 'sel1', __LINE__, "
 			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
