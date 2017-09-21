@@ -33,7 +33,7 @@ sub getContent
     	my $dispathcher = {
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
-		'findpcode' => \&find_pcode,
+		'findpcode' => \&get_pcode,
     	};
     	
     	my $disp_link = $dispathcher->{ $id };
@@ -2214,7 +2214,7 @@ sub insert_hash_table
 	return $current_id;
 }
 
-sub find_pcode
+sub get_pcode
 {
 	my ( $self, $task, $id, $template ) = @_;
 
@@ -2229,32 +2229,61 @@ sub find_pcode
 	$_ =~ s/[^0-9]//g for ( $request_limit, $center );
 	$request_limit = 20 if ( $request_limit eq '' ) or ( $request_limit == 0 ) or ( $request_limit > 100 );
 
-	my $rws = [];
+	my $finded_pcode = [];
 	
 	if ( $request ne '' ) {
+	
+		my $all_pcode = $self->cached( 'autoform_allpcode' );
+		
+		if ( !$all_pcode ) {
+
+			$all_pcode = $self->query( 'selallkeys', __LINE__, "
+				SELECT DHL_Cities.ID, CName, RName, DHL_Cities.PCode, DHL_Cities.isDefault, DPrice, Branches.ID as Center
+				FROM DHL_Cities 
+				JOIN DHL_Prices ON DHL_Prices.PCode = DHL_Cities.ID
+				JOIN Branches ON DHL_Prices.SenderID = Branches.SenderID
+				WHERE DHL_Cities.isDeleted=0 AND RateID = (
+					SELECT MAX(ID) FROM DHL_Rates WHERE RDate <= curdate()
+				) AND DPrice > 0
+				ORDER BY CName, DHL_Cities.isDefault DESC, DHL_Cities.PCode"
+			);
+			
+			$vars->get_memd->set('autoform_allpcode', $all_pcode, 
+				$self->{ autoform }->{ memcached }->{ memcached_exptime } );
+		}
+	
 		if ( $request =~ /[^0-9]/ ) {
-			$request = "(CName LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ") OR 
-				RName LIKE (" . $vars->db->{ 'dbh' }->quote( '%'.$request.'%' ) . "))";
+
+			my $limit = 0;
+			
+			for ( @$all_pcode ) {
+				if ( ( $_->{ CName } =~ /^$request/ or $_->{ RName } =~ /^$request/ )
+						and $_->{ Center } == $center ) {
+					
+					push( @$finded_pcode, $_ );
+					
+					$limit++;
+					
+					last if $limit >= $request_limit;
+				};
+			}
 		}
 		else {
-			$request = "DHL_Cities.PCode LIKE (" . $vars->db->{ 'dbh' }->quote( $request.'%' ) . ")";
+			my $limit = 0;
+			
+			for ( @$all_pcode ) {
+				if ( $_->{ PCode } =~ /^$request/ and $_->{ Center } == $center ) {
+					
+					push( @$finded_pcode, $_ );
+					
+					$limit++;
+					
+					last if $limit >= $request_limit;
+				};
+			}			
 		}
-		
-		$rws = $self->query( 'selallkeys', __LINE__, "
-			SELECT DHL_Cities.ID, CName, RName, DHL_Cities.PCode, DHL_Cities.isDefault
-			FROM DHL_Cities 
-			JOIN DHL_Prices ON DHL_Prices.PCode = DHL_Cities.ID
-			JOIN Branches ON DHL_Prices.SenderID = Branches.SenderID
-			WHERE $request AND DHL_Cities.isDeleted=0
-			AND RateID = (
-				SELECT MAX(ID) FROM DHL_Rates WHERE RDate <= curdate()
-			)
-			AND Branches.ID = $center AND DPrice > 0
-			ORDER BY CName, DHL_Cities.isDefault DESC, DHL_Cities.PCode
-			LIMIT $request_limit"
-		);
 
-		for my $rk ( @$rws ) {
+		for my $rk ( @$finded_pcode ) {
 			$rk->{ CName } = ( $rk->{ RName } ne '' ? 
 				$vars->get_system->converttext( $rk->{ RName } ) : 
 				$vars->get_system->converttext( $rk->{ CName } ) 
@@ -2265,12 +2294,13 @@ sub find_pcode
 	$vars->get_system->pheaderJSON( $vars );
 	
 	my $tvars = {
-		'alist' => $rws,
+		'alist' => $finded_pcode,
 		'callback' => $callback
 	};
 	
 	$template->process( 'autoform_pcode.tt2', $tvars );
 }
+
 
 sub send_app_confirm
 # //////////////////////////////////////////////////
