@@ -47,6 +47,7 @@ sub get_content_rules_hash
 				},
 				'param' => '[centers_from_db]',
 				'uniq_code' => 'onchange="update_nearest_date_free_date();"',
+				'first_elements' => '1',
 			},
 			{
 				'type' => 'select',
@@ -59,6 +60,7 @@ sub get_content_rules_hash
 					'name' => 'VType',
 				},
 				'param' => '[visas_from_db]',
+				'first_elements' => '13',
 			},
 			{
 				'type' => 'info',

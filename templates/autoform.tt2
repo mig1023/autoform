@@ -377,27 +377,27 @@ function init_comm(pos_x, pos_y) {
 
 	$('#[% post_index %]').autocomplete({
 		source:function( request, response ) {
-				$.ajax({
-					url: "/autoform/findpcode.htm",
-					dataType: "jsonp",
-					data: {
-						maxRows: 8,
-						name_startsWith: request.term,
-						center: [% appinfo.center %], 
-					},
-					success: function( data ) {
-						$('#[% post_index %]').poshytip('hide');
-						response( $.map( data.cmps, function( item ) {
-							return {
-								value: item.pcode,
-								desc: item.cname,
-								cdefault: item.cdefault,
-								cid: item.cid
-							}
-						}));
-					}
-				});
-			},
+			$.ajax({
+				url: "/autoform/findpcode.htm",
+				dataType: "jsonp",
+				data: {
+					maxRows: 8,
+					name_startsWith: request.term,
+					center: [% appinfo.center %], 
+				},
+				success: function( data ) {
+					$('#[% post_index %]').poshytip('hide');
+					response( $.map( data.cmps, function( item ) {
+						return {
+							value: item.pcode,
+							desc: item.cname,
+							cdefault: item.cdefault,
+							cid: item.cid
+						}
+					}));
+				}
+			});
+		},
 		delay:10,
 		minLength:3,
 		select: function( event, ui ) {
