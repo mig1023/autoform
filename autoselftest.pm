@@ -1693,6 +1693,16 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_list_of_app },
+			'comment' => 'get_list_of_app',
+			'test' => { 	
+				1 => { 	'tester' => \&test_array,
+					'prepare' => \&pre_all_finished,
+					'args' => [ 'Token' ],
+					'expected' => [ [ { 'ID' => 'X' } ], 'autoform_list.tt2' ],
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
