@@ -594,6 +594,24 @@ sub get_test_list {
 						'alternative_data_source' => {},
 					}
 				},
+				2 => { 	'tester' => \&test_hash,
+					'args' => [ '[page2]' ],
+					'expected' => {
+						'Auto' => {
+							'' => undef,
+						},
+						'AutoAppointments' => {
+							'SDate' => 's_date',
+							'FDate' => 'f_date'
+						},
+						'alternative_data_source' => {
+							'f_date' => {
+								'table' => 'AutoAppointments',
+								'field' => 'SDate'
+							}
+						},
+					}
+				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_chkbox },
@@ -1228,6 +1246,10 @@ sub get_test_list {
 									'table' => 'Appointments',
 									'name' => 'FDate',
 								},
+								'load_if_free_field' => {
+									'table' => 'Appointments',
+									'name' => 'SDate',
+								},
 								'special' => 'datepicker, mask',
 								'param' => {}
 							},
@@ -1277,6 +1299,10 @@ sub get_test_list {
 								'db' => {
 									'table' => 'Appointments',
 									'name' => 'FDate',
+								},
+								'load_if_free_field' => {
+									'table' => 'Appointments',
+									'name' => 'SDate',
 								},
 								'special' => 'datepicker, mask',
 								'param' => {}
@@ -1706,6 +1732,58 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::check_comments_alter_version },
+			'comment' => 'check_comments_alter_version',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'args' => [ { '5' => 'test1', '10' => 'test2' }, '[token]' ],
+					'expected' => 'test1',
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ { '1,2,3' => 'test1', '4,5,6' => 'test2' }, '[token]' ],
+					'expected' => 'test2',
+				},
+				3 => { 	'tester' => \&test_line,
+					'args' => [ { '1,2,3' => 'test1' }, '[token]' ],
+					'expected' => '',
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::change_current_appdata },
+			'comment' => 'change_current_appdata',
+			'test' => { 	
+				1 => { 	'tester' => \&test_write_db,
+					'args' => [ 1234, '[table_id]' ],
+					'expected' => '[token_id]:AutoToken:AutoAppDataID:1234',
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_all_values },
+			'comment' => 'get_all_values',
+			'test' => { 	
+				1 => { 	'tester' => \&test_hash,
+					'args' => [ 23, '[table_id]' ],
+					'expected' => { { 'visa_text' => undef } },
+				},
+				2 => { 	'tester' => \&test_hash,
+					'args' => [ 1, '[table_id]' ],
+					'expected' => {
+						'email' => '',
+						'vtype' => '13',
+						'pers_info' => '0', 
+						'mobil_info' => '0',
+						'center' => '5',
+					},
+				},
+				3 => { 	'tester' => \&test_hash,
+					'args' => [ 2, '[table_id]' ],
+					'expected' => {
+						'f_date' => '01.05.2011',
+						's_date' => '01.05.2011'
+					},
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -1858,6 +1936,10 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'FDate',
 				},
+				'load_if_free_field' => {
+					'table' => 'Appointments',
+					'name' => 'SDate',
+				},
 				'special' => 'datepicker, mask',
 			},
 		],
@@ -1888,6 +1970,7 @@ sub get_content_rules_hash
 					'transfer' => 'nope',
 				},
 				'param' => '[persons_in_app]',
+				'special' => 'save_info_about_hastdatatype',
 			},
 		],
 		'Список заявителей' => [
@@ -2053,6 +2136,16 @@ sub get_tests
 				( ref( $t->{expected} ) eq 'HASH' ? values %{ $t->{expected} } : $t->{expected} ) 
 				)
 			) {
+			
+				my $table_id = {
+					'AutoToken' => $token_id,
+					'AutoAppointments' => $test_appid,
+					'AutoAppData' => $test_appdataid,
+					'AutoSchengenAppData' => $test_appdata_schid,
+				};
+				
+				$_ = $table_id if /\[table_id\]/;
+				
 				s/\[token\]/$test_token/g;
 				s/\[token_id\]/$token_id/g;
 				s/\[app_id\]/$test_appid/g;
@@ -2064,7 +2157,9 @@ sub get_tests
 				s/\[first_page_selected\]/$first_page_selected/g;
 				s/\[second_page\]/$second_page/g;
 	
-				$_ = $self->get_content_rules( 1, 'full' ) if /\[page1\]/;
+				if ( /\[page(\d+)\]/ ) {
+					$_ = $self->get_content_rules( $1, 'full' );
+				}
 				
 				if ( ref($_) eq 'HASH' ) {
 					for my $field ( keys %$_ ) {
@@ -2104,7 +2199,7 @@ sub show_result
 	
 	my $result_line = self_test_htm( 'body_start' );
 	
-	my $test_num = 18; 	# 15 self_self + create_clear_form + get_add
+	my $test_num = 18; 	# 16 self_self + create_clear_form + get_add
 	my $fails = 0;
 
 	my $tests = get_test_list();
@@ -2179,6 +2274,7 @@ sub self_self_test
 	$fail_in_myself += ! test_array_ref( $self_debug, [ '1', 'A', '2', 'B' ], 'self11', $self, [ '1', 'A', '2', 'B', '3' ] );
 	$fail_in_myself += ! test_regexp( $self_debug, '^[A-D]+[0-5]+$', 'self12', undef, 'ABC1234 5' );
 
+	$fail_in_myself += ! test_hash( $self_debug, {}, 'self6', undef, { 'key1' => 'value1' } );
 	$fail_in_myself += ! test_hash( $self_debug, { 'key1' => 'value1', 'key2' => [ 1, 2, 3 ] }, 'self3', undef, 
 		{ 'key1' => 'value1', 'key2' => ( 1, 3, 2 ) } );
 	$fail_in_myself += ! test_hash( $self_debug, { 'key1' => 'value1', 'key2' => 'value2' }, 'self14', undef, 
@@ -2216,11 +2312,9 @@ sub test_line
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 
-	warn "$expected\n$result" if $debug;
+	warn "$comm :: $expected / $result" if $debug;
 	
-	if ( lc( $expected ) ne lc( $result ) ) {
-		return $comm;
-	};
+	return $comm if lc( $expected ) ne lc( $result );
 }
 
 sub test_line_in_hash
@@ -2229,11 +2323,9 @@ sub test_line_in_hash
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my ( $key, $value ) = split /:/, $expected;
 	
-	warn Dumper( $expected, $result ) if $debug;
+	warn "$comm ::\n" . Dumper( $expected, $result ) if $debug;
 
-	if ( lc( $result->{ $key } ) ne lc( $value ) ) { 
-		return $comm;
-	};
+	return $comm if lc( $result->{ $key } ) ne lc( $value );
 }
 
 sub test_hash
@@ -2242,15 +2334,15 @@ sub test_hash
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my $not_eq = 0;
 
-	warn Dumper( $expected, $result ) if $debug;
+	warn "$comm ::\n" . Dumper( $expected, $result ) if $debug;
+	
+	$not_eq += ( keys %$expected != keys %$result );
 	
 	for ( keys %$expected, keys %$result ) {
 		$not_eq += ( recursive_check( $debug, $expected->{ $_ }, $comm, undef, $result->{ $_ } ) ? 1 : 0 );
 	}
 
-	if ( $not_eq ) {
-		return 1;
-	};
+	return 1 if $not_eq;
 }
 
 sub test_array
@@ -2264,7 +2356,7 @@ sub test_array
 	
 	my $not_eq = 0;
 	
-	warn Dumper( $expected, \@result ) if $debug;
+	warn "$comm ::\n" . Dumper( $expected, \@result ) if $debug;
 	
 	return 0 if ( $#result < 0 ) and ( $#$expected < 0 );
 	return 1 if ( $#result < 0 ) or ( $#$expected < 0 );
@@ -2274,9 +2366,7 @@ sub test_array
 		$not_eq += ( recursive_check( $debug, $expected->[$_], $comm, undef, $result[$_] ) ? 1 : 0 );
 	}
 
-	if ( $not_eq ) { 
-		return 1;
-	};
+	return 1 if $not_eq;
 }
 
 sub test_array_ref
@@ -2284,7 +2374,7 @@ sub test_array_ref
 {
 	my ( $debug, $expected, $comm, $self, $result ) = @_;
 
-	warn Dumper( $expected, $result ) if $debug;
+	warn "$comm ::\n" . Dumper( $expected, $result ) if $debug;
 	
 	my $not_eq = 0;
 	
@@ -2297,9 +2387,7 @@ sub test_array_ref
 		$not_eq += ( recursive_check( $debug, $expected->[$_], $comm, undef, $result->[$_] ) ? 1 : 0 );
 	}
 	
-	if ( $not_eq ) { 
-		return 1;
-	};
+	return 1 if $not_eq;
 }
 
 sub test_regexp
@@ -2307,11 +2395,9 @@ sub test_regexp
 {
 	my ( $debug, $regexp, $comm, undef, $result ) = @_;
 	
-	warn "$regexp\n$result" if $debug;
+	warn "$comm :: $regexp / $result" if $debug;
 	
-	if ( $result !~ /$regexp/ ) {
-		return $comm;
-	}
+	return $comm if $result !~ /$regexp/;
 }
 
 sub test_cached
@@ -2325,11 +2411,9 @@ sub test_cached
 	
 	my $result = $vars->get_memd->get( $cached_name );
 	
-	warn "$cached_value\n$result" if $debug;
+	warn "$comm :: $cached_value / $result" if $debug;
 	
-	if ( $result ne $cached_value ) {
-		return $comm;
-	}
+	return $comm if $result ne $cached_value;
 }
 
 sub test_write_db
@@ -2346,11 +2430,9 @@ sub test_write_db
 	my $value = $vars->db->sel1("
 		SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
 
-	warn "$db_value\n$value" if $debug;
+	warn "$comm :: $db_value / $value" if $debug;
 
-	if ( lc( $db_value ) ne lc( $value ) ) {
-		return $comm;
-	}
+	return $comm if lc( $db_value ) ne lc( $value );
 }
 
 sub pre_corrupt_token
