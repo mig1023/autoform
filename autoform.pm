@@ -261,8 +261,7 @@ sub init_add_param
 
 			push ( @{ $info_from_db->{ '[eu_countries]' } }, $_ ) for @$add_eu_countries;
 
-			$vars->get_memd->set('autoform_addparam', $info_from_db, 
-				$self->{ autoform }->{ memcached }->{ memcached_exptime } );
+			$self->cached( 'autoform_addparam', $info_from_db );
 		}
 	}
 
@@ -359,8 +358,7 @@ sub get_collect_date
 				for ( 'CollectDate', 'cdSimpl', 'cdUrgent', 'cdCatD' );
 		}
 
-		$vars->get_memd->set('autoform_collectdates', $collect_dates, 
-			$self->{ autoform }->{ memcached }->{ memcached_exptime } );
+		$self->cached( 'autoform_collectdates', $collect_dates );
 	}
 	
 	my ( $center_id, $category ) = $self->query( 'sel1', __LINE__, "
@@ -2248,8 +2246,7 @@ sub get_pcode
 				ORDER BY CName, DHL_Cities.isDefault DESC, DHL_Cities.PCode"
 			);
 			
-			$vars->get_memd->set('autoform_allpcode', $all_pcode, 
-				$self->{ autoform }->{ memcached }->{ memcached_exptime } );
+			$self->cached( 'autoform_allpcode', $all_pcode );
 		}
 	
 		if ( $request =~ /[^0-9]/ ) {
@@ -2457,12 +2454,14 @@ sub lang
 sub cached
 # //////////////////////////////////////////////////
 {
-	my ( $self, $name ) = @_;
+	my ( $self, $name, $save ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
+	return $vars->get_memd->set( $name, $save, $self->{ autoform }->{ memcached }->{ memcached_exptime } ) if $save;
+	
 	return if $self->{ this_is_self_testing };
-		
+
 	return $vars->get_memd->get( $name );
 }
 

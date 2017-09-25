@@ -1486,7 +1486,10 @@ sub get_test_list {
 					'args' => [ 'cach_selftest' ],
 					'expected' => '',
 				},
-				
+				4 => { 	'tester' => \&test_cached,
+					'args' => [ 'cach_selftest_write', 12345 ],
+					'expected' => 'cach_selftest_write:12345',
+				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_file_content },
@@ -1975,6 +1978,8 @@ sub selftest
 	my $vars = $self->{ 'VCS::Vars' };
 	my $config = $vars->getConfig('db');
 	
+	$vars->get_memd->delete( $_ ) for ( 'cach_selftest', 'cach_selftest_write' );
+	
 	$vars->db->query("USE fake_vcs");
 
 	my $result = [ { 'text' => "self_self_test", 'status' => self_self_test() } ];
@@ -1985,7 +1990,9 @@ sub selftest
 	push @$result, { 'text' => 'get_add', 'status' => ( ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
 	push @$result, get_tests( $self, $vars, @param );
 	
-	$vars->db->query( "USE $config->{'dbname'}" );	
+	$vars->db->query( "USE $config->{'dbname'}" );
+	
+	$vars->get_memd->delete( $_ ) for ( 'autoform_addparam', 'autoform_collectdates', 'autoform_allpcode' );
 
 	return show_result($result);
 }
@@ -2307,24 +2314,42 @@ sub test_regexp
 	}
 }
 
+sub test_cached
+# //////////////////////////////////////////////////
+{
+	my ( $debug, $cached, $comm, $self ) = @_;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my ( $cached_name, $cached_value ) = split /:/, shift;
+	
+	my $result = $vars->get_memd->get( $cached_name );
+	
+	warn "$cached_value\n$result" if $debug;
+	
+	if ( $result ne $cached_value ) {
+		return $comm;
+	}
+}
+
 sub test_write_db
 # //////////////////////////////////////////////////
 {
 	my $debug = shift;
 	my ( $token_or_appid, $db_table, $db_name, $db_value ) = split /:/, shift;
-	my ( $comment, $self, $result ) = @_;
+	my ( $comm, $self, $result ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $field = ( $token_or_appid =~ /^(t[a-z0-9]{63}|Token)$/ ? "Token" : "ID" );
 	
 	my $value = $vars->db->sel1("
-			SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
+		SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
 
 	warn "$db_value\n$value" if $debug;
 
 	if ( lc( $db_value ) ne lc( $value ) ) {
-		return $comment;
+		return $comm;
 	}
 }
 
