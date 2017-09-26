@@ -313,8 +313,7 @@ sub get_test_list {
 				},
 				5 => { 	'tester' => \&test_line,
 					'args' => [ 'input', 'element', 'val', {}, 'uniq', undef, 'comm' ],
-					'expected' => '<input class="input_width input_gen optional_field" type="text" value="val" ' .
-						'name="element" id="element" title="comm" uniq>',
+					'expected' => '<input class="input_width input_gen optional_field" type="text" value="val" name="element" id="element" title="comm" uniq>',
 				},
 				6 => { 	'tester' => \&test_line,
 					'args' => [ 'checkbox', 'element', 'val', {} ],
@@ -327,17 +326,12 @@ sub get_test_list {
 				8 => { 	'tester' => \&test_line,
 					'args' => [ 'select', 'element', '3', { 1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth' }, undef, '2' ],
 					'expected' => 
-						'<select class="input_width select_gen" size = "1" name="element" title="" id="element">' .
-						'<option  value="2">second</option><option  value="1">first</option>' .
-						'<option  value="4">fourth</option><option selected value="3">third</option></select>',
+						'<select class="input_width select_gen" size = "1" name="element" title="" id="element"><option  value="2">second</option><option  value="1">first</option><option  value="4">fourth</option><option selected value="3">third</option></select>',
 				},
 				9 => { 	'tester' => \&test_line,
 					'args' => [ 'radiolist', 'element', '2', { 1 => 'first', 2 => 'second', 3 => 'third' } ],
 					'expected' => 
-						'<div id="element"><input type="radio" name="element" value="1"  id="element1"><label for="element1">' .
-						'first</label><br><input type="radio" name="element" value="2" checked id="element2">' .
-						'<label for="element2">second</label><br><input type="radio" name="element" value="3"  '.
-						'id="element3"><label for="element3">third</label><br></div>',
+						'<div id="element"><input type="radio" name="element" value="1"  id="element1"><label for="element1">first</label><br><input type="radio" name="element" value="2" checked id="element2"><label for="element2">second</label><br><input type="radio" name="element" value="3"  id="element3"><label for="element3">third</label><br></div>',
 				},
 				10 => {	'tester' => \&test_line,
 					'args' => [ 'text', undef, 'text' ],
@@ -365,10 +359,7 @@ sub get_test_list {
 						'test2' => { 'db' => 'test2', 'label_for' => 'Тест 2' },
 					} ],
 					'expected' =>
-						'<div id="element"><input type="checkbox" value="test1" name="test1" ' .
-						'id="test1" checked><label for="test1">Тест 1</label><br><input type=' .
-						'"checkbox" value="test2" name="test2" id="test2" ><label for="test2">' .
-						'Тест 2</label><br></div>',
+						'<div id="element"><input type="checkbox" value="test1" name="test1" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br></div>',
 				},
 				16 => {	'tester' => \&test_line,
 					'args' => [ 'checklist_insurer', 'element', 'test1=0,test2=1', { 
@@ -376,27 +367,22 @@ sub get_test_list {
 						'test2' => 'Тест 2',
 					} ],
 					'expected' =>
-						'<input type="checkbox" value="test1" name="element_test1" id="test1" >' .
-						'<label for="test1">Тест 1</label><br><input type="checkbox" value="test2" ' .
-						'name="element_test2" id="test2" ><label for="test2">Тест 2</label><br>',
+						'<input type="checkbox" value="test1" name="element_test1" id="test1" ><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="element_test2" id="test2" ><label for="test2">Тест 2</label><br>',
 				},
 				17 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'past', 0 ],
 					'expected' =>
-						'<td align="center" class="pr_size_gen pr_red_red_gen">' .
-						'<div class="ltl_progr pr_past" title=""><div class="pr_in_gen"></div></div></td>',
+						'<td align="center" class="pr_size_gen pr_red_red_gen"><div class="ltl_progr pr_past" title=""><div class="pr_in_gen"></div></div></td>',
 				},
 				18 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'current', 1 ],
 					'expected' =>
-						'<td align="center" class="pr_size_gen pr_white_gray_gen">' .
-						'<div class="ltl_progr pr_current" title=""><div class="pr_in_gen"></div></div></td>',
+						'<td align="center" class="pr_size_gen pr_white_gray_gen"><div class="ltl_progr pr_current" title=""><div class="pr_in_gen"></div></div></td>',
 				},
 				19 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'future', 2 ],
 					'expected' =>
-						'<td align="center" class="pr_size_gen pr_gray_white_gen">' .
-						'<div class="ltl_progr pr_future" title=""><div class="pr_in_gen"></div></div></td>',
+						'<td align="center" class="pr_size_gen pr_gray_white_gen"><div class="ltl_progr pr_future" title=""><div class="pr_in_gen"></div></div></td>',
 				},
 			},
 		},
@@ -451,11 +437,7 @@ sub get_test_list {
 						}
 					],
 					'expected' => 
-						'<tr><td><label id="text">Средства</label></td><td><div id="test">' .
-						'<input type="checkbox" value="test1" name="test1" id="test1" checked>' .
-						'<label for="test1">Тест 1</label><br><input type="checkbox" value=' .
-						'"test2" name="test2" id="test2" ><label for="test2">Тест 2</label>' .
-						'<br></div></td></tr>',
+						'<tr><td><label id="text">Средства</label></td><td><div id="test"><input type="checkbox" value="test1" name="test1" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br></div></td></tr>',
 				}
 			},
 		},
@@ -605,6 +587,49 @@ sub get_test_list {
 							}
 						},
 					}
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::check_checklist },
+			'comment' => 'check_checklist',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'args' => [
+						{
+							'name' => 'test',
+							'label' => 'Средства',
+							'check' => 'at_least_one',
+							'param' => {
+								'test1' => 0,
+								'test2' => 0,
+								'test3' => 0,
+							},
+						},
+					],
+					'param' => [
+						{ 'name' => 'test2', 'value' => '1' },
+					],
+					'expected' => '',
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [
+						{
+							'name' => 'test',
+							'label' => 'Test',
+							'check' => 'at_least_one',
+							'param' => {
+								'test1' => 0,
+								'test2' => 0,
+								'test3' => 0,
+							},
+						},
+					],
+					'param' => [
+						{ 'name' => 'test1', 'value' => '' },
+						{ 'name' => 'test2', 'value' => '' },
+						{ 'name' => 'test3', 'value' => '' },
+					],
+					'expected' => 'test|В поле "Test" нужно выбрать хотя бы одно значение',
 				},
 			},
 		},
@@ -1775,6 +1800,88 @@ sub get_test_list {
 						'f_date' => '01.05.2011',
 						's_date' => '01.05.2011'
 					},
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::check_data_from_form },
+			'comment' => 'check_data_from_form',
+			'test' => { 	
+				1 => { 	'tester' => \&test_line,
+					'args' => [ '[token]', 1 ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '1' },
+						{ 'name' => 'vtype', 'value' => '13' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
+						{ 'name' => 'pers_info', 'value' => '1' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => '',
+				},
+				2 => { 	'tester' => \&test_line,
+					'args' => [ '[token]', 3 ],
+					'expected' => '',
+				},
+				3 => { 	'tester' => \&test_line,
+					'args' => [ '[token]', 1 ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '' },
+						{ 'name' => 'vtype', 'value' => '13' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
+						{ 'name' => 'pers_info', 'value' => '1' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => 'center|Поле "Визовый центр" не заполнено',
+				},
+				4 => { 	'tester' => \&test_line,
+					'args' => [ '[token]', 1 ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '1' },
+						{ 'name' => 'vtype', 'value' => '13' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => '' },
+						{ 'name' => 'pers_info', 'value' => '1' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => 'email|Поле "Email" не заполнено',
+				},
+				5 => { 	'tester' => \&test_line,
+					'args' => [ '[token]', 1 ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '1' },
+						{ 'name' => 'vtype', 'value' => '13' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
+						{ 'name' => 'pers_info', 'value' => '' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => 'pers_info|Вы должны указать поле "я согласен на обработку персональных данных"',
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::save_data_from_form },
+			'comment' => 'save_data_from_form',
+			'test' => { 	
+				1 => { 	'tester' => \&test_write_db,
+					'args' => [ 1, '[table_id]' ],
+					'param' => [ 
+						{ 'name' => 'center', 'value' => '1' },
+						{ 'name' => 'vtype', 'value' => '99' },
+						{ 'name' => 'free_date', 'value' => '' },
+						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
+						{ 'name' => 'pers_info', 'value' => '1' },
+						{ 'name' => 'mobil_info', 'value' => '1' },
+					],
+					'expected' => '[app_id]:AutoAppointments:VType:99',
+				},
+				2 => { 	'tester' => \&test_write_db,
+					'args' => [ 2, '[table_id]' ],
+					'param' => [ 
+						{ 'name' => 'f_date', 'value' => '01.05.1998' },
+						{ 'name' => 's_date', 'value' => '01.05.1999' },
+					],
+					'expected' => '[app_id]:AutoAppointments:SDate:1999-05-01',
 				},
 			},
 		},
