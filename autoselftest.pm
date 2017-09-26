@@ -581,9 +581,6 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_hash,
 					'args' => [ '[page1]' ],
 					'expected' => {
-						'Auto' => {
-							'' => 'free_date'
-						},
 						'AutoAppointments' => {
 							'PersonalDataPermission' => 'pers_info',
 							'CenterID' => 'center',
@@ -597,9 +594,6 @@ sub get_test_list {
 				2 => { 	'tester' => \&test_hash,
 					'args' => [ '[page2]' ],
 					'expected' => {
-						'Auto' => {
-							'' => undef,
-						},
 						'AutoAppointments' => {
 							'SDate' => 's_date',
 							'FDate' => 'f_date'

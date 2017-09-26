@@ -1567,10 +1567,12 @@ sub get_names_db_for_save_or_get
 	my $alternative_data_source = {};
 
 	return if $page_content =~ /^\[/;
-	
+
 	for my $element (@$page_content) {
 		next if ( $element->{ special } eq 'insurer_many_id' ) and ( $save_or_get eq 'save' );
 		next if ( $element->{ type } eq 'info' ) and ( $save_or_get eq 'save' );
+		
+		next if ref( $element->{ db } ) ne 'HASH';
 
 		if ( $element->{ db }->{ name } eq 'complex' ) {
 			for my $sub_element ( keys %{ $element->{ param } } ) {
