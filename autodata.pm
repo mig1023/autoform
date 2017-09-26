@@ -1814,7 +1814,7 @@ sub get_content_rules_hash
 					'name' => 'AppDate',
 				},
 				'special' => 'datepicker, mask',
-				'uniq_code' => 'onchange="update_timeslots();"',
+				'uniq_code' => 'onchange="update_timeslots(1);"',
 			},
 			{
 				'type' => 'select',

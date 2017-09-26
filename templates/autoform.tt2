@@ -280,7 +280,7 @@ function init_comm(pos_x, pos_y) {
 
 	update_timeslots();
 
-	function update_timeslots() {
+	function update_timeslots(date_change) {
 				
 		$('#timeslot').hide();
 		$('#timeslot').find('option').remove();
@@ -312,9 +312,13 @@ function init_comm(pos_x, pos_y) {
 			$('#timeslot').show();
 			
 			[% IF last_error_name == 'timeslot' %]
-				$(document).ready(function() {
-					show_error_tip();
-				});
+				if ( !date_change ) {
+					$(document).ready(function() {
+						show_error_tip();
+					});
+				} else {
+					$('#timeslot').poshytip('destroy');
+				}
 			[% END %]
 			
 			var al = $(xml).find('urgent_flag');

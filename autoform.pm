@@ -2370,7 +2370,6 @@ sub send_app_confirm
 	$replacer->{ app_website } = $conf->{ $spb_center . "html_website" };
 	
 	for ( keys %$replacer ) {
-
 		$html =~ s/\[%$_%\]/$replacer->{ $_ }/g;
 	}
 	
@@ -2426,8 +2425,9 @@ sub age
 	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
 	
 	my $age = $year - $birth_year;
-	$age-- unless sprintf( "%02d%02d", $month, $day )
-		>= sprintf( "%02d%02d", $birth_month, $birth_day );
+	
+	$age-- unless sprintf( "%02d%02d", $month, $day ) >= sprintf( "%02d%02d", $birth_month, $birth_day );
+		
 	$age = 0 if $age < 0;
 
 	return $age;
