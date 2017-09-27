@@ -2436,18 +2436,20 @@ sub age
 sub lang
 # //////////////////////////////////////////////////
 {
-	my ( $self, $text ) = @_;
+	my ( $self, $text, $lang_param ) = @_;
+	
+	return if !$text;
 	
 	my $vocabulary = $self->{ 'VCS::Vars' }->{ 'VCS::Resources' }->{ 'list' };
 
-	return if !$text;
+	my $lang = ( $lang_param ? $lang_param : $self->{ 'lang' } );
 	
 	if ( ref( $text ) ne 'HASH' ) {
-		return $vocabulary->{ $text }->{ $self->{ 'lang' } } || $text;
+		return $vocabulary->{ $text }->{ $lang } || $text;
 	}
 	
 	for ( keys %$text ) {
-		$text->{ $_ } = $vocabulary->{ $text->{ $_ } }->{ $self->{ 'lang' } } || $text->{ $_ };
+		$text->{ $_ } = $vocabulary->{ $text->{ $_ } }->{ $lang } || $text->{ $_ };
 	}
 	
 	return $text;
