@@ -19,7 +19,7 @@
 <tr><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br><td><tr>
 
 <tr><td align="center">
-<table width="450px" id="app_table">
+<table width="600px" id="app_table">
 
 <tr><td colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
 
@@ -33,7 +33,7 @@
 	<td>[% i %].</td>
 	<td [% IF i == 1 %]id = "applist"[% END %] width="90%">
 	[% IF !person.Finished %]<b>[[% langreq('черновик') %]]</b>[% END %] [% person.FName %] [% person.LName %]</td>
-	<td>[% person.BirthDate %]</td>
+	<td>[% IF person.BirthDate != '00.00.0000' %][% person.BirthDate %][% ELSE %]&nbsp;[% END %]</td>
 	<td><input class="edit_input" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
 	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
 	</tr>
@@ -56,7 +56,7 @@
 	
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
-<tr><td colspan="5"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
+<tr><td colspan="5"><a target="_blank" class="dotted_link" href="http://195.91.200.102/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 </td></tr>
 </table>
 
@@ -112,7 +112,7 @@ function mobileScreenCheck() {
 	}
 	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
-	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
+	$('#app_table').attr("width", ( mobilScreen ? '100%' : '600px' ) );
 	$('.edit_input').attr("value", ( mobilScreen ? '✎' : '[% langreq('Редактировать') %]' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
 	
