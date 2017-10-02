@@ -388,6 +388,11 @@ function init_comm(pos_x, pos_y) {
 
 	$('#[% post_index %]').autocomplete({
 		source:function( request, response ) {
+			$('#[% post_index %]').hide();
+			$('#[% post_index %]').parent().append(
+				'<span id="[% post_index %]_replacer">' + $('#[% post_index %]').val() + 
+				' <img src="/files/autoform_wait.gif"></span>'
+			);
 			$.ajax({
 				url: "/autoform/findpcode.htm",
 				dataType: "jsonp",
@@ -398,6 +403,8 @@ function init_comm(pos_x, pos_y) {
 				},
 				success: function( data ) {
 					$('#[% post_index %]').poshytip('hide');
+					$('#[% post_index %]_replacer').remove();
+					$('#[% post_index %]').show();
 					response( $.map( data.cmps, function( item ) {
 						return {
 							value: item.pcode,
