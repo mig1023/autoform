@@ -58,20 +58,16 @@ function isMobile() {
 
 [% IF (special.with_map.0) %]
 <tr class="ymap"><td colspan="3">&nbsp;</td></tr>
-<tr class="ymap"><td colspan="3"><div id="YMapsID" style="width:600px;height:400px"></div></td></tr>
+<tr class="ymap"><td colspan="3"><div id="YMapsID" style="width:100%;height:400px"></div></td></tr>
 <tr class="ymap"><td colspan="3">&nbsp;</td></tr>
 
 <script type="text/javascript">
-if ( isMobile() ) {
-	$(".ymap").hide();
-} else {
-	YMaps.jQuery(function () {
-		var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
-		map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
-		map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
-		map.addControl(new YMaps.Zoom());
-	});
-}
+YMaps.jQuery(function () {
+	var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+	map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
+	map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
+	map.addControl(new YMaps.Zoom());
+});
 </script>
 [% END %]
 
