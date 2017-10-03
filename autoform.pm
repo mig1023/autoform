@@ -3,6 +3,7 @@ use strict;
 
 use VCS::Vars;
 use VCS::Site::autodata;
+use VCS::Site::autodata_type_d;
 use VCS::Site::autoselftest;
 
 use Data::Dumper;
@@ -51,10 +52,21 @@ sub get_content_rules
 {
 	my ( $self, $current_page, $full, $token, $need_to_init ) = @_;
 	
-	my $content = ( $self->{ this_is_self_testing } ?
-		VCS::Site::autoselftest::get_content_rules_hash() :
-		VCS::Site::autodata::get_content_rules_hash()
-	);
+	my ( undef, $visa_category ) = $self->get_app_visa_and_center( $token );
+		
+	my $content;
+
+	if ( $self->{ this_is_self_testing } ) {
+	
+		$content = VCS::Site::autoselftest::get_content_rules_hash();
+	}
+	elsif ( $visa_category eq 'D' ) {
+	
+		$content = VCS::Site::autodata_type_d::get_content_rules_hash();
+	}
+	else {
+		$content = VCS::Site::autodata::get_content_rules_hash();
+	};
 	
 	my $keys_in_current_page = {};
 	my $new_content = {};
@@ -90,6 +102,45 @@ sub get_content_rules
 	return scalar( keys %$content ) if $current_page =~ /^length$/i;
 	
 	return $content->{ $current_page };
+}
+
+sub get_app_visa_and_center
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+
+	return if !$token;
+	
+	my $visa_vtype = $self->cached( 'autoform_' . $token . '_vtype' );
+	my $center_id = $self->cached( 'autoform_' . $token . '_center' );
+		
+	if ( !$visa_vtype or !$center_id ) {
+		
+		( $center_id, $visa_vtype ) = $self->query( 'sel1', __LINE__, "
+			SELECT CenterID, VisaTypes.ID FROM AutoAppointments
+			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
+			JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
+			WHERE Token = ?", $token
+		);
+		
+		$self->cached( 'autoform_' . $token . '_vtype', $visa_vtype ) if $visa_vtype;
+		$self->cached( 'autoform_' . $token . '_center', $center_id ) if $center_id;
+	}
+	
+	return ( $center_id ) if !$visa_vtype;
+	
+	my $visa_category = $self->cached( 'autoform_vcategory_' . $visa_vtype );
+	
+	if ( !$visa_category ) {
+		
+		$visa_category = $self->query( 'sel1', __LINE__, "
+			SELECT Category FROM VisaTypes WHERE ID = ?", $visa_vtype
+		);
+		
+		$self->cached( 'autoform_vcategory_' . $visa_vtype, $visa_category  );
+	}
+
+	return ( $center_id, $visa_category );
 }
 
 sub autoform
@@ -361,12 +412,7 @@ sub get_collect_date
 		$self->cached( 'autoform_collectdates', $collect_dates );
 	}
 	
-	my ( $center_id, $category ) = $self->query( 'sel1', __LINE__, "
-		SELECT CenterID, Category FROM AutoAppointments
-		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
-		JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
-		WHERE Token = ?", $token
-	);
+	my ( $center_id, $category ) = $self->get_app_visa_and_center( $token );
 
 	$collect_dates = $collect_dates->{ $center_id };
 
@@ -555,7 +601,7 @@ sub get_autoform_content
 
 	my ( $content, $template ) = $self->get_html_page( $step, $token, $appnum );
 
-	my $progress = $self->get_progressbar( $page );
+	my $progress = $self->get_progressbar( $page, $token );
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
@@ -659,7 +705,7 @@ sub get_forward
 		$current_table_id = $self->get_current_table_id( $token );
 	}
 	
-	$self->save_data_from_form( $step, $current_table_id );
+	$self->save_data_from_form( $step, $current_table_id, $token );
 	$self->mod_last_change_date( $token );
 	
 	my $last_error = $self->check_data_from_form( $token, $step );
@@ -1102,14 +1148,23 @@ sub get_cell
 sub get_progressbar
 # //////////////////////////////////////////////////
 {
-	my ( $self, $page ) = @_;
+	my ( $self, $page, $token ) = @_;
 	
-	my ( $line, $content );
+	my ( $line, $content, $progress_line );
 	
-	my $progress_line = ( $self->{ this_is_self_testing } ?
-		VCS::Site::autoselftest::get_progressline() :
-		VCS::Site::autodata::get_progressline()
-	);
+	my ( undef, $visa_category ) = $self->get_app_visa_and_center( $token );
+		
+	if ( $self->{ this_is_self_testing } ) {
+	
+		$progress_line = VCS::Site::autoselftest::get_progressline();
+	}
+	elsif ( $visa_category eq 'D' ) {
+	
+		$progress_line = VCS::Site::autodata_type_d::get_progressline();
+	}
+	else {
+		$progress_line = VCS::Site::autodata::get_progressline();
+	};
 	
 	my $current_progress = $page->[0]->{ progress };
 	my $big_element = 0;
@@ -1310,11 +1365,7 @@ sub check_comments_alter_version
 	
 	return $comment unless ref( $comment ) eq 'HASH';
 	
-	my $current_center = $self->query( 'sel1', __LINE__, "
-		SELECT CenterID FROM AutoAppointments 
-		JOIN AutoToken ON AutoToken.AutoAppID = AutoAppointments.ID 
-		WHERE AutoToken.Token = ?", $token
-	);
+	my ( $current_center ) = $self->get_app_visa_and_center( $token );
 	
 	for ( keys %$comment ) {
 	
@@ -1374,7 +1425,7 @@ sub resort_with_first_elements
 sub save_data_from_form
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $table_id ) = @_;
+	my ( $self, $step, $table_id, $token ) = @_;
 	
 	my $vars = $self->{'VCS::Vars'};
 
@@ -1405,7 +1456,7 @@ sub save_data_from_form
 		);
 	}
 	
-	$self->check_special_in_rules_for_save( $step, $table_id );
+	$self->check_special_in_rules_for_save( $step, $table_id, $token );
 }
 
 sub change_current_appdata
@@ -1421,7 +1472,7 @@ sub change_current_appdata
 sub check_special_in_rules_for_save
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $table_id ) = @_;
+	my ( $self, $step, $table_id, $token ) = @_;
 	
 	my $vars = $self->{'VCS::Vars'};
 	my $elements = $self->get_content_rules( $step );
@@ -1458,6 +1509,10 @@ sub check_special_in_rules_for_save
 			$self->query( 'query', __LINE__, "
 				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, $new_list, $table_id->{AutoToken}
 			) if $new_list;
+		}
+		elsif ( $element->{special} eq 'cach_this_value' ) {
+	
+			$self->cached( 'autoform_' . $token . '_' . $element->{name}, $vars->getparam( $element->{name} ) );
 		}
 	}
 }
@@ -1662,7 +1717,7 @@ sub check_data_from_form
 		$first_error = $self->check_captcha() if $element->{type} =~ /captcha/;
 
 		if ( !$first_error and $element->{check_logic} ) {
-			$first_error = $self->check_logic( $element, $tables_id );
+			$first_error = $self->check_logic( $element, $tables_id, $token );
 		}
 	}
 	
@@ -1764,7 +1819,7 @@ sub check_captcha
 sub check_logic
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element, $tables_id ) = @_;
+	my ( $self, $element, $tables_id, $token ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	my $value = $vars->getparam( $element->{ name } );
@@ -1843,10 +1898,7 @@ sub check_logic
 		
 		if ( $rule->{ condition } =~ /^email_not_blocked$/ and $value ) {
 		
-			my $center = $self->query( 'sel1', __LINE__, "
-				SELECT CenterID FROM AutoAppointments WHERE ID = ?", 
-				$tables_id->{ 'AutoAppointments' }
-			);
+			my ( $center ) = $self->get_app_visa_and_center( $token );
 
 			my $blocket_emails = ( $self->{ this_is_self_testing } ?
 				VCS::Site::autoselftest::get_blocked_emails() :
