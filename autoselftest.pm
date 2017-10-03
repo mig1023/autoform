@@ -441,6 +441,15 @@ sub get_test_list {
 				}
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_html_page },
+			'comment' => 'get_html_page',
+			'test' => { 	
+				1 => { 	'tester' => \&test_array,
+					'args' => [ 1, '[token]', '999' ],
+					'expected' => [ '[first_page_selected]', 'autoform.tt2' ],
+				},
+			},
+		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_progressbar },
 			'comment' => 'get_progressbar',
 			'test' => { 	
@@ -775,11 +784,12 @@ sub get_test_list {
 				4 => { 	'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ { condition => 'email_not_blocked', }, ]
+							check_logic => [ { condition => 'email_not_blocked' } ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
 						},
+						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked1mail@mail.com' },
@@ -789,11 +799,12 @@ sub get_test_list {
 				5 => { 	'tester' => \&test_line,
 					'args' => [ 
 						{	name => 'field_name',
-							check_logic => [ { condition => 'email_not_blocked', }, ]
+							check_logic => [ { condition => 'email_not_blocked', } ]
 						},
 						{
 							'AutoAppointments' => '[app_id]',
 						},
+						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked2mail@mail.com' },
@@ -808,6 +819,7 @@ sub get_test_list {
 						{
 							'AutoAppointments' => '[app_id]',
 						},
+						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked3mail@mail.com' },
@@ -822,6 +834,7 @@ sub get_test_list {
 						{
 							'AutoAppointments' => '[app_id]',
 						},
+						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked4mail@mail.com' },
