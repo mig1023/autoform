@@ -2310,6 +2310,7 @@ sub show_result
 	my $result_line = self_test_htm( 'body_start' );
 	
 	my $test_num = 18; 	# 16 self_self + create_clear_form + get_add
+	my $test_func = 0;
 	my $fails = 0;
 
 	my $tests = get_test_list();
@@ -2317,6 +2318,7 @@ sub show_result
 		for( keys %{ $test->{test} } ) {
 			$test_num++;
 		}
+		$test_func++;
 	}
 	
 	for ( @$result ) {
@@ -2332,7 +2334,10 @@ sub show_result
 				self_test_htm( 'font', 'red', "-- fail: $_->{status}" )
 			) . self_test_htm( 'br' );
 	}
-	$result_line .= self_test_htm( 'br' ) . self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "Всего тестов: $test_num" );
+	$result_line .= 
+		self_test_htm( 'br' ) . 
+		self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "Всего функций протестировано: $test_func" ) .
+		self_test_htm( 'span', ( $fails ? 'red' : 'green' ), "Всего тестов: $test_num" );
 	
 	return $result_line . self_test_htm( 'body_end' );
 }
