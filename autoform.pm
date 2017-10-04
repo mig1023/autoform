@@ -51,9 +51,9 @@ sub getContent
 sub get_content_rules
 # //////////////////////////////////////////////////
 {
-	my ( $self, $current_page, $full, $token, $need_to_init ) = @_;
+	my ( $self, $current_page, $full, $need_to_init ) = @_;
 	
-	my ( undef, $visa_category ) = $self->get_app_visa_and_center( $token );
+	my ( undef, $visa_category ) = $self->get_app_visa_and_center();
 		
 	my $content;
 
@@ -96,7 +96,7 @@ sub get_content_rules
 		}
 	}
 
-	$content = ( $need_to_init ? $self->init_add_param( $new_content, $token, $keys_in_current_page ) : $new_content );
+	$content = ( $need_to_init ? $self->init_add_param( $new_content, $keys_in_current_page ) : $new_content );
 	
 	return $content if !$current_page;
 	
@@ -108,12 +108,12 @@ sub get_content_rules
 sub get_app_visa_and_center
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 
-	return if !$token;
+	return if !$self->{ token };
 	
-	my $visa_vtype = $self->cached( 'autoform_' . $token . '_vtype' );
-	my $center_id = $self->cached( 'autoform_' . $token . '_center' );
+	my $visa_vtype = $self->cached( 'autoform_' . $self->{ token } . '_vtype' );
+	my $center_id = $self->cached( 'autoform_' . $self->{ token }. '_center' );
 		
 	if ( !$visa_vtype or !$center_id ) {
 		
@@ -121,11 +121,11 @@ sub get_app_visa_and_center
 			SELECT CenterID, VisaTypes.ID FROM AutoAppointments
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 			JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
-			WHERE Token = ?", $token
+			WHERE Token = ?", $self->{ token }
 		);
 		
-		$self->cached( 'autoform_' . $token . '_vtype', $visa_vtype ) if $visa_vtype;
-		$self->cached( 'autoform_' . $token . '_center', $center_id ) if $center_id;
+		$self->cached( 'autoform_' . $self->{ token } . '_vtype', $visa_vtype ) if $visa_vtype;
+		$self->cached( 'autoform_' . $self->{ token } . '_center', $center_id ) if $center_id;
 	}
 	
 	return ( $center_id ) if !$visa_vtype;
@@ -155,13 +155,13 @@ sub autoform
 	my $special = {};
 	my $javascript_check = 1;
 	
-	my $token = $self->get_token_and_create_new_form_if_need();
+	$self->{ token } = $self->get_token_and_create_new_form_if_need();
 	
-	$self->{'lang'} = 'en' if $vars->getparam( 'lang' ) =~ /^en$/i ;
+	$self->{ lang } = 'en' if $vars->getparam( 'lang' ) =~ /^en$/i ;
 
-	if ( $token =~ /^\d\d$/ ) {
+	if ( $self->{ token } =~ /^\d\d$/ ) {
 	
-		( $title, $page_content, $template_file ) = $self->get_page_error( $token );
+		( $title, $page_content, $template_file ) = $self->get_page_error();
 	}
 	elsif ( $vars->getparam( 'script' ) ) {
 	
@@ -171,7 +171,7 @@ sub autoform
 	}
 	else {
 		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
-			$self->get_autoform_content( $token );
+			$self->get_autoform_content();
 	}
 
 	my ( $last_error_name, $last_error_text ) = split /\|/, $last_error;
@@ -181,12 +181,12 @@ sub autoform
 	if ( ( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) ) or
 		( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) ) ) {
 		
-		$appinfo_for_timeslots = $self->get_same_info_for_timeslots( $token );
+		$appinfo_for_timeslots = $self->get_same_info_for_timeslots();
 	}
 
 	if ( ( ref( $special->{ with_map } ) eq 'ARRAY' ) and ( @{ $special->{ with_map } } > 0 ) ) {
 	
-		$map_in_page = $self->get_geo_info( $token );
+		$map_in_page = $self->get_geo_info();
 	}
 
 	$vars->get_system->pheader( $vars );
@@ -195,11 +195,11 @@ sub autoform
 		'langreq' => sub { return $vars->getLangSesVar(@_) },
 		'title' => $title,
 		'content_text' => $page_content,
-		'token' => $token,
+		'token' => $self->{ token },
 		'appid' => $appid,
 		'step' => $step,
 		'min_step' => 1,
-		'max_step' => $self->get_content_rules('length'),
+		'max_step' => $self->get_content_rules( 'length' ),
 		'max_applicants' => $self->{ autoform }->{ general }->{ max_applicants },
 		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'last_error_name' => $last_error_name,
@@ -232,7 +232,7 @@ sub autoselftest
 sub get_same_info_for_timeslots
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $appinfo = {};
 
@@ -241,7 +241,7 @@ sub get_same_info_for_timeslots
 		FROM AutoToken 
 		JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		WHERE Token = ?", $token
+		WHERE Token = ?", $self->{ token }
 	);
 	
 	$appinfo->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
@@ -252,13 +252,13 @@ sub get_same_info_for_timeslots
 sub get_geo_info
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my ( $center, $addr ) = $self->query( 'sel1', __LINE__, "
 		SELECT CenterID, BAddr FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN Branches ON AutoAppointments.CenterID = Branches.ID
-		WHERE Token = ?", $token
+		WHERE Token = ?", $self->{ token }
 	);
 
 	my $branches = ( $self->{ this_is_self_testing } ?
@@ -276,7 +276,7 @@ sub get_geo_info
 sub init_add_param
 # //////////////////////////////////////////////////
 {
-	my ( $self, $content_rules, $token, $keys_in_current_page ) = @_;
+	my ( $self, $content_rules, $keys_in_current_page ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -317,14 +317,14 @@ sub init_add_param
 		}
 	}
 
-	if ( $token and $keys_in_current_page->{ persons_in_page } ) {
+	if ( $self->{ token } and $keys_in_current_page->{ persons_in_page } ) {
 
 		my $app_person_in_app = $self->query( 'selallkeys', __LINE__, "
 			SELECT AutoAppData.ID as ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person,
 			birthdate, CURRENT_DATE() as currentdate
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
-			WHERE AutoToken.Token = ?", $token
+			WHERE AutoToken.Token = ?", $self->{ token }
 		);
 
 		for my $person ( @$app_person_in_app ) {
@@ -343,12 +343,12 @@ sub init_add_param
 		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
 	
-	if ( $token and $keys_in_current_page->{ ussr_or_rf_first } ) {
+	if ( $self->{ token } and $keys_in_current_page->{ ussr_or_rf_first } ) {
 	
 		my $birthdate = $self->query( 'sel1', __LINE__, "
 			SELECT DATEDIFF(AutoAppData.BirthDate, '1991-12-26')
 			FROM AutoAppData JOIN AutoToken ON AutoAppData.ID = AutoToken.AutoAppDataID 
-			WHERE AutoToken.Token = ?", $token
+			WHERE AutoToken.Token = ?", $self->{ token }
 		);
 	
 		$ussr_first = 1 if $birthdate < 0;
@@ -370,9 +370,9 @@ sub init_add_param
 					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
 				}
 				
-				if ( exists $element->{ check_logic } and $token and $keys_in_current_page->{ collect_date } ) {
+				if ( exists $element->{ check_logic } and $self->{ token } and $keys_in_current_page->{ collect_date } ) {
 					for ( @{ $element->{ check_logic } } ) {
-						$_->{ offset } = $self->get_collect_date( $token )	
+						$_->{ offset } = $self->get_collect_date()	
 							if $_->{ offset } =~ /\[collect_date_offset\]/;
 					}
 				}
@@ -390,7 +390,7 @@ sub init_add_param
 sub get_collect_date
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -413,7 +413,7 @@ sub get_collect_date
 		$self->cached( 'autoform_collectdates', $collect_dates );
 	}
 	
-	my ( $center_id, $category ) = $self->get_app_visa_and_center( $token );
+	my ( $center_id, $category ) = $self->get_app_visa_and_center();
 
 	$collect_dates = $collect_dates->{ $center_id };
 
@@ -443,7 +443,7 @@ sub get_token_and_create_new_form_if_need
 			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token
 		);
 	
-		return '01' if ( length($token) != 64 ) or ( $token !~ /^t/i );
+		return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 		
 		return '02' if !$token_exist;
 		
@@ -456,7 +456,7 @@ sub get_token_and_create_new_form_if_need
 sub create_clear_form
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -471,7 +471,7 @@ sub create_clear_form
 	
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
-		$app_id, $token
+		$app_id, $self->{ token }
 	);
 }
 	
@@ -532,7 +532,7 @@ sub get_page_error
 sub get_autoform_content
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $last_error = '';
 	my $title;
@@ -540,7 +540,7 @@ sub get_autoform_content
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $token
+		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	my $action = lc( $vars->getparam('action') );
@@ -553,56 +553,56 @@ sub get_autoform_content
 	my $appid = undef;
 
 	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
-		$step = $self->get_back( $step, $token );
+		$step = $self->get_back( $step );
 	}
 
-	if ( ( $action eq 'forward' ) and ( $step < $self->get_content_rules('length') ) ) {
-		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step, $token );
+	if ( ( $action eq 'forward' ) and ( $step < $self->get_content_rules( 'length' ) ) ) {
+		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
 	}
 
 	if ( ( $action eq 'edit' ) and $appdata_id ) {
-		$step = $self->get_edit( $step, $appdata_id, $token );
+		$step = $self->get_edit( $step, $appdata_id );
 	}
 	
 	if ( ( $action eq 'delapp' ) and $appdata_id ) {
-		$self->get_delete( $appdata_id, $token );
+		$self->get_delete( $appdata_id );
 	}
 	
 	if ( $action eq 'addapp' ) {
-		$step = $self->get_add( $app_id, $token );
+		$step = $self->get_add( $app_id );
 	}
 	
 	if ( $action eq 'tofinish' ) {
-		my $app_status = $self->check_all_app_finished_and_not_empty( $token );
+		my $app_status = $self->check_all_app_finished_and_not_empty();
 		
 		if ( $app_status == 0 ) {
-			$step = $self->set_step_by_content( $token, '[app_finish]', 'next' );
+			$step = $self->set_step_by_content( '[app_finish]', 'next' );
 		} else {
-			$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
+			$step = $self->set_step_by_content( '[list_of_applicants]' );
 			
 			$last_error = $self->text_error( ( $app_status == 1 ? 4 : 5 ), { 'name' => 'applist' }, undef);
 		}
 	}
 	
 	if ( $action eq 'tolist' ) {
-		$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
+		$step = $self->set_step_by_content( '[list_of_applicants]' );
 	}
 	
-	my $page = $self->get_content_rules( $step, 'full', $token );
+	my $page = $self->get_content_rules( $step, 'full' );
 
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
 	if ( !$last_error and ( exists $page->[0]->{relation} ) ) {
-		( $step, $page ) = $self->check_relation( $step, $page, $token, $back );
+		( $step, $page ) = $self->check_relation( $step, $page, $back );
 	}
 	
 	if ( $page !~ /\[/ ) { 
 		$title = $self->lang( $page->[0]->{ page_name } );
 	}
 
-	my ( $content, $template ) = $self->get_html_page( $step, $token, $appnum );
+	my ( $content, $template ) = $self->get_html_page( $step, $appnum );
 
-	my $progress = $self->get_progressbar( $page, $token );
+	my $progress = $self->get_progressbar( $page );
 	
 	my ( $special ) = $self->get_specials_of_element( $step );
 	
@@ -612,18 +612,18 @@ sub get_autoform_content
 sub check_relation
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $page, $token, $moonwalk ) = @_;
+	my ( $self, $step, $page, $moonwalk ) = @_;
 
 	my $skip_this_page;
 	my $at_least_one_page_skipped = 0;
 	
-	my $current_table_id = $self->get_current_table_id( $token ); 
+	my $current_table_id = $self->get_current_table_id(); 
 	
 	do {
 		$skip_this_page = 0;
 
 		for my $relation ( keys %{ $page->[0]->{ relation } } ) {
-			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{ relation }->{ $relation }, $token );
+			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{ relation }->{ $relation } );
 		}
 		
 		if ( $skip_this_page ) {
@@ -638,9 +638,9 @@ sub check_relation
 			
 			$page = $self->get_content_rules( $step, 'full' );
 			
-			my $current_table_id = $self->get_current_table_id( $token ); 
+			my $current_table_id = $self->get_current_table_id(); 
 			
-			if ( $step == $self->get_step_by_content($token, '[app_finish]') ) {
+			if ( $step == $self->get_step_by_content('[app_finish]') ) {
 				$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
 			}
 		}
@@ -650,7 +650,7 @@ sub check_relation
 	if ( $at_least_one_page_skipped ) {
 	
 		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
 		);
 	}
 
@@ -660,9 +660,9 @@ sub check_relation
 sub skip_page_by_relation
 # //////////////////////////////////////////////////
 {
-	my ( $self, $condition, $relation, $token ) = @_;
+	my ( $self, $condition, $relation ) = @_;
 
-	my $current_table_id = $self->get_current_table_id( $token ); 
+	my $current_table_id = $self->get_current_table_id(); 
 	
 	my $value = $self->query( 'sel1', __LINE__, "
 		SELECT $relation->{name} FROM Auto$relation->{table} WHERE ID = ?",
@@ -695,21 +695,21 @@ sub skip_by_condition
 sub get_forward
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $token ) = @_;
+	my ( $self, $step ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $current_table_id = $self->get_current_table_id( $token );
+	my $current_table_id = $self->get_current_table_id();
 	
 	if ( !$current_table_id->{AutoAppointments} ) {
-		$self->create_clear_form( $token, $vars->getparam( 'center' ) );
-		$current_table_id = $self->get_current_table_id( $token );
+		$self->create_clear_form( $vars->getparam( 'center' ) );
+		$current_table_id = $self->get_current_table_id();
 	}
 	
-	$self->save_data_from_form( $step, $current_table_id, $token );
-	$self->mod_last_change_date( $token );
+	$self->save_data_from_form( $step, $current_table_id );
+	$self->mod_last_change_date();
 	
-	my $last_error = $self->check_data_from_form( $token, $step );
+	my $last_error = $self->check_data_from_form( $step );
 	
 	my $appnum = undef;
 	my $appid = undef;
@@ -719,19 +719,19 @@ sub get_forward
 
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, "$last_error[1] ($last_error[0], step $step)", $token
+			$step, "$last_error[1] ($last_error[0], step $step)", $self->{ token }
 		);
 	} else {
 		$step++;
 			
 		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
 		);
 		
 		$self->set_current_app_finished( $current_table_id->{ AutoAppData } ) 
-			if $step == $self->get_step_by_content($token, '[app_finish]');
+			if $step == $self->get_step_by_content( '[app_finish]');
 	
-		( $appid, $appnum ) = $self->set_appointment_finished( $token )
+		( $appid, $appnum ) = $self->set_appointment_finished()
 			if $step == $self->get_content_rules( 'length' );
 	}
 
@@ -751,27 +751,27 @@ sub set_current_app_finished
 sub set_appointment_finished
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $this_is_draft = $self->query( 'sel1', __LINE__, "
-		SELECT Draft FROM AutoToken WHERE Token = ?", $token
+		SELECT Draft FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	if ( $this_is_draft ) {
 		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET EndDate = now(), Step = 1 WHERE Token = ?", {}, $token
+			UPDATE AutoToken SET EndDate = now(), Step = 1 WHERE Token = ?", {}, $self->{ token }
 		);
 	
 		return ( 0, 'draft_app_num' );
 	}
 	
-	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment( $token );
+	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment();
 	
 	$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
 
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET EndDate = now(), Finished = 1, CreatedApp = ? WHERE Token = ?", {}, 
-		$new_appid, $token
+		$new_appid, $self->{ token }
 	);
 
 	$self->query( 'query', __LINE__, "
@@ -779,7 +779,7 @@ sub set_appointment_finished
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
-	$self->send_app_confirm( $appnum, $new_appid, $token, $self->{'lang'} );
+	$self->send_app_confirm( $appnum, $new_appid, $self->{'lang'} );
 		
 	return ( $new_appid, $appnum );
 }
@@ -787,7 +787,7 @@ sub set_appointment_finished
 sub get_step_by_content
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token, $content, $next ) = @_;
+	my ( $self, $content, $next ) = @_;
 	
 	my $page_content = $self->get_content_rules();
 	my $step;
@@ -804,12 +804,12 @@ sub get_step_by_content
 sub set_step_by_content
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token, $content, $next ) = @_;
+	my ( $self, $content, $next ) = @_;
 
-	my $step = $self->get_step_by_content( $token, $content, $next );
+	my $step = $self->get_step_by_content( $content, $next );
 
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
 	);
 
 	return $step;
@@ -818,11 +818,11 @@ sub set_step_by_content
 sub get_edit
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $appdata_id, $token ) = @_;
+	my ( $self, $step, $appdata_id ) = @_;
 	
-	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
+	if ( $self->check_existing_id_in_token( $appdata_id ) ) {
 		
-		$step = $self->get_step_by_content($token, '[list_of_applicants]', 'next');
+		$step = $self->get_step_by_content( '[list_of_applicants]', 'next');
 		
 		my $sch_id = $self->query( 'sel1', __LINE__, "
 			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
@@ -830,14 +830,14 @@ sub get_edit
 		
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
-			$step, $appdata_id, $sch_id, $token
+			$step, $appdata_id, $sch_id, $self->{ token }
 		);
 		
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, $appdata_id
 		);
 		
-		$self->mod_last_change_date( $token );
+		$self->mod_last_change_date();
 	}
 	
 	return $step;
@@ -846,9 +846,9 @@ sub get_edit
 sub get_delete
 # //////////////////////////////////////////////////
 {
-	my ( $self, $appdata_id, $token ) = @_;
+	my ( $self, $appdata_id ) = @_;
 	
-	if ( $self->check_existing_id_in_token( $appdata_id, $token ) ) {
+	if ( $self->check_existing_id_in_token( $appdata_id ) ) {
 	
 		my $sch_id = $self->query( 'sel1', __LINE__, "
 			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
@@ -862,14 +862,14 @@ sub get_delete
 			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, $sch_id
 		);
 
-		$self->mod_last_change_date( $token );
+		$self->mod_last_change_date();
 	}
 }
 
 sub check_existing_id_in_token
 # //////////////////////////////////////////////////
 {
-	my ( $self, $appdata_id, $token ) = @_;
+	my ( $self, $appdata_id ) = @_;
 	
 	my $exist = 0;
 	
@@ -877,7 +877,7 @@ sub check_existing_id_in_token
 		SELECT AutoAppData.ID FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $token
+		WHERE Token = ?", $self->{ token }
 	);
 		
 	for my $app ( @$list_of_app_in_token ) {
@@ -890,13 +890,13 @@ sub check_existing_id_in_token
 sub check_all_app_finished_and_not_empty
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my ( $app_count, $app_finished ) = $self->query( 'sel1', __LINE__, "
 		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $token
+		WHERE Token = ?", $self->{ token }
 	);
 
 	return 2 if $app_count < 1;
@@ -909,7 +909,7 @@ sub check_all_app_finished_and_not_empty
 sub get_add
 # //////////////////////////////////////////////////
 {
-	my ( $self, $app_id, $token ) = @_;
+	my ( $self, $app_id ) = @_;
 	
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);"
@@ -924,14 +924,14 @@ sub get_add
 	
 	my $appdata_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
 	
-	my $step = $self->get_step_by_content( $token, '[list_of_applicants]', 'next' );
+	my $step = $self->get_step_by_content( '[list_of_applicants]', 'next' );
 	
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $token
+		$step, $appdata_id, $sch_id, $self->{ token }
 	);
 	
-	$self->mod_last_change_date( $token );
+	$self->mod_last_change_date();
 	
 	return $step;
 }
@@ -939,19 +939,19 @@ sub get_add
 sub get_back
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $token ) = @_;
+	my ( $self, $step ) = @_;
 	
-	$self->save_data_from_form( $step, $self->get_current_table_id( $token ) );
-	$self->mod_last_change_date( $token );
+	$self->save_data_from_form( $step, $self->get_current_table_id() );
+	$self->mod_last_change_date();
 	
 	$step--;
 	
-	if ( $step == $self->get_step_by_content( $token, '[app_finish]' ) ) {
-		$step = $self->set_step_by_content( $token, '[list_of_applicants]' );
+	if ( $step == $self->get_step_by_content( '[app_finish]' ) ) {
+		$step = $self->set_step_by_content( '[list_of_applicants]' );
 	}
 	
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $token
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
 	);
 		
 	return $step;
@@ -960,27 +960,27 @@ sub get_back
 sub get_html_page
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $token, $appnum ) = @_;
+	my ( $self, $step, $appnum ) = @_;
 	
 	my $content = '';
 	my $template = 'autoform.tt2';
 	
-	my $page_content = $self->get_content_rules( $step, undef, $token, 'init' );
+	my $page_content = $self->get_content_rules( $step, undef, 'init' );
 
 	if ( $page_content eq '[list_of_applicants]' ) {
-		return $self->get_list_of_app( $token );
+		return $self->get_list_of_app();
 	}
 	
 	if ( $page_content eq '[app_finish]' ) {
 		return $self->get_finish();
 	}
 	
-	my $current_values = $self->get_all_values( $step, $self->get_current_table_id( $token ) );
+	my $current_values = $self->get_all_values( $step, $self->get_current_table_id() );
 	
-	$self->correct_values( \$current_values, $appnum, $token );
+	$self->correct_values( \$current_values, $appnum );
 	
 	for my $element ( @$page_content ) {
-		$content .= $self->get_html_line( $element, $current_values, $token );
+		$content .= $self->get_html_line( $element, $current_values );
 	}
 	
 	return ( $content, $template );
@@ -989,7 +989,7 @@ sub get_html_page
 sub correct_values
 # //////////////////////////////////////////////////
 {
-	my ( $self, $current_values, $appnum, $token ) = @_;
+	my ( $self, $current_values, $appnum ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 
@@ -1007,7 +1007,7 @@ sub correct_values
 		$$current_values->{ 'new_app_timedate' } = $self->query( 'sel1', __LINE__, "
 			SELECT AppDate FROM AutoAppointments 
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
-			WHERE AutoToken.Token = ?", $token
+			WHERE AutoToken.Token = ?", $self->{ token }
 		);
 
 		$$current_values->{ 'new_app_timedate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
@@ -1028,14 +1028,14 @@ sub correct_values
 sub get_list_of_app
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $content = $self->query( 'selallkeys', __LINE__, "
 		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $token
+		WHERE Token = ?", $self->{ token }
 	);
 		
 	if ( scalar(@$content) < 1 ) {
@@ -1059,7 +1059,7 @@ sub get_specials_of_element
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	my $page_content = $self->get_content_rules(shift);
+	my $page_content = $self->get_content_rules( shift, undef, shift );
 	
 	return if $page_content =~ /^\[/;
 	
@@ -1085,7 +1085,7 @@ sub get_specials_of_element
 sub get_html_line
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element, $values, $token ) = @_;
+	my ( $self, $element, $values ) = @_;
 
 	return $self->get_html_for_element( 'free_line' ) if $element->{ type } eq 'free_line';
 	
@@ -1119,7 +1119,7 @@ sub get_html_line
 			$self->get_html_for_element(
 				$element->{ type }, $element->{ name }, $current_value, $element->{ param }, 
 				$element->{ uniq_code }, $element->{ first_elements },
-				$self->check_comments_alter_version( $element->{ comment }, $token ),
+				$self->check_comments_alter_version( $element->{ comment } ),
 				$element->{ check },
 			) . $label_for_need
 		);
@@ -1149,11 +1149,11 @@ sub get_cell
 sub get_progressbar
 # //////////////////////////////////////////////////
 {
-	my ( $self, $page, $token ) = @_;
+	my ( $self, $page ) = @_;
 	
 	my ( $line, $content, $progress_line );
 	
-	my ( undef, $visa_category ) = $self->get_app_visa_and_center( $token );
+	my ( undef, $visa_category ) = $self->get_app_visa_and_center();
 		
 	if ( $self->{ this_is_self_testing } ) {
 	
@@ -1362,11 +1362,11 @@ sub get_html_for_element
 sub check_comments_alter_version
 # //////////////////////////////////////////////////
 {
-	my ( $self, $comment, $token ) = @_;
+	my ( $self, $comment ) = @_;
 	
 	return $comment unless ref( $comment ) eq 'HASH';
 	
-	my ( $current_center ) = $self->get_app_visa_and_center( $token );
+	my ( $current_center ) = $self->get_app_visa_and_center();
 	
 	for ( keys %$comment ) {
 	
@@ -1426,11 +1426,11 @@ sub resort_with_first_elements
 sub save_data_from_form
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $table_id, $token ) = @_;
+	my ( $self, $step, $table_id ) = @_;
 	
 	my $vars = $self->{'VCS::Vars'};
 
-	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules($step), 'save' );
+	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'save' );
 
 	for my $table ( keys %$request_tables ) {
 		
@@ -1446,7 +1446,7 @@ sub save_data_from_form
 			
 			my $value = $vars->getparam( $request_tables->{$table}->{$row} );
 			
-			push ( @values, $self->encode_data_for_db( $step, $request_tables->{$table}->{$row}, $value) );
+			push ( @values, $self->encode_data_for_db( $step, $request_tables->{$table}->{$row}, $value ) );
 			
 			$self->change_current_appdata( $value, $table_id ) if $row eq 'PersonForAgreements';
 		}
@@ -1457,7 +1457,7 @@ sub save_data_from_form
 		);
 	}
 	
-	$self->check_special_in_rules_for_save( $step, $table_id, $token );
+	$self->check_special_in_rules_for_save( $step, $table_id );
 }
 
 sub change_current_appdata
@@ -1473,7 +1473,7 @@ sub change_current_appdata
 sub check_special_in_rules_for_save
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $table_id, $token ) = @_;
+	my ( $self, $step, $table_id ) = @_;
 	
 	my $vars = $self->{'VCS::Vars'};
 	my $elements = $self->get_content_rules( $step );
@@ -1512,8 +1512,8 @@ sub check_special_in_rules_for_save
 			) if $new_list;
 		}
 		elsif ( $element->{special} eq 'cach_this_value' ) {
-	
-			$self->cached( 'autoform_' . $token . '_' . $element->{name}, $vars->getparam( $element->{name} ) );
+
+			$self->cached( 'autoform_' . $self->{ token } . '_' . $element->{name}, $vars->getparam( $element->{name} ) );
 		}
 	}
 }
@@ -1654,7 +1654,7 @@ sub get_names_db_for_save_or_get
 sub get_current_table_id
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $tables_id = {};
 	my $request_tables = '';
@@ -1671,7 +1671,7 @@ sub get_current_table_id
 	$request_tables =~ s/,\s$//;
 
 	my @ids = $self->query( 'sel1', __LINE__, "
-		SELECT $request_tables FROM AutoToken WHERE Token = ?", $token
+		SELECT $request_tables FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 	
 	my $max_index = scalar( keys %$tables_controled_by_AutoToken ) - 1;
@@ -1681,7 +1681,7 @@ sub get_current_table_id
 	};
 	
 	$tables_id->{ AutoToken } = $self->query( 'sel1', __LINE__, "
-		SELECT ID FROM AutoToken WHERE Token = ?", $token
+		SELECT ID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	return $tables_id;
@@ -1690,10 +1690,10 @@ sub get_current_table_id
 sub check_data_from_form
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token, $step ) = @_;
+	my ( $self, $step ) = @_;
 	
-	my $page_content = $self->get_content_rules( $step, undef, $token, 'init' );
-	my $tables_id = $self->get_current_table_id( $token );
+	my $page_content = $self->get_content_rules( $step, undef, 'init' );
+	my $tables_id = $self->get_current_table_id();
 
 	return if $page_content =~ /^\[/;
 	
@@ -1718,7 +1718,7 @@ sub check_data_from_form
 		$first_error = $self->check_captcha() if $element->{type} =~ /captcha/;
 
 		if ( !$first_error and $element->{check_logic} ) {
-			$first_error = $self->check_logic( $element, $tables_id, $token );
+			$first_error = $self->check_logic( $element, $tables_id );
 		}
 	}
 	
@@ -1820,7 +1820,7 @@ sub check_captcha
 sub check_logic
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element, $tables_id, $token ) = @_;
+	my ( $self, $element, $tables_id ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
 	my $value = $vars->getparam( $element->{ name } );
@@ -1899,7 +1899,7 @@ sub check_logic
 		
 		if ( $rule->{ condition } =~ /^email_not_blocked$/ and $value ) {
 		
-			my ( $center ) = $self->get_app_visa_and_center( $token );
+			my ( $center ) = $self->get_app_visa_and_center();
 
 			my $blocket_emails = ( $self->{ this_is_self_testing } ?
 				VCS::Site::autoselftest::get_blocked_emails() :
@@ -2048,31 +2048,31 @@ sub offset_calc
 sub mod_last_change_date
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $lastip = $ENV{'HTTP_X_REAL_IP'};
 	
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET LastChange = now(), LastIP = ? WHERE Token = ?", {}, $lastip, $token
+		UPDATE AutoToken SET LastChange = now(), LastIP = ? WHERE Token = ?", {}, $lastip, $self->{ token }
 	);
 }
 
 sub create_new_appointment
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
 	my $new_appid;
 	my $info_for_contract = "from_db";
 	
-	my $tables_transfered_id = $self->get_current_table_id( $token );
+	my $tables_transfered_id = $self->get_current_table_id();
 	
 	my $db_rules = $self->get_content_db_rules();
 
 	my ( $insurance_line, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
 		SELECT Insurance, PersonForAgreements FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		WHERE Token = ?", $token
+		WHERE Token = ?", $self->{ token }
 	);
 
 	if ( $person_for_contract ) {
@@ -2357,7 +2357,7 @@ sub get_pcode
 sub send_app_confirm
 # //////////////////////////////////////////////////
 {
-	my ( $self, $appnumber, $appid, $token, $langid ) = @_; 
+	my ( $self, $appnumber, $appid, $langid ) = @_; 
 	
 	$langid = 'ru' unless $langid;
 	
@@ -2366,10 +2366,10 @@ sub send_app_confirm
 	my $replacer = {
 		app_num => $appnumber,
 		app_id => $appid,
-		app_token => $token,
+		app_token => $self->{ token },
 	};
 	
-	my ( $app_list, undef ) = $self->get_list_of_app( $token );
+	my ( $app_list, undef ) = $self->get_list_of_app();
 	
 	for ( @$app_list ) {
 		$replacer->{ app_list } .= $_->{ FName } . ' ' . $_->{ LName } . '<br>';

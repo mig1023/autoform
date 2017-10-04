@@ -45,6 +45,7 @@ sub get_content_rules_hash
 				'param' => '[centers_from_db]',
 				'uniq_code' => 'onchange="update_nearest_date_free_date();"',
 				'first_elements' => '1',
+				'special' => 'cach_this_value',
 			},
 			{
 				'type' => 'select',
@@ -58,6 +59,7 @@ sub get_content_rules_hash
 				},
 				'param' => '[visas_from_db]',
 				'first_elements' => '13',
+				'special' => 'cach_this_value',
 			},
 			{
 				'type' => 'info',

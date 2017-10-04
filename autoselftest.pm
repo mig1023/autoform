@@ -2236,6 +2236,7 @@ sub get_tests
 
 	my @result = ();
 	$self->{ this_is_self_testing } = 1;
+	$self->{ token } = $test_token;
 
 	my $tests = get_test_list();
 	
