@@ -3,6 +3,7 @@ use strict;
 
 use VCS::Vars;
 use VCS::Site::autodata;
+use VCS::Site::autodata_type_c;
 use VCS::Site::autodata_type_d;
 use VCS::Site::autoselftest;
 
@@ -65,7 +66,7 @@ sub get_content_rules
 		$content = VCS::Site::autodata_type_d::get_content_rules_hash();
 	}
 	else {
-		$content = VCS::Site::autodata::get_content_rules_hash();
+		$content = VCS::Site::autodata_type_c::get_content_rules_hash();
 	};
 	
 	my $keys_in_current_page = {};
@@ -1163,7 +1164,7 @@ sub get_progressbar
 		$progress_line = VCS::Site::autodata_type_d::get_progressline();
 	}
 	else {
-		$progress_line = VCS::Site::autodata::get_progressline();
+		$progress_line = VCS::Site::autodata_type_c::get_progressline();
 	};
 	
 	my $current_progress = $page->[0]->{ progress };
