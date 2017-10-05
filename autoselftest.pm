@@ -93,7 +93,7 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_content_1,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' => [
 						'1', 
 						'Начало записи', 
@@ -114,7 +114,7 @@ sub get_test_list {
 				},
 				2 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_content_1,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'param' => [
 						{ 'name' => 'action', 'value' => 'forward' },
 						
@@ -151,7 +151,7 @@ sub get_test_list {
 				},
 				3 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_content_2,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'param' => [
 						{ 'name' => 'action', 'value' => 'back' },
 					],
@@ -445,7 +445,7 @@ sub get_test_list {
 			'comment' => 'get_html_page',
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
-					'args' => [ 1, '[token]', '999' ],
+					'args' => [ 1, '999' ],
 					'expected' => [ '[first_page_selected]', 'autoform.tt2' ],
 				},
 			},
@@ -719,11 +719,11 @@ sub get_test_list {
 			'comment' => 'check_existing_id_in_token',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'args' => [ '[appdata_id]', '[token]' ],
+					'args' => [ '[appdata_id]' ],
 					'expected' => '1',
 				},
 				2 => { 	'tester' => \&test_line,
-					'args' => [ '1', '[token]' ],
+					'args' => [ '1' ],
 					'expected' => '0',
 				},
 			},
@@ -789,7 +789,6 @@ sub get_test_list {
 						{
 							'AutoAppointments' => '[app_id]',
 						},
-						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked1mail@mail.com' },
@@ -804,7 +803,6 @@ sub get_test_list {
 						{
 							'AutoAppointments' => '[app_id]',
 						},
-						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked2mail@mail.com' },
@@ -819,7 +817,6 @@ sub get_test_list {
 						{
 							'AutoAppointments' => '[app_id]',
 						},
-						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked3mail@mail.com' },
@@ -834,7 +831,6 @@ sub get_test_list {
 						{
 							'AutoAppointments' => '[app_id]',
 						},
-						'[token]',
 					],
 					'param' => [
 						{ 'name' => 'field_name', 'value' => 'blocked4mail@mail.com' },
@@ -1108,7 +1104,7 @@ sub get_test_list {
 			'comment' => 'get_current_table_id',
 			'test' => { 	
 				1 => { 	'tester' => \&test_hash,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' =>  {
 						'AutoAppData' => '[appdata_id]',
 						'AutoSchengenAppData' => '[schdata_id]',
@@ -1147,19 +1143,19 @@ sub get_test_list {
 			'comment' => 'skip_page_by_relation',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+					'args' => [ 'only_if', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '0',
 				},
 				2 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+					'args' => [ 'only_if', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '1',
 				},
 				3 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if_not', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+					'args' => [ 'only_if_not', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '0',
 				},
 				4 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if_not', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' }, '[token]' ],
+					'args' => [ 'only_if_not', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '1',
 				},
 			},
@@ -1169,7 +1165,7 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_hash,
 					'prepare' => \&pre_getinfo,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' =>  {
 						'persons' => '1',
 						'center' => '5',
@@ -1200,7 +1196,6 @@ sub get_test_list {
 								},
 							] 
 						}, 
-						'[token]',
 						{ 'param' => 1 },
 					],
 					'expected' => { 
@@ -1228,7 +1223,7 @@ sub get_test_list {
 			'comment' => 'get_content_rules',
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
-					'args' => [ '2', 'full', '[token]', 'init' ],
+					'args' => [ '2', 'full', 'init' ],
 					'expected' =>  
 					[
 						[
@@ -1289,7 +1284,7 @@ sub get_test_list {
 					],
 				},
 				2 => { 	'tester' => \&test_array,
-					'args' => [ '2', undef, '[token]', 'init' ],
+					'args' => [ '2', undef, 'init' ],
 					'expected' =>  
 					[
 						[
@@ -1343,7 +1338,7 @@ sub get_test_list {
 					],
 				},
 				3 => { 	'tester' => \&test_regexp,
-					'args' => [ 'length', undef, '[token]' ],
+					'args' => [ 'length' ],
 					'expected' => '^\d+$',
 				},
 			},
@@ -1595,7 +1590,7 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_geo_or_collect,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' => [ [ 55, 49, 'Казань' ] ],
 				},
 			},
@@ -1605,12 +1600,12 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_geo_or_collect,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' => '7',
 				},
 				2 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_collect2,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' => '14',
 				},
 			},
@@ -1619,15 +1614,15 @@ sub get_test_list {
 			'comment' => 'check_relation',
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
-					'args' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' }, '[token]', 0 ],
+					'args' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' }, 0 ],
 					'expected' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' } ],
 				},
 				2 => { 	'tester' => \&test_array,
-					'args' => [ 1, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Начало записи' }, '[token]', 0 ],
+					'args' => [ 1, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Начало записи' }, 0 ],
 					'expected' => [ 2, get_content_rules_hash( 'with_raltion', undef, 'add' )->{ 'Данные поездки' } ],
 				},
 				3 => { 	'tester' => \&test_array,
-					'args' => [ 2, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Данные поездки' }, '[token]', 'moonwalk' ],
+					'args' => [ 2, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Данные поездки' }, 'moonwalk' ],
 					'expected' => [ 1, get_content_rules_hash( 'with_raltion', undef, 'add' )->{ 'Начало записи' } ],
 				},
 			},
@@ -1636,11 +1631,11 @@ sub get_test_list {
 			'comment' => 'get_step_by_content',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'args' => [ '[token]', '[list_of_applicants]', 0 ],
+					'args' => [ '[list_of_applicants]', 0 ],
 					'expected' => '3',
 				},
 				2 => { 	'tester' => \&test_line,
-					'args' => [ '[token]', '[list_of_applicants]', 'next' ],
+					'args' => [ '[list_of_applicants]', 'next' ],
 					'expected' => '4',
 				},
 			},
@@ -1649,12 +1644,12 @@ sub get_test_list {
 			'comment' => 'set_step_by_content',
 			'test' => { 	
 				1 => { 	'tester' => \&test_write_db,
-					'args' => [ 'Token', '[list_of_applicants]', 0 ],
-					'expected' => 'Token:AutoToken:Step:3',
+					'args' => [ '[list_of_applicants]', 0 ],
+					'expected' => '[token]:AutoToken:Step:3',
 				},
 				2 => { 	'tester' => \&test_write_db,
-					'args' => [ 'Token', '[list_of_applicants]', 'next' ],
-					'expected' => 'Token:AutoToken:Step:4',
+					'args' => [ '[list_of_applicants]', 'next' ],
+					'expected' => '[token]:AutoToken:Step:4',
 				},
 			},
 		},
@@ -1717,12 +1712,12 @@ sub get_test_list {
 			'comment' => 'set_appointment_finished',
 			'test' => { 	
 				1 => { 	'tester' => \&test_regexp,
-					'args' => [ 'Token' ],
+					'args' => [ '[token]' ],
 					'expected' => '^[1-9]\d*$',
 				},
 				2 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_draft,
-					'args' => [ 'Token' ],
+					'args' => [ '[token]' ],
 					'expected' => [ 0, 'draft_app_num' ],
 				},
 			},
@@ -1731,15 +1726,15 @@ sub get_test_list {
 			'comment' => 'get_edit',
 			'test' => { 	
 				1 => { 	'tester' => \&test_write_db,
-					'args' => [ 1, '[appdata_id]', '[token]' ],
+					'args' => [ 1, '[appdata_id]' ],
 					'expected' => '[token]:AutoToken:AutoAppDataID:[appdata_id]',
 				},
 				2 => { 	'tester' => \&test_write_db,
-					'args' => [ 1, '111', '[token]' ],
+					'args' => [ 1, '111' ],
 					'expected' => '[token]:AutoToken:AutoAppDataID:[appdata_id]',
 				},
 				3 => { 	'tester' => \&test_write_db,
-					'args' =>[ 1, '[appdata_id]', '[token]' ],
+					'args' =>[ 1, '[appdata_id]' ],
 					'expected' => '[token]:AutoToken:Step:4',
 				},
 			},
@@ -1749,16 +1744,16 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_all_finished,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' => 0,
 				},
 				2 => { 	'tester' => \&test_line,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' => 1,
 				},
 				3 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_nobody,
-					'args' => [ '[token]' ],
+					'args' => [],
 					'expected' => 2,
 				},
 			},
@@ -1767,7 +1762,7 @@ sub get_test_list {
 			'comment' => 'get_list_of_app',
 			'test' => { 	
 				1 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_all_finished,
+					'prepare' => \&pre_token,
 					'args' => [ 'Token' ],
 					'expected' => [ [ { 'ID' => 'X' } ], 'autoform_list.tt2' ],
 				},
@@ -1777,16 +1772,20 @@ sub get_test_list {
 			'comment' => 'check_comments_alter_version',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'args' => [ { '5' => 'test1', '10' => 'test2' }, '[token]' ],
+					'args' => [ { '1' => 'test1', '10' => 'test2' } ],
 					'expected' => 'test1',
 				},
 				2 => { 	'tester' => \&test_line,
-					'args' => [ { '1,2,3' => 'test1', '4,5,6' => 'test2' }, '[token]' ],
+					'args' => [ { '2,4,5' => 'test1', '2,1,3' => 'test2' } ],
 					'expected' => 'test2',
 				},
 				3 => { 	'tester' => \&test_line,
-					'args' => [ { '1,2,3' => 'test1' }, '[token]' ],
+					'args' => [ { '2,3,4' => 'test1' } ],
 					'expected' => '',
+				},
+				4 => { 	'tester' => \&test_line,
+					'args' => [ 'test0' ],
+					'expected' => 'test0',
 				},
 			},
 		},
@@ -1809,14 +1808,15 @@ sub get_test_list {
 				2 => { 	'tester' => \&test_hash,
 					'args' => [ 1, '[table_id]' ],
 					'expected' => {
-						'email' => '',
+						'email' => 'mail@mail.ru',
 						'vtype' => '13',
 						'pers_info' => '0', 
 						'mobil_info' => '0',
-						'center' => '5',
+						'center' => '1',
 					},
 				},
 				3 => { 	'tester' => \&test_hash,
+					'prepare' => \&pre_getinfo,
 					'args' => [ 2, '[table_id]' ],
 					'expected' => {
 						'f_date' => '01.05.2011',
@@ -1829,7 +1829,7 @@ sub get_test_list {
 			'comment' => 'check_data_from_form',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'args' => [ '[token]', 1 ],
+					'args' => [ 1 ],
 					'param' => [ 
 						{ 'name' => 'center', 'value' => '1' },
 						{ 'name' => 'vtype', 'value' => '13' },
@@ -1841,11 +1841,11 @@ sub get_test_list {
 					'expected' => '',
 				},
 				2 => { 	'tester' => \&test_line,
-					'args' => [ '[token]', 3 ],
+					'args' => [ 3 ],
 					'expected' => '',
 				},
 				3 => { 	'tester' => \&test_line,
-					'args' => [ '[token]', 1 ],
+					'args' => [ 1 ],
 					'param' => [ 
 						{ 'name' => 'center', 'value' => '' },
 						{ 'name' => 'vtype', 'value' => '13' },
@@ -1857,7 +1857,7 @@ sub get_test_list {
 					'expected' => 'center|Поле "Визовый центр" не заполнено',
 				},
 				4 => { 	'tester' => \&test_line,
-					'args' => [ '[token]', 1 ],
+					'args' => [ 1 ],
 					'param' => [ 
 						{ 'name' => 'center', 'value' => '1' },
 						{ 'name' => 'vtype', 'value' => '13' },
@@ -1869,7 +1869,7 @@ sub get_test_list {
 					'expected' => 'email|Поле "Email" не заполнено',
 				},
 				5 => { 	'tester' => \&test_line,
-					'args' => [ '[token]', 1 ],
+					'args' => [ 1 ],
 					'param' => [ 
 						{ 'name' => 'center', 'value' => '1' },
 						{ 'name' => 'vtype', 'value' => '13' },
@@ -1953,6 +1953,7 @@ sub get_content_rules_hash
 				},
 				'param' => '[centers_from_db]',
 				'uniq_code' => 'onchange="update_nearest_date_free_date();"',
+				'special' => 'cach_this_value',
 			},
 			{
 				'type' => 'select',
@@ -1965,6 +1966,7 @@ sub get_content_rules_hash
 					'name' => 'VType',
 				},
 				'param' => '[visas_from_db]',
+				'special' => 'cach_this_value',
 			},
 			{
 				'type' => 'info',
@@ -2065,6 +2067,7 @@ sub get_content_rules_hash
 				},
 				'special' => 'datepicker, mask',
 			},
+
 		],
 		
 		'Страница окончания записи' => [
@@ -2101,6 +2104,35 @@ sub get_content_rules_hash
 				'page_ord' => 3,
 				'progress' => 3,
 				'replacer' => '[list_of_applicants]',
+			},
+		],
+		'Страница с непередающимися в БД полями' => [
+			{
+				'page_ord' => 100,
+				'progress' => 10,
+			},
+			{
+				'type' => 'checkbox',
+				'name' => 'no_rumname',
+				'label_for' => 'нет отчества',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'NoRMName',
+					'transfer' => 'nope',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'info_address',
+				'label' => 'Адрес',
+				'comment' => 'Полный адрес, включая индекс',
+				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
+				'check' => 'zЁN\s\-\_\.\,\;\'\"',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'RAddress',
+					'transfer' => 'nope',
+				},
 			},
 		],
 	};
@@ -2184,15 +2216,22 @@ sub selftest
 	my $vars = $self->{ 'VCS::Vars' };
 	my $config = $vars->getConfig('db');
 	
-	$vars->get_memd->delete( $_ ) for ( 'cach_selftest', 'cach_selftest_write' );
+	$self->{ this_is_self_testing } = 1;
+	
+	$vars->get_memd->delete( $_ ) for (
+		'cach_selftest', 'cach_selftest_write', 'autoform_addparam', 'autoform_collectdates', 'autoform_allpcode',
+	);
 	
 	$vars->db->query("USE fake_vcs");
 
 	my $result = [ { 'text' => "self_self_test", 'status' => self_self_test() } ];
 	
 	my @param = get_test_appointments( $self, $vars );
+
+	$vars->get_memd->set( 'autoform_' . $param[0] . '_vtype', 1, 60 );
+	$vars->get_memd->set( 'autoform_' . $param[0]. '_center', 5, 60 );
 	
-	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $param[0] =~ /^A[a-z0-9]{63}$/ ) and ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
+	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $param[0] =~ /^t[a-z0-9]{63}$/ ) and ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
 	push @$result, { 'text' => 'get_add', 'status' => ( ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
 	push @$result, get_tests( $self, $vars, @param );
 	
@@ -2210,7 +2249,9 @@ sub get_test_appointments
 	
 	my $test_token = $self->get_token_and_create_new_form_if_need();
 	
-	$self->create_clear_form( $test_token );
+	$self->{ token } = $test_token;
+	
+	$self->create_clear_form();
 	
 	my $appid = $vars->db->sel1("
 		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $test_token);
@@ -2235,8 +2276,6 @@ sub get_tests
 	my $token_id = shift;
 
 	my @result = ();
-	$self->{ this_is_self_testing } = 1;
-	$self->{ token } = $test_token;
 
 	my $tests = get_test_list();
 	
@@ -2621,7 +2660,7 @@ sub pre_getinfo
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
-		UPDATE AutoAppointments SET SDate = '2011-05-01', CenterID = '5'
+		UPDATE AutoAppointments SET SDate = '2011-05-01', FDate = '2011-05-01', CenterID = '5'
 		WHERE ID = '$appid'" );
 }
 
@@ -2815,14 +2854,17 @@ sub pre_draft
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 
-	if ( $type eq 'PREPARE' ) { 
+	if ( $type eq 'PREPARE' ) {
+
 		$vars->db->query("
-			UPDATE AutoToken SET Draft = 1 WHERE Token = 'Token'"
+			UPDATE AutoToken SET Draft = 1 WHERE Token = ?", {},
+			$$token
 		);
 	}
 	else {
 		$vars->db->query("
-			UPDATE AutoToken SET Draft = 0 WHERE Token = 'Token'"
+			UPDATE AutoToken SET Draft = 0 WHERE Token = ?", {},
+			$$token
 		);
 	}
 }
@@ -2862,6 +2904,20 @@ sub pre_nobody
 			UPDATE AutoAppData SET AppID = ? WHERE ID = ?", {},
 			$appid, $appdataid
 		);
+	}
+}
+
+sub pre_token
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+
+	if ( $type eq 'PREPARE' ) { 
+		$self->{ save_token } = $self->{ token };
+		$self->{ token } = 'Token';
+	}
+	else {
+		$self->{ token } = $self->{ save_token };
 	}
 }
 
