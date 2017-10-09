@@ -58,11 +58,11 @@ sub get_content_rules
 	my $content;
 
 	if ( $self->{ this_is_self_testing } ) {
-	
-		$content = VCS::Site::autoselftest::get_content_rules_hash();
+
+	$content = VCS::Site::autoselftest::get_content_rules_hash();
 	}
 	elsif ( $visa_category eq 'D' ) {
-	
+
 		$content = VCS::Site::autodata_type_d::get_content_rules_hash();
 	}
 	else {
@@ -161,7 +161,7 @@ sub autoform
 
 	if ( $self->{ token } =~ /^\d\d$/ ) {
 	
-		( $title, $page_content, $template_file ) = $self->get_page_error();
+		( $title, $page_content, $template_file ) = $self->get_page_error( $self->{ token } );
 	}
 	elsif ( $vars->getparam( 'script' ) ) {
 	
@@ -265,7 +265,7 @@ sub get_geo_info
 		VCS::Site::autoselftest::get_geo_branches() :
 		VCS::Site::autodata::get_geo_branches()
 	);
-	
+
 	$addr =~ s/\r?\n/<br>/g;
 	
 	$branches->{ $center }->[ 2 ] = $addr;
@@ -879,7 +879,7 @@ sub check_existing_id_in_token
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $self->{ token }
 	);
-		
+
 	for my $app ( @$list_of_app_in_token ) {
 		$exist = 1 if ( $app->{ID} == $appdata_id );
 	}
@@ -1367,7 +1367,7 @@ sub check_comments_alter_version
 	return $comment unless ref( $comment ) eq 'HASH';
 	
 	my ( $current_center ) = $self->get_app_visa_and_center();
-	
+
 	for ( keys %$comment ) {
 	
 		my %centers = map { $_ => 1 } split /,/, $_;
@@ -1533,12 +1533,12 @@ sub get_all_values
 		next if $table eq 'alternative_data_source';
 
 		my $request = join ',', keys %{ $request_tables->{ $table } };
-		
+
 		my $result = $self->query( 'selallkeys', __LINE__, "
 			SELECT $request FROM $table WHERE ID = ?", $table_id->{ $table }
 		);
 		$result = $result->[0];
-		
+
 		for my $value ( keys %$result ) {
 			$all_values->{ $request_tables->{ $table }->{ $value } } = 
 				$self->decode_data_from_db( $step, $request_tables->{ $table }->{ $value }, $result->{ $value } );
@@ -2131,10 +2131,11 @@ sub mod_hash
 	my $vars = $self->{ 'VCS::Vars' };
 
 	for my $column ( keys %$hash ) {
+
 		if ( $db_rules->{ $table_name }->{ $column } eq 'nope') {
 			delete $hash->{ $column };
 		}
-	}
+	};
 	
 	$hash = $self->visapurpose_assembler( $hash ) if exists $hash->{ VisaPurpose };
 	$hash = $self->mezzi_assembler( $hash ) if exists $hash->{ Mezzi1 };
