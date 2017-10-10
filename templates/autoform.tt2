@@ -398,6 +398,8 @@ function init_comm(pos_x, pos_y) {
 				'<span id="[% post_index %]_replacer">' + $('#[% post_index %]').val() + 
 				' <img src="/files/autoform_wait.gif"></span>'
 			);
+			$('#[% post_index %]_replacer').css( "font-size", ( isMobile() ? '1.5em' : '' ) );
+			
 			$.ajax({
 				url: "/autoform/findpcode.htm",
 				dataType: "jsonp",

@@ -1341,6 +1341,7 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'info' ) {
+		$value = '(' . $self->lang( 'не указано' ) . ')' if !$value;
 		$content =~ s/\[text\]/$value/;
 	}
 	

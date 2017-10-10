@@ -457,15 +457,6 @@ sub get_content_rules_hash
 					'transfer' => 'nope',
 				},
 			},
-			{
-				'type' => 'info',
-				'name' => 'info_phone',
-				'label' => 'Телефон',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'AppPhone',
-				},
-			},
 		],
 		
 		'Укажите данные доверенного лица' => [
