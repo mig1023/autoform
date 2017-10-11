@@ -1361,19 +1361,19 @@ sub get_test_list {
 					'expected' => '[appdata_id]:AutoAppData:Finished:5',
 				},
 				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_query,
+					'prepare' => \&pre_logic_1,
 					'args' => [ 'sel1', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
-					'expected' => '15',
+					'expected' => '21',
 				},
 				3 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_query,
+					'prepare' => \&pre_logic_1,
 					'args' => [ 'selall', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
-					'expected' => [ [ [ '15' ] ] ],
+					'expected' => [ [ [ '21' ] ] ],
 				},
 				4 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_query,
+					'prepare' => \&pre_logic_1,
 					'args' => [ 'selallkeys', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
-					'expected' => [ [ { 'Finished' => '15' } ] ],
+					'expected' => [ [ { 'Finished' => '21' } ] ],
 				},
 			},
 		},
@@ -1743,7 +1743,7 @@ sub get_test_list {
 			'comment' => 'check_all_app_finished_and_not_empty',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_all_finished,
+					'prepare' => \&pre_logic_1,
 					'args' => [],
 					'expected' => 0,
 				},
@@ -1907,6 +1907,26 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::correct_values },
+			'comment' => 'correct_values',
+			'test' => { 	
+				1 => { 	'tester' => \&test_hash,
+					'args' => [ \{ new_app_num => 10 }, 20 ],
+					'expected' => { new_app_num => 20 },
+				},
+				2 => { 	'tester' => \&test_hash,
+					'prepare' => \&pre_collect2,
+					'args' => [ \{ new_app_branch => 5 } ],
+					'expected' => { new_app_branch => 'Kazan' },
+				},
+				3 => { 	'tester' => \&test_hash,
+					'prepare' => \&pre_init_param,
+					'args' => [ \{ new_app_timeslot => 10 } ],
+					'expected' => { new_app_timeslot => '9:00 - 9:25' },
+				},
+				
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -1920,10 +1940,10 @@ my $progress_bar_2 =
 	'<td align="center" class="pr_size_gen pr_white_red_gen"><div class="big_progr pr_past" title=""><div class="pr_in_gen">1</div></div></td><td align="center" class="pr_size_gen pr_red_gray_gen"><div class="ltl_progr pr_current" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">2</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Паспорта"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Допданные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Поездка"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Проживание"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Расходы"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Ещё?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="На кого?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">3</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Офис"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_white_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
 my $first_page = 
-	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" id="free_date"></label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" id="free_date">(не указано)</label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 
 my $first_page_selected = 
-	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" id="free_date"></label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" id="free_date">(не указано)</label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 	
 my $second_page = 
 	'<tr><td rowspan=2><label id="text">Дата начала поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: 01.01.2025</span></td><tr><td rowspan=2><label id="text">Дата окончания поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: 31.12.2025</span></td>';
@@ -2362,15 +2382,17 @@ sub show_result
 	
 	my $result_line = self_test_htm( 'body_start' );
 	
-	my $test_num = 18; 	# 16 self_self + create_clear_form + get_add
-	my $test_func = 0;
+	my $test_num = 18; 	
+	# 16 self_self + create_clear_form + get_add
+	
+	my $test_func = 2;	
+	# create_clear_form + get_add
+	
 	my $fails = 0;
 
 	my $tests = get_test_list();
 	for my $test (@$tests) {
-		for( keys %{ $test->{test} } ) {
-			$test_num++;
-		}
+		$test_num++ for( keys %{ $test->{test} } );
 		$test_func++;
 	}
 	
@@ -2681,10 +2703,18 @@ sub pre_init_param
 			DefaultPaymentMethod, DisableAppSameDay) 
 			VALUES (1, 'Moscow', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 'rtf', 
 			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)");
+			
+		$vars->db->query("
+			INSERT INTO TimeData (SlotID, TimeID, TStart, TEnd, Visas, EVisas, isDeleted, DayNum)
+			VALUES (10, 1, 32400, 33900, 200, 0, 0, 1)");
+
 	} 
 	else {
 		$vars->db->query("
 			DELETE FROM Branches");
+			
+		$vars->db->query("
+			DELETE FROM TimeData");
 	}
 }
 
@@ -2696,23 +2726,6 @@ sub pre_app_finish
 	$vars->db->query("
 		UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
 		$appdataid );
-}
-
-sub pre_query
-# //////////////////////////////////////////////////
-{
-	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
-	
-	if ( $type eq 'PREPARE' ) { 
-		$vars->db->query("
-			UPDATE AutoAppData SET Finished = 15 WHERE ID = ?", {}, 
-			$appdataid );
-	}
-	else {
-		$vars->db->query("
-			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
-			$appdataid );
-	}
 }
 
 sub pre_lang
@@ -2865,25 +2878,6 @@ sub pre_draft
 		$vars->db->query("
 			UPDATE AutoToken SET Draft = 0 WHERE Token = ?", {},
 			$$token
-		);
-	}
-}
-
-sub pre_all_finished
-# //////////////////////////////////////////////////
-{
-	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
-
-	if ( $type eq 'PREPARE' ) { 
-		$vars->db->query("
-			UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {},
-			$appdataid
-		);
-	}
-	else {
-		$vars->db->query("
-			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {},
-			$appdataid
 		);
 	}
 }

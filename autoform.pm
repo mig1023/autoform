@@ -1023,6 +1023,8 @@ sub correct_values
 		
 		$$current_values->{ 'new_app_timeslot' } = "$start - $end";	
 	}
+	
+	return $$current_values;
 }
 
 sub get_list_of_app
