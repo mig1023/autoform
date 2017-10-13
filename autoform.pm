@@ -580,7 +580,7 @@ sub get_autoform_content
 		} else {
 			$step = $self->set_step_by_content( '[list_of_applicants]' );
 			
-			$last_error = $self->text_error( ( $app_status == 1 ? 4 : 5 ), { 'name' => 'applist' }, undef);
+			$last_error = $self->text_error( $app_status, { 'name' => 'applist' }, undef);
 		}
 	}
 	
@@ -728,7 +728,7 @@ sub get_forward
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
 		);
 		
-		$self->set_current_app_finished( $current_table_id->{ AutoAppData } ) 
+		$self->set_current_app_finished( $current_table_id ) 
 			if $step == $self->get_step_by_content( '[app_finish]');
 	
 		( $appid, $appnum ) = $self->set_appointment_finished()
@@ -741,10 +741,14 @@ sub get_forward
 sub set_current_app_finished
 # //////////////////////////////////////////////////
 {
-	my ( $self, $appdata_id ) = @_;
+	my ( $self, $tables_id ) = @_;
 	
+	my $vtype = $self->query( 'sel1', __LINE__, "
+		SELECT VType FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
+	);
+
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoAppData SET Finished = 1 WHERE ID = ?", {}, $appdata_id
+		UPDATE AutoAppData SET Finished = ? WHERE ID = ?", {}, $vtype, $tables_id->{ AutoAppData }
 	);
 }
 
@@ -891,17 +895,20 @@ sub check_all_app_finished_and_not_empty
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	
-	my ( $app_count, $app_finished ) = $self->query( 'sel1', __LINE__, "
-		SELECT COUNT(AutoAppData.ID), SUM(AutoAppData.Finished) FROM AutoToken 
-		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+
+	my $allfinished = $self->query( 'selallkeys',  __LINE__, "
+		SELECT AutoAppData.Finished AS FinishedAs, VType FROM AutoAppData
+		JOIN AutoAppointments ON AutoAppointments.ID = AutoAppData.AppID
+		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 		WHERE Token = ?", $self->{ token }
 	);
-
-	return 2 if $app_count < 1;
 	
-	return 1 if $app_finished < $app_count;
+	for ( @$allfinished ) {
+		return 4 if !$_->{ FinishedAs };
+		return 19 if $_->{ FinishedAs } != $_->{ VType };
+	}
+	
+	return 5 if @$allfinished < 1;
 	
 	return 0;
 }
@@ -1033,7 +1040,8 @@ sub get_list_of_app
 	my $self = shift;
 	
 	my $content = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,  AutoAppData.Finished
+		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,
+		AutoAppData.Finished, AutoAppointments.VType
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
@@ -1041,10 +1049,13 @@ sub get_list_of_app
 	);
 		
 	if ( scalar(@$content) < 1 ) {
-		$content->[0]->{ID} = 'X';
+		$content->[ 0 ]->{ ID } = 'X';
 	} else {
 		for my $app ( @$content ) {
-			$app->{BirthDate} =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+		
+			$app->{ BirthDate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+
+			$app->{ Finished } = ( $app->{ Finished } == $app->{ VType } ? 1 : 2 ) if $app->{ Finished };
 		}
 	}
 
@@ -1969,6 +1980,7 @@ sub text_error
 		'Вы ввели недопустимый адрес электронной почты',
 		'Этот электронный адрес был заблокирован.<br>Вы превысили допустимое количество записей',
 		'Капча введена неверно.<br>Пожалуйста, попробуйте ещё раз',
+		'Анкеты заполнены для другого типа визы, проверьте правильность их заполнения',
 	];
 	
 	if ( !defined($element) ) {
