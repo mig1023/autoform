@@ -239,7 +239,7 @@ sub get_mobile_api
 	}
 	elsif ( $vars->getparam( 'mobile_app' ) eq 'get_all_values' ) {
 		
-		my $current_values = $self->get_all_values( undef, $self->get_current_table_id() );		
+		my $current_values = $self->get_all_values( 'all', $self->get_current_table_id() );
 
 		for ( keys %$current_values ) {
 			$result{ appdata }->{ $_ } = $current_values->{ $_ };
@@ -1573,8 +1573,13 @@ sub get_all_values
 {
 	my ( $self, $step, $table_id ) = @_;
 
+	my $allsteps_values = ( $step eq 'all' ? 1 : 0 );
+	
+	$step = undef if $step eq 'all';
+	
 	my $all_values = {};
-	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'full' );
+	
+	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ) );
 
 	for my $table ( keys %$request_tables ) {
 
@@ -1589,12 +1594,16 @@ sub get_all_values
 		)->[0];
 
 		for my $value ( keys %$result ) {
-			$all_values->{ $request_tables->{ $table }->{ $value } } = 
-				$self->decode_data_from_db( $step, $request_tables->{ $table }->{ $value }, $result->{ $value } );
+		
+			my $field_name = ( $allsteps_values ? $table . '_' . $value : $request_tables->{ $table }->{ $value } );
+
+			$all_values->{ $field_name } = $self->decode_data_from_db(
+				$step, $request_tables->{ $table }->{ $value }, $result->{ $value }
+			);
 		}
 	}
 
-	if ( $request_tables->{ alternative_data_source } ) {
+	if ( $request_tables->{ alternative_data_source } and !$allsteps_values ) {
 	
 		my $alt = $request_tables->{ alternative_data_source };
 
