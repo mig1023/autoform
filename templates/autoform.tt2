@@ -86,19 +86,11 @@ YMaps.jQuery(function () {
 [% IF step %]
 </td></tr><tr><td colspan="3">&nbsp;</td></tr>
 <tr><td colspan="3">
-<a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 	[% IF ( step == 1 ) %]
-	<span class="ltl_text">
+	<a target="_blank" class="dotted_link_big" href="">[% langreq('Воспользуйтесь преимуществами услуги Vip Premium lounge') %]</a>
 	<br><br>
-	<a target="_blank" class="dotted_link" href="/vcs/new.htm">[% langreq('Старая форма записи') %]</a>
-	<br><br>
-	[% langreq('Уважаемые клиенты, при оформлении записи на сайте анкета будет сформирована автоматически') %]
-	<br><br>
-	[% langreq('Внимание, с 14-го сентября 2015 года, все заявители, запрашивающие визу, должны будут пройти обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждый заявитель должен явиться на подачу документов лично.') %]
-	</span>
-	<br><br>
-	<a target="_blank" class="dotted_link" href="">[% langreq('Воспользуйтесь преимуществами услуги Vip Premium lounge') %]</a>
 	[% END %]
+<a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 [% END %]
 </td></tr></table>
 

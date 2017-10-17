@@ -58,8 +58,8 @@ sub get_content_rules
 	my $content;
 
 	if ( $self->{ this_is_self_testing } ) {
-
-	$content = VCS::Site::autoselftest::get_content_rules_hash();
+	
+		$content = VCS::Site::autoselftest::get_content_rules_hash();
 	}
 	elsif ( $visa_category eq 'D' ) {
 
@@ -157,6 +157,13 @@ sub autoform
 	
 	$self->{ token } = $self->get_token_and_create_new_form_if_need();
 	
+	if ( $vars->getparam( 'mobile_app' ) ) {
+	
+		$self->get_mobile_api();
+		
+		return;
+	}
+	
 	$self->{ lang } = 'en' if $vars->getparam( 'lang' ) =~ /^en$/i ;
 
 	if ( $self->{ token } =~ /^\d\d$/ ) {
@@ -213,6 +220,35 @@ sub autoform
 		'map_in_page' => $map_in_page,
 	};
 	$template->process( $template_file, $tvars );
+}
+
+sub get_mobile_api
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my %result = ();
+	
+	# token error!
+	
+	if ( $vars->getparam( 'mobile_app' ) eq 'get_token' ) {
+	
+		$result{ token } = $self->{ token };
+	}
+	elsif ( $vars->getparam( 'mobile_app' ) eq 'get_all_values' ) {
+		
+		my $current_values = $self->get_all_values( undef, $self->get_current_table_id() );		
+
+		for ( keys %$current_values ) {
+			$result{ appdata }->{ $_ } = $current_values->{ $_ };
+		}
+	}
+	
+	$vars->get_system->pheaderJSON( $vars );
+	
+	print JSON->new->pretty->encode(\%result);
 }
 
 sub autoselftest
@@ -1550,8 +1586,7 @@ sub get_all_values
 
 		my $result = $self->query( 'selallkeys', __LINE__, "
 			SELECT $request FROM $table WHERE ID = ?", $table_id->{ $table }
-		);
-		$result = $result->[0];
+		)->[0];
 
 		for my $value ( keys %$result ) {
 			$all_values->{ $request_tables->{ $table }->{ $value } } = 
@@ -1637,6 +1672,20 @@ sub get_names_db_for_save_or_get
 	my $alternative_data_source = {};
 
 	return if $page_content =~ /^\[/;
+	
+	if ( ref( $page_content ) eq 'HASH' ) {
+	
+		my $allpages_content = [];
+	
+		for my $page ( keys %$page_content ) {
+		
+			next if $page_content->{ $page } =~ /^\[/;
+			
+			push @$allpages_content, $_ for @{ $page_content->{ $page } };
+		}
+		
+		$page_content = $allpages_content;
+	}
 
 	for my $element (@$page_content) {
 		next if ( $element->{ special } eq 'insurer_many_id' ) and ( $save_or_get eq 'save' );
@@ -2254,9 +2303,9 @@ sub get_hash_table
 	
 	my $hash_table = $self->query( 'selallkeys', __LINE__, "
 		SELECT * FROM $table_name WHERE ID = ?", $table_id
-	);
+	)->[0];
 	
-	return $hash_table->[0];
+	return $hash_table;
 }
 
 sub insert_hash_table
