@@ -5,6 +5,7 @@ use VCS::Vars;
 use VCS::Site::autodata;
 use VCS::Site::autodata_type_c;
 use VCS::Site::autodata_type_d;
+use VCS::Site::automobile_api;
 use VCS::Site::autoselftest;
 
 use Data::Dumper;
@@ -229,26 +230,11 @@ sub get_mobile_api
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my %result = ();
-	
-	# token error!
-	
-	if ( $vars->getparam( 'mobile_app' ) eq 'get_token' ) {
-	
-		$result{ token } = $self->{ token };
-	}
-	elsif ( $vars->getparam( 'mobile_app' ) eq 'get_all_values' ) {
-		
-		my $current_values = $self->get_all_values( 'all', $self->get_current_table_id() );
-
-		for ( keys %$current_values ) {
-			$result{ appdata }->{ $_ } = $current_values->{ $_ };
-		}
-	}
+	my $api_response = VCS::Site::automobile_api::get_mobile_api( $self, $token );
 	
 	$vars->get_system->pheaderJSON( $vars );
 	
-	print JSON->new->pretty->encode(\%result);
+	print JSON->new->pretty->encode( $api_response );
 }
 
 sub autoselftest
@@ -1484,19 +1470,19 @@ sub save_data_from_form
 
 	for my $table ( keys %$request_tables ) {
 		
-		next if !$table_id->{$table};
+		next if !$table_id->{ $table };
 		next if $table eq 'alternative_data_source';
 	
 		my $request = '';
 		my @values = ();
 	
-		for my $row ( keys %{$request_tables->{$table}} ) { 
+		for my $row ( keys %{ $request_tables->{ $table } } ) {
 		
 			$request .=  "$row = ?, ";
 			
-			my $value = $vars->getparam( $request_tables->{$table}->{$row} );
+			my $value = $vars->getparam( $request_tables->{ $table }->{ $row } );
 			
-			push ( @values, $self->encode_data_for_db( $step, $request_tables->{$table}->{$row}, $value ) );
+			push ( @values, $self->encode_data_for_db( $step, $request_tables->{ $table }->{ $row }, $value ) );
 			
 			$self->change_current_appdata( $value, $table_id ) if $row eq 'PersonForAgreements';
 		}
@@ -1573,10 +1559,6 @@ sub get_all_values
 {
 	my ( $self, $step, $table_id ) = @_;
 
-	my $allsteps_values = ( $step eq 'all' ? 1 : 0 );
-	
-	$step = undef if $step eq 'all';
-	
 	my $all_values = {};
 	
 	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ) );
@@ -1595,15 +1577,12 @@ sub get_all_values
 
 		for my $value ( keys %$result ) {
 		
-			my $field_name = ( $allsteps_values ? $table . '_' . $value : $request_tables->{ $table }->{ $value } );
-
-			$all_values->{ $field_name } = $self->decode_data_from_db(
-				$step, $request_tables->{ $table }->{ $value }, $result->{ $value }
-			);
+			$all_values->{ $request_tables->{ $table }->{ $value } } =
+				$self->decode_data_from_db( $step, $request_tables->{ $table }->{ $value }, $result->{ $value } );
 		}
 	}
 
-	if ( $request_tables->{ alternative_data_source } and !$allsteps_values ) {
+	if ( $request_tables->{ alternative_data_source } ) {
 	
 		my $alt = $request_tables->{ alternative_data_source };
 
@@ -1733,7 +1712,7 @@ sub get_current_table_id
 	my $tables_list = [];
 
 	my $tables_controled_by_AutoToken = VCS::Site::autodata::get_tables_controled_by_AutoToken();
-	
+
 	for my $table_controlled (keys %$tables_controled_by_AutoToken) {
 	
 		$request_tables .= $tables_controled_by_AutoToken->{$table_controlled} . ', ';
@@ -1748,8 +1727,8 @@ sub get_current_table_id
 	
 	my $max_index = scalar( keys %$tables_controled_by_AutoToken ) - 1;
 	
-	for my $id (0..$max_index) {
-		$tables_id->{ $tables_list->[$id] } = $ids[$id];
+	for my $id ( 0..$max_index ) {
+		$tables_id->{ $tables_list->[ $id ] } = $ids[ $id ];
 	};
 	
 	$tables_id->{ AutoToken } = $self->query( 'sel1', __LINE__, "
