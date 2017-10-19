@@ -1708,33 +1708,23 @@ sub get_current_table_id
 	my $self = shift;
 	
 	my $tables_id = {};
-	my $request_tables = '';
-	my $tables_list = [];
 
 	my $tables_controled_by_AutoToken = VCS::Site::autodata::get_tables_controled_by_AutoToken();
 
-	for my $table_controlled (keys %$tables_controled_by_AutoToken) {
+	my @tables_list = ( 'AutoToken', keys %$tables_controled_by_AutoToken );
 	
-		$request_tables .= $tables_controled_by_AutoToken->{$table_controlled} . ', ';
-		
-		push @$tables_list, $table_controlled;
-	}
-	$request_tables =~ s/,\s$//;
-
+	my $request_tables = 'ID, ' . join ', ', values %$tables_controled_by_AutoToken;
+	
 	my @ids = $self->query( 'sel1', __LINE__, "
 		SELECT $request_tables FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
-	
-	my $max_index = scalar( keys %$tables_controled_by_AutoToken ) - 1;
+
+	my $max_index = scalar( keys %$tables_controled_by_AutoToken );
 	
 	for my $id ( 0..$max_index ) {
-		$tables_id->{ $tables_list->[ $id ] } = $ids[ $id ];
+		$tables_id->{ $tables_list[ $id ] } = $ids[ $id ];
 	};
 	
-	$tables_id->{ AutoToken } = $self->query( 'sel1', __LINE__, "
-		SELECT ID FROM AutoToken WHERE Token = ?", $self->{ token }
-	);
-
 	return $tables_id;
 }
 
