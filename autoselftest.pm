@@ -1348,8 +1348,8 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_write_db,
 					'prepare' => \&pre_app_finish,
-					'args' => [ '[appdata_id]' ],
-					'expected' => '[appdata_id]:AutoAppData:Finished:1',
+					'args' => [ '[table_id]' ],
+					'expected' => '[appdata_id]:AutoAppData:Finished:13',
 				},
 			},
 		},
@@ -1745,16 +1745,21 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_logic_1,
 					'args' => [],
-					'expected' => 0,
+					'expected' => 19,
 				},
 				2 => { 	'tester' => \&test_line,
 					'args' => [],
-					'expected' => 1,
+					'expected' => 4,
 				},
 				3 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_nobody,
 					'args' => [],
-					'expected' => 2,
+					'expected' => 5,
+				},
+				4 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_finished_app,
+					'args' => [],
+					'expected' => 0,
 				},
 			},
 		},
@@ -2618,7 +2623,8 @@ sub test_write_db
 	my $field = ( $token_or_appid =~ /^(t[a-z0-9]{63}|Token)$/ ? "Token" : "ID" );
 	
 	my $value = $vars->db->sel1("
-		SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'" );
+		SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'"
+	);
 
 	warn "$comm :: $db_value / $value" if $debug;
 
@@ -2644,14 +2650,11 @@ sub pre_finished
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
-	if ( $type eq 'PREPARE' ) { 
-		$vars->db->query("
-			UPDATE AutoToken SET Finished = 1 WHERE Token = '$$token'" );
-	} 
-	else {
-		$vars->db->query("
-			UPDATE AutoToken SET Finished = 0 WHERE Token = '$$token'" );
-	}
+	my $code = ( $type eq 'PREPARE' ? 13 : 0 );
+	
+	$vars->db->query("
+		UPDATE AutoToken SET Finished = $code WHERE Token = '$$token'"
+	);
 }
 
 sub pre_content_1
@@ -2660,7 +2663,8 @@ sub pre_content_1
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
-		UPDATE AutoToken SET Step = 1 WHERE Token = '$$token'" );
+		UPDATE AutoToken SET Step = 1 WHERE Token = '$$token'"
+	);
 }
 
 sub pre_content_2
@@ -2670,10 +2674,12 @@ sub pre_content_2
 	
 	$vars->db->query("
 		UPDATE AutoAppointments SET PersonalDataPermission = 0, MobilPermission = 0, EMail = '' 
-		WHERE ID = '$appid'" );
+		WHERE ID = '$appid'"
+	);
 		
 	$vars->db->query("
-		UPDATE AutoToken SET Step = 2 WHERE Token = '$$token'" );
+		UPDATE AutoToken SET Step = 2 WHERE Token = '$$token'"
+	);
 }
 
 sub pre_getinfo
@@ -2683,7 +2689,8 @@ sub pre_getinfo
 	
 	$vars->db->query("
 		UPDATE AutoAppointments SET SDate = '2011-05-01', FDate = '2011-05-01', CenterID = '5'
-		WHERE ID = '$appid'" );
+		WHERE ID = '$appid'"
+	);
 }
 
 sub pre_init_param
@@ -2702,19 +2709,22 @@ sub pre_init_param
 			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
 			DefaultPaymentMethod, DisableAppSameDay) 
 			VALUES (1, 'Moscow', 1, 3, 0, 1, 1, 1, 'г.Москва', 'г.Москва', 0, 1, 'rtf', 
-			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)");
+			0, 1, 1, 1, 1, 0, 3, 2, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 0, 0, 1, 67, 0, '1', 1, 0)"
+		);
 			
 		$vars->db->query("
 			INSERT INTO TimeData (SlotID, TimeID, TStart, TEnd, Visas, EVisas, isDeleted, DayNum)
-			VALUES (10, 1, 32400, 33900, 200, 0, 0, 1)");
-
+			VALUES (10, 1, 32400, 33900, 200, 0, 0, 1)"
+		);
 	} 
 	else {
 		$vars->db->query("
-			DELETE FROM Branches");
+			DELETE FROM Branches"
+		);
 			
 		$vars->db->query("
-			DELETE FROM TimeData");
+			DELETE FROM TimeData"
+		);
 	}
 }
 
@@ -2724,8 +2734,8 @@ sub pre_app_finish
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
-		UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, 
-		$appdataid );
+		UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, $appdataid 
+	);
 }
 
 sub pre_lang
@@ -2733,12 +2743,7 @@ sub pre_lang
 {
 	my ( $self, $type ) = @_;
 	
-	if ( $type eq 'PREPARE' ) { 
-		$self->{ lang } = 'en';
-	}
-	else {
-		$self->{ lang } = 'ru';
-	}
+	$self->{ lang } = ( $type eq 'PREPARE' ? 'en' : 'ru' );
 }
 
 sub pre_cach
@@ -2766,7 +2771,7 @@ sub pre_file
 		close $test_file;
 	}
 	else {
-		unlink '\tmp\autoform_selftest_file';
+		unlink '/tmp/autoform_selftest_file';
 	}
 }
 
@@ -2775,16 +2780,13 @@ sub pre_logic_1
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
-	if ( $type eq 'PREPARE' ) { 
-		$vars->db->query("
-			UPDATE AutoAppData SET Finished = 21, Status = 1 WHERE ID = ?", {}, 
-			$appdataid );
-	}
-	else {
-		$vars->db->query("
-			UPDATE AutoAppData SET Finished = 0, Status = 0 WHERE ID = ?", {}, 
-			$appdataid );
-	}
+	my $finished = ( $type eq 'PREPARE' ? 21 : 0 );
+	my $status = ( $type eq 'PREPARE' ? 1 : 0 );
+	
+	$vars->db->query("
+		UPDATE AutoAppData SET Finished = ?, Status = ? WHERE ID = ?", {}, 
+		$finished, $status, $appdataid
+	);
 }
 
 sub pre_logic_2
@@ -2792,16 +2794,26 @@ sub pre_logic_2
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
-	if ( $type eq 'PREPARE' ) { 
-		$vars->db->query("
-			UPDATE AutoAppointments SET SDate = '2010-01-01' WHERE ID = ?", {}, 
-			$appid );
-	}
-	else {
-		$vars->db->query("
-			UPDATE AutoAppointments SET SDate = '0000-00-00' WHERE ID = ?", {}, 
-			$appid );
-	}
+	my $date = ( $type eq 'PREPARE' ? '2010-01-01' : '0000-00-00' );
+	
+	$vars->db->query("
+		UPDATE AutoAppointments SET SDate = ? WHERE ID = ?", {}, 
+		$date, $appid
+	);
+}
+
+sub pre_finished_app
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	my $finished = ( $type eq 'PREPARE' ? 13 : 0 );
+	my $status = ( $type eq 'PREPARE' ? 1 : 0 );
+	
+	$vars->db->query("
+		UPDATE AutoAppData SET Finished = ?, Status = ? WHERE ID = ?", {}, 
+		$finished, $status, $appdataid
+	);
 }
 
 sub pre_geo_or_collect
@@ -2867,38 +2879,25 @@ sub pre_draft
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 
-	if ( $type eq 'PREPARE' ) {
-
-		$vars->db->query("
-			UPDATE AutoToken SET Draft = 1 WHERE Token = ?", {},
-			$$token
-		);
-	}
-	else {
-		$vars->db->query("
-			UPDATE AutoToken SET Draft = 0 WHERE Token = ?", {},
-			$$token
-		);
-	}
+	my $draft = ( $type eq 'PREPARE' ? 1 : 0 );
+	
+	$vars->db->query("
+		UPDATE AutoToken SET Draft = ? WHERE Token = ?", {},
+		$draft, $$token
+	);
 }
 
 sub pre_nobody
 # //////////////////////////////////////////////////
 {
-	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
 
-	if ( $type eq 'PREPARE' ) { 
-		$vars->db->query("
-			UPDATE AutoAppData SET AppID = 0 WHERE ID = ?", {},
-			$appdataid
-		);
-	}
-	else {
-		$vars->db->query("
-			UPDATE AutoAppData SET AppID = ? WHERE ID = ?", {},
-			$appid, $appdataid
-		);
-	}
+	my $appid = ( $type eq 'PREPARE' ? 0 : $appid_param );
+	
+	$vars->db->query("
+		UPDATE AutoAppData SET AppID = ? WHERE ID = ?", {},
+		$appid, $appdataid
+	);
 }
 
 sub pre_token
