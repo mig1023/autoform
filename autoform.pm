@@ -539,12 +539,7 @@ sub get_page_error
 {
 	my ( $self, $error_num ) = @_;
 	
-	my $error_type = [
-		'для правильной работы анкеты необходимо, чтобы в браузере был включён javascript',
-		'неправильный токен',
-		'такого токена не существует',
-		'запись уже завершена',
-	];
+	my $error_type = VCS::Site::autodata::get_page_error();
 	
 	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
 	
@@ -663,7 +658,7 @@ sub check_relation
 			my $current_table_id = $self->get_current_table_id(); 
 			
 			if ( $step == $self->get_step_by_content('[app_finish]') ) {
-				$self->set_current_app_finished( $current_table_id->{ AutoAppData } );
+				$self->set_current_app_finished( $current_table_id );
 			}
 		}
 	
@@ -1987,28 +1982,7 @@ sub text_error
 {
 	my ( $self, $error_code, $element, $incorrect_symbols, $relation, $offset ) = @_;
 	
-	my $text = [
-		'Поле "[name]" не заполнено',
-		'В поле "[name]" указана неверная дата',
-		'В поле "[name]" введены недопустимые символы',
-		'Вы должны указать поле "[name]"',
-		'Вы должны полностью заполнить анкеты или удалить ненужные черновики',
-		'Вы должны добавить по меньшей мере одного заявителя',
-		'"[name]" не может быть раньше, чем "[relation]"',
-		'"[name]" не может быть раньше, чем "[relation]" на [offset]',
-		'"[name]" не может быть позднее, чем "[relation]"',
-		'"[name]" не может быть позднее, чем "[relation]" на [offset]',
-		'Поле "[name]" уже встречается в актуальных записях',
-		'В поле "[name]" нужно выбрать хотя бы одно значение',
-		'Недопустимая дата в поле "[name]"',
-		'Необходимо заполнить поле "[name]" или указать "[relation]"',
-		'Необходимо заполнить поле "[name]", если заполнено "[relation]"',
-		'Введён недопустимый индекс или город в поле "[name]", попробуйте указать другой',
-		'Вы ввели недопустимый адрес электронной почты',
-		'Этот электронный адрес был заблокирован.<br>Вы превысили допустимое количество записей',
-		'Капча введена неверно.<br>Пожалуйста, попробуйте ещё раз',
-		'Анкеты заполнены для другого типа визы, проверьте правильность их заполнения',
-	];
+	my $text = VCS::Site::autodata::get_text_error();
 	
 	if ( !defined($element) ) {
 		return "|" . $self->lang( $text->[$error_code] );
@@ -2311,6 +2285,7 @@ sub insert_hash_table
 }
 
 sub get_pcode
+# //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
 
@@ -2395,7 +2370,6 @@ sub get_pcode
 	
 	$template->process( 'autoform_pcode.tt2', $tvars );
 }
-
 
 sub send_app_confirm
 # //////////////////////////////////////////////////
