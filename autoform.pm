@@ -244,6 +244,9 @@ sub autoselftest
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
+	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
+		if ( $vars->get_session->{'login'} eq '' );
+	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
 	$vars->get_system->pheader( $vars );
