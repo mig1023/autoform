@@ -231,8 +231,10 @@ sub get_mobile_api
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $api_response = VCS::Site::automobile_api::get_mobile_api( $self, $token );
-	
+
 	$vars->get_system->pheaderJSON( $vars );
+	
+	return if ref( $api_response ) ne 'HASH';
 	
 	print JSON->new->pretty->encode( $api_response );
 }
