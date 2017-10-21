@@ -19,7 +19,7 @@ sub get_mobile_api
 	
 	if ( $self->{ token } =~ /^\d\d$/ ) {
 	
-		$result = get_api_error( $self, 1 );
+		$result = get_api_head( $self, 1 );
 	}
 	elsif ( $vars->getparam( 'mobile_app' ) eq 'get_appdata' ) {
 		
@@ -31,7 +31,7 @@ sub get_mobile_api
 	}
 	elsif ( $vars->getparam( 'mobile_app' ) ne 'get_token' ) {
 		
-		$result = get_api_error( $self, 2 );
+		$result = get_api_head( $self, 2 );
 	}
 	
 	return $result;
@@ -44,7 +44,7 @@ sub get_values_for_api
 	
 	my $tables_id = $self->get_current_table_id();
 	
-	my $result = get_api_error( $self, 0 );
+	my $result = get_api_head( $self, 0 );
 	
 	$result->{ appointments } = $self->query( 'selallkeys', __LINE__, "
 		SELECT * FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
@@ -60,6 +60,17 @@ sub get_values_for_api
 	);
 
 	for my $app ( 0..$#$all_applicants ) {
+	
+		if ( $all_applicants->[ $app ]->{ SchengenAppDataID } != 0 ) {
+			
+			my $sch_app = $self->query( 'selallkeys', __LINE__, "
+				SELECT * FROM AutoSchengenAppData WHERE ID = ?", $tables_id->{ AutoSchengenAppData }
+			)->[0];
+			
+			delete $sch_app->{ ID };
+		
+			$result->{ "schdata_$app" } = $sch_app;
+		}
 	
 		delete $all_applicants->[ $app ]->{ $_ } 
 			for ( 'ID', 'AppID', 'Finished', 'InsurerID', 'DListID', 'PolicyID', 'SchengenAppDataID', 
@@ -88,32 +99,45 @@ sub set_values_from_api
 		UPDATE AutoToken SET AutoAppID = ? WHERE Token = ?", {}, $app_id, $self->{ token }
 	);
 
-	for my $appdata ( keys %$data ) {
+	my $app_max = 0;
+	
+	for ( keys %$data ) {
 		
-		next if $appdata !~ /^appdata_\d+$/;
+		/^appdata_(\d+)$/;
+		$app_max = $1 if $app_max < $1;
+	}
 		
-		$data->{ $appdata }->{ AppID } = $app_id;
+	for ( 0..$app_max ) {	
 		
-		my $appdata_id = $self->insert_hash_table( 'AutoAppData', $data->{ $appdata } );
+		my $sch_id = $self->insert_hash_table( 'AutoSchengenAppData', $data->{ "schdata_$_" } );
+		
+		$data->{ "appdata_$_" }->{ AppID } = $app_id;
+		$data->{ "appdata_$_" }->{ SchengenAppDataID } = $sch_id;
+		
+		my $appdata_id = $self->insert_hash_table( 'AutoAppData', $data->{ "appdata_$_" } );
 	}
 	
-	return get_api_error( $self, 0 );
+	$vars->get_system->redirect( 
+		$vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token }
+	);
 }
 
-sub get_api_error
+sub get_api_head
 # //////////////////////////////////////////////////
 {
 	my ( $self, $error_number ) = @_;
 	
 	my $error_text = [
+		'',
 		'ошибка токена',
 		'ошибка API-запроса',
 	];
 	
 	return { 
+		'token' => $self->{ token },
 		'error' => {
 			'error' => $error_number,
-			'error_text' => $self->lang( $error_text->[ $error_number - 1 ] ),
+			'error_text' => $self->lang( $error_text->[ $error_number ] ),
 		}
 	};
 }
