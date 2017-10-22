@@ -309,7 +309,7 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'unique_in_pending',
-						'table' => 'Appointments',
+						'table' => 'AppData',
 						'name' => 'PassNum',
 					},
 				],
@@ -1665,6 +1665,9 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'info',
 				'name' => 'info_phone',
 				'label' => 'Телефон',
@@ -1767,18 +1770,6 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'dovphone',
-				'label' => 'Телефон',
-				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
-				'example' => '79161234567',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'Phone',
-				},
-			},
-			{
-				'type' => 'input',
 				'name' => 'dovaddress',
 				'label' => 'Адрес',
 				'comment' => 'Полный адрес, включая индекс',
@@ -1787,6 +1778,18 @@ sub get_content_rules_hash
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'Address',
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'dovphone',
+				'label' => 'Телефон',
+				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				'example' => '79161234567',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'Phone',
 				},
 			},
 		],

@@ -306,7 +306,7 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'unique_in_pending',
-						'table' => 'Appointments',
+						'table' => 'AppData',
 						'name' => 'PassNum',
 					},
 				],
