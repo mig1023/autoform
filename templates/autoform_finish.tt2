@@ -10,7 +10,7 @@
 
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
-
+<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
 
 <table width="100%">
 
@@ -34,7 +34,7 @@
 	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="finish_button();">
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
-<tr><td colspan="5"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
+<tr><td colspan="5"><a target="_blank" class="dotted_link" href="http://195.91.200.102/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 </td></tr>
 </table>
 

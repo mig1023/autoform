@@ -44,6 +44,7 @@ function isMobile() {
 
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
+<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
 
 <table width="100%">
 
@@ -81,7 +82,11 @@ YMaps.jQuery(function () {
 [% END %]
 
 [% IF ( step == max_step ) %]
-	<input type="button" value="[% langreq('Перейти на страницу записи') %] ▷" onclick="go_button('app');">
+	[% IF mobile_app %]
+		<input type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] ▷" onclick="go_button('mobile_app');">
+	[% ELSE %]
+		<input type="button" value="[% langreq('Перейти на страницу записи') %] ▷" onclick="go_button('app');">
+	[% END %]
 [% END %]
 [% IF step %]
 </td></tr><tr><td colspan="3">&nbsp;</td></tr>
@@ -167,6 +172,13 @@ function go_button(where) {
 	[% IF ( step == max_step ) %]
 		if (where == 'app') {
 			location.replace('[% vcs_tools %]info.htm?&token=[% token %]&appid=[% appid %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
+			return;
+		}
+	[% END %]
+	
+	[% IF mobile_app %]
+		if (where == 'mobile_app') {
+			location.replace('/autoform/mobile_end.htm');
 			return;
 		}
 	[% END %]

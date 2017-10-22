@@ -15,21 +15,21 @@ sub get_mobile_api
 	
 	my $table_id = $self->get_current_table_id();
 	
-	my $result;
+	my $result = get_api_head( $self, 0 );
 	
 	if ( $self->{ token } =~ /^\d\d$/ ) {
 	
 		$result = get_api_head( $self, 1 );
 	}
-	elsif ( $vars->getparam( 'mobile_app' ) eq 'get_appdata' ) {
+	elsif ( $vars->getparam( 'mobile_api' ) eq 'get_appdata' ) {
 		
-		$result = get_values_for_api( $self );
+		$result = get_values_for_api( $self, $result );
 	}
-	elsif ( $vars->getparam( 'mobile_app' ) eq 'set_appdata' ) {
+	elsif ( $vars->getparam( 'mobile_api' ) eq 'set_appdata' ) {
 	
 		$result = set_values_from_api( $self );
 	}
-	elsif ( $vars->getparam( 'mobile_app' ) ne 'get_token' ) {
+	elsif ( $vars->getparam( 'mobile_api' ) ne 'get_token' ) {
 		
 		$result = get_api_head( $self, 2 );
 	}
@@ -40,11 +40,9 @@ sub get_mobile_api
 sub get_values_for_api
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $result ) = @_;
 	
 	my $tables_id = $self->get_current_table_id();
-	
-	my $result = get_api_head( $self, 0 );
 	
 	$result->{ appointments } = $self->query( 'selallkeys', __LINE__, "
 		SELECT * FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
@@ -118,7 +116,8 @@ sub set_values_from_api
 	}
 	
 	$vars->get_system->redirect( 
-		$vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token }
+		$vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 
+		'?t=' . $self->{ token } . '&mobile_app=on'
 	);
 }
 

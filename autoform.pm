@@ -37,6 +37,7 @@ sub getContent
     		'index' => \&autoform,
 		'selftest' => \&autoselftest,
 		'findpcode' => \&get_pcode,
+		'mobile_end' => \&mobile_end,
     	};
     	
     	my $disp_link = $dispathcher->{ $id };
@@ -158,7 +159,7 @@ sub autoform
 	
 	$self->{ token } = $self->get_token_and_create_new_form_if_need();
 	
-	if ( $vars->getparam( 'mobile_app' ) ) {
+	if ( $vars->getparam( 'mobile_api' ) ) {
 	
 		$self->get_mobile_api();
 		
@@ -219,6 +220,7 @@ sub autoform
 		'lang_in_link' => $self->{ lang },
 		'javascript_check' => $javascript_check,
 		'map_in_page' => $map_in_page,
+		'mobile_app' => ( $vars->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -256,6 +258,16 @@ sub autoselftest
 	print $self_test_result;
 }
 
+sub mobile_end
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' );
+}
+	
 sub get_same_info_for_timeslots
 # //////////////////////////////////////////////////
 {
@@ -523,13 +535,11 @@ sub token_generation
 
 	my $token_existing = 1;
 	my $token = 't';
+	my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
 	
 	do {
-		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
+		$token .= @alph[ int( rand( 36 ) ) ] for ( 1..63 );
 		
-		for ( 1..63 ) {
-			$token .= @alph[ int( rand( 35 ) ) ];
-		}
 		$token_existing = $self->query( 'sel1', __LINE__, "
 			SELECT ID FROM AutoToken WHERE Token = ?", $token
 		) || 0;
