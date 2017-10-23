@@ -157,9 +157,11 @@ sub autoform
 	my $special = {};
 	my $javascript_check = 1;
 	
-	$self->{ token } = $self->get_token_and_create_new_form_if_need();
+	my $mobile_api = ( $vars->getparam( 'mobile_api' ) ? 1 : 0 );
 	
-	if ( $vars->getparam( 'mobile_api' ) ) {
+	$self->{ token } = $self->get_token_and_create_new_form_if_need( $mobile_api );
+	
+	if ( $mobile_api ) {
 	
 		$self->get_mobile_api();
 		
@@ -466,7 +468,7 @@ sub get_collect_date
 sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $mobile_api ) = @_;
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
@@ -486,7 +488,7 @@ sub get_token_and_create_new_form_if_need
 		
 		return '02' if !$token_exist;
 		
-		return '03' if $finished;
+		return '03' if $finished and !$mobile_api;
 	}
 	
 	return $token;
