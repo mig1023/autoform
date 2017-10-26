@@ -236,6 +236,8 @@ sub get_mobile_api
 	
 	my $api_response = VCS::Site::automobile_api::get_mobile_api( $self, $token );
 
+	return $api_response if $self->{ this_is_self_testing };
+	
 	$vars->get_system->pheaderJSON( $vars );
 	
 	return if ref( $api_response ) ne 'HASH';
@@ -473,7 +475,7 @@ sub get_token_and_create_new_form_if_need
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $token = lc( $vars->getparam('t') );
-	
+
 	$token =~ s/[^a-z0-9]//g;
 
 	if ( $token eq '' ) {

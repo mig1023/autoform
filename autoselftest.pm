@@ -17,32 +17,24 @@ sub get_test_list {
 				},
 				2 => {	'tester' => \&test_line,
 					'args' => [],
-					'param' => [ 
-						{ 'name' => 't', 'value' => '[token]' },
-					],
+					'param' => { 't' => '[token]' },
 					'expected' => '[token]',
 				},
 				3 => {	'tester' => \&test_line,
 					'args' => [],
-					'param' => [
-						{ 'name' => 't', 'value' => '7[token]' },
-					],
+					'param' => { 't' => '7[token]' },
 					'expected' => '01',
 				},
 				4 => {	'tester' => \&test_line,
 					'prepare' => \&pre_corrupt_token,
 					'args' => [],
-					'param' => [
-						{ 'name' => 't', 'value' => '[token]' },
-					],
+					'param' => { 't' => '[token]' },
 					'expected' => '02',
 				},
 				5 => {	'tester' => \&test_line,
 					'prepare' => \&pre_finished,
 					'args' => [],
-					'param' => [
-						{ 'name' => 't', 'value' => '[token]' },
-					],
+					'param' => { 't' => '[token]' },
 					'expected' => '03',
 				},
 			}
@@ -115,16 +107,14 @@ sub get_test_list {
 				2 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_content_1,
 					'args' => [],
-					'param' => [
-						{ 'name' => 'action', 'value' => 'forward' },
-						
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '13' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-					
-						{ 'name' => 'pers_info', 'value' => 'pers_info' },
-						{ 'name' => 'mobil_info', 'value' => 'mobil_info' },
-					],
+					'param' => {
+						'action' => 'forward',
+						'center' => '1',
+						'vtype' => '13',
+						'email' => 'mail@mail.ru',
+						'pers_info' => 'pers_info',
+						'mobil_info' => 'mobil_info',
+					},
 					'expected' => [
 						'2', 
 						'Данные поездки', 
@@ -152,9 +142,7 @@ sub get_test_list {
 				3 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_content_2,
 					'args' => [],
-					'param' => [
-						{ 'name' => 'action', 'value' => 'back' },
-					],
+					'param' => { 'action' => 'back' },
 					'expected' => [
 						'1', 
 						'Начало записи', 
@@ -615,9 +603,7 @@ sub get_test_list {
 							},
 						},
 					],
-					'param' => [
-						{ 'name' => 'test2', 'value' => '1' },
-					],
+					'param' => { 'test2' => '1' },
 					'expected' => '',
 				},
 				2 => { 	'tester' => \&test_line,
@@ -633,11 +619,11 @@ sub get_test_list {
 							},
 						},
 					],
-					'param' => [
-						{ 'name' => 'test1', 'value' => '' },
-						{ 'name' => 'test2', 'value' => '' },
-						{ 'name' => 'test3', 'value' => '' },
-					],
+					'param' => {
+						'test1' => '',
+						'test2' => '',
+						'test3' => '',
+					},
 					'expected' => 'test|В поле "Test" нужно выбрать хотя бы одно значение',
 				},
 			},
@@ -647,23 +633,17 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'true' } ],
-					'param' => [
-						{ 'name' => 'test', 'value' => '1' },
-					],
+					'param' => { 'test' => '1' },
 					'expected' => '',
 				},
 				2 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'true'} ],
-					'param' => [
-						{ 'name' => 'test', 'value' => '' },
-					],
+					'param' => { 'test' => '' },
 					'expected' => 'test|Вы должны указать поле "test"',
 				},
 				3 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => '' } ],
-					'param' => [
-						{ 'name' => 'test', 'value' => '' },
-					],
+					'param' => { 'test' => '' },
 					'expected' => '',
 				},
 			},
@@ -673,44 +653,32 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'z'} ],
-					'param' => [
-						{ 'name' => 'test', 'value' => 'text' },
-					],
+					'param' => { 'test' => 'text' },
 					'expected' => '',
 				},
 				2 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'z' } ],
-					'param' => [
-						{ 'name' => 'test', 'value' => '' },
-					],
+					'param' => { 'test' => '' },
 					'expected' => 'test|Поле "test" не заполнено',
 				},
 				3 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
-					'param' => [
-						{ 'name' => 'test', 'value' => '2010-03-01' },
-					],
+					'param' => { 'test' => '2010-03-01' },
 					'expected' => 'test|В поле "test" указана неверная дата',
 				},
 				4 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'W' } ],
-					'param' => [
-						{ 'name' => 'test', 'value' => 'abcАБВ' },
-					],
+					'param' => { 'test' => 'abcАБВ' },
 					'expected' => 'test|В поле "test" введены недопустимые символы: АБВ',
 				},
 				5 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'Ё' } ],
-					'param' => [
-						{ 'name' => 'test', 'value' => 'ABCабв' },
-					],
+					'param' => { 'test' => 'ABCабв' },
 					'expected' => 'test|В поле "test" введены недопустимые символы: ABC',
 				},
 				6 => { 	'tester' => \&test_line,
 					'args' => [ { 'name' => 'test', 'check' => 'N' } ],
-					'param' => [
-						{ 'name' => 'test', 'value' => '123XYZ456' },
-					],
+					'param' => { 'test' => '123XYZ456' },
 					'expected' => 'test|В поле "test" введены недопустимые символы: XYZ',
 				},
 			},
@@ -743,9 +711,7 @@ sub get_test_list {
 						},
 						0,
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '21' },
-					],
+					'param' => { 'field_name' => '21' },
 					'expected' => 'field_name|Поле "field_name" уже встречается в актуальных записях',
 				},
 				2 => { 	'tester' => \&test_line,
@@ -760,9 +726,7 @@ sub get_test_list {
 						},
 						0,
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '20' },
-					],
+					'param' => { 'field_name' => '20' },
 					'expected' => '',
 				},
 				3 => { 	'tester' => \&test_line,
@@ -776,9 +740,7 @@ sub get_test_list {
 						},
 						0,
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '21' },
-					],
+					'param' => { 'field_name' => '21' },
 					'expected' => '',
 				},
 				4 => { 	'tester' => \&test_line,
@@ -790,9 +752,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => 'blocked1mail@mail.com' },
-					],
+					'param' => { 'field_name' => 'blocked1mail@mail.com' },
 					'expected' => 'field_name|Вы ввели недопустимый адрес электронной почты',
 				},
 				5 => { 	'tester' => \&test_line,
@@ -804,9 +764,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => 'blocked2mail@mail.com' },
-					],
+					'param' => { 'field_name' => 'blocked2mail@mail.com' },
 					'expected' => 'field_name|Этот электронный адрес был заблокирован.<br>Вы превысили допустимое количество записей',
 				},
 				6 => { 	'tester' => \&test_line,
@@ -818,9 +776,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => 'blocked3mail@mail.com' },
-					],
+					'param' => { 'field_name' => 'blocked3mail@mail.com' },
 					'expected' => '',
 				},
 				7 => { 	'tester' => \&test_line,
@@ -832,9 +788,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => 'blocked4mail@mail.com' },
-					],
+					'param' => { 'field_name' => 'blocked4mail@mail.com' },
 					'expected' => '',
 				},
 				8 => { 	'tester' => \&test_line,
@@ -851,9 +805,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '' },
-					],
+					'param' => { 'field_name' => '' },
 					'expected' => '',
 				},
 				9 => { 	'tester' => \&test_line,
@@ -870,9 +822,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => 'PrintSrv' },
-					],
+					'param' => { 'field_name' => 'PrintSrv' },
 					'expected' => '',
 				},
 				10 => { 	'tester' => \&test_line,
@@ -889,9 +839,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '' },
-					],
+					'param' => { 'field_name' => '' },
 					'expected' => 'field_name|Необходимо заполнить поле "field_name" или указать "PrintSrv"',
 				},
 				11 => { 'tester' => \&test_line,
@@ -908,9 +856,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '' },
-					],
+					'param' => { 'field_name' => '' },
 					'expected' => '',
 				},
 				12 => { 'tester' => \&test_line,
@@ -927,9 +873,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => 'PrintSrv' },
-					],
+					'param' => { 'field_name' => 'PrintSrv' },
 					'expected' => '',
 				},
 				13 => { 'tester' => \&test_line,
@@ -945,9 +889,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '' },
-					],
+					'param' => { 'field_name' => '' },
 					'expected' => 'field_name|Необходимо заполнить поле "field_name", если заполнено "Draft"',
 				},				
 
@@ -957,9 +899,7 @@ sub get_test_list {
 							check_logic => [ { 'condition' => 'now_or_later' } ]
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '2100-01-01' },
-					],
+					'param' => { 'field_name' => '2100-01-01' },
 					'expected' => '',
 				},
 				15 => { 'tester' => \&test_line,
@@ -968,9 +908,7 @@ sub get_test_list {
 							check_logic => [ { 'condition' => 'now_or_later' } ]
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '1999-01-01' },
-					],
+					'param' => { 'field_name' => '1999-01-01' },
 					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
 				},
 				16 => { 'tester' => \&test_line,
@@ -979,9 +917,7 @@ sub get_test_list {
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '1999-01-01' },
-					],
+					'param' => { 'field_name' => '1999-01-01' },
 					'expected' => '',
 				},
 				17 => { 'tester' => \&test_line,
@@ -990,9 +926,7 @@ sub get_test_list {
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '2100-01-01' },
-					],
+					'param' => { 'field_name' => '2100-01-01' },
 					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
 				},
 				18 => { 'tester' => \&test_line,
@@ -1010,9 +944,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '2011-01-01' },
-					],
+					'param' => { 'field_name' => '2011-01-01' },
 					'expected' => '',
 				},
 				19 => { 'tester' => \&test_line,
@@ -1030,9 +962,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '2008-01-01' },
-					],
+					'param' => { 'field_name' => '2008-01-01' },
 					'expected' => 'field_name|"field_name" не может быть раньше, чем "Draft"',
 				},
 				20 => { 'tester' => \&test_line,
@@ -1050,9 +980,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '2008-01-01' },
-					],
+					'param' => { 'field_name' => '2008-01-01' },
 					'expected' => '',
 				},
 				21 => { 'tester' => \&test_line,
@@ -1070,9 +998,7 @@ sub get_test_list {
 							'AutoAppointments' => '[app_id]',
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '2011-01-01' },
-					],
+					'param' => { 'field_name' => '2011-01-01' },
 					'expected' => 'field_name|"field_name" не может быть позднее, чем "Draft"',
 				},
 				22 => { 'tester' => \&test_line,
@@ -1081,9 +1007,7 @@ sub get_test_list {
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '01.01.2009' },
-					],
+					'param' => { 'field_name' => '01.01.2009' },
 					'expected' => '',
 				},
 				23 => { 'tester' => \&test_line,
@@ -1092,9 +1016,7 @@ sub get_test_list {
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
 					],
-					'param' => [
-						{ 'name' => 'field_name', 'value' => '01.01.2113' },
-					],
+					'param' => { 'field_name' => '01.01.2113' },
 					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
 				},
 			},
@@ -1658,38 +1580,38 @@ sub get_test_list {
 			'test' => { 
 				1 => { 	'tester' => \&test_array,
 					'args' => [ 1, 'Token' ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '13' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-						{ 'name' => 'pers_info', 'value' => '1' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => { 
+						'center' => '1',
+						'vtype' => '13',
+						'free_date' => '',
+						'email' => 'mail@mail.ru',
+						'pers_info' => '1',
+						'mobil_info' => '1',
+					},
 					'expected' => [ 2, '', undef, undef],
 				},			
 				2 => { 	'tester' => \&test_array,
 					'args' => [ 1, 'Token' ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-						{ 'name' => 'pers_info', 'value' => '1' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => { 
+						'center' => '1',
+						'vtype' => '',
+						'free_date' => '',
+						'email' => 'mail@mail.ru',
+						'pers_info' => '1',
+						'mobil_info' => '1',
+					},
 					'expected' => [ 1, 'vtype|Поле "Тип визы" не заполнено', undef, undef],
 				},
 				3 => { 	'tester' => \&test_array,
 					'args' => [ 1, 'Token' ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '13' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-						{ 'name' => 'pers_info', 'value' => '' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => { 
+						'center' => '1',
+						'vtype' => '13',
+						'free_date' => '',
+						'email' => 'mail@mail.ru',
+						'pers_info' => '',
+						'mobil_info' => '1',
+					},
 					'expected' => [ 1, 'pers_info|Вы должны указать поле "я согласен на обработку персональных данных"', 
 						undef, undef],
 				},
@@ -1835,14 +1757,14 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
 					'args' => [ 1 ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '13' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-						{ 'name' => 'pers_info', 'value' => '1' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => { 
+						'center' => '1',
+						'vtype' => '13',
+						'free_date' => '',
+						'email' => 'mail@mail.ru',
+						'pers_info' => '1',
+						'mobil_info' => '1',
+					},
 					'expected' => '',
 				},
 				2 => { 	'tester' => \&test_line,
@@ -1851,38 +1773,38 @@ sub get_test_list {
 				},
 				3 => { 	'tester' => \&test_line,
 					'args' => [ 1 ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '' },
-						{ 'name' => 'vtype', 'value' => '13' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-						{ 'name' => 'pers_info', 'value' => '1' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => {
+						'center' => '',
+						'vtype' => '13',
+						'free_date' => '',
+						'email' => 'mail@mail.ru',
+						'pers_info' => '1',
+						'mobil_info' => '1',
+					},
 					'expected' => 'center|Поле "Визовый центр" не заполнено',
 				},
 				4 => { 	'tester' => \&test_line,
 					'args' => [ 1 ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '13' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => '' },
-						{ 'name' => 'pers_info', 'value' => '1' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => { 
+						'center' => '1',
+						'vtype' => '13',
+						'free_date' => '',
+						'email' => '',
+						'pers_info' => '1',
+						'mobil_info' => '1',
+					},
 					'expected' => 'email|Поле "Email" не заполнено',
 				},
 				5 => { 	'tester' => \&test_line,
 					'args' => [ 1 ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '13' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-						{ 'name' => 'pers_info', 'value' => '' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => {
+						'center' => '1',
+						'vtype' => '13',
+						'free_date' => '',
+						'email' => 'mail@mail.ru',
+						'pers_info' => '',
+						'mobil_info' => '1',
+					},
 					'expected' => 'pers_info|Вы должны указать поле "я согласен на обработку персональных данных"',
 				},
 			},
@@ -1892,22 +1814,22 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_write_db,
 					'args' => [ 1, '[table_id]' ],
-					'param' => [ 
-						{ 'name' => 'center', 'value' => '1' },
-						{ 'name' => 'vtype', 'value' => '99' },
-						{ 'name' => 'free_date', 'value' => '' },
-						{ 'name' => 'email', 'value' => 'mail@mail.ru' },
-						{ 'name' => 'pers_info', 'value' => '1' },
-						{ 'name' => 'mobil_info', 'value' => '1' },
-					],
+					'param' => {
+						'center' => '1',
+						'vtype' => '99',
+						'free_date' => '',
+						'email' => 'mail@mail.ru',
+						'pers_info' => '1',
+						'mobil_info' => '1',
+					},
 					'expected' => '[app_id]:AutoAppointments:VType:99',
 				},
 				2 => { 	'tester' => \&test_write_db,
 					'args' => [ 2, '[table_id]' ],
-					'param' => [ 
-						{ 'name' => 'f_date', 'value' => '01.05.1998' },
-						{ 'name' => 's_date', 'value' => '01.05.1999' },
-					],
+					'param' => { 
+						'f_date' => '01.05.1998',
+						's_date' => '01.05.1999',
+					},
 					'expected' => '[app_id]:AutoAppointments:SDate:1999-05-01',
 				},
 			},
@@ -1929,7 +1851,27 @@ sub get_test_list {
 					'args' => [ \{ new_app_timeslot => 10 } ],
 					'expected' => { new_app_timeslot => '9:00 - 9:25' },
 				},
-				
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_mobile_api },
+			'comment' => 'get_mobile_api',
+			'test' => { 	
+				1 => { 	'tester' => \&test_hash,
+					'args' => [ '[token]' ],
+					'param' => { 'mobile_api' => 'get_token_wrong' },
+					'expected' => {
+						'error' => { 'error_text' => 'ошибка API-запроса', 'error' => 2 },
+						'token' => '[token]',
+					},
+				},
+				2 => { 	'tester' => \&test_hash,
+					'prepare' => \&pre_token01,
+					'param' => { 'mobile_api' => 'get_appdata' },
+					'expected' => {
+						'error' => { 'error_text' => 'ошибка токена', 'error' => 1 },
+						'token' => '01',
+					},
+				},
 			},
 		},
 	];
@@ -2292,13 +2234,7 @@ sub get_test_appointments
 sub get_tests
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	my $vars = shift;
-	my $test_token = shift;
-	my $test_appid = shift;
-	my $test_appdataid = shift;
-	my $test_appdata_schid = shift;
-	my $token_id = shift;
+	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id ) = @_;
 
 	my @result = ();
 
@@ -2318,47 +2254,15 @@ sub get_tests
 			&{ $t->{prepare} }( $self, 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
 			
-			for (	@{ $t->{args} }, 
-				@{ $t->{param} },
+			$_ = replace_var( $_, @_ ) for ( @{ $t->{args} }, 
 				( ref( $t->{expected} ) eq 'ARRAY' ? @{ $t->{expected} } : 
-				( ref( $t->{expected} ) eq 'HASH' ? values %{ $t->{expected} } : $t->{expected} ) 
-				)
-			) {
-			
-				my $table_id = {
-					'AutoToken' => $token_id,
-					'AutoAppointments' => $test_appid,
-					'AutoAppData' => $test_appdataid,
-					'AutoSchengenAppData' => $test_appdata_schid,
-				};
-				
-				$_ = $table_id if /\[table_id\]/;
-				
-				s/\[token\]/$test_token/g;
-				s/\[token_id\]/$token_id/g;
-				s/\[app_id\]/$test_appid/g;
-				s/\[appdata_id\]/$test_appdataid/g;
-				s/\[schdata_id\]/$test_appdata_schid/g;
-				s/\[progress_bar\]/$progress_bar/g;
-				s/\[progress_bar_2\]/$progress_bar_2/g;
-				s/\[first_page\]/$first_page/g;
-				s/\[first_page_selected\]/$first_page_selected/g;
-				s/\[second_page\]/$second_page/g;
-	
-				if ( /\[page(\d+)\]/ ) {
-					$_ = $self->get_content_rules( $1, 'full' );
-				}
-				
-				if ( ref($_) eq 'HASH' ) {
-					for my $field ( keys %$_ ) {
-						$_->{ $field } =~ s/\[token\]/$test_token/g;
-						$_->{ $field } =~ s/\[app_id\]/$test_appid/g;
-					}
-				}
-			}
-		
-			for ( @{ $t->{param} } ) {
-				$vars->setparam( $_->{name}, $_->{value} );
+				( ref( $t->{expected} ) eq 'HASH' ? values %{ $t->{expected} } : $t->{expected} ) )
+			);
+
+			for ( keys %{ $t->{param} } ) {
+
+				$t->{param}->{ $_ } = replace_var( $t->{param}->{ $_ }, @_ );
+				$vars->setparam( $_, $t->{param}->{ $_ } );
 			}
 
 			my $test_result = &{ $t->{tester} }( 
@@ -2378,6 +2282,47 @@ sub get_tests
 	}
 	
 	return @result;
+}
+
+sub replace_var
+# //////////////////////////////////////////////////
+{
+	my $_ = shift;
+	
+	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id ) = @_;
+
+	my $table_id = {
+		'AutoToken' => $token_id,
+		'AutoAppointments' => $test_appid,
+		'AutoAppData' => $test_appdataid,
+		'AutoSchengenAppData' => $test_appdata_schid,
+	};
+	
+	$_ = $table_id if /\[table_id\]/;
+	
+	s/\[token\]/$test_token/g;
+	s/\[token_id\]/$token_id/g;
+	s/\[app_id\]/$test_appid/g;
+	s/\[appdata_id\]/$test_appdataid/g;
+	s/\[schdata_id\]/$test_appdata_schid/g;
+	s/\[progress_bar\]/$progress_bar/g;
+	s/\[progress_bar_2\]/$progress_bar_2/g;
+	s/\[first_page\]/$first_page/g;
+	s/\[first_page_selected\]/$first_page_selected/g;
+	s/\[second_page\]/$second_page/g;
+
+	if ( /\[page(\d+)\]/ ) {
+		$_ = $self->get_content_rules( $1, 'full' );
+	}
+	
+	if ( ref($_) eq 'HASH' ) {
+		for my $field ( keys %$_ ) {
+			$_->{ $field } =~ s/\[token\]/$test_token/g;
+			$_->{ $field } =~ s/\[app_id\]/$test_appid/g;
+		}
+	}
+	
+	return $_;
 }
 
 sub show_result
@@ -2908,6 +2853,20 @@ sub pre_token
 	if ( $type eq 'PREPARE' ) { 
 		$self->{ save_token } = $self->{ token };
 		$self->{ token } = 'Token';
+	}
+	else {
+		$self->{ token } = $self->{ save_token };
+	}
+}
+
+sub pre_token01
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+
+	if ( $type eq 'PREPARE' ) { 
+		$self->{ save_token } = $self->{ token };
+		$self->{ token } = '01';
 	}
 	else {
 		$self->{ token } = $self->{ save_token };
