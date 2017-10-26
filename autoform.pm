@@ -2411,8 +2411,10 @@ sub send_app_confirm
 	$replacer->{ app_list } =~ s/\<br\>$//;
 	
 	my $lang_local = VCS::Site::autodata::get_appointment_text();
+	
+	$lang_local->{ $_ } = $self->lang( $lang_local->{ $_ } ) for keys %$lang_local;
 
-	my $subject = $lang_local->{ subject }->{ $langid } . ', #' . $vars->get_system->appnum_to_str( $appnumber );
+	my $subject = $lang_local->{ subject } . ', #' . $vars->get_system->appnum_to_str( $appnumber );
 	
 	my $conf = $self->{ autoform }->{ confirm };
 	my $html = $self->get_file_content( $conf->{ tt } );
@@ -2438,14 +2440,14 @@ sub send_app_confirm
 		
 	my @date_sp = split /\-/, $data->{ AppDate };
 
-	my @months = split /\|/, $lang_local->{ months }->{ $langid };
+	my @months = split /\|/, $lang_local->{ months };
 
 	$replacer->{ date_time } = 
 		$date_sp[ 2 ] . ' ' . $months[ $date_sp[ 1 ] + 1 ] . ' ' . $date_sp[ 0 ] . ', ' . 
 		$vars->get_system->time_to_str($tstart) . ' - ' . $vars->get_system->time_to_str($tend);
 	
-	$replacer->{ app_person } = ( !$data->{ dwhom } ? '<b>' . $lang_local->{ pers }->{ $langid } .'</b>' : 
-		$lang_local->{ by_the_doc }->{ $langid } . ' <b>' . 
+	$replacer->{ app_person } = ( !$data->{ dwhom } ? '<b>' . $lang_local->{ pers } .'</b>' : 
+		$lang_local->{ by_the_doc } . ' <b>' . 
 		$data->{ LName } . ' ' . $data->{ FName } . ' ' .  $data->{ MName } . '</b>' 
 	);
 	
@@ -2461,7 +2463,7 @@ sub send_app_confirm
 	}
 	
 	for ( keys %$lang_local ) {
-		$html =~ s/\[%$_%\]/$lang_local->{ $_ }->{ $langid }/g;
+		$html =~ s/\[%$_%\]/$lang_local->{ $_ }/g;
 	};
 	
 	$vars->{'session'}->{'login'} = 'website';
