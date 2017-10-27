@@ -107,9 +107,9 @@ function isMobile() {
 
 function mobileScreenCheck() {
 
-	var mobilScreen = 0;		
-	if ( isMobile() ) {
-		mobilScreen = 1;
+	var mobilScreen = isMobile();	
+	
+	if ( mobilScreen ) {
 		init_comm( 'center', 'bottom' );
 	}
 	else {

@@ -61,10 +61,8 @@ function isMobile() {
 
 function mobileScreenCheck() {
 
-	var mobilScreen = 0;		
-	if ( isMobile() ) {
-		mobilScreen = 1;
-	}
+	var mobilScreen = isMobile();	
+	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
