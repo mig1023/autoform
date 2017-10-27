@@ -28,13 +28,6 @@
 	window.location.href = "[% addr %]?t=[% token %]";
 </script>
 [% END %]
-
-<script>
-function isMobile() {
-	return ( document.body.clientWidth < 700 ? 1 : 0);
-}
-</script>
-
 </head>
 
 <font face="arial">
@@ -107,6 +100,10 @@ YMaps.jQuery(function () {
 
 $(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
+
+function isMobile() {
+	return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+}
 
 function mobileScreenCheck() {
 
