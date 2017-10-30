@@ -59,22 +59,24 @@ sub get_values_for_api
 
 	for my $app ( 0..$#$all_applicants ) {
 	
+		my $sch_app = {};
+	
 		if ( $all_applicants->[ $app ]->{ SchengenAppDataID } != 0 ) {
 			
-			my $sch_app = $self->query( 'selallkeys', __LINE__, "
-				SELECT * FROM AutoSchengenAppData WHERE ID = ?", $tables_id->{ AutoSchengenAppData }
+			$sch_app = $self->query( 'selallkeys', __LINE__, "
+				SELECT * FROM AutoSchengenAppData WHERE ID = ?", $all_applicants->[ $app ]->{ SchengenAppDataID }
 			)->[0];
 			
 			delete $sch_app->{ ID };
-		
-			$result->{ "schdata_$app" } = $sch_app;
 		}
+		
+		$result->{ schengen }->[ $app ] = $sch_app;
 	
 		delete $all_applicants->[ $app ]->{ $_ } 
 			for ( 'ID', 'AppID', 'Finished', 'InsurerID', 'DListID', 'PolicyID', 'SchengenAppDataID', 
 				'AppDateBM', 'TimeslotBMID' );
 	
-		$result->{ "appdata_$app" } = $all_applicants->[ $app ];
+		$result->{ appdata }->[ $app ] = $all_applicants->[ $app ];
 	}
 	
 	return $result;
@@ -99,20 +101,14 @@ sub set_values_from_api
 
 	my $app_max = 0;
 	
-	for ( keys %$data ) {
+	for ( 0..$#{ $data->{ appdata } } ) {	
 		
-		/^appdata_(\d+)$/;
-		$app_max = $1 if $app_max < $1;
-	}
+		my $sch_id = $self->insert_hash_table( 'AutoSchengenAppData', $data->{ schengen }-> [ $_ ] );
 		
-	for ( 0..$app_max ) {	
+		$data->{ appdata }->[ $_ ]->{ AppID } = $app_id;
+		$data->{ appdata }->[ $_ ]->{ SchengenAppDataID } = $sch_id;
 		
-		my $sch_id = $self->insert_hash_table( 'AutoSchengenAppData', $data->{ "schdata_$_" } );
-		
-		$data->{ "appdata_$_" }->{ AppID } = $app_id;
-		$data->{ "appdata_$_" }->{ SchengenAppDataID } = $sch_id;
-		
-		my $appdata_id = $self->insert_hash_table( 'AutoAppData', $data->{ "appdata_$_" } );
+		my $appdata_id = $self->insert_hash_table( 'AutoAppData', $data->{ appdata }->[ $_ ] );
 	}
 	
 	$vars->get_system->redirect( 
