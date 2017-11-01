@@ -155,6 +155,10 @@ sub set_values_from_api
 
 	my $app_id = $self->insert_hash_table( 'AutoAppointments', $data->{ appointments } );
 
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET AutoAppID = ? WHERE Token = ?", {}, $app_id, $self->{ token }
+	);
+	
 	my $app_max = 0;
 	
 	for ( 0..$#{ $data->{ appdata } } ) {	
