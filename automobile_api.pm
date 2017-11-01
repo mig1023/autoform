@@ -2,6 +2,7 @@ package VCS::Site::automobile_api;
 use strict;
 
 use VCS::Vars;
+use VCS::Site::autodata;
 
 use Data::Dumper;
 use JSON;
@@ -42,16 +43,7 @@ sub get_values_for_api
 {
 	my ( $self, $result ) = @_;
 	
-	my $delete_fields = {
-		'appointments' => [
-			'ID', 'PersonalDataPermission', 'MobilPermission', 'PersonForAgreements', 'TimeslotID', 
-			'AppDate', 'Status', 'Login', 'BankID', 'SessionID', 'CompanyID', 'Draft', 'Duration', 'Notes'
-		],
-		'appdata' => [
-			'ID', 'AppID', 'Finished', 'InsurerID', 'DListID', 'PolicyID', 'SchengenAppDataID', 
-			'AppDateBM', 'TimeslotBMID'
-		],
-	};
+	my $delete_fields = VCS::Site::autodata::get_mobile_api_fields( 'to_delete' );
 	
 	my $tables_id = $self->get_current_table_id();
 	
@@ -95,38 +87,7 @@ sub set_values_from_api
 {
 	my $self = shift;
 	
-	my $enabled_fields_array = {
-		'appointments' => [
-			'SMS', 'CenterID', 'FName', 'Frontiera', 'Shipping', 'PolicyType', 'PrintSrv',
-			'ShAddress', 'FDate', 'PassNum', 'Phone', 'PacketID', 'NCount', 'LName', 'Urgent',
-			'OfficeToReceive', 'MName', 'ShIndex', 'Address', 'PassDate', 'PassWhom', 'EMail',
-			'TFName', 'SDate', 'TBDate', 'Itinerario', 'dwhom', 'Mobile', 'TLName', 'Vettore',
-			'RDate', 'Cost', 'VType', 
-		],
-		'appdata' => [
-			'Citizenship', 'ACompanyName', 'AnkDate', 'FirstCity', 'DocType', 'Family', 'Fingers',
-			'PolicyType', 'Countries', 'Mezzi4', 'MezziWhom', 'PassTill', 'RMName', 'RFName',
-			'PassNum', 'Permesso', 'RPassNum', 'NullaCity', 'AppSDate', 'AnketaC', 'LName','PrevLNames',
-			'Mezzi3', 'AnketaSrv', 'ProfActivity', 'FullAddress', 'AMobile', 'PassWhom', 'EuPassNum',
-			'Gender', 'FingersDate', 'ACompanyFax', 'RLName', 'EuBDate', 'PolicyNum', 'Mezzi7',
-			'ConcilFree', 'ACompanyPhone', 'AppEMail', 'ACopmanyPerson', 'MezziWhomOther', 'DocTypeOther',
-			'VisaNum', 'MezziOtherSrc', 'AppFDate', 'Mezzi1', 'PolicyErr', 'BrhPlace', 'NoRMName',
-			'FamilyOther', 'Short', 'Status', 'Hotels', 'Mezzi2', 'NRes', 'ASAddr', 'VisaOther', 'FName',
-			'PermessoED', 'Mezzi6', 'IDNumber', 'RPWhen', 'EuCitizen', 'VidNo', 'isChild', 'PrevCitizenship',
-			'CalcDuration', 'BrhCountry', 'RAddress', 'Nulla', 'Mezzi5', 'WorkOrg', 'HotelPhone', 'FamRel',
-			'EuLName', 'CountryRes', 'PassDate', 'City', 'FirstCountry', 'PermessoFD', 'VidTill', 'RPWhere',
-			'HotelAdresses', 'KinderData', 'BirthDate', 'PrevVisaFD', 'AppPhone', 'VisaPurpose', 'PrevVisa',
-			'PrevVisaED', 'ACompanyAddress', 'EuFName', 'CountryLive', 'PhotoSrv',
-		],
-		'schengen' => [
-			'HostDataAddress', 'HostDataDateOfBirth', 'HostDataName', 'VisaDataPurposeTravel',
-			'HostDataType', 'HostDataPostalCode', 'HostDataEmail', 'VisaDataMainDestination',
-			'VisaDataType', 'VisaDataBorderFirstEntry', 'VisaDataBorderEntryCity', 'VisaDataBeginningTravel',
-			'HostDataPhoneNumber', 'VisaDataDuration', 'VisaDataNumberEntries', 'HostDataCity',
-			'VisaDataEndTravel', 'HostDataProvince', 'HostDataFax', 'VisaDataIBorderEntry',
-			'VisaDataCityDestination', 'HostDataDenomination',
-		]
-	};
+	my $enabled_fields_array = VCS::Site::autodata::get_mobile_api_fields();
 	
 	my $vars = $self->{ 'VCS::Vars' };
 
