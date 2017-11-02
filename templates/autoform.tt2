@@ -118,17 +118,21 @@ function mobileScreenCheck() {
 	
 	$('#app_table').attr("cellspacing", ( mobilScreen ? '50' : '' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '590px' ) );
+	
 	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
+	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
-	$('.info').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
-	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
+	$('.info').css( "font-size", ( mobilScreen ? '30px' : '' ) );
 	
-	$(':checkbox, :radio').css( "-ms-transform", ( mobilScreen ? "scale(1.5)" : "" ) );
-	$(':checkbox, :radio').css( "-moz-transform:", ( mobilScreen ? "scale(1.5)" : "" ) );
-	$(':checkbox, :radio').css( "-webkit-transform", ( mobilScreen ? "scale(1.5)" : "" ) );
-	$(':checkbox, :radio').css( "-o-transform", ( mobilScreen ? "scale(1.5)" : "" ) );
-	$(':checkbox, :radio').css( "margin-right", ( mobilScreen ? "10px" : "" ) );
+	$(':button').css( "height", ( mobilScreen ? '120px' : '' ) );
+	$(':button').css( "width", ( mobilScreen ? '240px' : '' ) );
+	
+	$(':checkbox, :radio').css( "-ms-transform", ( mobilScreen ? "scale(4)" : "" ) );
+	$(':checkbox, :radio').css( "-moz-transform:", ( mobilScreen ? "scale(4)" : "" ) );
+	$(':checkbox, :radio').css( "-webkit-transform", ( mobilScreen ? "scale(4)" : "" ) );
+	$(':checkbox, :radio').css( "-o-transform", ( mobilScreen ? "scale(4)" : "" ) );
+	$(':checkbox, :radio').css( "margin-right", ( mobilScreen ? "30x" : "" ) );
 	$(':checkbox, :radio').css( "margin-top", ( mobilScreen ? "20px" : "" ) );
 	
 	if ( mobilScreen ) {
@@ -153,14 +157,16 @@ function mobileScreenCheck() {
 		});
 	});
 	
-	$('.input_width').each(function(){
-		$(this).css( "height", mobilScreen ? '40px' : '20px' );
-		$(this).css( "font-size", mobilScreen ? '1.5em' : '' );
+	$('*').each(function(){
+		$(this).css( "font-size", mobilScreen ? '35px' : '' );
 	});
 	
-	$(".mobil_hide").each(function(){
-		$(this).css( "display", ( mobilScreen ? 'none' : '' ) );
-	});
+	$('.input_width').css( "line-height", mobilScreen ? '60px' : '' );
+	$('.input_width').css( "height", mobilScreen ? '60px' : '' );
+	$('.input_width').css( "font-size", mobilScreen ? '40px' : '' );
+	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
+	
+	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
 }
 
 
