@@ -524,9 +524,9 @@ sub save_new_token_in_db
 	my ( $self, $token ) = @_;
 
 	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoToken (Token, AutoAppID, AutoAppDataID, 
-		AutoSchengenAppDataID, Step, LastError, Finished, Draft) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0)", {}, $token
+		INSERT INTO AutoToken (
+		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate) 
+		VALUES (?, 0, 0, 0, 1, '', 0, 0, now())", {}, $token
 	);
 	
 	return $token;
