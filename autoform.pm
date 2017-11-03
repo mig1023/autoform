@@ -476,7 +476,7 @@ sub get_token_and_create_new_form_if_need
 	
 	my $token = lc( $vars->getparam('t') );
 
-	$token =~ s/[^a-z0-9]//g;
+	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
 
 	if ( $token eq '' ) {
 		$token = $self->save_new_token_in_db( $self->token_generation() );
@@ -485,7 +485,7 @@ sub get_token_and_create_new_form_if_need
 		my ( $token_exist, $finished ) = $self->query( 'sel1', __LINE__, "
 			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token
 		);
-	
+
 		return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 		
 		return '02' if !$token_exist;

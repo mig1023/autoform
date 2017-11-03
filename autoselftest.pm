@@ -28,7 +28,6 @@ sub get_test_list {
 				4 => {	'tester' => \&test_line,
 					'prepare' => \&pre_corrupt_token,
 					'args' => [],
-					'param' => { 't' => '[token]' },
 					'expected' => '02',
 				},
 				5 => {	'tester' => \&test_line,
@@ -2582,11 +2581,14 @@ sub pre_corrupt_token
 	my ( $self, $type, $test, $num, $token ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
-		$self->{ test_token_save } = $$token;
-		$$token =~ s/\w$/F/;
-	}
-	else {
-		$$token = $self->{ test_token_save };
+	
+		my $vars = $self->{ 'VCS::Vars' };
+	
+		my $t = $$token;
+		
+		$t =~ s/\w$/-/;
+		
+		$vars->setparam( 't', $t );
 	}	
 }
 
