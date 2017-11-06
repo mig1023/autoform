@@ -1871,6 +1871,22 @@ sub get_test_list {
 						'token' => '01',
 					},
 				},
+				3 => { 	'tester' => \&test_hash,
+					'param' => { 'mobile_api' => 'get_token' },
+					'expected' => {
+						'error' => { 'error_text' => undef, 'error' => 0 },
+						'token' => '[token]',
+					},
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_delete },
+			'comment' => 'get_delete',
+			'test' => { 	
+				1 => { 	'tester' => \&test_write_db,
+					'args' => [ '[appdata_id]' ],
+					'expected' => '[appdata_id]:AutoAppData:ID:',
+				},
 			},
 		},
 	];
