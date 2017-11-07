@@ -2436,8 +2436,7 @@ sub send_app_confirm
 	$replacer->{ branch_addr } =~ s/_?(x005F|x000D)_?//g;
 	
 	my ( $tstart,$tend ) = $self->query( 'sel1', __LINE__, "
-		SELECT TStart,TEnd FROM TimeData WHERE SlotID=?",
-		$data->{ TimeslotID }
+		SELECT TStart,TEnd FROM TimeData WHERE SlotID=?", $data->{ TimeslotID }
 	);
 		
 	my @date_sp = split /\-/, $data->{ AppDate };
@@ -2458,7 +2457,7 @@ sub send_app_confirm
 	$replacer->{ link_image } = $conf->{ link_image };
 	$replacer->{ link_site } = $conf->{ link_site };
 	$replacer->{ app_email } = $conf->{ $spb_center . "html_email" };
-	$replacer->{ app_website } = $conf->{ $spb_center . "html_website" };
+	$replacer->{ app_website } = $conf->{ html_website };
 	
 	for ( keys %$replacer ) {
 		$html =~ s/\[%$_%\]/$replacer->{ $_ }/g;
@@ -2479,9 +2478,9 @@ sub send_app_confirm
 			'ContentType' => 'application/pdf',
 		},
 		1 => {
-			'filename' => "Согласие.docx", 
+			'filename' => "Согласие.pdf", 
 			'data' => $agreem, 
-			'ContentType' => 'application/docx',
+			'ContentType' => 'application/pdf',
 		}
 	};
 	
