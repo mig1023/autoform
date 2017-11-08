@@ -90,9 +90,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'pers_info',
-				'label_for' => 'я согласен на <a class=' . "'" . 'dotted_link_big' . "'" . 
-					' href=' . "'" . '/pers_data_agreement.pdf' . "'" . 
-					'>условия обработки персональных данных</a>',
+				'label_for' => 'я согласен на <a target="_blank" class="dotted_link_big" href="/pers_data_agreement.pdf">условия обработки персональных данных</a>',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',

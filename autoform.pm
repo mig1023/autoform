@@ -1141,6 +1141,7 @@ sub get_html_line
 	my $content = $self->get_html_for_element( 'start_line' );
 	
 	if ( $element->{ type } eq 'text' ) {
+	
 		$content .= $self->get_html_for_element( 'text', $element->{ name }, $element->{ label }, 
 				undef, $element->{ font } );
 		$content .= $self->get_html_for_element( 'end_line' );
@@ -1255,7 +1256,7 @@ sub get_html_for_element
 	
 	my $content = $elements->{ $type };
 	
-	$value =~ s/"/&quot;/g;
+	$value =~ s/"/&quot;/g unless $type eq 'label_for';
 	
 	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {
 		$content =~ s/\[name\]//gi;
@@ -1272,7 +1273,6 @@ sub get_html_for_element
 	else {
 		$content =~ s/\[progress_stage\]/$value/gi;
 	}
-	
 	
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[comment\]/$comment/gi;
@@ -1390,11 +1390,13 @@ sub get_html_for_element
 	}
 	
 	if ( $type eq 'info' ) {
+	
 		$value = '(' . $self->lang( 'не указано' ) . ')' if !$value;
 		$content =~ s/\[text\]/$value/;
 	}
 	
 	if ( $uniq_code ) {
+	
 		$content = $self->add_css_class( $content, 'bold_text') if $uniq_code eq 'bold';
 		$content =~ s/\[u\]/$uniq_code/gi;
 	}
@@ -1403,6 +1405,7 @@ sub get_html_for_element
 	}
 	
 	if ( ( $type eq 'input' ) and ( ( $check !~ /^z/ ) ) ) {
+	
 		$content = $self->add_css_class( $content, 'optional_field');
 	}
 
@@ -1421,6 +1424,7 @@ sub check_comments_alter_version
 	for ( keys %$comment ) {
 	
 		my %centers = map { $_ => 1 } split /,/, $_;
+		
 		return $comment->{ $_ } if exists $centers{ $current_center };
 	}
 }
@@ -1531,6 +1535,7 @@ sub check_special_in_rules_for_save
 	return if $elements =~ /\[/;
 	
 	for my $element ( @$elements ) {
+	
 		if ( $element->{special} eq 'save_info_about_hastdatatype' ) {
 			
 			my $visa_type = $self->query( 'sel1', __LINE__, "
@@ -1596,9 +1601,9 @@ sub get_all_values
 		}
 	}
 
-	if ( $request_tables->{ alternative_data_source } ) {
+	my $alt = $request_tables->{ alternative_data_source };
 	
-		my $alt = $request_tables->{ alternative_data_source };
+	if ( $alt ) {
 
 		for my $field ( keys %{ $alt } ) {
 			if ( !$all_values->{ $field } ) {
@@ -1613,6 +1618,16 @@ sub get_all_values
 	}
 
 	return $all_values;
+}
+
+sub get_prepare_line
+# //////////////////////////////////////////////////
+{
+	my ( $self, $line ) = @_;
+	
+	$line =~ s/^\s+|\s+$//g;
+	
+	return $line;
 }
 
 sub decode_data_from_db
@@ -1634,7 +1649,7 @@ sub encode_data_for_db
 	my $vars = $self->{'VCS::Vars'};
 	my $element = $self->get_element_by_name( $step, $element_name );
 	
-	$value =~ s/^\s+|\s+$//g;
+	$value = $self->get_prepare_line( $value );
 	
 	$value = ( ( $value eq $element_name ) ? 1 : 0 ) if $element->{type} =~ /checkbox|checklist/;
 	$value = $vars->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
@@ -1816,7 +1831,7 @@ sub check_param
 	my $value = $vars->getparam( $element->{ name } );
 	my $rules = $element->{ check };
 
-	$value =~ s/^\s+|\s+$//g;
+	$value = $self->get_prepare_line( $value );
 
 	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( ( $value eq '' ) or 
 			( ( $value eq '0' ) and ( $element->{ name } eq 'timeslot') ) );

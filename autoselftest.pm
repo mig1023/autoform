@@ -1889,6 +1889,15 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_prepare_line },
+			'comment' => 'get_prepare_line',
+			'test' => { 	
+				1 => { 	'tester' => \&test_write_db,
+					'args' => [ '    start_line   end_line     ' ],
+					'expected' => 'start_line   end_line',
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
