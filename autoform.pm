@@ -1627,6 +1627,8 @@ sub get_prepare_line
 	
 	$line =~ s/^\s+|\s+$//g;
 	
+	$line =~ s/\xc2\xa0/\x20/g;
+	
 	return $line;
 }
 
@@ -1855,7 +1857,9 @@ sub check_param
 		$regexp = '[^' . $regexp . $rules . ']';
 
 		if ( ( $value =~ /$regexp/ ) and ( $value ne '' ) ) {
+		
 			$value =~ s/$revers_regexp//gi;
+
 			return $self->text_error( 2, $element, $value );
 		}
 	}
