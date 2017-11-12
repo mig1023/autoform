@@ -18,9 +18,9 @@
 .pr_white_gray_gen{ background-image: url('/images/pbar-white-gray.png'); }
 
 .pr_in_gen{
-	padding-top:7px;
 	color:white;
-	font-size:30;
+	font-size:33px;
+	line-height: 51px
 }
 
 .big_progr{
