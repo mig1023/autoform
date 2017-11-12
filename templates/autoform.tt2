@@ -87,8 +87,8 @@ YMaps.jQuery(function () {
 	[% IF ( step == 1 ) %]
 	<a target="_blank" class="dotted_link_big" href="">[% langreq('Воспользуйтесь преимуществами услуги Vip Premium lounge') %]</a>
 	<br>
+	<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 	[% END %]
-<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 [% END %]
 </td></tr></table>
 
