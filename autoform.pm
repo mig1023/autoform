@@ -33,19 +33,19 @@ sub getContent
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 
-    	my $dispathcher = {
-    		'index' => \&autoform,
-		'selftest' => \&autoselftest,
-		'findpcode' => \&get_pcode,
-		'mobile_end' => \&mobile_end,
-    	};
+	my $dispathcher = {
+		'index'		=> \&autoform,
+		'selftest'	=> \&autoselftest,
+		'findpcode'	=> \&get_pcode,
+		'mobile_end'	=> \&mobile_end,
+	};
     	
-    	my $disp_link = $dispathcher->{ $id };
+	my $disp_link = $dispathcher->{ $id };
 
-    	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
+	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
     		if !$disp_link;
 	
-    	&{ $disp_link }( $self, $task, $id, $template );
+	&{ $disp_link }( $self, $task, $id, $template );
     	
 	return 1;
 }
@@ -203,26 +203,26 @@ sub autoform
 	$vars->get_system->pheader( $vars );
 	
 	my $tvars = {
-		'langreq' => sub { return $vars->getLangSesVar(@_) },
-		'title' => $title,
-		'content_text' => $page_content,
-		'token' => $self->{ token },
-		'appid' => $appid,
-		'step' => $step,
-		'min_step' => 1,
-		'max_step' => $self->get_content_rules( 'length' ),
-		'max_applicants' => $self->{ autoform }->{ general }->{ max_applicants },
-		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
-		'last_error_name' => $last_error_name,
-		'last_error_text' => $last_error_text,
-		'special' => $special,
-		'vcs_tools' => $self->{ autoform }->{ paths }->{ addr_vcs },
-		'appinfo' => $appinfo_for_timeslots,
-		'progress' => $progress,
-		'lang_in_link' => $self->{ lang },
-		'javascript_check' => $javascript_check,
-		'map_in_page' => $map_in_page,
-		'mobile_app' => ( $vars->getparam( 'mobile_app' ) ? 1 : 0 ),
+		'langreq' 		=> sub { return $vars->getLangSesVar(@_) },
+		'title' 		=> $title,
+		'content_text' 		=> $page_content,
+		'token' 		=> $self->{ token },
+		'appid' 		=> $appid,
+		'step' 			=> $step,
+		'min_step' 		=> 1,
+		'max_step' 		=> $self->get_content_rules( 'length' ),
+		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
+		'addr' 			=> $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'last_error_name' 	=> $last_error_name,
+		'last_error_text' 	=> $last_error_text,
+		'special' 		=> $special,
+		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'appinfo' 		=> $appinfo_for_timeslots,
+		'progress' 		=> $progress,
+		'lang_in_link' 		=> $self->{ lang },
+		'javascript_check' 	=> $javascript_check,
+		'map_in_page' 		=> $map_in_page,
+		'mobile_app' 		=> ( $vars->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -298,7 +298,8 @@ sub get_geo_info
 	my $self = shift;
 	
 	my ( $center, $addr ) = $self->query( 'sel1', __LINE__, "
-		SELECT CenterID, BAddr FROM AutoToken 
+		SELECT CenterID, BAddr
+		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN Branches ON AutoAppointments.CenterID = Branches.ID
 		WHERE Token = ?", $self->{ token }
@@ -390,7 +391,8 @@ sub init_add_param
 	
 		my $birthdate = $self->query( 'sel1', __LINE__, "
 			SELECT DATEDIFF(AutoAppData.BirthDate, '1991-12-26')
-			FROM AutoAppData JOIN AutoToken ON AutoAppData.ID = AutoToken.AutoAppDataID 
+			FROM AutoAppData
+			JOIN AutoToken ON AutoAppData.ID = AutoToken.AutoAppDataID 
 			WHERE AutoToken.Token = ?", $self->{ token }
 		);
 	
@@ -798,6 +800,7 @@ sub set_appointment_finished
 	);
 
 	if ( $this_is_draft ) {
+	
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET EndDate = now(), Step = 1 WHERE Token = ?", {}, $self->{ token }
 		);
@@ -914,7 +917,8 @@ sub check_existing_id_in_token
 	my $exist = 0;
 	
 	my $list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.ID FROM AutoToken 
+		SELECT AutoAppData.ID
+		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $self->{ token }
@@ -933,7 +937,8 @@ sub check_all_app_finished_and_not_empty
 	my $self = shift;
 
 	my $allfinished = $self->query( 'selallkeys',  __LINE__, "
-		SELECT AutoAppData.Finished AS FinishedAs, VType FROM AutoAppData
+		SELECT AutoAppData.Finished AS FinishedAs, VType
+		FROM AutoAppData
 		JOIN AutoAppointments ON AutoAppointments.ID = AutoAppData.AppID
 		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 		WHERE Token = ?", $self->{ token }
@@ -1048,7 +1053,8 @@ sub correct_values
 	if ( $$current_values->{ 'new_app_timedate' } ) {
 
 		$$current_values->{ 'new_app_timedate' } = $self->query( 'sel1', __LINE__, "
-			SELECT AppDate FROM AutoAppointments 
+			SELECT AppDate
+			FROM AutoAppointments 
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 			WHERE AutoToken.Token = ?", $self->{ token }
 		);
@@ -1076,8 +1082,8 @@ sub get_list_of_app
 	my $self = shift;
 	
 	my $content = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, AutoAppData.BirthDate,
-		AutoAppData.Finished, AutoAppointments.VType
+		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName,
+		AutoAppData.BirthDate, AutoAppData.Finished, AutoAppointments.VType
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
@@ -2124,7 +2130,8 @@ sub create_new_appointment
 	my $db_rules = $self->get_content_db_rules();
 
 	my ( $insurance_line, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
-		SELECT Insurance, PersonForAgreements FROM AutoToken 
+		SELECT Insurance, PersonForAgreements
+		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
 	);
@@ -2419,9 +2426,9 @@ sub send_app_confirm
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $replacer = {
-		app_num => $appnumber,
-		app_id => $appid,
-		app_token => $self->{ token },
+		app_num		=> $appnumber,
+		app_id		=> $appid,
+		app_token	=> $self->{ token },
 	};
 	
 	my ( $app_list, undef ) = $self->get_list_of_app();
@@ -2442,7 +2449,9 @@ sub send_app_confirm
 	
 	my $data = $self->query( 'selallkeys', __LINE__, "
 		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName
-		FROM Appointments WHERE ID = ? ORDER BY ID DESC LIMIT 1", $appid
+		FROM Appointments
+		WHERE ID = ?
+		ORDER BY ID DESC LIMIT 1", $appid
 	)->[0];
 	
 	$replacer->{ branch_addr } = $vars->getGLangVar( 'Address-' . $data->{ CenterID }, $langid );
@@ -2492,14 +2501,14 @@ sub send_app_confirm
 	
 	my $atach = {
 		0 => {
-			'filename' => "Appointment_$appnumber.pdf", 
-			'data' => VCS::Docs::appointments->new( 'VCS::Docs::appointments', $vars )->createPDF( $appid ), 
-			'ContentType' => 'application/pdf',
+			'filename'	=> "Appointment_$appnumber.pdf", 
+			'data'		=> VCS::Docs::appointments->new( 'VCS::Docs::appointments', $vars )->createPDF( $appid ), 
+			'ContentType'	=> 'application/pdf',
 		},
 		1 => {
-			'filename' => "Согласие.pdf", 
-			'data' => $agreem, 
-			'ContentType' => 'application/pdf',
+			'filename'	=> "Согласие.pdf", 
+			'data'		=> $agreem, 
+			'ContentType'	=> 'application/pdf',
 		}
 	};
 	
