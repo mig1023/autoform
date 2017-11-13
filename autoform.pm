@@ -28,25 +28,25 @@ sub getContent
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
-
+	
 	my $vars = $self->{ 'VCS::Vars' };
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
-
+	
 	my $dispathcher = {
 		'index'		=> \&autoform,
 		'selftest'	=> \&autoselftest,
 		'findpcode'	=> \&get_pcode,
 		'mobile_end'	=> \&mobile_end,
 	};
-    	
+	
 	my $disp_link = $dispathcher->{ $id };
-
+	
 	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
-    		if !$disp_link;
+		if !$disp_link;
 	
 	&{ $disp_link }( $self, $task, $id, $template );
-    	
+	
 	return 1;
 }
 
@@ -120,7 +120,8 @@ sub get_app_visa_and_center
 	if ( !$visa_vtype or !$center_id ) {
 		
 		( $center_id, $visa_vtype ) = $self->query( 'sel1', __LINE__, "
-			SELECT CenterID, VisaTypes.ID FROM AutoAppointments
+			SELECT CenterID, VisaTypes.ID
+			FROM AutoAppointments
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 			JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
 			WHERE Token = ?", $self->{ token }
@@ -1015,13 +1016,9 @@ sub get_html_page
 	
 	my $page_content = $self->get_content_rules( $step, undef, 'init' );
 
-	if ( $page_content eq '[list_of_applicants]' ) {
-		return $self->get_list_of_app();
-	}
+	return $self->get_list_of_app() if $page_content eq '[list_of_applicants]';
 	
-	if ( $page_content eq '[app_finish]' ) {
-		return $self->get_finish();
-	}
+	return $self->get_finish() if $page_content eq '[app_finish]';
 	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id() );
 	
@@ -1130,6 +1127,7 @@ sub get_specials_of_element
 	for my $element ( @$page_content ) {
 	
 		for my $spec_type ( keys %$special ) {
+		
 			push( $special->{ $spec_type }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
 		}
 	}
@@ -1148,8 +1146,9 @@ sub get_html_line
 	
 	if ( $element->{ type } eq 'text' ) {
 	
-		$content .= $self->get_html_for_element( 'text', $element->{ name }, $element->{ label }, 
-				undef, $element->{ font } );
+		$content .= $self->get_html_for_element(
+			'text', $element->{ name }, $element->{ label }, undef, $element->{ font }
+		);
 		$content .= $self->get_html_for_element( 'end_line' );
 	
 		return $content;
@@ -1798,6 +1797,8 @@ sub check_data_from_form
 		if ( !$first_error and $element->{check_logic} ) {
 			$first_error = $self->check_logic( $element, $tables_id );
 		}
+		
+		
 	}
 	
 	return $first_error;
@@ -2409,8 +2410,8 @@ sub get_pcode
 	$vars->get_system->pheaderJSON( $vars );
 	
 	my $tvars = {
-		'alist' => $finded_pcode,
-		'callback' => $callback
+		'alist'		=> $finded_pcode,
+		'callback'	=> $callback
 	};
 	
 	$template->process( 'autoform_pcode.tt2', $tvars );
