@@ -1799,6 +1799,7 @@ sub get_content_rules_hash
 				'page_ord' => 27,
 				'progress' => 12,
 				'persons_in_page' => 1,
+				'goto_link' => 'back_to_appdate',
 			},
 			{
 				'type' => 'text',

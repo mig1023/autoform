@@ -278,19 +278,22 @@ sub get_same_info_for_timeslots
 {
 	my $self = shift;
 	
-	my $appinfo = {};
+	my $app = {};
 
-	( $appinfo->{ persons }, $appinfo->{ center }, $appinfo->{ fdate } ) = $self->query( 'sel1', __LINE__, "
-		SELECT count(AutoAppData.ID), CenterID, SDate
-		FROM AutoToken 
-		JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
-		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		WHERE Token = ?", $self->{ token }
-	);
+	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot }, $app->{ appdate } ) = 
+		$self->query( 'sel1', __LINE__, "
+			SELECT count(AutoAppData.ID), CenterID, SDate, TimeslotID, AppDate
+			FROM AutoToken 
+			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
+			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+			WHERE Token = ?", $self->{ token }
+		);
 	
-	$appinfo->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	$app->{ fdate_iso } = $app->{ fdate };
+	
+	$app->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 
-	return $appinfo;
+	return $app;
 }
 
 sub get_geo_info
@@ -752,6 +755,9 @@ sub get_forward
 	
 	my $appnum = undef;
 	my $appid = undef;
+	
+	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step, $current_table_id )
+		if !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) );
 
 	if ( $last_error ) {
 		my @last_error = split /\|/, $last_error;
@@ -828,16 +834,42 @@ sub set_appointment_finished
 	return ( $new_appid, $appnum );
 }
 
+sub check_timeslots_already_full_or_not_actual
+# //////////////////////////////////////////////////
+{
+	my ( $self, $step, $current_table_id ) = @_;
+	
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my $app = $self->get_same_info_for_timeslots();
+
+	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $vars );
+	my $timeslots = $appobj->get_timeslots_arr( $app->{ center }, $app->{ persons }, $app->{ appdate } );
+
+	for ( @$timeslots ) {
+		return ( '', $step ) if $_->{id} == $app->{ timeslot };
+	}
+
+	$step = $self->get_step_by_content( 'back_to_appdate' );
+	 
+	return ( $self->text_error( 20, { name => 'timeslot' } ), $step );
+}
+
 sub get_step_by_content
 # //////////////////////////////////////////////////
 {
 	my ( $self, $content, $next ) = @_;
 	
 	my $page_content = $self->get_content_rules();
+	my $page_content_full = $self->get_content_rules( undef, 'full' );
+	
 	my $step;
 
 	for my $page ( keys %$page_content ) {
+	
 		$step = $page if ( $page_content->{ $page } eq $content );
+		
+		$step = $page if ( $page_content_full->{ $page }->[ 0 ]->{ goto_link } eq $content );
 	}
 
 	$step++ if $next;
