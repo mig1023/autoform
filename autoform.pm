@@ -19,8 +19,12 @@ sub new
 # //////////////////////////////////////////////////
 {
 	my ( $class, $pclass, $vars ) = @_;
+	
 	my $self = bless {}, $pclass;
+	
 	$self->{ 'VCS::Vars' } = $vars;
+	$self->{ vars } = $vars;
+	
 	return $self;
 }
 
@@ -28,8 +32,6 @@ sub getContent
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 	
@@ -42,8 +44,9 @@ sub getContent
 	
 	my $disp_link = $dispathcher->{ $id };
 	
-	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
-		if !$disp_link;
+	$self->{ vars }->get_system->redirect(
+		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm'
+	) if !$disp_link;
 	
 	&{ $disp_link }( $self, $task, $id, $template );
 	
@@ -152,13 +155,12 @@ sub autoform
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $vars = $self->{ 'VCS::Vars' };
 	my ( $page_content, $template_file, $title, $progress, $appid, $last_error );
 	my $step = 0;
 	my $special = {};
 	my $javascript_check = 1;
 	
-	my $mobile_api = ( $vars->getparam( 'mobile_api' ) ? 1 : 0 );
+	my $mobile_api = ( $self->{ vars }->getparam( 'mobile_api' ) ? 1 : 0 );
 	
 	$self->{ token } = $self->get_token_and_create_new_form_if_need( $mobile_api );
 	
@@ -169,13 +171,13 @@ sub autoform
 		return;
 	}
 	
-	$self->{ lang } = 'en' if $vars->getparam( 'lang' ) =~ /^en$/i ;
+	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
 
 	if ( $self->{ token } =~ /^\d\d$/ ) {
 	
 		( $title, $page_content, $template_file ) = $self->get_page_error( $self->{ token } );
 	}
-	elsif ( $vars->getparam( 'script' ) ) {
+	elsif ( $self->{ vars }->getparam( 'script' ) ) {
 	
 		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
 		
@@ -201,10 +203,10 @@ sub autoform
 		$map_in_page = $self->get_geo_info();
 	}
 
-	$vars->get_system->pheader( $vars );
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
-		'langreq' 		=> sub { return $vars->getLangSesVar(@_) },
+		'langreq' 		=> sub { return $self->{ vars }->getLangSesVar(@_) },
 		'title' 		=> $title,
 		'content_text' 		=> $page_content,
 		'token' 		=> $self->{ token },
@@ -213,7 +215,7 @@ sub autoform
 		'min_step' 		=> 1,
 		'max_step' 		=> $self->get_content_rules( 'length' ),
 		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
-		'addr' 			=> $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'addr' 			=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'last_error_name' 	=> $last_error_name,
 		'last_error_text' 	=> $last_error_text,
 		'special' 		=> $special,
@@ -223,7 +225,7 @@ sub autoform
 		'lang_in_link' 		=> $self->{ lang },
 		'javascript_check' 	=> $javascript_check,
 		'map_in_page' 		=> $map_in_page,
-		'mobile_app' 		=> ( $vars->getparam( 'mobile_app' ) ? 1 : 0 ),
+		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
 	$template->process( $template_file, $tvars );
 }
@@ -233,13 +235,11 @@ sub get_mobile_api
 {
 	my ( $self, $token ) = @_;
 
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my $api_response = VCS::Site::automobile_api::get_mobile_api( $self, $token );
 
 	return $api_response if $self->{ this_is_self_testing };
 	
-	$vars->get_system->pheaderJSON( $vars );
+	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 	
 	return if ref( $api_response ) ne 'HASH';
 	
@@ -251,14 +251,13 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' )
-		if ( $vars->get_session->{'login'} eq '' );
+	$self->{ vars }->get_system->redirect(
+		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm'
+	) if ( $self->{ vars }->get_session->{'login'} eq '' );
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
-	$vars->get_system->pheader( $vars );
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	print $self_test_result;
 }
@@ -268,9 +267,9 @@ sub mobile_end
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	$vars->get_system->redirect( $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm' );
+	$self->{ vars }->get_system->redirect(
+		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm'
+	);
 }
 	
 sub get_same_info_for_timeslots
@@ -325,8 +324,6 @@ sub init_add_param
 # //////////////////////////////////////////////////
 {
 	my ( $self, $content_rules, $keys_in_current_page ) = @_;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $info_from_db = undef;
 	my $ussr_first = 0;
@@ -441,8 +438,6 @@ sub get_collect_date
 {
 	my $self = shift;
 
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my $collect_dates = $self->cached( 'autoform_collectdates' );
 		
 	if ( !$collect_dates ) {
@@ -478,9 +473,7 @@ sub get_token_and_create_new_form_if_need
 {
 	my ( $self, $mobile_api ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	my $token = lc( $vars->getparam('t') );
+	my $token = lc( $self->{ vars }->getparam('t') );
 
 	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
 
@@ -507,11 +500,9 @@ sub create_clear_form
 {
 	my $self = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoAppointments (RDate, Login, Draft) VALUES (now(), ?, 1)", {}, 
-		$vars->get_session->{'login'}
+		$self->{ vars }->get_session->{'login'}
 	);
 		
 	my $app_id = $self->query( 'sel1', __LINE__, "
@@ -579,16 +570,14 @@ sub get_autoform_content
 	my $last_error = '';
 	my $title;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
-	my $action = lc( $vars->getparam('action') );
+	my $action = lc( $self->{ vars }->getparam('action') );
 	$action =~ s/[^a-z]//g;
 	
-	my $appdata_id = $vars->getparam('person');
+	my $appdata_id = $self->{ vars }->getparam('person');
 	$appdata_id =~ s/[^0-9]//g;
 	
 	my $appnum = undef;
@@ -739,12 +728,10 @@ sub get_forward
 {
 	my ( $self, $step ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my $current_table_id = $self->get_current_table_id();
 	
 	if ( !$current_table_id->{AutoAppointments} ) {
-		$self->create_clear_form( $vars->getparam( 'center' ) );
+		$self->create_clear_form( $self->{ vars }->getparam( 'center' ) );
 		$current_table_id = $self->get_current_table_id();
 	}
 	
@@ -839,11 +826,9 @@ sub check_timeslots_already_full_or_not_actual
 {
 	my ( $self, $step, $current_table_id ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my $app = $self->get_same_info_for_timeslots();
 
-	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $vars );
+	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } );
 	my $timeslots = $appobj->get_timeslots_arr( $app->{ center }, $app->{ persons }, $app->{ appdate } );
 
 	for ( @$timeslots ) {
@@ -1068,8 +1053,6 @@ sub correct_values
 {
 	my ( $self, $current_values, $appnum ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-
 	$$current_values->{ 'new_app_num' } = $appnum if $appnum;
 
 	if ( $$current_values->{ 'new_app_branch' } ) {
@@ -1097,7 +1080,7 @@ sub correct_values
 			SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $$current_values->{ 'new_app_timeslot' }
 		);
 		
-		$_ = $vars->get_system->time_to_str( $_ ) for ( $start, $end );
+		$_ = $self->{ vars }->get_system->time_to_str( $_ ) for ( $start, $end );
 		
 		$$current_values->{ 'new_app_timeslot' } = "$start - $end";	
 	}
@@ -1286,8 +1269,6 @@ sub get_html_for_element
 	my $param = $self->lang( $param );
 	my $comment = $self->lang( $comment );
 	my $example = $self->lang( 'пример' );
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $elements = VCS::Site::autodata::get_html_elements();
 	
@@ -1519,8 +1500,6 @@ sub save_data_from_form
 {
 	my ( $self, $step, $table_id ) = @_;
 	
-	my $vars = $self->{'VCS::Vars'};
-
 	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'save' );
 
 	for my $table ( keys %$request_tables ) {
@@ -1535,7 +1514,7 @@ sub save_data_from_form
 		
 			$request .=  "$row = ?, ";
 			
-			my $value = $vars->getparam( $request_tables->{ $table }->{ $row } );
+			my $value = $self->{ vars }->getparam( $request_tables->{ $table }->{ $row } );
 			
 			push ( @values, $self->encode_data_for_db( $step, $request_tables->{ $table }->{ $row }, $value ) );
 			
@@ -1566,7 +1545,6 @@ sub check_special_in_rules_for_save
 {
 	my ( $self, $step, $table_id ) = @_;
 	
-	my $vars = $self->{'VCS::Vars'};
 	my $elements = $self->get_content_rules( $step );
 	
 	return if $elements =~ /\[/;
@@ -1595,7 +1573,7 @@ sub check_special_in_rules_for_save
 			my $new_list = '';
 				
 			for my $insurer ( @$all_insurer ) {
-				next unless $vars->getparam( 'insurance_' . $insurer->{ ID } );
+				next unless $self->{ vars }->getparam( 'insurance_' . $insurer->{ ID } );
 				$new_list .= ( $new_list ? ',' : '' ) . $insurer->{ ID };
 			}
 
@@ -1605,7 +1583,10 @@ sub check_special_in_rules_for_save
 		}
 		elsif ( $element->{special} eq 'cach_this_value' ) {
 
-			$self->cached( 'autoform_' . $self->{ token } . '_' . $element->{name}, $vars->getparam( $element->{name} ) );
+			$self->cached(
+				'autoform_' . $self->{ token } . '_' . $element->{name},
+				$self->{ vars }->getparam( $element->{name} )
+			);
 		}
 	}
 }
@@ -1685,14 +1666,14 @@ sub encode_data_for_db
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step, $element_name, $value ) = @_;
-	my $vars = $self->{'VCS::Vars'};
+
 	my $element = $self->get_element_by_name( $step, $element_name );
 	
 	$value = $self->get_prepare_line( $value );
 	
 	$value = ( ( $value eq $element_name ) ? 1 : 0 ) if $element->{type} =~ /checkbox|checklist/;
-	$value = $vars->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
-	$value = $vars->get_system->to_upper_case_first( $value ) if $element->{ format } eq 'capitalized';
+	$value = $self->{ vars }->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
+	$value = $self->{ vars }->get_system->to_upper_case_first( $value ) if $element->{ format } eq 'capitalized';
 	
 	$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 	
@@ -1841,12 +1822,10 @@ sub check_checklist
 {
 	my ( $self, $element ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
 	my $at_least_one = 0;
 	
 	for my $field ( keys %{ $element->{ param } } ) {
-		$at_least_one += ( $vars->getparam( $field ) ? 1 : 0 );
+		$at_least_one += ( $self->{ vars }->getparam( $field ) ? 1 : 0 );
 	}
 	
 	return $self->text_error( 11, $element ) if ( ( $element->{ check } =~ /at_least_one/ ) and ( $at_least_one == 0 ) );
@@ -1857,8 +1836,7 @@ sub check_chkbox
 {
 	my ( $self, $element ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	my $value = $vars->getparam( $element->{ name } );
+	my $value = $self->{ vars }->getparam( $element->{ name } );
 	
 	return $self->text_error( 3, $element ) if ( ( $element->{ check } =~ /true/ ) and ( $value eq '' ) );
 }
@@ -1868,8 +1846,7 @@ sub check_param
 {
 	my ( $self, $element ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	my $value = $vars->getparam( $element->{ name } );
+	my $value = $self->{ vars }->getparam( $element->{ name } );
 	my $rules = $element->{ check };
 
 	$value = $self->get_prepare_line( $value );
@@ -1909,9 +1886,7 @@ sub check_captcha
 {
 	my $self = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	my $response = $vars->getparam( 'g-recaptcha-response' ) || '';
+	my $response = $self->{ vars }->getparam( 'g-recaptcha-response' ) || '';
 	
 	my $request = HTTP::Tiny->new();
 
@@ -1935,8 +1910,7 @@ sub check_logic
 {
 	my ( $self, $element, $tables_id ) = @_;
 
-	my $vars = $self->{ 'VCS::Vars' };
-	my $value = $vars->getparam( $element->{ name } );
+	my $value = $self->{ vars }->getparam( $element->{ name } );
 	my $first_error = '';
 	my $error = 0;
 	
@@ -2222,8 +2196,6 @@ sub mod_hash
 {
 	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, $info_for_contract ) = @_;
 
-	my $vars = $self->{ 'VCS::Vars' };
-
 	for my $column ( keys %$hash ) {
 
 		if ( $db_rules->{ $table_name }->{ $column } eq 'nope') {
@@ -2253,9 +2225,9 @@ sub mod_hash
 
 	if ( $table_name eq 'Appointments' ) {
 	
-		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $vars);
+		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $self->{ vars } );
 		
-		$hash->{ AppNum } = $appobj->getLastAppNum( $vars, $hash->{ CenterID }, $hash->{ AppDate } );
+		$hash->{ AppNum } = $appobj->getLastAppNum( $self->{ vars }, $hash->{ CenterID }, $hash->{ AppDate } );
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
 			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
@@ -2367,12 +2339,10 @@ sub get_pcode
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $vars = $self->{ 'VCS::Vars' };
-
-	my $request = $vars->getparam( 'name_startsWith' ) || '';
-	my $request_limit = $vars->getparam( 'maxRows' ) || 20;
-	my $callback = $vars->getparam( 'callback' ) || "";
-	my $center = $vars->getparam( 'center' ) || 1;
+	my $request = $self->{ vars }->getparam( 'name_startsWith' ) || '';
+	my $request_limit = $self->{ vars }->getparam( 'maxRows' ) || 20;
+	my $callback = $self->{ vars }->getparam( 'callback' ) || "";
+	my $center = $self->{ vars }->getparam( 'center' ) || 1;
 	
 	$request =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя]//g;
 	$_ =~ s/[^0-9]//g for ( $request_limit, $center );
@@ -2433,13 +2403,13 @@ sub get_pcode
 
 		for my $rk ( @$finded_pcode ) {
 			$rk->{ CName } = ( $rk->{ RName } ne '' ? 
-				$vars->get_system->converttext( $rk->{ RName } ) : 
-				$vars->get_system->converttext( $rk->{ CName } ) 
+				$self->{ vars }->get_system->converttext( $rk->{ RName } ) : 
+				$self->{ vars }->get_system->converttext( $rk->{ CName } ) 
 			);
 		}
 	}
 	
-	$vars->get_system->pheaderJSON( $vars );
+	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 	
 	my $tvars = {
 		'alist'		=> $finded_pcode,
@@ -2455,8 +2425,6 @@ sub send_app_confirm
 	my ( $self, $appnumber, $appid, $langid ) = @_; 
 	
 	$langid = 'ru' unless $langid;
-	
-	my $vars = $self->{ 'VCS::Vars' };
 	
 	my $replacer = {
 		app_num		=> $appnumber,
@@ -2475,7 +2443,7 @@ sub send_app_confirm
 	
 	$lang_local->{ $_ } = $self->lang( $lang_local->{ $_ } ) for keys %$lang_local;
 
-	my $subject = $lang_local->{ subject } . ', #' . $vars->get_system->appnum_to_str( $appnumber );
+	my $subject = $lang_local->{ subject } . ', #' . $self->{ vars }->get_system->appnum_to_str( $appnumber );
 	
 	my $conf = $self->{ autoform }->{ confirm };
 	my $html = $self->get_file_content( $conf->{ tt } );
@@ -2487,13 +2455,13 @@ sub send_app_confirm
 		ORDER BY ID DESC LIMIT 1", $appid
 	)->[0];
 	
-	$replacer->{ branch_addr } = $vars->getGLangVar( 'Address-' . $data->{ CenterID }, $langid );
+	$replacer->{ branch_addr } = $self->{ vars }->getGLangVar( 'Address-' . $data->{ CenterID }, $langid );
 	
 	$replacer->{ branch_addr } = $self->query( 'sel1', __LINE__, "
 		SELECT BAddr FROM Branches WHERE ID=?", $data->{ CenterID }
 	) if $replacer->{ branch_addr } eq 'Address-' . $data->{ CenterID };
 
-	$replacer->{ branch_addr } = $vars->get_system->converttext( $replacer->{ branch_addr } );
+	$replacer->{ branch_addr } = $self->{ vars }->get_system->converttext( $replacer->{ branch_addr } );
 	$replacer->{ branch_addr } =~ s/_?(x005F|x000D)_?//g;
 	
 	my ( $tstart,$tend ) = $self->query( 'sel1', __LINE__, "
@@ -2506,7 +2474,7 @@ sub send_app_confirm
 
 	$replacer->{ date_time } = 
 		$date_sp[ 2 ] . ' ' . $months[ $date_sp[ 1 ] + 1 ] . ' ' . $date_sp[ 0 ] . ', ' . 
-		$vars->get_system->time_to_str($tstart) . ' - ' . $vars->get_system->time_to_str($tend);
+		$self->{ vars }->get_system->time_to_str($tstart) . ' - ' . $self->{ vars }->get_system->time_to_str($tend);
 	
 	$replacer->{ app_person } = ( !$data->{ dwhom } ? '<b>' . $lang_local->{ pers } .'</b>' : 
 		$lang_local->{ by_the_doc } . ' <b>' . 
@@ -2528,14 +2496,14 @@ sub send_app_confirm
 		$html =~ s/\[%$_%\]/$lang_local->{ $_ }/g;
 	};
 	
-	$vars->{'session'}->{'login'} = 'website';
+	$self->{ vars }->{'session'}->{'login'} = 'website';
 	
 	my $agreem = $self->get_file_content( $conf->{ pers_data } );
 	
 	my $atach = {
 		0 => {
 			'filename'	=> "Appointment_$appnumber.pdf", 
-			'data'		=> VCS::Docs::appointments->new( 'VCS::Docs::appointments', $vars )->createPDF( $appid ), 
+			'data'		=> VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } )->createPDF( $appid ), 
 			'ContentType'	=> 'application/pdf',
 		},
 		1 => {
@@ -2545,7 +2513,7 @@ sub send_app_confirm
 		}
 	};
 	
-	$vars->get_system->send_mail( $vars, $data->{ EMail }, $subject, $html, 1, $atach );
+	$self->{ vars }->get_system->send_mail( $self->{ vars }, $data->{ EMail }, $subject, $html, 1, $atach );
 }
 
 sub get_file_content
@@ -2569,8 +2537,7 @@ sub age
 {
 	my $self = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	my $age_free_days = $vars->getConfig( 'general' )->{ age_free_days } + 0;
+	my $age_free_days = $self->{ vars }->getConfig( 'general' )->{ age_free_days } + 0;
 
 	my ( $birth_year, $birth_month, $birth_day ) = split /\-/, shift; 
 	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
@@ -2591,7 +2558,7 @@ sub lang
 	
 	return if !$text;
 	
-	my $vocabulary = $self->{ 'VCS::Vars' }->{ 'VCS::Resources' }->{ 'list' };
+	my $vocabulary = $self->{ vars }->{ 'VCS::Resources' }->{ 'list' };
 
 	my $lang = ( $lang_param ? $lang_param : $self->{ 'lang' } );
 	
@@ -2611,13 +2578,11 @@ sub cached
 {
 	my ( $self, $name, $save ) = @_;
 	
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	return $vars->get_memd->set( $name, $save, $self->{ autoform }->{ memcached }->{ memcached_exptime } ) if $save;
+	return $self->{ vars }->get_memd->set( $name, $save, $self->{ autoform }->{ memcached }->{ memcached_exptime } ) if $save;
 	
 	return if $self->{ this_is_self_testing };
 
-	return $vars->get_memd->get( $name );
+	return $self->{ vars }->get_memd->get( $name );
 }
 
 sub query
@@ -2627,16 +2592,15 @@ sub query
 	my $type = shift;
 	my $line = shift;
 	
-	my $vars = $self->{ 'VCS::Vars' };
 	my $return;
 	
 	# my $time_start = [ gettimeofday() ];
 
-	$return = $vars->db->selall(@_) if $type eq 'selall';
-	$return = $vars->db->selallkeys(@_) if $type eq 'selallkeys';
-	$return = $vars->db->query(@_) if $type eq 'query';
+	$return = $self->{ vars }->db->selall(@_) if $type eq 'selall';
+	$return = $self->{ vars }->db->selallkeys(@_) if $type eq 'selallkeys';
+	$return = $self->{ vars }->db->query(@_) if $type eq 'query';
 	
-	my @result = $vars->db->sel1(@_) if $type eq 'sel1';
+	my @result = $self->{ vars }->db->sel1(@_) if $type eq 'sel1';
 	
 	# my $milliseconds = tv_interval( $time_start ) * 1000;
 	# warn Dumper( \@_ ) . '>' x 25 . " line $line - $milliseconds ms" if $milliseconds > 1; 

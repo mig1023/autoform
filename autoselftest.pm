@@ -262,7 +262,7 @@ sub get_test_list {
 				5 => { 	'tester' => \&test_line,
 					'args' => [ 7, { 'name' => 'test', 'label_for' => 'label_for' }, 
 						undef, 'label2', 400 ],
-					'expected' => 'test|"label_for" не может быть раньше, чем "label2" на 1 год',
+					'expected' => 'test|"label_for" не может быть раньше, чем "label2" более, чем на 1 год',
 				},
 			},
 		},
@@ -1091,6 +1091,9 @@ sub get_test_list {
 						'persons' => '1',
 						'center' => '5',
 						'fdate' => '01.05.2011',
+						'fdate_iso' => '2011-05-01',
+						'timeslot' => '0',
+						'appdate' => '0000-00-00',
 					},
 				},
 			},
@@ -1892,7 +1895,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_prepare_line },
 			'comment' => 'get_prepare_line',
 			'test' => { 	
-				1 => { 	'tester' => \&test_write_db,
+				1 => { 	'tester' => \&test_line,
 					'args' => [ '    start_line   end_line     ' ],
 					'expected' => 'start_line   end_line',
 				},
@@ -2208,6 +2211,8 @@ sub selftest
 	my $config = $vars->getConfig('db');
 	
 	$self->{ this_is_self_testing } = 1;
+	
+	$self->{ vars } = $vars;
 	
 	$vars->get_memd->delete( $_ ) for (
 		'cach_selftest', 'cach_selftest_write', 'autoform_addparam', 'autoform_collectdates', 'autoform_allpcode',
