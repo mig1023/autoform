@@ -15,7 +15,7 @@
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 [% END %]
 
-[% IF special.mask.0 %]
+[% IF ( special.mask.0 || (step == 1) ) %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 [% END %]
 
@@ -67,11 +67,11 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="3"><br>
 [% IF ( step > min_step ) && ( step != max_step ) %]
-	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
+	<input class="action_button" type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 [% END %]
 [% IF ( step < max_step ) && ( step > 0 ) %]
-	<input id="next_button" type="button" value="[% langreq('Далее') %] ▷" onclick="go_button('forward');">
+	<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] ▷" onclick="go_button('forward');">
 [% END %]
 
 [% IF ( step == max_step ) %]
@@ -81,14 +81,11 @@ YMaps.jQuery(function () {
 		<input type="button" value="[% langreq('Перейти на страницу записи') %] ▷" onclick="go_button('app');">
 	[% END %]
 [% END %]
-[% IF step %]
-</td></tr><tr><td colspan="3">&nbsp;</td></tr>
-<tr><td colspan="3">
-	[% IF ( step == 1 ) %]
-	<a target="_blank" class="dotted_link_big" href="">[% langreq('Воспользуйтесь преимуществами услуги Vip Premium lounge') %]</a>
-	<br>
-	<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
-	[% END %]
+[% IF step == 1 %]
+	</td></tr><tr><td colspan="3">
+	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
+	<tr><td colspan="3">
+	[% INCLUDE vip_form.tt2 %]
 [% END %]
 </td></tr></table>
 
@@ -125,8 +122,8 @@ function mobileScreenCheck() {
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	$('.info').css( "font-size", ( mobilScreen ? '30px' : '' ) );
 	
-	$(':button').css( "height", ( mobilScreen ? '120px' : '' ) );
-	$(':button').css( "width", ( mobilScreen ? '240px' : '' ) );
+	$('.action_button').css( "height", ( mobilScreen ? '120px' : '' ) );
+	$('.action_button').css( "width", ( mobilScreen ? '240px' : '' ) );
 	
 	$(':checkbox, :radio').css( "-ms-transform", ( mobilScreen ? "scale(4)" : "" ) );
 	$(':checkbox, :radio').css( "-moz-transform:", ( mobilScreen ? "scale(4)" : "" ) );
