@@ -23,7 +23,6 @@ sub new
 	my $self = bless {}, $pclass;
 	
 	$self->{ 'VCS::Vars' } = $vars;
-	$self->{ vars } = $vars;
 	
 	return $self;
 }
@@ -34,6 +33,8 @@ sub getContent
 	my ( $self, $task, $id, $template ) = @_;
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
+	
+	$self->{ vars } = $self->{ 'VCS::Vars' };
 	
 	my $dispathcher = {
 		'index'		=> \&autoform,
