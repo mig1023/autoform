@@ -99,7 +99,7 @@ sub get_html_elements
 		'example'		=> '<tr class="mobil_hide" [u]><td class="exam_td_gen">' .
 					'<span class="exam_span_gen">[example]: [value]</span></td>',
 
-		'info'			=> '<label class="info" id="[name]" [u]>[text]</label>',
+		'info'			=> '<label class="info" title="[comment]" id="[name]" [u]>[text]</label>',
 		'checklist'		=> '<div id="[name]">[options]</div>',
 		'checklist_insurer'	=> '[options]',
 		'captcha'		=> '<script type="text/javascript">var onloadCallback = function(){grecaptcha.render(' .

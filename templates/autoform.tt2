@@ -206,12 +206,21 @@ function init_comm(pos_x, pos_y) {
 		showTimeout: 100
 	});
 	
-	$('.select_gen,').poshytip({
+	$('.select_gen').poshytip({
 		className: 'tip-yellowsimple',
 		showOn: 'focus',
 		alignTo: 'target',
 		alignX: 'center',
 		alignY: 'top',
+		offsetX: 5,
+		showTimeout: 100
+	});
+	
+	$('label').poshytip({
+		className: 'tip-yellowsimple',
+		alignTo: 'target',
+		alignX: pos_x,
+		alignY: pos_y,
 		offsetX: 5,
 		showTimeout: 100
 	});
@@ -273,7 +282,11 @@ function init_comm(pos_x, pos_y) {
 			{ 'center': $('#center').val() }, 
 			function(xml) {
 				$(xml).find('node').each( function() {
-					$('#vtype').append('<option value="' + $(this).find('id').text() + '"'+(parseInt($(this).find('default').text()) ? ' selected'  : '')+'>'+$(this).find('title').text() + '</option>');
+					$('#vtype').append(
+						'<option value="' + $(this).find('id').text() + '"'+
+						(parseInt($(this).find('default').text()) ? ' selected'  : '')+
+						'>'+$(this).find('title').text() + '</option>'
+					);
 				
 					if ($(this).find('id').text() == selected_el) { restore_el = 1; };
 				});
@@ -312,13 +325,12 @@ function init_comm(pos_x, pos_y) {
 				$(xml).find('node').each( function() {
 					var apptimeValue = $(this).find('id').text();
 					var apptimeText = $(this).find('title').text();
-
-					if ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) {
-						$('#timeslot').append('<option value="' + apptimeValue + '" selected >'+ apptimeText + '</option>');
-					} else {
-						$('#timeslot').append('<option value="' + apptimeValue + '">'+ apptimeText + '</option>');
-					}
-				
+					
+					$('#timeslot').append(
+						'<option value="' + apptimeValue + '" ' +
+						( ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) ? 'selected' : '' )
+						+ ' >'+ apptimeText + '</option>'
+					);
 			});
 			
 			$('#tmp_img').remove();

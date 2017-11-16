@@ -1275,7 +1275,7 @@ sub get_html_for_element
 	
 	my $content = $elements->{ $type };
 	
-	$value =~ s/"/&quot;/g unless $type eq 'label_for';
+	$value =~ s/"/&quot;/g unless $type =~ /^(label_for|text)$/;
 	
 	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {
 		$content =~ s/\[name\]//gi;
@@ -1292,7 +1292,7 @@ sub get_html_for_element
 	else {
 		$content =~ s/\[progress_stage\]/$value/gi;
 	}
-	
+
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[comment\]/$comment/gi;
 	$content =~ s/\[example\]/$example/gi;

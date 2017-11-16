@@ -26,7 +26,9 @@
 
 [% IF content_text.0.ID == "X" %]
 	<tr><td colspan="5" id = "applist">
-	[% langreq('Ни один заявитель ещё не добавлен') %]
+	[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
+	[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Зарегистрировать заявителя"</b>') %]!<br>
+	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих') %].<br><br>
 	</td></tr>
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
@@ -44,7 +46,7 @@
 
 [% IF i < max_applicants %]
 <tr><td colspan="5">
-	<input type="button" value="[% langreq('Добавить заявителя') %]" onclick="go_button('addapp');">
+	<input type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');">
 </td></tr>
 [% END %]
 

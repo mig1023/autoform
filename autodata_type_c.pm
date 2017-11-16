@@ -68,6 +68,7 @@ sub get_content_rules_hash
 				'type' => 'info',
 				'name' => 'free_date',
 				'label' => 'Ближайшая доступная дата',
+				'comment' => 'Вы сможете выбрать удобную для Вас дату подачи документов во время оформления записи',
 				'special' => 'nearest_date',
 			},
 			{
@@ -75,7 +76,7 @@ sub get_content_rules_hash
 				'name' => 'email',
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
-				'example' => 'mail@mail.ru',
+				'example' => '',
 				'check' => 'zWN\@\-\_\.',
 				'check_logic' => [
 					{
@@ -90,7 +91,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'pers_info',
-				'label_for' => 'я согласен на <a target="_blank" class="dotted_link_big" href="/pers_data_agreement.pdf">условия обработки персональных данных</a>',
+				'label_for' => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/pers_data_agreement.pdf">условиями</a> обработки персональных данных визовым центром',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -101,7 +102,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				'label_for' => 'я согласен на условия работы с мобильными телефона на территории визового центра',
+				'label_for' => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">условиями</a> работы с мобильными телефона на территории визового центра',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -123,7 +124,7 @@ sub get_content_rules_hash
 				'name' => 's_date',
 				'label' => 'Дата начала поездки',
 				'comment' => 'Введите предполагаемую дату начала поездки',
-				'example' => '01.01.2025',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -142,7 +143,7 @@ sub get_content_rules_hash
 				'name' => 'f_date',
 				'label' => 'Дата окончания поездки',
 				'comment' => 'Введите предполагаемую дату окончания поездки',
-				'example' => '31.12.2025',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -248,7 +249,7 @@ sub get_content_rules_hash
 				'name' => 'birthdate',
 				'label' => 'Дата рождения',
 				'comment' => 'Введите дату рождения',
-				'example' => '01.01.1980',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -323,7 +324,7 @@ sub get_content_rules_hash
 				'name' => 'passdate',
 				'label' => 'Дата выдачи',
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
-				'example' => '01.01.2010',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -348,7 +349,7 @@ sub get_content_rules_hash
 				'name' => 'passtill',
 				'label' => 'Действителен до',
 				'comment' => 'Введите дату окончания действия загранпаспорта, указанную в паспорте',
-				'example' => '01.01.2010',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -383,7 +384,7 @@ sub get_content_rules_hash
 				'name' => 'fulladdress',
 				'label' => 'Домашний адрес',
 				'comment' => 'Фактический адрес проживания заявителя',
-				'example' => 'Moscow, Lermontov st., 10',
+				'example' => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
 				'check' => 'zWN\s\-\_\.\,\;\'\"\/',
 				'db' => {
 					'table' => 'AppData',
@@ -396,7 +397,7 @@ sub get_content_rules_hash
 				'name' => 'appemail',
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
-				'example' => 'mail@mail.ru',
+				'example' => '',
 				'check' => 'zWN\@\s\-\.',
 				'check_logic' => [
 					{
@@ -697,6 +698,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'brhplace',
 				'label' => 'Действителен до',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -783,7 +785,7 @@ sub get_content_rules_hash
 				'name' => 'apps_date',
 				'label' => 'Дата начала поездки',
 				'comment' => 'Укажите дату начала действия запрашивамой визы',
-				'example' => '01.01.2025',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -800,7 +802,7 @@ sub get_content_rules_hash
 				'name' => 'appf_date',
 				'label' => 'Дата окончания поездки',
 				'comment' => 'Укажите дату окончания действия запрашивамой визы',
-				'example' => '31.12.2025',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -927,7 +929,7 @@ sub get_content_rules_hash
 				'name' => 'premessofd',
 				'label' => 'Действительно с',
 				'comment' => 'Начало действия разрешения',
-				'example' => '01.01.2025',
+				'example' => '31.12.1900',
 				'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -940,7 +942,7 @@ sub get_content_rules_hash
 				'name' => 'premessoed',
 				'label' => 'Действительно по',
 				'comment' => 'окончание действия разрешения',
-				'example' => '31.12.2025',
+				'example' => '31.12.1900',
 				'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -967,7 +969,7 @@ sub get_content_rules_hash
 				'name' => 'prevvisafd',
 				'label' => 'Дата начала',
 				'comment' => 'Укажите дату начала действия визы',
-				'example' => '01.01.2016',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -980,7 +982,7 @@ sub get_content_rules_hash
 				'name' => 'prevvised',
 				'label' => 'Дата окончания',
 				'comment' => 'Укажите дату окончания действия визы',
-				'example' => '01.06.2016',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -1007,7 +1009,7 @@ sub get_content_rules_hash
 				'name' => 'prevvisafd',
 				'label' => 'Дата сдачи отпечатков, если известна',
 				'comment' => 'Укажите, если помните, дату, когда сдавались отпечатки пальцев для предыдущей визы',
-				'example' => '01.06.2016',
+				'example' => '31.12.1900',
 				'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -1146,7 +1148,7 @@ sub get_content_rules_hash
 				'name' => 'p_birthdate',
 				'label' => 'Дата рождения',
 				'comment' => 'Укажите дату рождения приглашающего лица',
-				'example' => '01.01.1970',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1502,7 +1504,7 @@ sub get_content_rules_hash
 				'name' => 'eu_bdate',
 				'label' => 'Дата рождения',
 				'comment' => 'Введите дату рождения',
-				'example' => '01.01.1980',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -1626,7 +1628,7 @@ sub get_content_rules_hash
 				'name' => 'info_passdate',
 				'label' => 'Дата выдачи',
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
-				'example' => '01.01.2010',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -1743,7 +1745,7 @@ sub get_content_rules_hash
 				'name' => 'dovpassdate',
 				'label' => 'Дата выдачи',
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
-				'example' => '01.01.2010',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -1849,7 +1851,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'services_text',
-				'label' => 'СМС-оповещение о готовности документов (платная услуга)',
+				'label' => 'СМС-оповещение о готовности документов ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				'font' => 'bold',
 			},
 			{
@@ -1873,7 +1875,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'services_text',
-				'label' => 'Доставка документов DHL (платная услуга)',
+				'label' => 'Доставка документов DHL ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				'font' => 'bold',
 			},
 			{
@@ -1929,7 +1931,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'insurance_text',
-				'label' => 'Страховка (платная услуга)',
+				'label' => 'Страховка ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				'font' => 'bold',
 			},
 			{
