@@ -1457,7 +1457,7 @@ sub add_rules_format
 	$format_add_string .= $self->lang( 'и ' ) if $rules =~ /Ё/ and $rules =~ /W/;
 	$format_add_string .= $self->lang( 'английские ' ) if $rules =~ /W/;
 	$format_add_string .= $self->lang( 'буквы, ' ) if $rules =~ /Ё/ or $rules =~ /W/;
-	$format_add_string .= $self->lang( 'цифры,' ) if $rules =~ /N/;
+	$format_add_string .= $self->lang( 'цифры, ' ) if $rules =~ /N/;
 	
 	$rules =~ s/(\s|\n|z|W|Ё|N|'|\))//g;
 		
@@ -1466,7 +1466,7 @@ sub add_rules_format
 		
 		my $symbols_help = VCS::Site::autodata::get_symbols_help();
 		
-		$format_add_string .= $self->lang( ' а также символы ' );
+		$format_add_string .= $self->lang( 'а также символы' );
 		
 		for ( 1..$#symbols ) {
 			
@@ -1479,7 +1479,7 @@ sub add_rules_format
 		}		
 	}
 	
-	$format_add_string =~ s/\s?,$//;
+	$format_add_string =~ s/\s?,\s?$//;
 		
 	return $format_add_string;
 }
