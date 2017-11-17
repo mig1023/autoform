@@ -249,20 +249,6 @@ sub get_content_rules_hash
 				},
 				'special' => 'mask',
 			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'checkbox',
-				'name' => 'nres',
-				'label' => 'Если заявитель не является гражданином или резидентом страны пребывания',
-				'label_for' => 'не резидент',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'NRes',
-				},
-				'relation' => {},
-			},
 		],
 		
 		'Данные загранпаспорта' => [
@@ -771,19 +757,19 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Подтверждение записи' => [
-			{
-				'page_ord' => 12,
-				'progress' => 11,
-			},
-			{
-				'type' => 'captcha',
-			},
-		],
+		# 'Подтверждение записи' => [
+			# {
+				# 'page_ord' => 12,
+				# 'progress' => 11,
+			# },
+			# {
+				# 'type' => 'captcha',
+			# },
+		# ],
 		
 		'Поздравляем!' => [
 			{
-				'page_ord' => 13,
+				'page_ord' => 12,
 				'progress' => 12,
 			},
 			{

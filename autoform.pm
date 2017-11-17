@@ -2276,12 +2276,14 @@ sub mod_hash
 	$hash->{ SchengenAppDataID } = $schappid if $schappid;
 	$hash->{ Status } = 1 if exists $hash->{ Status };
 	$hash->{ PolicyType } = 1 if $insurance;
+	
+	$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) if $table_name eq 'AppData';
 
 	if ( $table_name eq 'Appointments' ) {
 	
-		my $appobj = VCS::Docs::appointments->new('VCS::Docs::appointments', $self->{ vars } );
+		my $appointments = VCS::Docs::appointments->new('VCS::Docs::appointments', $self->{ vars } );
 		
-		$hash->{ AppNum } = $appobj->getLastAppNum( $self->{ vars }, $hash->{ CenterID }, $hash->{ AppDate } );
+		$hash->{ AppNum } = $appointments->getLastAppNum( $self->{ vars }, $hash->{ CenterID }, $hash->{ AppDate } );
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
 			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );

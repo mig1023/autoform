@@ -436,20 +436,6 @@ sub get_content_rules_hash
 				},
 				'relation' => {},
 			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'checkbox',
-				'name' => 'nres',
-				'label' => 'Если заявитель не является гражданином или резидентом страны пребывания',
-				'label_for' => 'не резидент',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'NRes',
-				},
-				'relation' => {},
-			},
 		],
 		
 		'Дополнительные данные' => [
