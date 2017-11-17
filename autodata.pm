@@ -89,6 +89,9 @@ sub get_html_elements
 		'start_cell'		=> '<td [u]>',
 		'end_cell'		=> '</td>',
 		
+		'new_line'		=> '<br>',
+		'new_and_bold'		=> '<br><br><b>[name]</b>',
+		
 		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
@@ -175,6 +178,25 @@ sub get_blocked_emails
 			],
 		},
 	];
+};
+
+sub get_symbols_help
+# //////////////////////////////////////////////////
+{
+	return {
+		's' => 'пробела',
+		'.' => 'точки',
+		',' => 'запятой',
+		':' => 'двоеточия',
+		';' => 'точки с запятой',
+		'-' => 'дефиса',
+		'_' => 'нижнего подчёркивания',
+		'"' => 'кавычек',
+		'/' => 'дроби',
+		'+' => 'плюса',
+		'(' => 'скобок',
+		'\\' => 'обратной дроби',
+	};
 };
 
 sub get_appointment_text

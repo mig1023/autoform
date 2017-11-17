@@ -1276,6 +1276,8 @@ sub get_html_for_element
 	my $content = $elements->{ $type };
 	
 	$value =~ s/"/&quot;/g unless $type =~ /^(label_for|text)$/;
+
+	$comment .= $self->add_rules_format( $check ) if $type =~ /^input$/;
 	
 	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {
 		$content =~ s/\[name\]//gi;
@@ -1429,6 +1431,57 @@ sub get_html_for_element
 	}
 
 	return $content;
+}
+
+sub add_rules_format
+# //////////////////////////////////////////////////
+{
+	my ( $self, $rules ) = @_;
+
+	my $format_add_string = $self->get_html_for_element( 'new_and_bold',
+		$self->lang( ( $rules =~ /z/ ? 'Обязательное' : 'Необязательное' ) . ' поле' ) 
+	);
+	
+	if ( $rules =~ /D/ ) {
+		$format_add_string .= $self->get_html_for_element( 'new_line' ) . 
+			$self->lang( 'В поле вводится дата в формате ДД.ММ.ГГГГ' );
+			
+		$rules = undef;
+	}
+	else {
+		$format_add_string .= $self->get_html_for_element( 'new_line' ) .
+			$self->lang( 'В поле допустимо вводить ' );
+	}
+	
+	$format_add_string .= $self->lang( 'русские ' ) if $rules =~ /Ё/;
+	$format_add_string .= $self->lang( 'и ' ) if $rules =~ /Ё/ and $rules =~ /W/;
+	$format_add_string .= $self->lang( 'английские ' ) if $rules =~ /W/;
+	$format_add_string .= $self->lang( 'буквы, ' ) if $rules =~ /Ё/ or $rules =~ /W/;
+	$format_add_string .= $self->lang( 'цифры,' ) if $rules =~ /N/;
+	
+	$rules =~ s/(\s|\n|z|W|Ё|N|'|\))//g;
+		
+	if ( $rules ) {
+		my @symbols = split /\\/, $rules;
+		
+		my $symbols_help = VCS::Site::autodata::get_symbols_help();
+		
+		$format_add_string .= $self->lang( ' а также символы ' );
+		
+		for ( 1..$#symbols ) {
+			
+			if ( exists $symbols_help->{ $symbols[ $_ ] } ) {
+				$format_add_string .= ' ' . $self->lang( $symbols_help->{ $symbols[ $_ ] } ) . ',';
+			}
+			elsif ( $symbols[ $_ ] ne '' ) {
+				$format_add_string .= " $symbols[ $_ ],"; 
+			}			
+		}		
+	}
+	
+	$format_add_string =~ s/\s?,$//;
+		
+	return $format_add_string;
 }
 
 sub check_comments_alter_version

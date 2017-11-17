@@ -76,7 +76,7 @@ sub get_content_rules_hash
 				'name' => 'email',
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
-				'example' => '',
+				'example' => 'info@italyvms.ru',
 				'check' => 'zWN\@\-\_\.',
 				'check_logic' => [
 					{
@@ -397,7 +397,7 @@ sub get_content_rules_hash
 				'name' => 'appemail',
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
-				'example' => '',
+				'example' => 'info@italyvms.ru',
 				'check' => 'zWN\@\s\-\.',
 				'check_logic' => [
 					{
@@ -569,7 +569,7 @@ sub get_content_rules_hash
 				'label' => 'Для несовершеннолетних',
 				'comment' => 'Фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей или законного представителя',
 				'example' => 'Ivanov Ivan, The Russian Federation',
-				'check' => 'WN\s\n\-\,\.\;\_\\\/\'\"',
+				'check' => 'WN\s\-\,\.\;\_\\\/\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'KinderData',
@@ -582,7 +582,7 @@ sub get_content_rules_hash
 				'label' => 'Профессиональная деятельность',
 				'comment' => 'Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
 				'example' => 'Doctor',
-				'check' => 'zWN\s_\.\,\"\'\-\(\)\#\*',
+				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ProfActivity',
@@ -594,8 +594,8 @@ sub get_content_rules_hash
 				'name' => 'workaddr',
 				'label' => 'Работодатель: адрес, телефон',
 				'comment' => 'Данные заполняются в соответствии со справкой с места работы',
-				'example' => 'MedCenter, Moscow, ul.Lenina 1, (095) 123-4567',
-				'check' => 'zWwN\s_\.\,\"\'\-\(\)\#\*',
+				'example' => 'VMS, M.Tolmachevskiy pereulok 6 b.1, (495) 7273577',
+				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'WorkOrg',
@@ -825,7 +825,7 @@ sub get_content_rules_hash
 						'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
 				},
 				'example' => '14',
-				'check' => 'zN+',
+				'check' => 'zN\+',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'CalcDuration',
@@ -1658,7 +1658,7 @@ sub get_content_rules_hash
 				'name' => 'info_address',
 				'label' => 'Адрес',
 				'comment' => 'Полный адрес, включая индекс',
-				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
+				'example' => '119017, г.Москва, М.Толмачевский пер., д. 6, стр.1',
 				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
