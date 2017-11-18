@@ -85,19 +85,22 @@ sub get_content_rules
 		$new_content->{ $page_ord } = $content->{ $page };
 		
 		if ( $current_page == $page_ord ) {
+
 			for ( 'persons_in_page', 'collect_date', 'param', 'ussr_or_rf_first' ) {
 				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[0]->{ $_ } ? 1 : 0 );
 			}
 		}
 		
-		if ( !$full ) {
-			if ( $content->{ $page }->[0]->{replacer} ) {
-				$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
-			} else {
-				delete $new_content->{ $page_ord }->[0];
-				@{ $new_content->{ $page_ord } } = grep defined, @{ $new_content->{ $page_ord } };
-			}
-		} else {
+		if ( !$full && $content->{ $page }->[0]->{replacer} ) {
+		
+			$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
+		}
+		elsif ( !$full ) {
+		
+			delete $new_content->{ $page_ord }->[0];
+			@{ $new_content->{ $page_ord } } = grep defined, @{ $new_content->{ $page_ord } };
+		}
+		else {
 			$new_content->{ $page_ord }->[0]->{page_name} = $page;
 		}
 	}
