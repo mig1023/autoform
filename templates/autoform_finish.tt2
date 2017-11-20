@@ -22,7 +22,7 @@
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 <tr><td>
-	Заполнить ещё одну или оформить запись?
+	[% langreq('Вернуться к списку и добавить ещё одного заявителя или перейти к завершению записи?') %]
 </td></tr>
 
 <tr><td>&nbsp;
@@ -31,7 +31,7 @@
 <tr><td>
 	<input type="button" value="◁ [% langreq('Вернуться к списку') %]" onclick="back_button();">
 	&nbsp;
-	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="finish_button();">
+	<input type="button" value="[% langreq('Перейти к завершению') %] ▷" onclick="finish_button();">
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 </table>

@@ -305,7 +305,7 @@ sub get_content_rules_hash
 				'name' => 'rupassnum',
 				'label' => '№ загранпаспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '750000001',
+				'example' => '650000001',
 				'check' => 'zWN',
 				'check_logic' => [
 					{
@@ -370,7 +370,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'passwhere',
 				'label' => 'Выдан',
-				'comment' => 'UFMS/FMS и номер подразделения',
+				'comment' => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
 				'example' => 'FMS 12345',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
@@ -415,7 +415,7 @@ sub get_content_rules_hash
 				'name' => 'appphone',
 				'label' => 'Телефон',
 				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
-				'example' => '79161234567',
+				'example' => '79XXXXXXXXX',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -428,7 +428,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'ischild',
-				'label' => 'Если ребёнок вписан в паспорт родителей',
+				'label' => 'Если ребёнок вписан в загранпаспорт родителей',
 				'label_for' => 'вписан в паспорт',
 				'db' => {
 					'table' => 'AppData',
@@ -472,7 +472,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'brhplace',
 				'label' => 'Место рождения',
-				'comment' => 'Укажите место рождения так, как оно указано в загранпаспорте, без знака /',
+				'comment' => 'Укажите место рождения латинскими буквами в соответствии с информацией в загранпаспорте',
 				'example' => 'Moscow',
 				'check' => 'zWN\s\-\,\;',
 				'db' => {
@@ -500,7 +500,7 @@ sub get_content_rules_hash
 				'name' => 'prev_сitizenship',
 				'label' => 'Гражданство при рождении',
 				'comment' => 'Для тех, кто родился до 1992 необходимо указывать The Soviet Union, позднее - The Russian Federation',
-				'example' => 'The Russian Federation',
+				'example' => 'The Soviet Union',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -543,8 +543,8 @@ sub get_content_rules_hash
 					0 => 'не указано',
 					1 => 'холост/не замужем',
 					2 => 'женат/замужем',
-					3 => 'не проживает с супругом',
 					4 => 'разведен/-а',
+					3 => 'не проживает с супругом',
 					5 => 'вдовец/вдова',
 					6 => 'иное'
 				},
@@ -578,9 +578,9 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'workaddr',
-				'label' => 'Работодатель: адрес, телефон',
+				'label' => 'Работодатель: название компании, адрес, телефон',
 				'comment' => 'Данные заполняются в соответствии со справкой с места работы',
-				'example' => 'VMS, M.Tolmachevskiy pereulok 6 b.1, (495) 7273577',
+				'example' => 'VMS, M.Tolmachevskiy pereulok 6 b.1, (495)7273577',
 				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
@@ -594,15 +594,15 @@ sub get_content_rules_hash
 			{
 				'type' => 'radiolist',
 				'name' => 'n_rezident',
-				'label' => 'Страна пребывания',
+				'label' => 'Страна пребывания, если не является страной гражданства',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'CountryLive',
 				},
 				'param' => { 
-					1 => 'страна гражданства', 
-					2 => 'не является страной гражданства', 
+					1 => 'нет', 
+					2 => 'да, потребуется указать вид на жительство или равноценный документ', 
 				},
 			},
 			{
@@ -649,7 +649,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'familyother',
 				'label' => 'Семейное положение',
-				'check' => 'zW',
+				'check' => 'zW\s',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FamilyOther',
@@ -673,8 +673,9 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'vidno',
-				'label' => 'Вид на жительство №',
-				'check' => 'zN\s\-',
+				'label' => 'Номер вида на жительство или равноценного документа',
+				'comment' => 'Укажите номер вида на жительство; при наличии временной регистрации оставьте поле пустым',
+				'check' => 'N\s\-',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'VidNo',
@@ -684,7 +685,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'brhplace',
 				'label' => 'Действителен до',
-				'example' => '31.12.1900',
+				'comment' => 'Укажите срок действия документа',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -754,7 +755,7 @@ sub get_content_rules_hash
 				'name' => 'visanum',
 				'label' => 'Виза запрашивается для',
 				'comment' => 'Виза с однократным въездом даёт возможность пересечь границу Шенгена только один раз. После того как Вы покинете зону Шенгена по данной визе, она будет закрыта и перестанет действовать. Виза с двукратным въездом позволяет въехать и покинуть зону Шенгена два раза в период действия визы. Виза с многократным въездом даёт возможность пересекать границу зоны Шенгенского соглашения в период действия визы',
-				'example' => 'двукратного въезда',
+				'example' => 'многократного въезда',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1061,9 +1062,9 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'hotelsaddr',
-				'label' => 'Адрес ',
-				'comment' => 'Укажите адрес гостиницы с почтовым индексом',
-				'example' => 'Via Villafranca 10, Rome, 00185',
+				'label' => 'Адрес места пребывания',
+				'comment' => 'Укажите адрес гостиницы',
+				'example' => 'Via Esempio 1, Rome',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
@@ -1076,7 +1077,7 @@ sub get_content_rules_hash
 				'name' => 'hotelpho',
 				'label' => 'Телефон',
 				'comment' => 'Укажите контактный телефон гостиницы',
-				'example' => '3964440384',
+				'example' => '39XXXXXXXX',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1223,7 +1224,7 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'a_province',
 				'label' => 'Провинция',
-				'example' => 'Rome',
+				'example' => 'Milano',
 				'check' => 'zWN\.\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1237,7 +1238,7 @@ sub get_content_rules_hash
 				'name' => 'a_city',
 				'label' => 'Город',
 				'comment' => 'Укажите название города',
-				'example' => 'Fiumicino',
+				'example' => 'Milano',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1250,7 +1251,7 @@ sub get_content_rules_hash
 				'name' => 'a_company',
 				'label' => 'Название приглашающей компании',
 				'comment' => 'Укажите полное название организации',
-				'example' => 'Microsoft Corporation',
+				'example' => 'Visa Management Service',
 				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'AppData',
@@ -1263,7 +1264,7 @@ sub get_content_rules_hash
 				'name' => 'a_companyaddr',
 				'label' => 'Адрес приглашающей компании',
 				'comment' => 'Укажите адрес организации',
-				'example' => 'Via Villafranca 10, Rome, 00185',
+				'example' => 'Via Esempio 10, Milano',
 				'check' => 'zWN\s\-\,\;',
 				'db' => {
 					'table' => 'AppData',
@@ -1276,7 +1277,7 @@ sub get_content_rules_hash
 				'name' => 'a_phone',
 				'label' => 'Телефон компании',
 				'comment' => 'Укажите контактный телефон организации',
-				'example' => '3964440384',
+				'example' => '39XXXXXXXX',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1288,8 +1289,8 @@ sub get_content_rules_hash
 				'name' => 'a_fax',
 				'label' => 'Факс компании',
 				'comment' => 'Укажите контактный факс организации',
-				'example' => '3964440384',
-				'check' => 'zN',
+				'example' => '39XXXXXXXX',
+				'check' => 'N',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'ACompanyFax',
@@ -1299,8 +1300,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'a_person',
 				'label' => 'ФИО, адрес, телефон, email контактного лица',
-				'comment' => 'Укажите данные кантактного лица организации',
-				'example' => 'Mike Bowman, Via Villafranca 10, Rome, 00185, 3964440384, mail@mail.it',
+				'comment' => 'Укажите данные кантактного лица приглашающей организации',
+				'example' => 'Ivanov Ivan, Via Esempio 10, Milano, 39XXXXXXXX, info@italyvms.ru',
 				'check' => 'zWN\@\s\-\.\,\;',
 				'db' => {
 					'table' => 'AppData',
@@ -1326,7 +1327,7 @@ sub get_content_rules_hash
 				},
 				'param' => { 
 					0 => 'сам заявитель', 
-					1 => 'упомянутый ранее спонсор',
+					1 => 'приглашающая сторона',
 					2 => 'иной спонсор',
 				},
 			},
@@ -1554,7 +1555,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Укажите данные для договора' => [
+		'Укажите данные документа, удостоверяющего личность' => [
 			{
 				'page_ord' => 25,
 				'progress' => 11,
@@ -1566,7 +1567,14 @@ sub get_content_rules_hash
 					}
 				},
 			},
-
+			{
+				'type' => 'text',
+				'name' => 'rupass_text',
+				'label' => 'Для граждан РФ необходимо указать данные внутреннего паспорта',
+			},
+			{
+				'type' => 'free_line',
+			},
 			{
 				'type' => 'info',
 				'name' => 'info_rulname',
@@ -1602,7 +1610,7 @@ sub get_content_rules_hash
 				'name' => 'info_passnum',
 				'label' => '№ паспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '754300001',
+				'example' => '4510ХХХХХХ',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -1642,9 +1650,9 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'info_address',
-				'label' => 'Адрес',
-				'comment' => 'Полный адрес, включая индекс',
-				'example' => '119017, г.Москва, М.Толмачевский пер., д. 6, стр.1',
+				'label' => 'Адрес регистрации',
+				'comment' => 'Укажите адрес регистрации',
+				'example' => 'г.Москва, М.Толмачевский пер., д. 6, стр.1',
 				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
@@ -1838,6 +1846,9 @@ sub get_content_rules_hash
 				'type' => 'free_line',
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'text',
 				'name' => 'services_text',
 				'label' => 'СМС-оповещение о готовности документов ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
@@ -1849,9 +1860,9 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'sms',
-				'label' => 'SMS уведомление',
+				'label' => 'Номер телефона для<br>SMS-уведомления',
 				'comment' => 'Введите номер сотового телефона для получения СМС о готовности документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				'example' => '79051234578',
+				'example' => '79XXXXXXXXX',
 				'check' => 'N',
 				'db' => {
 					'table' => 'Appointments',
@@ -1874,7 +1885,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'ship_index',
 				'label' => 'Индекс доставки',
-				'comment' => 'Введите первые цифры индекса или первые первые буквы города для доставки документов документов; выберите из списка подходящий индекс и город; услуга платная, оставьте поле пустым, если в ней нет необходимости',
+				'comment' => 'Введите первые цифры индекса или первые буквы города для доставки документов; выберите из списка подходящий индекс и город; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				'example' => '119017, Москва',
 				'check' => 'ЁN\s\,\.\-\(\)',
 				'check_logic' => [
@@ -1953,7 +1964,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Предпочтительный офис выдачи документов' => [
+		'Предпочтительный офис получения готовых документов' => [
 			{
 				'page_ord' => 28,
 				'progress' => 13,
@@ -1992,15 +2003,10 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Поздравляем!' => [
+		'Запись успешно создана!' => [
 			{
 				'page_ord' => 30,
 				'progress' => 15,
-			},
-			{
-				'type' => 'text',
-				'name' => 'visa_text',
-				'label' => 'Всё, запись создана!',
 			},
 			{
 				'type' => 'text',
