@@ -534,7 +534,7 @@ sub get_content_rules_hash
 				'name' => 'family',
 				'label' => 'Семейное положение',
 				'example' => 'женат/замужем',
-				'check' => 'zN',
+				'check' => 'N',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Family',
@@ -567,7 +567,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'workdata',
 				'label' => 'Профессиональная деятельность',
-				'comment' => 'Профессиою необходимо указывать на английском или итальянском языках. Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
+				'comment' => 'Профессию необходимо указывать на английском или итальянском языках. Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
 				'example' => 'Doctor',
 				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
@@ -742,14 +742,14 @@ sub get_content_rules_hash
 				'name' => 'nulla',
 				'label' => 'Страна первого въезда',
 				'comment' => 'Укажите страну первого въезда в шенгенскую зону в рамках запланированной поездки',
-				'example' => 'ITALIA',
+				'example' => 'ITALY',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Nulla',
 				},
-				'param' => '[first_countries]',
-				'first_elements' => '133',
+				'param' => '[eu_countries]',
+				'first_elements' => 'default_free, 133',
 			},
 			{
 				'type' => 'select',
@@ -757,7 +757,7 @@ sub get_content_rules_hash
 				'label' => 'Виза запрашивается для',
 				'comment' => 'Виза с однократным въездом даёт возможность пересечь границу Шенгена только один раз. После того как Вы покинете зону Шенгена по данной визе, она будет закрыта и перестанет действовать. Виза с двукратным въездом позволяет въехать и покинуть зону Шенгена два раза в период действия визы. Виза с многократным въездом даёт возможность пересекать границу зоны Шенгенского соглашения в период действия визы',
 				'example' => 'многократного въезда',
-				'check' => 'zN',
+				'check' => 'N',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'VisaNum',
@@ -850,7 +850,7 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'fingers',
 				'label' => 'Отпечатки предоставлены за последние 5 лет',
-				'check' => 'zN',
+				'check' => 'N',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'Fingers',
@@ -873,7 +873,7 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'femrel',
 				'label' => 'Степень родства',
-				'check' => 'zN',
+				'check' => 'N',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'FamRel',
@@ -1111,7 +1111,7 @@ sub get_content_rules_hash
 				'name' => 'p_name',
 				'label' => 'Имя',
 				'comment' => 'Укажите имя приглашающего лица',
-				'example' => 'Mike',
+				'example' => 'Ivan',
 				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1124,7 +1124,7 @@ sub get_content_rules_hash
 				'name' => 'p_last_name',
 				'label' => 'Фамилия',
 				'comment' => 'Укажите фамилию приглашающего лица',
-				'example' => 'Bowman',
+				'example' => 'Ivanov',
 				'check' => 'zW\s\-',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1149,13 +1149,13 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'p_province',
 				'label' => 'Провинция',
-				'check' => 'zWN\.\s\-',
+				'check' => 'N',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataProvince',
 				},
 				'param' => '[schengen_provincies]',
-				'format' => 'capslock',
+				'first_elements' => 'default_free',
 			},
 			{
 				'type' => 'input',
@@ -1175,7 +1175,7 @@ sub get_content_rules_hash
 				'name' => 'p_adress',
 				'label' => 'Адрес',
 				'comment' => 'Укажите адрес без названия города',
-				'example' => 'Via Villafranca 10',
+				'example' => 'Via Esempio 1',
 				'check' => 'zWN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1188,7 +1188,7 @@ sub get_content_rules_hash
 				'name' => 'p_phone',
 				'label' => 'Телефон',
 				'comment' => 'Укажите контактный номер телефона',
-				'example' => '3964440384',
+				'example' => '39XXXXXXXX',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'SchengenAppData',
@@ -1200,8 +1200,8 @@ sub get_content_rules_hash
 				'name' => 'p_email',
 				'label' => 'Email',
 				'comment' => 'Укажите адрес электронной почты',
-				'example' => 'mail@mail.it',
-				'check' => 'zWN\@\s\-\.\,\;',
+				'example' => 'info@italyvms.ru',
+				'check' => 'zWN\@\s\-\.',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataEmail',
@@ -1227,13 +1227,13 @@ sub get_content_rules_hash
 				'name' => 'a_province',
 				'label' => 'Провинция',
 				'example' => 'Milano',
-				'check' => 'zWN\.\s\-',
+				'check' => 'N',
 				'db' => {
 					'table' => 'SchengenAppData',
 					'name' => 'HostDataProvince',
 				},
 				'param' => '[schengen_provincies]',
-				'format' => 'capslock',
+				'first_elements' => 'default_free',
 			},
 			{
 				'type' => 'input',
@@ -1322,7 +1322,7 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'mezziwhom',
 				'label' => 'Расходы заявителя оплачивает',
-				'check' => 'zN',
+				'check' => 'N',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'MezziWhom',
@@ -1983,7 +1983,7 @@ sub get_content_rules_hash
 				'type' => 'radiolist',
 				'name' => 'mezziwhom',
 				'label' => 'Выберите офис, в котором будет осуществляться выдачи готовых документов',
-				'check' => 'zN',
+				'check' => 'N',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'OfficeToReceive',

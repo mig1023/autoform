@@ -341,11 +341,10 @@ sub init_add_param
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
 				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
 				'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries',
-				'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex=0',
+				'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex = 0',
 				'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
-				'[first_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
-				'[eu_countries]' => 'SELECT ID, Name FROM Countries WHERE MemberOfEU=1',
+				'[eu_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE MemberOfEU = 1',
 			};
 			
 			for ( keys %$info_from_sql ) {
@@ -354,9 +353,9 @@ sub init_add_param
 			
 			my $add_eu_countries = [
 				[ 37, "BULGARIA" ],
-				[ 47, "CIPRO" ],
-				[ 104, "IRLANDA" ],
-				[ 201, "REGNO UNITO DI GRAN BRETAGNA E DI IRLANDA DEL NORD" ],
+				[ 47, "CYPRUS" ],
+				[ 104, "IRELAND" ],
+				[ 201, "THE UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND" ],
 				[ 215, "ROMANIA" ],
 			];
 
@@ -988,7 +987,8 @@ sub get_add
 	my $sch_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
 	
 	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoAppData (AnkDate, AppID, SchengenAppDataID) VALUES (now(), ?, ?)", {}, 
+		INSERT INTO AutoAppData (AnkDate, AppID, SchengenAppDataID, VisaNum)
+		VALUES (now(), ?, ?, 2)", {}, 
 		$app_id, $sch_id
 	);
 	
@@ -997,7 +997,8 @@ sub get_add
 	my $step = $self->get_step_by_content( '[list_of_applicants]', 'next' );
 	
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?
+		WHERE Token = ?", {}, 
 		$step, $appdata_id, $sch_id, $self->{ token }
 	);
 	
@@ -1316,6 +1317,8 @@ sub get_html_for_element
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{ $opt } . '</option>'; 
 		}
 
+		$content =~ s/\[u\]\>/[u] onmousedown="\$(':first-child', this).remove(); this.onmousedown = null;">/i 
+			if $first_elements =~ /default_free/;
 		$content =~ s/\[u\]\>/data-timeslot="$value_original">/i if $name eq 'timeslot';
 		$content =~ s/\[options\]/$list/gi;
 	}
@@ -1534,12 +1537,17 @@ sub resort_with_first_elements
 
 	my @array_with_first_elements = ();
 	
-	for my $f ( @first_elements ) {
+	for my $first ( @first_elements ) {
 	
-		$f =~ s/^\s+|\s+$//g;
+		$first =~ s/^\s+|\s+$//g;
 		
-		for my $e (keys %$country_hash) {
-			push @array_with_first_elements, $f if $e == $f;
+		if ( $first eq 'default_free' ) {
+			push @array_with_first_elements, 0;
+		}
+		else {
+			for my $elem (keys %$country_hash) {
+				push @array_with_first_elements, $first if $elem == $first;
+			}
 		}
 	}
 	
@@ -1908,8 +1916,8 @@ sub check_param
 
 	$value = $self->get_prepare_line( $value );
 
-	return $self->text_error( 0, $element ) if ( $rules =~ /z/ ) and ( ( $value eq '' ) or 
-			( ( $value eq '0' ) and ( $element->{ name } eq 'timeslot') ) );
+	return $self->text_error( 0, $element ) if 
+		( $rules =~ /z/ ) and (	( $value eq '' ) or ( $value eq '0' ) );
 			
 	return if $rules eq 'z';
 
