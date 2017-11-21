@@ -85,37 +85,51 @@ sub get_html_elements
 {
 	return { 
 		'start_line'		=> '<tr [u]>',
+		
 		'end_line'		=> '</tr>',
+		
 		'start_cell'		=> '<td [u]>',
+		
 		'end_cell'		=> '</td>',
 		
 		'new_line'		=> '<br>',
+		
 		'new_and_bold'		=> '<br><br><b>[name]</b>',
 		
 		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
 					' id="[name]" title="[comment]" [u]>',
+					
 		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
+		
 		'select'		=> '<select class="input_width select_gen" size = "1" ' .
 					'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
+					
 		'radiolist'		=> '<div id="[name]">[options]</div>',
+		
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
+		
 		'example'		=> '<tr class="mobil_hide" [u]><td class="exam_td_gen">' .
 					'<span class="exam_span_gen">[example]: [value]</span></td>',
 
 		'info'			=> '<label class="info" title="[comment]" id="[name]" [u]>[text]</label>',
+		
 		'checklist'		=> '<div id="[name]">[options]</div>',
+		
 		'checklist_insurer'	=> '[options]',
+		
 		'captcha'		=> '<script type="text/javascript">var onloadCallback = function(){grecaptcha.render(' .
 					"'[captch_id]'" . ', [json_options]);};</script><script src="[widget_api]" ' .
 					'type="text/javascript"></script><div id="captha_div"><div id="[captch_id]"></div></div>',
 		
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
+		
 		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
 		
 		'progress'		=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
 					'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
 					
 		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
+		
 		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 	};
 }

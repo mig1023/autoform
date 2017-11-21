@@ -65,6 +65,7 @@ sub get_content_rules_hash
 				'type' => 'info',
 				'name' => 'free_date',
 				'label' => 'Ближайшая доступная дата',
+				'comment' => 'Вы сможете выбрать удобную для Вас дату подачи документов во время оформления записи',
 				'special' => 'nearest_date',
 			},
 			{
@@ -72,7 +73,7 @@ sub get_content_rules_hash
 				'name' => 'email',
 				'label' => 'Email',
 				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре',
-				'example' => 'mail@mail.ru',
+				'example' => 'info@italyvms.ru',
 				'check' => 'zWN\@\-\_\.',
 				'check_logic' => [
 					{
@@ -87,7 +88,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'pers_info',
-				'label_for' => 'я согласен на <a target="_blank" class="dotted_link_big" href="/pers_data_agreement.pdf">условия обработки персональных данных</a>',
+				'label_for' => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/pers_data_agreement.pdf">условиями</a> обработки персональных данных визовым центром',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -98,7 +99,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				'label_for' => 'я согласен на условия работы с мобильными телефона на территории визового центра',
+				'label_for' => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">условиями</a> работы с мобильными телефона на территории визового центра',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -120,7 +121,7 @@ sub get_content_rules_hash
 				'name' => 's_date',
 				'label' => 'Дата начала поездки',
 				'comment' => 'Введите предполагаемую дату начала поездки',
-				'example' => '01.01.2025',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -139,7 +140,7 @@ sub get_content_rules_hash
 				'name' => 'f_date',
 				'label' => 'Дата окончания поездки',
 				'comment' => 'Введите предполагаемую дату окончания поездки',
-				'example' => '31.12.2025',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -236,7 +237,7 @@ sub get_content_rules_hash
 				'name' => 'birthdate',
 				'label' => 'Дата рождения',
 				'comment' => 'Введите дату рождения',
-				'example' => '01.01.1980',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -287,7 +288,7 @@ sub get_content_rules_hash
 				'name' => 'rupassnum',
 				'label' => '№ загранпаспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '753500001',
+				'example' => '650000001',
 				'check' => 'zWN',
 				'check_logic' => [
 					{
@@ -345,7 +346,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Укажите данные для договора' => [
+		'Укажите данные документа, удостоверяющего личность' => [
 			{
 				'page_ord' => 8,
 				'progress' => 8,
@@ -357,7 +358,14 @@ sub get_content_rules_hash
 					}
 				},
 			},
-
+			{
+				'type' => 'text',
+				'name' => 'rupass_text',
+				'label' => 'Для граждан РФ необходимо указать данные внутреннего паспорта',
+			},
+			{
+				'type' => 'free_line',
+			},
 			{
 				'type' => 'info',
 				'name' => 'info_rulname',
@@ -393,7 +401,7 @@ sub get_content_rules_hash
 				'name' => 'info_passnum',
 				'label' => '№ паспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '754300001',
+				'example' => '4510ХХХХХХ',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
@@ -405,7 +413,7 @@ sub get_content_rules_hash
 				'name' => 'info_passdate',
 				'label' => 'Дата выдачи',
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
-				'example' => '01.01.2010',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -433,14 +441,26 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'info_address',
-				'label' => 'Адрес',
-				'comment' => 'Полный адрес, включая индекс',
-				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
+				'label' => 'Адрес регистрации',
+				'comment' => 'Укажите адрес регистрации',
+				'example' => 'г.Москва, М.Толмачевский пер., д. 6, стр.1',
 				'check' => 'zЁN\s\-\_\.\,\;\'\"',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'RAddress',
 					'transfer' => 'nope',
+				},
+			},
+			{
+				'type' => 'free_line',
+			},
+			{
+				'type' => 'info',
+				'name' => 'info_phone',
+				'label' => 'Телефон',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'AppPhone',
 				},
 			},
 		],
@@ -510,7 +530,7 @@ sub get_content_rules_hash
 				'name' => 'dovpassdate',
 				'label' => 'Дата выдачи',
 				'comment' => 'Введите дату выдачи, указанную в паспорте',
-				'example' => '01.01.2010',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -537,6 +557,18 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
+				'name' => 'dovaddress',
+				'label' => 'Адрес',
+				'comment' => 'Полный адрес, включая индекс',
+				'example' => '119017, г.Москва, М.Толмачевский пер., д. 6, стр.1',
+				'check' => 'zЁN\s\-\_\.\,\;\'\"',
+				'db' => {
+					'table' => 'Appointments',
+					'name' => 'Address',
+				},
+			},
+			{
+				'type' => 'input',
 				'name' => 'dovphone',
 				'label' => 'Телефон',
 				'comment' => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
@@ -545,18 +577,6 @@ sub get_content_rules_hash
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'Phone',
-				},
-			},
-			{
-				'type' => 'input',
-				'name' => 'dovaddress',
-				'label' => 'Адрес',
-				'comment' => 'Полный адрес, включая индекс',
-				'example' => '105203, г.Москва, ул.Ленина, д.1, кв.1',
-				'check' => 'zЁN\s\-\_\.\,\;\'\"',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'Address',
 				},
 			},
 		],
@@ -580,6 +600,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'app_date',
 				'label' => 'Дата записи в Визовый центр',
+				'comment' => 'Введите дату, когда собираетесь посетить Визовый центр для подачи документов',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -601,6 +623,7 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'timeslot',
 				'label' => 'Время',
+				'example' => '10:00 — 10:30',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
@@ -613,9 +636,12 @@ sub get_content_rules_hash
 				'type' => 'free_line',
 			},
 			{
+				'type' => 'free_line',
+			},
+			{
 				'type' => 'text',
 				'name' => 'services_text',
-				'label' => 'СМС-оповещение о готовности документов (платная услуга)',
+				'label' => 'СМС-оповещение о готовности документов ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				'font' => 'bold',
 			},
 			{
@@ -624,9 +650,9 @@ sub get_content_rules_hash
 			{
 				'type' => 'input',
 				'name' => 'sms',
-				'label' => 'SMS уведомление',
+				'label' => 'Номер телефона для<br>SMS-уведомления',
 				'comment' => 'Введите номер сотового телефона для получения СМС о готовности документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				'example' => '79051234578',
+				'example' => '79XXXXXXXXX',
 				'check' => 'N',
 				'db' => {
 					'table' => 'Appointments',
@@ -639,7 +665,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'services_text',
-				'label' => 'Доставка документов DHL (платная услуга)',
+				'label' => 'Доставка документов DHL ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				'font' => 'bold',
 			},
 			{
@@ -649,8 +675,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'ship_index',
 				'label' => 'Индекс доставки',
-				'comment' => 'Введите первые цифры индекса или первые первые буквы города для доставки документов документов; выберите из списка подходящий индекс и город; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				'example' => '101000, Москва',
+				'comment' => 'Введите первые цифры индекса или первые буквы города для доставки документов; выберите из списка подходящий индекс и город; услуга платная, оставьте поле пустым, если в ней нет необходимости',
+				'example' => '119017, Москва',
 				'check' => 'ЁN\s\,\.\-\(\)',
 				'check_logic' => [
 					{
@@ -674,7 +700,7 @@ sub get_content_rules_hash
 				'name' => 'shipping',
 				'label' => 'Адрес доставки',
 				'comment' => 'Введите адрес для доставки документов документов, без указания индекса и города; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				'example' => 'ул.Ленина, 1',
+				'example' => 'Малый Толмачёвский пер., д.6 стр.1',
 				'check' => 'ЁN\s\-\_\.\,\;\'\"',
 				'check_logic' => [
 					{
@@ -695,7 +721,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'text',
 				'name' => 'insurance_text',
-				'label' => 'Страховка (платная услуга)',
+				'label' => 'Страховка ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				'font' => 'bold',
 			},
 			{
@@ -728,7 +754,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Предпочтительный офис выдачи документов' => [
+		'Предпочтительный офис получения готовых документов' => [
 			{
 				'page_ord' => 11,
 				'progress' => 10,
@@ -744,38 +770,33 @@ sub get_content_rules_hash
 			{
 				'type' => 'radiolist',
 				'name' => 'mezziwhom',
-				'label' => 'Выберите офис выдачи документов',
-				'check' => 'zN',
+				'label' => 'Выберите офис, в котором будет осуществляться выдачи готовых документов',
+				'check' => 'N',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'OfficeToReceive',
 				},
 				'param' => { 
-					0 => 'Малый Толмачёвский, д.6 стр.1',
-					39 => 'ул. Киевская, вл. 2, 3 этаж',
+					0 => '<b>м.Третьяковская</b>, Малый Толмачёвский пер., д.6 стр.1',
+					39 => '<b>м.Киевская</b>, ул. Киевская, вл. 2, 3 этаж',
 				},
 			},
 		],
 		
-		# 'Подтверждение записи' => [
-			# {
-				# 'page_ord' => 12,
-				# 'progress' => 11,
-			# },
-			# {
-				# 'type' => 'captcha',
-			# },
-		# ],
+		'Подтверждение записи' => [
+			{
+				'page_ord' => 12,
+				'progress' => 11,
+			},
+			{
+				'type' => 'captcha',
+			},
+		],
 		
-		'Поздравляем!' => [
+		'Запись успешно создана!' => [
 			{
 				'page_ord' => 12,
 				'progress' => 12,
-			},
-			{
-				'type' => 'text',
-				'name' => 'visa_text',
-				'label' => 'Всё, запись создана!',
 			},
 			{
 				'type' => 'text',

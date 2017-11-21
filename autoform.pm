@@ -1317,8 +1317,6 @@ sub get_html_for_element
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{ $opt } . '</option>'; 
 		}
 
-		$content =~ s/\[u\]\>/[u] onmousedown="\$(':first-child', this).remove(); this.onmousedown = null;">/i 
-			if $first_elements =~ /default_free/;
 		$content =~ s/\[u\]\>/data-timeslot="$value_original">/i if $name eq 'timeslot';
 		$content =~ s/\[options\]/$list/gi;
 	}
