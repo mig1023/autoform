@@ -795,7 +795,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				'page_ord' => 12,
+				'page_ord' => 13,
 				'progress' => 12,
 			},
 			{

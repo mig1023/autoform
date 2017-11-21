@@ -2215,6 +2215,14 @@ sub create_new_appointment
 		)->[0];
 	}
 	
+	# my $time_start = $self->time_interval_calculate();
+	
+	$self->query( 'query', __LINE__, "
+		LOCK TABLES
+		AutoAppointments WRITE, Appointments WRITE, AutoAppData WRITE, AppData WRITE,
+		AutoSchengenAppData WRITE, SchengenAppData WRITE"
+	);
+	
 	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
 		$tables_transfered_id->{ AutoAppointments }, $db_rules, undef, undef, undef, 
 		$info_for_contract );
@@ -2234,6 +2242,11 @@ sub create_new_appointment
 			$db_rules, $new_appid, $sch_appid, ( exists $insurance_list{ $app->{ ID } } ? 1 : 0 )
 		);
 	}
+	
+	$self->query( 'query', __LINE__, "UNLOCK TABLES");
+	
+	# my $milliseconds = $self->time_interval_calculate( $time_start );
+	# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms"; 
 	
 	my $appnum = $self->query( 'sel1', __LINE__, "
 		SELECT AppNum FROM Appointments WHERE ID = ?", $new_appid
@@ -2650,6 +2663,16 @@ sub cached
 	return $self->{ vars }->get_memd->get( $name );
 }
 
+sub time_interval_calculate
+# //////////////////////////////////////////////////
+{
+	my ( $self, $interval_start ) = @_;
+	
+	return [ gettimeofday() ] unless $interval_start;
+	
+	return tv_interval( $interval_start ) * 1000;
+}
+
 sub query
 # //////////////////////////////////////////////////
 {
@@ -2659,7 +2682,7 @@ sub query
 	
 	my $return;
 	
-	# my $time_start = [ gettimeofday() ];
+	# my $time_start = $self->time_interval_calculate();
 
 	$return = $self->{ vars }->db->selall(@_) if $type eq 'selall';
 	$return = $self->{ vars }->db->selallkeys(@_) if $type eq 'selallkeys';
@@ -2667,8 +2690,10 @@ sub query
 	
 	my @result = $self->{ vars }->db->sel1(@_) if $type eq 'sel1';
 	
-	# my $milliseconds = tv_interval( $time_start ) * 1000;
-	# warn Dumper( \@_ ) . '>' x 25 . " line $line - $milliseconds ms" if $milliseconds > 1; 
+	my $milliseconds = $self->time_interval_calculate( $time_start );
+	
+	# warn Dumper( \@_ );
+	# warn "sql (line $line) - $milliseconds ms" if $milliseconds > 1; 
 	
 	return ( wantarray ? @result : $result[0] ) if $type eq 'sel1';
 	
