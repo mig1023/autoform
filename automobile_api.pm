@@ -30,6 +30,10 @@ sub get_mobile_api
 	
 		$result = set_values_from_api( $self );
 	}
+	elsif ( $vars->getparam( 'mobile_api' ) eq 'get_centers' ) {
+		
+		$result = get_api_centers( $self );
+	}
 	elsif ( $vars->getparam( 'mobile_api' ) ne 'get_token' ) {
 		
 		$result = get_api_head( $self, 2 );
@@ -136,6 +140,29 @@ sub set_values_from_api
 		$vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 
 		'?t=' . $self->{ token } . '&mobile_app=on'
 	);
+}
+
+sub get_api_centers
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $result = {};
+	
+	my $all_centers = $self->query( 'selallkeys', __LINE__, "
+		SELECT BName, BAddr as Address, Phone, Email, SubmissionTime, CollectionTime
+		FROM Branches
+		WHERE isDeleted = 0 AND Display = 1"
+	);
+	
+	for ( @$all_centers ) {
+	
+		$result->{ $_->{ BName } } = $_;
+		
+		delete $result->{ $_->{ BName } }->{ BName };
+	}
+	
+	return $result;
 }
 
 sub get_api_head
