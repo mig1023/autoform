@@ -2690,8 +2690,7 @@ sub query
 	
 	my @result = $self->{ vars }->db->sel1(@_) if $type eq 'sel1';
 	
-	my $milliseconds = $self->time_interval_calculate( $time_start );
-	
+	# my $milliseconds = $self->time_interval_calculate( $time_start );
 	# warn Dumper( \@_ );
 	# warn "sql (line $line) - $milliseconds ms" if $milliseconds > 1; 
 	
