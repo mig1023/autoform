@@ -627,7 +627,7 @@ sub get_content_rules_hash
 					6 => 'спорт',
 					7 => 'транзит',
 					8 => 'лечение',
-					9 => 'посещение родственников',
+					9 => 'посещение родственников или друзей',
 					10 => 'иная',
 				},
 				'special' => 'save_info_about_hastdatatype',
@@ -1218,8 +1218,8 @@ sub get_content_rules_hash
 					'only_if_not' => {
 						'table' => 'AppData',
 						'name' => 'VisaPurpose',
-						'value' => '1',
-					}
+						'value' => '1, 7, 9',
+					},
 				},
 			},
 			{

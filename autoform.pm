@@ -713,7 +713,7 @@ sub skip_by_condition
 
 	my $skip_it = 0;
 	
-	my %relation = map { $_ => 1 } split /,/, $relation; 
+	my %relation = map { $_ => 1 } split /,\s?/, $relation; 
 
 	if ( $condition eq 'only_if' ) {
 		$skip_it = 1 unless exists $relation{ $value };
