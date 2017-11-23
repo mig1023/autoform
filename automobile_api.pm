@@ -16,28 +16,23 @@ sub get_mobile_api
 	
 	my $table_id = $self->get_current_table_id();
 	
+	my $api = $vars->getparam( 'mobile_api' ) || '';
+	
 	my $result = get_api_head( $self, 0 );
 	
-	if ( $self->{ token } =~ /^\d\d$/ ) {
+	return get_api_head( $self, 1 ) if $self->{ token } =~ /^\d\d$/;
+		
+	return get_values_for_api( $self, $result ) if $api eq 'get_appdata';
+
+	return set_values_from_api( $self ) if $api eq 'set_appdata';
+
+	return get_api_centers( $self ) if $api eq 'get_centers';
+
+	return get_doc_status( $self ) if $api eq 'get_doc_status';
 	
-		$result = get_api_head( $self, 1 );
-	}
-	elsif ( $vars->getparam( 'mobile_api' ) eq 'get_appdata' ) {
-		
-		$result = get_values_for_api( $self, $result );
-	}
-	elsif ( $vars->getparam( 'mobile_api' ) eq 'set_appdata' ) {
 	
-		$result = set_values_from_api( $self );
-	}
-	elsif ( $vars->getparam( 'mobile_api' ) eq 'get_centers' ) {
-		
-		$result = get_api_centers( $self );
-	}
-	elsif ( $vars->getparam( 'mobile_api' ) ne 'get_token' ) {
-		
-		$result = get_api_head( $self, 2 );
-	}
+	
+	return get_api_head( $self, 2 ) if $api ne 'get_token';
 	
 	return $result;
 }
@@ -150,7 +145,7 @@ sub get_api_centers
 	my $result = {};
 	
 	my $all_centers = $self->query( 'selallkeys', __LINE__, "
-		SELECT BName, BAddr as Address, Phone, Email, SubmissionTime, CollectionTime
+		SELECT BName, BAddr as address, phone, email, submissionTime, collectionTime
 		FROM Branches
 		WHERE isDeleted = 0 AND Display = 1"
 	);
@@ -161,6 +156,53 @@ sub get_api_centers
 		
 		delete $result->{ $_->{ BName } }->{ BName };
 	}
+	
+	return $result;
+}
+
+sub get_doc_status
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $result = { 'status' => "0" };
+	my $param = {};
+	
+	for ( 'docnum', 'birthdate' ) {
+	
+		$param->{ $_ } = $self->{ vars }->getparam( $_ ) || '';
+		
+		$param->{ $_ } =~ s/[^0-9]//g;
+	}
+
+	return $result if ( $param->{ docnum } eq '' ) or ( $param->{ birthdate } eq '' );
+
+	my $docid = $self->query( 'sel1', __LINE__, "
+		SELECT ID FROM DocPack WHERE AgreementNo = ? AND PStatus != 7",
+		$param->{ docnum }
+	) || 0;
+	
+	return $result unless $docid;
+	
+	return $result unless $param->{ birthdate } =~ /^([0-9]{2})([0-9]{2})([0-9]{4})$/;
+	
+	my $birthdate = "$3-$2-$1";
+	
+	my $all_status = $self->query( 'selallkeys', __LINE__, "
+		SELECT ApplID, Status, BthDate
+		FROM DocPackInfo
+		JOIN DocPackList ON DocPackInfo.ID = PackInfoID
+		WHERE PackID = ?", $docid
+	);
+	
+	for ( @$all_status ) {
+	
+		$result->{ status } = $_->{ Status } if $birthdate eq $_->{ BthDate };
+	}
+	
+	$result->{ status } = "0" if $result->{ status } == 7;
+	
+	$result->{ status } = "3" if $result->{ status } > 7;
 	
 	return $result;
 }
