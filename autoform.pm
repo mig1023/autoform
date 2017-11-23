@@ -245,7 +245,7 @@ sub get_mobile_api
 	
 	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 	
-	return if ref( $api_response ) ne 'HASH';
+	return if ref( $api_response ) != /^(HASH|ARRAY)$/;
 	
 	print JSON->new->pretty->encode( $api_response );
 }

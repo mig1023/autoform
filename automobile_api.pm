@@ -30,7 +30,7 @@ sub get_mobile_api
 
 	return get_doc_status( $self ) if $api eq 'get_doc_status';
 	
-	
+	return get_advertisment() if $api eq 'get_advertisment';
 	
 	return get_api_head( $self, 2 ) if $api ne 'get_token';
 	
@@ -205,6 +205,14 @@ sub get_doc_status
 	$result->{ status } = "3" if $result->{ status } > 7;
 	
 	return $result;
+}
+
+sub get_advertisment
+# //////////////////////////////////////////////////
+{
+	return [
+		'http://',
+	];
 }
 
 sub get_api_head
