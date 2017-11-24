@@ -230,25 +230,9 @@ function init_comm(pos_x, pos_y) {
 	$('#[% picker %]').datepicker({
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
-		
-		showButtonPanel: true,
-		beforeShow: function( input ) {
-			setTimeout(function() {
-				var buttonPane = $( input ).datepicker( "widget" ).find( ".ui-datepicker-buttonpane" );  
-				var btn = $('<button class="ui-datepicker-current ui-state-default ui-priority-secondary ui-corner-all" type="button">Clear</button>');  
-				btn.unbind("click").bind("click", function () {
-					$.datepicker._clearDate( input );
-				});  
-				btn.appendTo( buttonPane );  
-			}, 1 );  
-		}, 
 		showOn: 'both',
 		buttonImage: '/vcs/static/images/1x1.png',
 		buttonImageOnly:true
-	}).keyup(function(e) {
-		if(e.keyCode == 8 || e.keyCode == 46) {
-			$.datepicker._clearDate(this);
-		}
 	});
 [% END %]
 
