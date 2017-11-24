@@ -1547,7 +1547,7 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'visa_text',
 				'label' => 'Выберите на кого оформляется',
-				'check' => 'zN',
+				'check' => 'N',
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'PersonForAgreements',
@@ -1813,7 +1813,6 @@ sub get_content_rules_hash
 				'name' => 'app_date',
 				'label' => 'Дата записи в Визовый центр',
 				'comment' => 'Введите дату, когда собираетесь посетить Визовый центр для подачи документов',
-				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
@@ -1835,7 +1834,6 @@ sub get_content_rules_hash
 				'type' => 'select',
 				'name' => 'timeslot',
 				'label' => 'Время',
-				'example' => '10:00 — 10:30',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
