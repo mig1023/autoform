@@ -4,6 +4,7 @@ use strict;
 use VCS::Vars;
 use VCS::Site::autodata;
 use VCS::Site::autodata_type_c;
+use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
 use VCS::Site::automobile_api;
 use VCS::Site::autoselftest;
@@ -59,7 +60,7 @@ sub get_content_rules
 {
 	my ( $self, $current_page, $full, $need_to_init ) = @_;
 	
-	my ( undef, $visa_category ) = $self->get_app_visa_and_center();
+	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
 	my $content;
 
@@ -70,6 +71,10 @@ sub get_content_rules
 	elsif ( $visa_category eq 'D' ) {
 
 		$content = VCS::Site::autodata_type_d::get_content_rules_hash();
+	}
+	elsif ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
+
+		$content = VCS::Site::autodata_type_c_spb::get_content_rules_hash();
 	}
 	else {
 		$content = VCS::Site::autodata_type_c::get_content_rules_hash();
@@ -981,6 +986,12 @@ sub get_add
 	my ( $self, $app_id ) = @_;
 	
 	$self->query( 'query', __LINE__, "
+		INSERT INTO AutoSpbAlterAppData () VALUES ();"
+	);
+		
+	my $spb_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+	
+	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);"
 	);
 		
@@ -997,9 +1008,9 @@ sub get_add
 	my $step = $self->get_step_by_content( '[list_of_applicants]', 'next' );
 	
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, AutoSpbDataID = ?
 		WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $self->{ token }
+		$step, $appdata_id, $sch_id, $spb_id, $self->{ token }
 	);
 	
 	$self->mod_last_change_date();
@@ -1228,7 +1239,7 @@ sub get_progressbar
 	
 	my ( $line, $content, $progress_line );
 	
-	my ( undef, $visa_category ) = $self->get_app_visa_and_center();
+	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
 	if ( $self->{ this_is_self_testing } ) {
 	
@@ -1237,6 +1248,10 @@ sub get_progressbar
 	elsif ( $visa_category eq 'D' ) {
 	
 		$progress_line = VCS::Site::autodata_type_d::get_progressline();
+	}
+	elsif ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
+
+		$progress_line = VCS::Site::autodata_type_c_spb::get_progressline();
 	}
 	else {
 		$progress_line = VCS::Site::autodata_type_c::get_progressline();

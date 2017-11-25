@@ -1,5 +1,6 @@
 ﻿package VCS::Site::autodata;
 use strict;
+use Data::Dumper;
 
 sub get_settings
 # //////////////////////////////////////////////////
@@ -141,6 +142,7 @@ sub get_tables_controled_by_AutoToken
 		'AutoAppointments' => 'AutoAppID',
 		'AutoAppData' => 'AutoAppDataID',
 		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
+		'AutoSpbAlterAppData' => 'AutoSpbDataID',
 	};
 }
 
@@ -284,5 +286,13 @@ sub get_mobile_api_fields
 		],
 	};
 };
+
+sub this_is_spb_center
+# //////////////////////////////////////////////////
+{
+	my %spb_centers = map { $_ => 1 } split /,\s?/, '11, 27, 29, 30, 33, 34, 38, 43';
+
+	return exists $spb_centers{ $_[0] };
+}
 
 1;

@@ -1,11 +1,11 @@
-﻿package VCS::Site::autodata_type_c;
+﻿package VCS::Site::autodata_type_c_spb;
 use strict;
 
 sub get_progressline
 # //////////////////////////////////////////////////
 {
 	return [ '',
-		{ big => 1, name => 'Начало', },
+		{ big => 1, name => 'Начало SPB', },  # <-----------------------!!!!!!!!!!!! МАРКЕР
 		{ big => 0, name => 'Даты поездки', },
 		{ big => 1, name => 'Заявители', },
 		{ big => 0, name => 'Данные паспортов', },
@@ -102,7 +102,10 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
+				#'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
+				
+				'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "http://www.italy-vms.ru/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
+				
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -407,14 +410,26 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
+				'name' => 'home_city',
+				'label' => 'Город',
+				'comment' => 'Укажите город, в котором проживаете',
+				'example' => '12345',
+				'check' => 'zNW\s\-',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'HomeCity',
+				},
+			},
+			{
+				'type' => 'input',
 				'name' => 'fulladdress',
 				'label' => 'Домашний адрес',
-				'comment' => 'Фактический адрес проживания заявителя',
-				'example' => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
+				'comment' => 'Фактический адрес проживания заявителя, без города',
+				'example' => 'M.Tolmachevskiy pereulok 6 b.1',
 				'check' => 'zWN\s\-\_\.\,\;\'\"\/',
 				'db' => {
-					'table' => 'AppData',
-					'name' => 'FullAddress',
+					'table' => 'SpbAlterAppData',
+					'name' => 'HomeAddr',
 				},
 				'format' => 'capslock'
 			},
@@ -431,8 +446,8 @@ sub get_content_rules_hash
 					},
 				],
 				'db' => {
-					'table' => 'AppData',
-					'name' => 'AppEMail',
+					'table' => 'SpbAlterAppData',
+					'name' => 'HomeEmail',
 				},
 				'format' => 'capslock'
 			},
@@ -448,7 +463,6 @@ sub get_content_rules_hash
 					'name' => 'AppPhone',
 				},
 			},
-			
 		],
 		
 		'Дополнительные данные' => [
@@ -591,16 +605,54 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'workaddr',
-				'label' => 'Работодатель: название компании, адрес, телефон',
+				'name' => 'work_name',
+				'label' => 'Название компании',
 				'comment' => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
-				'example' => 'VMS, M.Tolmachevskiy pereulok 6 b.1, (495)7273577',
+				'example' => 'VMS',
 				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
-					'table' => 'AppData',
-					'name' => 'WorkOrg',
+					'table' => 'SpbAlterAppData',
+					'name' => 'JobName',
 				},
 				'format' => 'capslock'
+			},
+			{
+				'type' => 'input',
+				'name' => 'work_city',
+				'label' => 'Город нахождения компании',
+				'comment' => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				'example' => 'Moscow',
+				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'JobCity',
+				},
+				'format' => 'capslock'
+			},
+			{
+				'type' => 'input',
+				'name' => 'work_addr',
+				'label' => 'Адрес нахождения компании',
+				'comment' => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				'example' => 'M.Tolmachevskiy pereulok 6 b.1',
+				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'JobAddr',
+				},
+				'format' => 'capslock'
+			},
+			{
+				'type' => 'input',
+				'name' => 'work_phone',
+				'label' => 'Контактный телефон компании',
+				'comment' => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				'example' => '12345',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'JobPhone',
+				},
 			},
 			{
 				'type' => 'free_line',
@@ -1049,42 +1101,67 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'input',
-				'name' => 'hotels',
+				'name' => 'hotel_name',
 				'label' => 'Название гостиницы или ФИО приглашающего',
 				'comment' => 'Укажите полное название гостиницы и данные приглашающего лица',
 				'example' => 'Grand Hotel',
 				'check' => 'zW\s\-\.',
 				'db' => {
-					'table' => 'AppData',
-					'name' => 'Hotels',
+					'table' => 'SpbAlterAppData',
+					'name' => 'HotelName',
 				},
 				'format' => 'capslock',
 			},
 			{
 				'type' => 'input',
-				'name' => 'hotelsaddr',
-				'label' => 'Адрес места пребывания',
-				'comment' => 'Укажите адрес гостиницы',
-				'example' => 'Via Esempio 1, Rome',
-				'check' => 'zWN\s\-\_\.\,\;\'\"',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'HotelAdresses',
-				},
-				'format' => 'capslock',
-			},
-			{
-				'type' => 'input',
-				'name' => 'hotelpho',
-				'label' => 'Телефон',
-				'comment' => 'Укажите контактный телефон гостиницы',
-				'example' => '39XXXXXXXX',
+				'name' => 'hotel_postcode',
+				'label' => 'Индекс гостиницы',
+				'comment' => 'Укажите индекс гостиницы',
+				'example' => '12345',
 				'check' => 'zN',
 				'db' => {
-					'table' => 'AppData',
-					'name' => 'HotelPhone',
+					'table' => 'SpbAlterAppData',
+					'name' => 'HotelPostCode',
 				},
 			},
+			{
+				'type' => 'input',
+				'name' => 'hotel_city',
+				'label' => 'Город расположения гостиницы',
+				'comment' => 'Укажите город, в котором располагается гостиница',
+				'example' => 'Grand Hotel',
+				'check' => 'zW\s\-\.',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'HotelCity',
+				},
+				'format' => 'capslock',
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotel_street',
+				'label' => 'Улица расположения гостиницы',
+				'comment' => 'Укажите улицу, на которой располагается гостиница',
+				'example' => 'Grand Hotel',
+				'check' => 'zW\s\-\.',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'HotelStreet',
+				},
+				'format' => 'capslock',
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotel_building',
+				'label' => 'Номер дома гостиницы',
+				'comment' => 'Номер дома на улице, на которой располагается гостиница',
+				'example' => '1',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'HotelHouse',
+				},
+			}
 		],
 		
 		'Приглашение' => [
@@ -1233,6 +1310,18 @@ sub get_content_rules_hash
 				},
 				'param' => '[schengen_provincies]',
 				'first_elements' => 'default_free',
+			},
+			{
+				'type' => 'input',
+				'name' => 'a_postcode',
+				'label' => 'Индекс компании',
+				'comment' => 'Укажите индекс компании',
+				'example' => '12345',
+				'check' => 'zN',
+				'db' => {
+					'table' => 'SpbAlterAppData',
+					'name' => 'CompanyIndex',
+				},
 			},
 			{
 				'type' => 'input',
@@ -1993,15 +2082,15 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Подтверждение записи' => [
-			{
-				'page_ord' => 29,
-				'progress' => 14,
-			},
-			{
-				'type' => 'captcha',
-			},
-		],
+		# 'Подтверждение записи' => [
+			# {
+				# 'page_ord' => 29,
+				# 'progress' => 14,
+			# },
+			# {
+				# 'type' => 'captcha',
+			# },
+		# ],
 		
 		'Запись успешно создана!' => [
 			{
