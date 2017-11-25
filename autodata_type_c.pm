@@ -102,7 +102,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				'label_for' => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">условиями</a> работы с мобильными телефона на территории визового центра',
+				'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -594,23 +594,6 @@ sub get_content_rules_hash
 			},
 			{
 				'type' => 'radiolist',
-				'name' => 'n_rezident',
-				'label' => 'Страна пребывания, если не является страной гражданства',
-				'check' => 'zN',
-				'db' => {
-					'table' => 'AppData',
-					'name' => 'CountryLive',
-				},
-				'param' => { 
-					1 => 'нет', 
-					2 => 'да, потребуется указать вид на жительство или равноценный документ', 
-				},
-			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'radiolist',
 				'name' => 'purpose',
 				'label' => 'Основная цель поездки',
 				'check' => 'zN',
@@ -650,6 +633,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'familyother',
 				'label' => 'Семейное положение',
+				'comment' => 'Укажите своё текущее семейное положение',
 				'check' => 'zW\s',
 				'db' => {
 					'table' => 'AppData',
@@ -659,15 +643,15 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Уточнение по стране пребывания' => [
+		'Основания для пребывания в Российской Федерации' => [
 			{
 				'page_ord' => 7,
 				'progress' => 5,
 				'relation' => {
-					'only_if' => {
+					'only_if_not' => {
 						'table' => 'AppData',
-						'name' => 'CountryLive',
-						'value' => '2',
+						'name' => 'Citizenship',
+						'value' => '70',
 					}
 				},
 			},
@@ -676,6 +660,7 @@ sub get_content_rules_hash
 				'name' => 'vidno',
 				'label' => 'Номер вида на жительство или равноценного документа',
 				'comment' => 'Укажите номер вида на жительство; при наличии временной регистрации оставьте поле пустым',
+				'example' => '820000000',
 				'check' => 'N\s\-',
 				'db' => {
 					'table' => 'AppData',
@@ -687,6 +672,7 @@ sub get_content_rules_hash
 				'name' => 'brhplace',
 				'label' => 'Действителен до',
 				'comment' => 'Укажите срок действия документа',
+				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'db' => {
 					'table' => 'AppData',
@@ -712,7 +698,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'visaother',
 				'label' => 'Основная цель поездки',
-				'comment' => '',
+				'comment' => 'Укажите цель предполагаемой поездки',
 				'check' => 'zWN\s\-',
 				'db' => {
 					'table' => 'AppData',
@@ -1351,7 +1337,8 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'mezziwhomother',
 				'label' => 'Спонсор',
-				'check' => 'zWN\s_\.\,\"\'\-\(\)\#\*',
+				'comment' => 'Укажите спонсора, оплачивающего расходы во время поездки',
+				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'MezziWhomOther',
@@ -1439,7 +1426,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'whomothersrc',
 				'label' => 'Иные средства',
-				'comment' => 'Укажите иные средства',
+				'comment' => 'Укажите иные финансовые гарантии',
 				'check' => 'zWwN\s_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
@@ -2005,7 +1992,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				'page_ord' => 30,
+				'page_ord' => 29,
 				'progress' => 15,
 			},
 			{

@@ -99,7 +99,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				'label_for' => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">условиями</a> работы с мобильными телефона на территории визового центра',
+				'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -793,7 +793,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				'page_ord' => 13,
+				'page_ord' => 12,
 				'progress' => 12,
 			},
 			{

@@ -2299,7 +2299,11 @@ sub mod_hash
 	$hash->{ Status } = 1 if exists $hash->{ Status };
 	$hash->{ PolicyType } = 1 if $insurance;
 	
-	$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) if $table_name eq 'AppData';
+	if ( $table_name eq 'AppData' ) {
+	
+		$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) ;
+		$hash->{ CountryLive } = ( $hash->{ NRes } ? 2 : 1 );
+	}
 
 	if ( $table_name eq 'Appointments' ) {
 	
