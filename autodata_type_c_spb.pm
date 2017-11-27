@@ -387,6 +387,12 @@ sub get_content_rules_hash
 				'name' => 'ischild',
 				'label' => 'Если ребёнок вписан в загранпаспорт родителей',
 				'label_for' => 'вписан в паспорт',
+				'check_logic' => [
+					{
+						'condition' => 'younger_than',
+						'offset' => 18,
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'isChild',

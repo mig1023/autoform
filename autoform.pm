@@ -2029,6 +2029,18 @@ sub check_logic
 				if $error;
 		}
 		
+		if ( $rule->{ condition } =~ /^younger_than$/ ) {
+			
+			my $app = $self->query( 'selallkeys', __LINE__, "
+				SELECT birthdate, CURRENT_DATE() as currentdate
+				FROM AutoAppData WHERE ID = ?", $tables_id->{ AutoAppData }
+			)->[0];
+		
+			$first_error = $self->text_error( 21, $element, undef, $rule->{ offset } ) 
+				if ( $self->age( $app->{ birthdate }, $app->{ currentdate } ) >= $rule->{ offset } )
+					and !( ( $element->{ type } eq 'checkbox' ) and ( $value eq '' ) );
+		}
+		
 		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
 
 			my $id_in_db = $self->query( 'sel1', __LINE__, "
