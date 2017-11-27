@@ -5,7 +5,7 @@ sub get_progressline
 # //////////////////////////////////////////////////
 {
 	return [ '',
-		{ big => 1, name => 'Начало SPB', },  # <-----------------------!!!!!!!!!!!! МАРКЕР
+		{ big => 1, name => 'Начало', },
 		{ big => 0, name => 'Даты поездки', },
 		{ big => 1, name => 'Заявители', },
 		{ big => 0, name => 'Данные паспортов', },
@@ -102,10 +102,7 @@ sub get_content_rules_hash
 			{
 				'type' => 'checkbox',
 				'name' => 'mobil_info',
-				#'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
-				
-				'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "http://www.italy-vms.ru/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
-				
+				'label_for' => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
 				'check' => 'true',
 				'db' => {
 					'table' => 'Appointments',
@@ -797,9 +794,9 @@ sub get_content_rules_hash
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'Nulla',
+					'name' => 'FirstCountry',
 				},
-				'param' => '[eu_countries]',
+				'param' => '[first_countries]',
 				'first_elements' => 'default_free, 133',
 			},
 			{
@@ -2082,15 +2079,15 @@ sub get_content_rules_hash
 			},
 		],
 		
-		# 'Подтверждение записи' => [
-			# {
-				# 'page_ord' => 29,
-				# 'progress' => 14,
-			# },
-			# {
-				# 'type' => 'captcha',
-			# },
-		# ],
+		'Подтверждение записи' => [
+			{
+				'page_ord' => 29,
+				'progress' => 14,
+			},
+			{
+				'type' => 'captcha',
+			},
+		],
 		
 		'Запись успешно создана!' => [
 			{

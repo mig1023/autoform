@@ -364,7 +364,9 @@ sub init_add_param
 				[ 215, "ROMANIA" ],
 			];
 
-			push ( @{ $info_from_db->{ '[eu_countries]' } }, $_ ) for @$add_eu_countries;
+			for ( @{ $info_from_db->{ '[eu_countries]' } }, @$add_eu_countries ) {
+				push ( @{ $info_from_db->{ '[first_countries]' } }, $_ );
+			}
 
 			$self->cached( 'autoform_addparam', $info_from_db );
 		}
@@ -2318,6 +2320,7 @@ sub mod_hash
 	
 		$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) ;
 		$hash->{ CountryLive } = ( $hash->{ NRes } ? 2 : 1 );
+		$hash->{ PrevVisa }--; 
 	}
 
 	if ( $table_name eq 'Appointments' ) {

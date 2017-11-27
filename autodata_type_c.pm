@@ -391,7 +391,6 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'isChild',
 				},
-				'relation' => {},
 			},
 			{
 				'type' => 'free_line',
@@ -745,9 +744,9 @@ sub get_content_rules_hash
 				'check' => 'zN',
 				'db' => {
 					'table' => 'AppData',
-					'name' => 'Nulla',
+					'name' => 'FirstCountry',
 				},
-				'param' => '[eu_countries]',
+				'param' => '[first_countries]',
 				'first_elements' => 'default_free, 133',
 			},
 			{
