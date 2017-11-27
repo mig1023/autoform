@@ -1938,7 +1938,12 @@ sub check_param
 
 	if ( $rules =~ /D/ ) {
 		$rules =~ s/(z|D)//g;
+		
 		return $self->text_error( 1, $element ) if ( !( $value =~ /$rules/ ) and ( $value ne '' ) );
+		
+		$value =~ /(\d\d)\.(\d\d)\.(\d\d\d\d)/;
+	
+		return $self->text_error( 1, $element ) if Date::Calc::check_date( $3, $2, $1 ) == 0;
 	}
 	else {
 		my $regexp = '';
