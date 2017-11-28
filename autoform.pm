@@ -772,7 +772,7 @@ sub get_forward
 		
 		$self->set_current_app_finished( $current_table_id ) 
 			if $step == $self->get_step_by_content( '[app_finish]');
-	
+
 		( $appid, $appnum ) = $self->set_appointment_finished()
 			if $step == $self->get_content_rules( 'length' );
 	}
@@ -988,12 +988,6 @@ sub get_add
 	my ( $self, $app_id ) = @_;
 	
 	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoSpbAlterAppData () VALUES ();"
-	);
-		
-	my $spb_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
-	
-	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);"
 	);
 		
@@ -1006,6 +1000,13 @@ sub get_add
 	);
 	
 	my $appdata_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+	
+	$self->query( 'query', __LINE__, "
+		INSERT INTO AutoSpbAlterAppData (AppDataID) VALUES (?)", {},
+		$appdata_id
+	);
+		
+	my $spb_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
 	
 	my $step = $self->get_step_by_content( '[list_of_applicants]', 'next' );
 	
@@ -2233,8 +2234,8 @@ sub create_new_appointment
 	
 	my $db_rules = $self->get_content_db_rules();
 
-	my ( $insurance_line, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
-		SELECT Insurance, PersonForAgreements
+	my ( $center, $insurance_line, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
+		SELECT CenterID, Insurance, PersonForAgreements
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
@@ -2254,12 +2255,13 @@ sub create_new_appointment
 	$self->query( 'query', __LINE__, "
 		LOCK TABLES
 		AutoAppointments WRITE, Appointments WRITE, AutoAppData WRITE, AppData WRITE,
-		AutoSchengenAppData WRITE, SchengenAppData WRITE"
+		AutoSchengenAppData WRITE, SchengenAppData WRITE, AutoSpbAlterAppData WRITE, SpbAlterAppData WRITE"
 	);
 	
-	my $new_appid = $self->create_table( 'AutoAppointments', 'Appointments',
-		$tables_transfered_id->{ AutoAppointments }, $db_rules, undef, undef, undef, 
-		$info_for_contract );
+	my $new_appid = $self->create_table(
+		'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
+		$db_rules, undef, undef, undef, $info_for_contract
+	);
  	
 	my %insurance_list = map { $_ => 1 } split /,/, $insurance_line;
 	
@@ -2270,10 +2272,17 @@ sub create_new_appointment
 	
 	for my $app ( @$allapp ) {
 		
-		my $sch_appid = $self->create_table( 'AutoSchengenAppData', 'SchengenAppData', $app->{ SchengenAppDataID }, $db_rules );
+		my $sch_appid = $self->create_table(
+			'AutoSchengenAppData', 'SchengenAppData', $app->{ SchengenAppDataID }, $db_rules
+		);
 		
-		my $appid = $self->create_table( 'AutoAppData', 'AppData', $app->{ ID }, 
-			$db_rules, $new_appid, $sch_appid, ( exists $insurance_list{ $app->{ ID } } ? 1 : 0 )
+		my $appid = $self->create_table(
+			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid,
+			( exists $insurance_list{ $app->{ ID } } ? 1 : 0 ), undef, $center
+		);
+		
+		$self->create_table(
+			'AutoSpbAlterAppData', 'SpbAlterAppData', $tables_transfered_id->{ 'AutoSpbAlterAppData' }, $db_rules
 		);
 	}
 	
@@ -2292,19 +2301,20 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract ) = @_;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid,
+	$insurance, $info_for_contract, $center ) = @_;
 
-	my $hash = $self->get_hash_table( $autoname, $transfered_id );
+	my $hash = $self->get_hash_table( $autoname, 'ID', $transfered_id );
 
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract );
-
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract, $center );
+	
 	return $self->insert_hash_table( $name, $hash );
 }
 
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, $info_for_contract ) = @_;
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, $info_for_contract, $center ) = @_;
 
 	for my $column ( keys %$hash ) {
 
@@ -2323,10 +2333,6 @@ sub mod_hash
 		$hash->{ ShAddress } = $hash->{ ShIndex } . ", " . $hash->{ ShAddress };
 	}
 	
-	$hash->{ FullAddress } .= ' ' . $hash->{ AppEMail } if exists $hash->{ FullAddress };
-	
-	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'Finished', 'AppEMail' );
-	
 	$hash->{ SMS } = 1 if $hash->{ Mobile };
 	$hash->{ AppID } = $appid if $appid;
 	$hash->{ SchengenAppDataID } = $schappid if $schappid;
@@ -2338,6 +2344,26 @@ sub mod_hash
 		$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) ;
 		$hash->{ CountryLive } = ( $hash->{ NRes } ? 2 : 1 );
 		$hash->{ PrevVisa }--; 
+		
+		if ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
+		
+			my $spb_hash = $self->get_hash_table( 'AutoSpbAlterAppData', 'AppDataID', $hash->{ ID } );
+
+			$hash->{ WorkOrg } = join ', ', (
+				$spb_hash->{ JobName }, $spb_hash->{ JobCity }, $spb_hash->{ JobAddr }, $spb_hash->{ JobPhone }
+			);
+	
+			$hash->{ FullAddress } = join ', ', (
+				$spb_hash->{ HomeCity }, $spb_hash->{ HomeAddr }, $spb_hash->{ HomeEmail }
+			);
+					
+			$hash->{ HotelAdresses } = join ', ', (
+				$spb_hash->{ HotelPostCode }, $spb_hash->{ HotelCity }, $spb_hash->{ HotelStreet }, $spb_hash->{ HotelHouse }
+			);
+		}
+		else {
+			$hash->{ FullAddress } .= ' ' . $hash->{ AppEMail };
+		}
 	}
 
 	if ( $table_name eq 'Appointments' ) {
@@ -2347,13 +2373,17 @@ sub mod_hash
 		$hash->{ AppNum } = $appointments->getLastAppNum( $self->{ vars }, $hash->{ CenterID }, $hash->{ AppDate } );
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
-			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
+		
 			$hash->{ dwhom } = 0;
+		
+			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
 		}
 		else {
 			$hash->{ dwhom } = 1;
 		}
 	}
+	
+	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'Finished', 'AppEMail', 'AppDataID' );
 		
 	return $hash;
 }
@@ -2418,10 +2448,10 @@ sub get_content_db_rules
 sub get_hash_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $table_name, $table_id ) = @_;
+	my ( $self, $table_name, $field, $table_id ) = @_;
 	
 	my $hash_table = $self->query( 'selallkeys', __LINE__, "
-		SELECT * FROM $table_name WHERE ID = ?", $table_id
+		SELECT * FROM $table_name WHERE $field = ?", $table_id
 	)->[0];
 	
 	return $hash_table;
