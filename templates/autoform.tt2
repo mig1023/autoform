@@ -388,7 +388,7 @@ function init_comm(pos_x, pos_y) {
 				$(this).css('top', (parseFloat($(this).css('top')) + 38) );
 			});
 		[% ELSE %]
-			$('#[% last_error_name %]').css({'background-color' : '#FF9999'});
+			$('#[% last_error_name %]').css({'background-color' : '#FF9999', 'border-width' : '1px'});
 		[% END %]
 	}
 [% END %]
