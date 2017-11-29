@@ -793,7 +793,11 @@ sub get_content_rules_hash
 				'progress' => 11,
 			},
 			{
-				'type' => 'captcha',
+				#'type' => 'captcha',
+				
+				'type' => 'text',
+				'name' => 'appdate_text',
+				'label' => 'Капча отключена на время тестирования',
 			},
 		],
 		

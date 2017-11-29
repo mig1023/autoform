@@ -1057,7 +1057,7 @@ sub get_content_rules_hash
 				'name' => 'hotels',
 				'label' => 'Название гостиницы или ФИО приглашающего',
 				'comment' => 'Укажите полное название гостиницы и данные приглашающего лица',
-				'example' => 'Grand Hotel',
+				'example' => 'VMS',
 				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'AppData',
@@ -2004,13 +2004,17 @@ sub get_content_rules_hash
 				'progress' => 14,
 			},
 			{
-				'type' => 'captcha',
+				# 'type' => 'captcha',
+				
+				'type' => 'text',
+				'name' => 'appdate_text',
+				'label' => 'Капча отключена на время тестирования',
 			},
 		],
 		
 		'Запись успешно создана!' => [
 			{
-				'page_ord' => 29,
+				'page_ord' => 30,
 				'progress' => 15,
 			},
 			{

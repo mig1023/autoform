@@ -416,12 +416,13 @@ sub get_content_rules_hash
 				'name' => 'home_city',
 				'label' => 'Город',
 				'comment' => 'Укажите город, в котором проживаете',
-				'example' => '12345',
+				'example' => 'Moscow',
 				'check' => 'zNW\s\-',
 				'db' => {
 					'table' => 'SpbAlterAppData',
 					'name' => 'HomeCity',
 				},
+				'format' => 'capslock'
 			},
 			{
 				'type' => 'input',
@@ -1107,7 +1108,7 @@ sub get_content_rules_hash
 				'name' => 'hotel_name',
 				'label' => 'Название гостиницы или ФИО приглашающего',
 				'comment' => 'Укажите полное название гостиницы и данные приглашающего лица',
-				'example' => 'Grand Hotel',
+				'example' => 'VMS',
 				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'SpbAlterAppData',
@@ -1132,7 +1133,7 @@ sub get_content_rules_hash
 				'name' => 'hotel_city',
 				'label' => 'Город расположения гостиницы',
 				'comment' => 'Укажите город, в котором располагается гостиница',
-				'example' => 'Grand Hotel',
+				'example' => 'Rome',
 				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'SpbAlterAppData',
@@ -1145,7 +1146,7 @@ sub get_content_rules_hash
 				'name' => 'hotel_street',
 				'label' => 'Улица расположения гостиницы',
 				'comment' => 'Укажите улицу, на которой располагается гостиница',
-				'example' => 'Grand Hotel',
+				'example' => 'Via Esempio',
 				'check' => 'zW\s\-\.',
 				'db' => {
 					'table' => 'SpbAlterAppData',
@@ -2091,13 +2092,17 @@ sub get_content_rules_hash
 				'progress' => 14,
 			},
 			{
-				'type' => 'captcha',
+				#'type' => 'captcha',
+				
+				'type' => 'text',
+				'name' => 'appdate_text',
+				'label' => 'Капча отключена на время тестирования',
 			},
 		],
 		
 		'Запись успешно создана!' => [
 			{
-				'page_ord' => 29,
+				'page_ord' => 30,
 				'progress' => 15,
 			},
 			{
