@@ -1040,6 +1040,31 @@ sub get_test_list {
 					'param' => { 'field_name' => '01.01.2113' },
 					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
 				},
+				24 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'younger_than', 'offset' => 10 } ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'prepare' => \&pre_age_18,
+					'expected' => 'field_name|Указать данное поле можно только для заявителей младше 10 лет',
+				},
+				25 => { 'tester' => \&test_line,
+					'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ { 'condition' => 'younger_than', 'offset' => 10 } ],
+							
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'prepare' => \&pre_age_9,
+					'expected' => '',
+				},
 			},
 		},
 		
@@ -1052,7 +1077,8 @@ sub get_test_list {
 						'AutoAppData' => '[appdata_id]',
 						'AutoSchengenAppData' => '[schdata_id]',
 						'AutoToken' => '[token_id]',
-						'AutoAppointments' => '[app_id]'
+						'AutoAppointments' => '[app_id]',
+						'AutoSpbAlterAppData' => '[spb_id]',
 					},
 				},
 			},
@@ -1328,7 +1354,7 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'tester' => \&test_hash,
 					'prepare' => \&pre_init_param,
-					'args' => [ 'Branches', '1' ],
+					'args' => [ 'Branches', 'ID', '1' ],
 					'expected' => {
 						'ID' => '1',	
 						'BName' => 'Moscow',
@@ -2306,7 +2332,8 @@ sub get_test_appointments
 	$self->get_add( $appid, $test_token );
 
 	my @param = $vars->db->sel1("
-		SELECT AutoAppDataID, AutoSchengenAppDataID, ID FROM AutoToken WHERE Token = ?", $test_token);
+		SELECT AutoAppDataID, AutoSchengenAppDataID, ID, AutoSpbDataID
+		FROM AutoToken WHERE Token = ?", $test_token);
 
 	return ( $test_token, $appid, @param );
 }
@@ -2314,7 +2341,7 @@ sub get_test_appointments
 sub get_tests
 # //////////////////////////////////////////////////
 {
-	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id ) = @_;
+	my ( $self, $vars, $test_token, $test_appid, $test_appdataid ) = @_;
 
 	my @result = ();
 
@@ -2369,13 +2396,14 @@ sub replace_var
 {
 	my $_ = shift;
 	
-	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id ) = @_;
+	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id, $test_spb_id ) = @_;
 
 	my $table_id = {
 		'AutoToken' => $token_id,
 		'AutoAppointments' => $test_appid,
 		'AutoAppData' => $test_appdataid,
 		'AutoSchengenAppData' => $test_appdata_schid,
+		'AutoSpbAlterAppData' => $test_spb_id
 	};
 	
 	$_ = $table_id if /\[table_id\]/;
@@ -2385,21 +2413,21 @@ sub replace_var
 	s/\[app_id\]/$test_appid/g;
 	s/\[appdata_id\]/$test_appdataid/g;
 	s/\[schdata_id\]/$test_appdata_schid/g;
+	s/\[spb_id\]/$test_spb_id/g;
 	s/\[progress_bar\]/$progress_bar/g;
 	s/\[progress_bar_2\]/$progress_bar_2/g;
 	s/\[first_page\]/$first_page/g;
 	s/\[first_page_selected\]/$first_page_selected/g;
 	s/\[second_page\]/$second_page/g;
-
-	if ( /\[page(\d+)\]/ ) {
-		$_ = $self->get_content_rules( $1, 'full' );
-	}
 	
 	if ( ref($_) eq 'HASH' ) {
 		for my $field ( keys %$_ ) {
-			$_->{ $field } =~ s/\[token\]/$test_token/g;
-			$_->{ $field } =~ s/\[app_id\]/$test_appid/g;
+			$_->{ $field } = replace_var( $_->{ $field }, @_ );
 		}
+	}
+	
+	if ( /\[page(\d+)\]/ ) {
+		$_ = $self->get_content_rules( $1, 'full' );
 	}
 	
 	return $_;
@@ -2954,6 +2982,30 @@ sub pre_token01
 	else {
 		$self->{ token } = $self->{ save_token };
 	}
+}
+
+sub pre_age_9
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	$vars->db->query("
+		UPDATE AutoAppData
+		SET birthdate = DATE_SUB(CURRENT_DATE(), INTERVAL 9 YEAR)
+		WHERE ID = ?", {}, $appdataid
+	);
+}
+
+sub pre_age_18
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	$vars->db->query("
+		UPDATE AutoAppData
+		SET birthdate = DATE_SUB(CURRENT_DATE(), INTERVAL 18 YEAR)
+		WHERE ID = ?", {}, $appdataid
+	);
 }
 
 1;
