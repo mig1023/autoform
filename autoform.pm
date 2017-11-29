@@ -822,7 +822,7 @@ sub set_appointment_finished
 	);
 
 	$self->query( 'query', __LINE__, "
-		UPDATE Appointments SET RDate = now(), Login = 'website_newform', Draft = 0, NCount = ? 
+		UPDATE Appointments SET RDate = now(), Login = 'website_nf', Draft = 0, NCount = ? 
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
@@ -2573,6 +2573,8 @@ sub send_app_confirm
 	
 	$langid = 'ru' unless $langid;
 	
+	$appnumber = $self->{ vars }->get_system->appnum_to_str( $appnumber );
+	
 	my $replacer = {
 		app_num		=> $appnumber,
 		app_id		=> $appid,
@@ -2590,7 +2592,7 @@ sub send_app_confirm
 	
 	$lang_local->{ $_ } = $self->lang( $lang_local->{ $_ } ) for keys %$lang_local;
 
-	my $subject = $lang_local->{ subject } . ', #' . $self->{ vars }->get_system->appnum_to_str( $appnumber );
+	my $subject = $lang_local->{ subject } . ", #$appnumber";
 	
 	my $conf = $self->{ autoform }->{ confirm };
 	my $html = $self->get_file_content( $conf->{ tt } );
@@ -2628,7 +2630,7 @@ sub send_app_confirm
 		$data->{ LName } . ' ' . $data->{ FName } . ' ' .  $data->{ MName } . '</b>' 
 	);
 	
-	my $spb_center = ( $data->{ CenterID } =~ /^(11|28|27|29|33|30)$/ ? "spb_" : "" );
+	my $spb_center = ( VCS::Site::autodata::this_is_spb_center( $data->{ CenterID } ) ? "spb_" : "" );
 	
 	$replacer->{ link_image } = $conf->{ link_image };
 	$replacer->{ link_site } = $conf->{ link_site };
@@ -2649,7 +2651,7 @@ sub send_app_confirm
 	
 	my $atach = {
 		0 => {
-			'filename'	=> "Appointment_$appnumber.pdf", 
+			'filename'	=> "Appointment.pdf", 
 			'data'		=> VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } )->createPDF( $appid ), 
 			'ContentType'	=> 'application/pdf',
 		},
