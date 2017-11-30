@@ -261,7 +261,7 @@ sub autoselftest
 	my ( $self, $task, $id, $template ) = @_;
 
 	$self->{ vars }->get_system->redirect(
-		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm'
+		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr }
 	) if ( $self->{ vars }->get_session->{'login'} eq '' );
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
@@ -2163,6 +2163,7 @@ sub offset_calc
 	my ( $self, $offset ) = @_;
 
 	if ( $offset >= 365 ) {
+	
 		$offset = floor( $offset / 365 );
 		
 		$offset =~ /(\d)?(\d)/;
@@ -2170,16 +2171,14 @@ sub offset_calc
 		if ( $1 == 1 ) {
 			$offset .= " лет";
 		}
+		elsif ( $2 == 1 ) {
+			$offset .= " год";
+		}
+		elsif ( ( $2 >= 2 ) and ( $2 <= 4 ) ) {
+			$offset .= " года";
+		}
 		else {
-			if ( $2 == 1 ) {
-				$offset .= " год";
-			}
-			elsif ( ( $2 >= 2 ) and ( $2 <= 4 ) ) {
-				$offset .= " года";
-			}
-			else {
-				$offset .= " лет";
-			}
+			$offset .= " лет";
 		}
 	}
 	elsif ( $offset >= 60 ) {
@@ -2228,6 +2227,7 @@ sub create_new_appointment
 	my $self = shift;
 	
 	my $new_appid;
+	
 	my $info_for_contract = "from_db";
 	
 	my $tables_transfered_id = $self->get_current_table_id();
@@ -2492,7 +2492,9 @@ sub get_pcode
 	my $center = $self->{ vars }->getparam( 'center' ) || 1;
 	
 	$request =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя]//g;
+	
 	$_ =~ s/[^0-9]//g for ( $request_limit, $center );
+	
 	$request_limit = 20 if ( $request_limit eq '' ) or ( $request_limit == 0 ) or ( $request_limit > 100 );
 
 	my $finded_pcode = [];
@@ -2517,38 +2519,29 @@ sub get_pcode
 			$self->cached( 'autoform_allpcode', $all_pcode );
 		}
 	
-		if ( $request =~ /[^0-9]/ ) {
-
-			my $limit = 0;
-			
-			for ( @$all_pcode ) {
-				if ( ( $_->{ CName } =~ /^$request/ or $_->{ RName } =~ /^$request/ )
-						and $_->{ Center } == $center ) {
+		my $limit = 0;
+	
+		for ( @$all_pcode ) {
+			if (
+				( $_->{ Center } == $center ) and (
+				
+					( ( $request =~ /[^0-9]/ ) and ( ( $_->{ CName } =~ /^$request/ or $_->{ RName } =~ /^$request/ ) ) )
 					
-					push( @$finded_pcode, $_ );
+					or 
 					
-					$limit++;
-					
-					last if $limit >= $request_limit;
-				};
-			}
-		}
-		else {
-			my $limit = 0;
-			
-			for ( @$all_pcode ) {
-				if ( $_->{ PCode } =~ /^$request/ and $_->{ Center } == $center ) {
-					
-					push( @$finded_pcode, $_ );
-					
-					$limit++;
-					
-					last if $limit >= $request_limit;
-				};
-			}			
+					( ( $request =~ /^[0-9]+$/ ) and ( $_->{ PCode } =~ /^$request/ ) )
+				)	
+			) {
+				push( @$finded_pcode, $_ );
+				
+				$limit++;
+				
+				last if $limit >= $request_limit;
+			};
 		}
 
 		for my $rk ( @$finded_pcode ) {
+		
 			$rk->{ CName } = ( $rk->{ RName } ne '' ? 
 				$self->{ vars }->get_system->converttext( $rk->{ RName } ) : 
 				$self->{ vars }->get_system->converttext( $rk->{ CName } ) 
