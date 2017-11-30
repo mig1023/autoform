@@ -785,12 +785,13 @@ sub set_current_app_finished
 {
 	my ( $self, $tables_id ) = @_;
 	
-	my $vtype = $self->query( 'sel1', __LINE__, "
-		SELECT VType FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
+	my ( $vtype, $center ) = $self->query( 'sel1', __LINE__, "
+		SELECT VType, CenterID FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
 	);
 
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoAppData SET Finished = ? WHERE ID = ?", {}, $vtype, $tables_id->{ AutoAppData }
+		UPDATE AutoAppData SET FinishedVType = ?, FinishedCenter = ? WHERE ID = ?", {},
+		$vtype, $center, $tables_id->{ AutoAppData }
 	);
 }
 
@@ -905,7 +906,7 @@ sub get_edit
 		);
 		
 		$self->query( 'query', __LINE__, "
-			UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, $appdata_id
+			UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $appdata_id
 		);
 		
 		$self->mod_last_change_date();
@@ -965,7 +966,7 @@ sub check_all_app_finished_and_not_empty
 	my $self = shift;
 
 	my $allfinished = $self->query( 'selallkeys',  __LINE__, "
-		SELECT AutoAppData.Finished AS FinishedAs, VType
+		SELECT FinishedVType, FinishedCenter, VType, CenterID
 		FROM AutoAppData
 		JOIN AutoAppointments ON AutoAppointments.ID = AutoAppData.AppID
 		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
@@ -973,8 +974,12 @@ sub check_all_app_finished_and_not_empty
 	);
 	
 	for ( @$allfinished ) {
-		return 4 if !$_->{ FinishedAs };
-		return 19 if $_->{ FinishedAs } != $_->{ VType };
+	
+		return 4 unless $_->{ FinishedVType } and $_->{ FinishedCenter };
+		
+		return 19 if $_->{ FinishedVType } != $_->{ VType };
+		
+		return 22 if $_->{ FinishedCenter } != $_->{ CenterID };
 	}
 	
 	return 5 if @$allfinished < 1;
@@ -1114,7 +1119,7 @@ sub get_list_of_app
 	
 	my $content = $self->query( 'selallkeys', __LINE__, "
 		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName,
-		AutoAppData.BirthDate, AutoAppData.Finished, AutoAppointments.VType
+		BirthDate, FinishedVType, FinishedCenter, VType, CenterID
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
@@ -1127,8 +1132,14 @@ sub get_list_of_app
 		for my $app ( @$content ) {
 		
 			$app->{ BirthDate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+			
+			$app->{ Finished } = 1;
+			
+			$app->{ Finished } = 3 if $app->{ FinishedCenter } != $app->{ CenterID };
+			
+			$app->{ Finished } = 2 if $app->{ FinishedVType } != $app->{ VType };
 
-			$app->{ Finished } = ( $app->{ Finished } == $app->{ VType } ? 1 : 2 ) if $app->{ Finished };
+			$app->{ Finished } = 0 if !$app->{ FinishedVType } or !$app->{ FinishedCenter };
 		}
 	}
 
@@ -2600,14 +2611,14 @@ sub send_app_confirm
 	$replacer->{ branch_addr } = $self->{ vars }->getGLangVar( 'Address-' . $data->{ CenterID }, $langid );
 	
 	$replacer->{ branch_addr } = $self->query( 'sel1', __LINE__, "
-		SELECT BAddr FROM Branches WHERE ID=?", $data->{ CenterID }
+		SELECT BAddr FROM Branches WHERE ID = ?", $data->{ CenterID }
 	) if $replacer->{ branch_addr } eq 'Address-' . $data->{ CenterID };
 
 	$replacer->{ branch_addr } = $self->{ vars }->get_system->converttext( $replacer->{ branch_addr } );
 	$replacer->{ branch_addr } =~ s/_?(x005F|x000D)_?//g;
 	
 	my ( $tstart,$tend ) = $self->query( 'sel1', __LINE__, "
-		SELECT TStart,TEnd FROM TimeData WHERE SlotID=?", $data->{ TimeslotID }
+		SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $data->{ TimeslotID }
 	);
 		
 	my @date_sp = split /\-/, $data->{ AppDate };
