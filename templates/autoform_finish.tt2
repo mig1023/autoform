@@ -29,9 +29,9 @@
 </td></tr>
 
 <tr><td>
-	<input type="button" value="◁ [% langreq('Вернуться к списку') %]" onclick="back_button();">
+	<input type="button" value="&#9665; [% langreq('Вернуться к списку') %]" onclick="back_button();">
 	&nbsp;
-	<input type="button" value="[% langreq('Перейти к завершению') %] ▷" onclick="finish_button();">
+	<input type="button" value="[% langreq('Перейти к завершению') %] &#9655;" onclick="finish_button();">
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 </table>

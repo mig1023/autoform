@@ -56,9 +56,9 @@
 </td></tr>
 
 <tr><td colspan="5">
-	<input type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
+	<input type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
-	<input type="button" value="[% langreq('Оформить запись') %] ▷" onclick="go_button('tofinish');">
+	<input type="button" value="[% langreq('Оформить запись') %] &#9655;" onclick="go_button('tofinish');">
 	
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
@@ -114,7 +114,7 @@ function mobileScreenCheck() {
 	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '600px' ) );
-	$('.edit_input').attr("value", ( mobilScreen ? '✎' : '[% langreq('Редактировать') %]' ) );
+	$('.edit_input').attr("value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
 	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
 	
 	[% IF last_error_name %]

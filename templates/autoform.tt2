@@ -67,23 +67,23 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="3"><br>
 [% IF ( step > min_step ) && ( step != max_step ) %]
-	<input class="action_button" type="button" value="◁ [% langreq('Назад') %]" onclick="go_button('back');">
+	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 [% END %]
 [% IF ( step < max_step ) && ( step > 0 ) %]
-	<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] ▷" onclick="go_button('forward');">
+	<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
 [% END %]
 
 [% IF ( step == max_step ) %]
 	[% IF mobile_app %]
-		<input type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] ▷" onclick="go_button('mobile_app');">
+		<input type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] &#9655;" onclick="go_button('mobile_app');">
 	[% ELSE %]
-		<input type="button" value="[% langreq('Перейти на страницу записи') %] ▷" onclick="go_button('app');">
+		<input type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('app');">
 	[% END %]
 [% END %]
 [% IF step == 1 %]
 	</td></tr><tr><td colspan="3">
-	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
+	<br><a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
 	<tr><td colspan="3">
 	[% INCLUDE vip_form.tt2 %]
 [% END %]
