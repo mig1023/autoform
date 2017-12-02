@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
@@ -245,7 +246,7 @@ function init_comm(pos_x, pos_y) {
 			
 	function update_nearest_date_[% near %]()
 	{	
-		$("#[% near %]").html("<img src='/files/autoform_wait.gif'>");
+		$("#[% near %]").html("<img src='/files/autoform_wait.gif' />");
 		$.get("[% vcs_tools %]get_nearest.htm", {
 			'center': $('#center').val(), 
 			'persons': 1, 
@@ -259,7 +260,7 @@ function init_comm(pos_x, pos_y) {
 		var restore_el = 0;
 		
 		$('#vtype').hide();
-		$('#vtype').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif'>");
+		$('#vtype').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif' />");
 		$('#vtype').find('option').remove();
 		
 		$.get("[% vcs_tools %]get_vtypes.htm", 
@@ -294,7 +295,7 @@ function init_comm(pos_x, pos_y) {
 				
 		$('#timeslot').hide();
 		$('#timeslot').find('option').remove();
-		$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif'>");
+		$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif' />");
 		
 		var reload_timeslot = $('#timeslot').attr('data-timeslot');
 
@@ -400,7 +401,7 @@ function init_comm(pos_x, pos_y) {
 			$('#[% post_index %]').hide();
 			$('#[% post_index %]').parent().append(
 				'<span id="[% post_index %]_replacer">' + $('#[% post_index %]').val() + 
-				' <img src="/files/autoform_wait.gif"></span>'
+				' <img src="/files/autoform_wait.gif" /></span>'
 			);
 			$('#[% post_index %]_replacer').css( "font-size", ( isMobile() ? '1.5em' : '' ) );
 			
