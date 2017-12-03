@@ -592,12 +592,18 @@ sub get_autoform_content
 	
 	my $appnum = undef;
 	my $appid = undef;
+	
+	my $min_step = 1;
+	my $max_step = $self->get_content_rules( 'length' );
+	
+	$step = $min_step if $step < $min_step;
+	$step = $max_step if $step > $max_step;
 
 	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
 		$step = $self->get_back( $step );
 	}
 
-	if ( ( $action eq 'forward' ) and ( $step < $self->get_content_rules( 'length' ) ) ) {
+	if ( ( $action eq 'forward' ) and ( $step < $max_step ) ) {
 		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
 	}
 
@@ -2382,6 +2388,8 @@ sub mod_hash
 		my $appointments = VCS::Docs::appointments->new('VCS::Docs::appointments', $self->{ vars } );
 		
 		$hash->{ AppNum } = $appointments->getLastAppNum( $self->{ vars }, $hash->{ CenterID }, $hash->{ AppDate } );
+		
+		$hash->{ OfficeToReceive } = ( $hash->{ OfficeToReceive } == 2 ? 39 : undef ) ;
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
 		

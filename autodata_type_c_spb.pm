@@ -2057,38 +2057,9 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Предпочтительный офис получения готовых документов' => [
-			{
-				'page_ord' => 28,
-				'progress' => 13,
-				'relation' => {
-					'only_if' => {
-						'table' => 'Appointments',
-						'name' => 'CenterID',
-						'value' => '1',
-					}
-				},
-				
-			},
-			{
-				'type' => 'radiolist',
-				'name' => 'mezziwhom',
-				'label' => 'Выберите офис, в котором будет осуществляться выдачи готовых документов',
-				'check' => 'N',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'OfficeToReceive',
-				},
-				'param' => { 
-					0 => '<b>м.Третьяковская</b>, Малый Толмачёвский пер., д.6 стр.1',
-					39 => '<b>м.Киевская</b>, ул. Киевская, вл. 2, 3 этаж',
-				},
-			},
-		],
-		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 29,
+				'page_ord' => 28,
 				'progress' => 14,
 			},
 			{
@@ -2102,7 +2073,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				'page_ord' => 30,
+				'page_ord' => 29,
 				'progress' => 15,
 			},
 			{
