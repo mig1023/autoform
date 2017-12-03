@@ -1,0 +1,79 @@
+<head>
+<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
+<link href="/css/autoform.css" rel="stylesheet" type="text/css">
+</head>
+
+<font face="arial">
+
+<center>
+<div id="info_form" style = "margin: 50px ">
+
+<form action = "[% addr %]" method = "POST" name = "dataform">
+<input type = "hidden" value = "nothing" name = "action" id = "action">
+
+<table width="100%">
+
+<tr><td align="center">
+
+<table width="450px" id="app_table">
+
+[% IF title == 1 %]
+
+<tr><td colspan="2"><h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
+
+<tr>
+<td>[% langreq('Номер записи') %]</td><td style="text-align:right">[% app_info.new_app_num %]</td>
+</tr><tr>
+<td>[% langreq('Дата и время подачи') %]</td><td style="text-align:right">[% app_info.new_app_date %] [% app_info.new_app_timeslot %]</td>
+</tr><tr>
+<td>[% langreq('Визовый центр') %]</td><td style="text-align:right">[% app_info.new_app_branch %]</td>
+</tr><tr>
+<td>[% langreq('Тип визы') %]</td><td style="text-align:right">[% app_info.new_app_vname %]</td>
+</tr>
+
+<tr><td colspan="2">
+
+<input style="width:100%;height:40px;margin-bottom:2px" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('forward');"><br>
+<input style="width:49%;height:40px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('forward');">
+<input style="width:48%;height:40px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('forward');"><br>
+
+</td></tr>
+
+<tr><td colspan="2"><br><h2>[% langreq('Список заявителей') %]</h2><br></td></tr>
+
+<tr><td colspan="2"><table>
+[% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
+<tr>
+<td width="90%">[% i %]. [% person.FName %] [% person.LName %]</td>
+<td><input style="height:25px" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('forward');"></td>
+</tr>
+[% END %]
+</table></td></tr>
+
+<tr><td colspan="3">
+<br><br><a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...</td></tr>
+
+
+[% ELSIF title == 2 %]
+
+[% ELSE %]
+something wrong
+[% END %]
+
+</table>
+
+</td></tr></table>
+
+</form>
+
+<script>
+
+function go_button(where) {
+	$('#action').val(where);
+	document.dataform.submit();
+};
+
+</script>
+
+</div>

@@ -169,20 +169,25 @@ sub autoform
 	my $special = {};
 	my $javascript_check = 1;
 	
+	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
+	
 	my $mobile_api = ( $self->{ vars }->getparam( 'mobile_api' ) ? 1 : 0 );
 	
-	$self->{ token } = $self->get_token_and_create_new_form_if_need( $mobile_api );
-	
+	( $self->{ token }, my $finished ) = $self->get_token_and_create_new_form_if_need( $mobile_api );
+
 	if ( $mobile_api ) {
 	
 		$self->get_mobile_api();
 		
 		return;
 	}
+	elsif ( $finished ) {
 	
-	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
-
-	if ( $self->{ token } =~ /^\d\d$/ ) {
+		$self->get_infopage( $template );
+		
+		return;
+	}
+	elsif ( $self->{ token } =~ /^\d\d$/ ) {
 	
 		( $title, $page_content, $template_file ) = $self->get_page_error( $self->{ token } );
 	}
@@ -486,23 +491,24 @@ sub get_token_and_create_new_form_if_need
 	my $token = lc( $self->{ vars }->getparam('t') );
 
 	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
+	
+	my $finished = 0;
 
 	if ( $token eq '' ) {
+	
 		$token = $self->save_new_token_in_db( $self->token_generation() );
 	}
 	else {
-		my ( $token_exist, $finished ) = $self->query( 'sel1', __LINE__, "
+		( my $token_exist, $finished ) = $self->query( 'sel1', __LINE__, "
 			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token
 		);
 
 		return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 		
 		return '02' if !$token_exist;
-		
-		return '03' if $finished and !$mobile_api;
 	}
 	
-	return $token;
+	return ( $token, $finished );
 }
 
 sub create_clear_form
@@ -570,6 +576,46 @@ sub get_page_error
 	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
 	
 	return ( "<center>$title</center>", undef, 'autoform.tt2' );
+}
+
+sub get_infopage
+# //////////////////////////////////////////////////
+{
+	my ( $self, $template ) = @_;
+	
+	my $app_info = $self->query( 'selallkeys', __LINE__, "
+		SELECT CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
+		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname
+		FROM AutoToken
+		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
+		WHERE Token = ?", $self->{ token }
+	)->[0];
+
+	$app_info->{ 'new_app_date' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	
+	$app_info->{ 'new_app_num' } =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	$self->correct_values( \$app_info );
+
+	my $app_list = $self->query( 'selallkeys', __LINE__, "
+		SELECT AppData.ID, AppData.FName, AppData.LName
+		FROM AutoToken 
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'title' 	=> 1,
+		'app_info'	=> $app_info,
+		'app_list'	=> $app_list,
+		'token' 	=> $self->{ token },
+		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
 }
 
 sub get_autoform_content
@@ -1082,7 +1128,7 @@ sub correct_values
 # //////////////////////////////////////////////////
 {
 	my ( $self, $current_values, $appnum ) = @_;
-	
+
 	$$current_values->{ 'new_app_num' } = $appnum if $appnum;
 
 	if ( $$current_values->{ 'new_app_branch' } ) {
