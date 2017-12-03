@@ -9,18 +9,21 @@
 <center>
 <div id="info_form" style = "margin: 50px ">
 
-<form action = "[% addr %]" method = "POST" name = "dataform">
+<form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 
 <table width="100%">
 
-<tr><td align="center">
+<tr><td align="center"> <br><br>
 
-<table width="450px" id="app_table">
+<table width="600px" id="app_table">
 
 [% IF title == 1 %]
 
 <tr><td colspan="2"><h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
+
+<tr><td>
+<table width="100%">
 
 <tr>
 <td>[% langreq('Номер записи') %]</td><td style="text-align:right">[% app_info.new_app_num %]</td>
@@ -32,27 +35,42 @@
 <td>[% langreq('Тип визы') %]</td><td style="text-align:right">[% app_info.new_app_vname %]</td>
 </tr>
 
-<tr><td colspan="2">
+</table>
+</td><td>
 
-<input style="width:100%;height:40px;margin-bottom:2px" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('forward');"><br>
-<input style="width:49%;height:40px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('forward');">
-<input style="width:48%;height:40px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('forward');"><br>
+<table width="100%">
+<tr><td>
 
+<input style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('print');"><br>
+<input style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
+<input style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
+
+</td></tr>
+</table>
 </td></tr>
 
 <tr><td colspan="2"><br><h2>[% langreq('Список заявителей') %]</h2><br></td></tr>
 
-<tr><td colspan="2"><table>
+<tr><td colspan="2"><table width="100%">
 [% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
 <tr>
-<td width="90%">[% i %]. [% person.FName %] [% person.LName %]</td>
-<td><input style="height:25px" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('forward');"></td>
+<td style="overflow:hidden;max-width:321px;text-overflow:ellipsis;"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
+<td style="text-align:right">[% person.BirthDate %]&nbsp;<input style="height:25px" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('forward');"></td>
 </tr>
 [% END %]
 </table></td></tr>
 
-<tr><td colspan="3">
-<br><br><a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...<br>Всякая фигня...</td></tr>
+<tr><td colspan="2">&nbsp;</td></tr>
+
+<tr><td colspan="2" style="border-bottom: 1px dashed #000;">&nbsp;</td></tr>
+
+<tr><td colspan="2" align ="justify" style="font-size:12px;">
+<br>1. [% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
+<br><br>2. [% langreq('C 14 сентября 2015 года, все заявители, запрашивающие визу, проходят обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждому заявителю необходимо явиться на подачу документов лично') %].
+<br><br>3. [% langreq('Обращаем ваше внимание, что прием документов на оформление визы и прохождение процедуры "Биометрия" в Визовом центре проходит при предъявлении распечатанной записи и строго в назначенное время') %].
+<br><br>4. [% langreq('Пожалуйста, будьте по указанному ниже адресу не более, чем за 10 минут до назначенного времени') %].
+<br><br>5. [% langreq('Запись в Визовый центр на подачу документов осуществляется бесплатно') %].
+<br><br>6. [% langreq('Ознакомьтесь с положением об') %] <a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('отказе от ответственности и политике конфиденциальности') %]</a>.</td></tr>
 
 
 [% ELSIF title == 2 %]
@@ -62,8 +80,6 @@ something wrong
 [% END %]
 
 </table>
-
-</td></tr></table>
 
 </form>
 

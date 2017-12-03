@@ -7,6 +7,7 @@ use VCS::Site::autodata_type_c;
 use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
 use VCS::Site::automobile_api;
+use VCS::Site::autoinfopage;
 use VCS::Site::autoselftest;
 
 use Data::Dumper;
@@ -175,27 +176,19 @@ sub autoform
 	
 	( $self->{ token }, my $finished ) = $self->get_token_and_create_new_form_if_need( $mobile_api );
 
-	if ( $mobile_api ) {
+	return $self->get_mobile_api() if $mobile_api;
 	
-		$self->get_mobile_api();
-		
-		return;
-	}
-	elsif ( $finished ) {
-	
-		$self->get_infopage( $template );
-		
-		return;
-	}
-	elsif ( $self->{ token } =~ /^\d\d$/ ) {
+	return $self->autoinfopage( $task, $id, $template ) if $finished;
+
+	if ( $self->{ token } =~ /^\d\d$/ ) {
 	
 		( $title, $page_content, $template_file ) = $self->get_page_error( $self->{ token } );
 	}
 	elsif ( $self->{ vars }->getparam( 'script' ) ) {
 	
-		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
-		
 		$javascript_check = 0;
+		
+		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
 	}
 	else {
 		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
@@ -274,6 +267,20 @@ sub autoselftest
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	print $self_test_result;
+}
+
+sub autoinfopage
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $autoinfopage = VCS::Site::autoinfopage->new('VCS::Site::autoinfopage', $self->{ vars } );
+	
+	$autoinfopage->{ autoform } = VCS::Site::autodata::get_settings();
+	
+	$autoinfopage->{ af } = $self;
+	
+	$autoinfopage->autoinfopage( $task, $id, $template );
 }
 
 sub mobile_end
@@ -576,46 +583,6 @@ sub get_page_error
 	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
 	
 	return ( "<center>$title</center>", undef, 'autoform.tt2' );
-}
-
-sub get_infopage
-# //////////////////////////////////////////////////
-{
-	my ( $self, $template ) = @_;
-	
-	my $app_info = $self->query( 'selallkeys', __LINE__, "
-		SELECT CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
-		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname
-		FROM AutoToken
-		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
-		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
-		WHERE Token = ?", $self->{ token }
-	)->[0];
-
-	$app_info->{ 'new_app_date' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
-	
-	$app_info->{ 'new_app_num' } =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
-	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	$self->correct_values( \$app_info );
-
-	my $app_list = $self->query( 'selallkeys', __LINE__, "
-		SELECT AppData.ID, AppData.FName, AppData.LName
-		FROM AutoToken 
-		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
-		WHERE Token = ?", $self->{ token }
-	);
-	
-	my $tvars = {
-		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
-		'title' 	=> 1,
-		'app_info'	=> $app_info,
-		'app_list'	=> $app_list,
-		'token' 	=> $self->{ token },
-		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
-	};
-	$template->process( 'autoform_info.tt2', $tvars );
 }
 
 sub get_autoform_content
@@ -2232,16 +2199,16 @@ sub offset_calc
 		$offset =~ /(\d)?(\d)/;
 		
 		if ( $1 == 1 ) {
-			$offset .= " лет";
+			$offset .= $self->lang( " лет" );
 		}
 		elsif ( $2 == 1 ) {
-			$offset .= " год";
+			$offset .= $self->lang( " год" );
 		}
 		elsif ( ( $2 >= 2 ) and ( $2 <= 4 ) ) {
-			$offset .= " года";
+			$offset .= $self->lang( " года" );
 		}
 		else {
-			$offset .= " лет";
+			$offset .= $self->lang( " лет" );
 		}
 	}
 	elsif ( $offset >= 60 ) {
@@ -2249,23 +2216,23 @@ sub offset_calc
 		$offset = floor( $offset / 30 );
 		
 		if ( ( $offset >= 2 ) and ( $offset <= 4) ) {
-			$offset .= " месяца";
+			$offset .= $self->lang( " месяца" );
 		}
 		else {
-			$offset .= " месяцев";
+			$offset .= $self->lang( " месяцев" );
 		}
 	}
 	else {
 		$offset =~ /(\d)?(\d)/;
 		
 		if ( ( $1 == 1 ) or ( $2 == 0 ) or ( $2 >= 5 ) ) {
-			$offset .= " дней";
+			$offset .= $self->lang( " дней" );
 		}
 		elsif ( ( $2 >= 2 ) and ( $2 <= 4) ) {
-			$offset .= " дня";
+			$offset .= $self->lang( " дня" );
 		}
 		else {
-			$offset .= " день";
+			$offset .= $self->lang( " день" );
 		}
 	}
 	
