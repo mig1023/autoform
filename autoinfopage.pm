@@ -3,7 +3,7 @@ use strict;
 
 use VCS::Vars;
 use Data::Dumper;
-
+use Imager::QRCode;
 
 sub new
 # //////////////////////////////////////////////////
@@ -62,6 +62,29 @@ sub get_infopage
 	
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
 	
+	my $qrcode_file_name = "qrcode_" . $self->{ af }->{ token } . ".png";
+	my $qrcode_file = $self->{ autoform }->{ qrcode }->{ file_folder } . $qrcode_file_name;
+	
+	unless ( -e $qrcode_file ) {
+	
+		my $qrcode = Imager::QRCode->new(
+			size          => 4,
+			margin        => 0,
+			version       => 1,
+			level         => 'M',
+			casesensitive => 1,
+			lightcolor    => Imager::Color->new( 255, 255, 255 ),
+			darkcolor     => Imager::Color->new( 0, 0, 0 ),
+		);
+
+		my $img = $qrcode->plot(
+			$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
+			'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
+		);
+		
+		$img->write( file => $qrcode_file );
+	}
+	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
 		'title' 	=> 1,
@@ -69,6 +92,7 @@ sub get_infopage
 		'app_list'	=> $app_list,
 		'token' 	=> $self->{ af }->{ token },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'qrcode'	=> $self->{ vars }->getform('fullhost') . '/files/' . $qrcode_file_name,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }

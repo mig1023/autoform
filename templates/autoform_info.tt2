@@ -14,13 +14,16 @@
 
 <table width="100%">
 
-<tr><td align="center"> <br><br>
+<tr><td align="center">
 
 <table width="600px" id="app_table">
 
 [% IF title == 1 %]
 
-<tr><td colspan="2"><h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
+<tr><td colspan="2">
+
+<img src="[% qrcode %]"><br><br>
+<h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
 
 <tr><td>
 <table width="100%">
