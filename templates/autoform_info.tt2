@@ -3,6 +3,12 @@
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
+[% IF title == 2 %]
+	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
+	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
+	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
+	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
+[% END %]
 </head>
 
 <font face="arial">
@@ -78,6 +84,88 @@
 
 
 [% ELSIF title == 2 %]
+
+<tr><td colspan="2">
+
+<h2>[% langreq('Назначить другую дату') %]</h2><br></td></tr>
+
+<tr><td colspan="2">&nbsp;</td></tr>
+<tr><td width="60%"><label id="text">Новая дата записи</label></td>
+<td><input class="input_width input_gen" style="width:100%;" type="text" value="[% appinfo.appdate %]" name="app_date" id="app_date" onchange="update_timeslots(1);"></td></tr>
+<tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen" style="width:100%;" size = "1" name="timeslot" title="" id="timeslot" data-timeslot="5694"></select></td></tr>
+
+<tr><td colspan="2"><br>
+<input style="height:30px;margin-bottom:2px" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+<input style="height:30px;margin-bottom:2px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br></td></tr>
+
+<tr><td colspan="2" style="border-bottom: 1px dashed #000;">&nbsp;</td></tr>
+
+<tr><td colspan="2" align ="justify" style="font-size:12px;">
+<br>1. [% langreq('Некоторые комментарии по процессу выбора нового времени и даты') %].
+</td></tr>
+
+<script>
+$("#app_date").mask("99.99.9999");
+
+$('#app_date').datepicker({
+	dateFormat: 'dd.mm.yy',
+	firstDay: 1,
+	showOn: 'both',
+	buttonImage: '/vcs/static/images/1x1.png',
+	buttonImageOnly:true
+});
+
+update_timeslots();
+
+function update_timeslots(date_change) {
+			
+	$('#timeslot').hide();
+	$('#timeslot').find('option').remove();
+	$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif' />");
+	
+	var reload_timeslot = $('#timeslot').attr('data-timeslot');
+
+	$.get("[% vcs_tools %]get_times.htm", {
+		'center': '[% appinfo.center %]', 
+		'persons': '[% appinfo.persons %]', 
+		'appdate':$('#app_date').val(),
+		'fdate': '[% appinfo.fdate %]', 
+		'lang': 'ru',
+		
+		}, function(xml) {
+			$(xml).find('node').each( function() {
+				var apptimeValue = $(this).find('id').text();
+				var apptimeText = $(this).find('title').text();
+				
+				$('#timeslot').append(
+					'<option value="' + apptimeValue + '" ' +
+					( ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) ? 'selected' : '' )
+					+ ' >'+ apptimeText + '</option>'
+				);
+		});
+		
+		$('#tmp_img').remove();
+		$('#timeslot').show();
+		
+		[% IF last_error_name == 'timeslot' %]
+			if ( !date_change ) {
+				$(document).ready(function() {
+					show_error_tip();
+				});
+			} else {
+				$('#timeslot').poshytip('destroy');
+			}
+		[% END %]
+		
+		var al = $(xml).find('urgent_flag');
+		if (al.text() != '') {
+			var alertText = al.text();
+			alert(alertText);
+		}
+    }, 'xml');
+};
+
+</script>
 
 [% ELSE %]
 something wrong

@@ -4,6 +4,7 @@ use strict;
 use VCS::Vars;
 use Data::Dumper;
 use Imager::QRCode;
+use Date::Calc;
 
 sub new
 # //////////////////////////////////////////////////
@@ -27,6 +28,10 @@ sub autoinfopage
 	$action =~ s/[^a-z]//g;
 	
 	return $self->print_appointment() if $action eq 'print';
+	
+	return $self->do_reschedule( $task, $id, $template ) if $action eq 'do_reschedule';
+	
+	return $self->reschedule( $task, $id, $template ) if $action eq 'reschedule';
 	
 	return $self->get_infopage( $task, $id, $template );
 }
@@ -116,6 +121,87 @@ sub print_appointment
 		$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
 		'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
 	);
+}
+
+sub reschedule
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $new = {};
+	
+	$new->{ $_ } = $self->{ vars }->getparam( $_ ) for ( 'app_date', 'timeslot' );
+	
+	if (
+		$new->{ timeslot } =~ /^\d+$/
+		and
+		$new->{ app_date } =~ /(\d\d)\.(\d\d)\.(\d\d\d\d)/
+		and
+		Date::Calc::check_date( $3, $2, $1 )
+	) {
+	
+		$new->{ app_date } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
+		
+		# my $time_start = $self->time_interval_calculate();
+	
+		$self->{ af }->query( 'query', __LINE__, "
+			LOCK TABLES Appointments WRITE, AutoToken READ"
+		);
+		
+		my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ af }->{ token }
+		);
+		
+		$self->{ af }->query( 'query', __LINE__, "
+			UPDATE Appointments SET AppDate = ?, TimeslotID = ? WHERE ID = ?", {}, 
+			$new->{ app_date }, $new->{ timeslot }, $app_id
+		);
+		
+		$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES");
+	
+		# my $milliseconds = $self->time_interval_calculate( $time_start );
+		# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms"; 
+		
+		$self->{ vars }->get_system->redirect( 
+			$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
+			'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
+		);
+	}
+	
+	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
+
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'title' 	=> 2,
+		'appinfo'	=> $appinfo_for_timeslots,
+		'token' 	=> $self->{ af }->{ token },
+		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub get_same_info_for_timeslots_from_app
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $app = {};
+
+	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot }, $app->{ appdate } ) = 
+		$self->{ af }->query( 'sel1', __LINE__, "
+			SELECT count(AppData.ID), CenterID, SDate, TimeslotID, AppDate
+			FROM AutoToken 
+			JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+			JOIN AppData ON AppData.AppID = Appointments.ID
+			WHERE Token = ?", $self->{ af }->{ token }
+		);
+	
+	$app->{ fdate_iso } = $app->{ fdate };
+	
+	$_ =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for ( $app->{ fdate }, $app->{ appdate });
+
+	return $app;
 }
 
 1;
