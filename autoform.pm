@@ -178,7 +178,7 @@ sub autoform
 
 	return $self->get_mobile_api() if $mobile_api;
 	
-	return $self->autoinfopage( $task, $id, $template ) if $finished;
+	return $self->autoinfopage( $task, $id, $template ) if $finished and $self->{ token } !~ /^\d\d$/;
 
 	if ( $self->{ token } =~ /^\d\d$/ ) {
 	
@@ -499,23 +499,23 @@ sub get_token_and_create_new_form_if_need
 
 	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
 	
-	my $finished = 0;
-
-	if ( $token eq '' ) {
+	return $self->save_new_token_in_db( $self->token_generation() ) if $token eq '';
 	
-		$token = $self->save_new_token_in_db( $self->token_generation() );
-	}
-	else {
-		( my $token_exist, $finished ) = $self->query( 'sel1', __LINE__, "
-			SELECT ID, Finished FROM AutoToken WHERE Token = ?", $token
-		);
+	my ( $token_exist, $finished, $app ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, Finished, CreatedApp FROM AutoToken WHERE Token = ?", $token
+	);
 
-		return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
-		
-		return '02' if !$token_exist;
-	}
+	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 	
-	return ( $token, $finished );
+	return '02' if !$token_exist;
+	
+	return $token unless $finished;
+	
+	my $status = $self->query( 'sel1', __LINE__, "
+		SELECT Status FROM Appointments WHERE ID = ?", $app
+	);
+	
+	return ( ( $status == 1 ? $token : '02' ), $finished );
 }
 
 sub create_clear_form

@@ -13,6 +13,7 @@ sub get_settings
 		'paths' => {
 			'addr' => '/autoform/',
 			'addr_vcs' => '/vcs/',
+			
 		},
 		
 		'age' => {
@@ -28,6 +29,10 @@ sub get_settings
 			'private_key' => '',
 			'widget_api' => 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit',
 			'verify_api' => 'https://www.google.com/recaptcha/api/siteverify',
+		},
+		
+		'qrcode' => {
+			'file_folder' => '/usr/local/www/data/htdocs/files/',
 		},
 		
 		'confirm' => {
@@ -48,8 +53,7 @@ sub get_page_error
 	return [
 		'для правильной работы анкеты необходимо, чтобы в браузере был включён javascript',
 		'неправильный токен',
-		'такого токена не существует',
-		'запись уже завершена',
+		'запись не найдена',
 	];
 }
 
