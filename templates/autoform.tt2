@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
@@ -22,7 +23,7 @@
 
 [% IF javascript_check %]
 <noscript>
-	<meta http-equiv="refresh" content="0; url=[% addr %]?t=[% token %]&script=no">
+	<meta http-equiv="refresh" content="0"; url=[% addr %]?t=[% token %]&script=no">
 </noscript>
 [% ELSE %]
 <script>
@@ -84,7 +85,7 @@ YMaps.jQuery(function () {
 [% END %]
 [% IF step == 1 %]
 	</td></tr><tr><td colspan="3">
-	<br><a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
+	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
 	<tr><td colspan="3">
 	[% INCLUDE vip_form.tt2 %]
 [% END %]
