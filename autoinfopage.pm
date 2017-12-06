@@ -28,10 +28,10 @@ sub autoinfopage
 	$action =~ s/[^a-z]//g;
 	
 	return $self->print_appointment() if $action eq 'print';
-	
-	return $self->do_reschedule( $task, $id, $template ) if $action eq 'do_reschedule';
-	
+
 	return $self->reschedule( $task, $id, $template ) if $action eq 'reschedule';
+	
+	return $self->cancel( $task, $id, $template ) if $action eq 'cancel';
 	
 	return $self->get_infopage( $task, $id, $template );
 }
@@ -54,41 +54,13 @@ sub get_infopage
 	
 	$app_info->{ new_app_num } =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
 	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
 	$self->{ af }->correct_values( \$app_info );
 
-	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppData.ID, AppData.FName, AppData.LName, AppData.BirthDate
-		FROM AutoToken 
-		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
-		WHERE Token = ?", $self->{ af }->{ token }
-	);
+	my $app_list = $self->get_app_list();
 	
-	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
+	my $qrcode_file_name = $self->get_qrcode();
 	
-	my $qrcode_file_name = "qrcode_" . $self->{ af }->{ token } . ".png";
-	my $qrcode_file = $self->{ autoform }->{ qrcode }->{ file_folder } . $qrcode_file_name;
-	
-	unless ( -e $qrcode_file ) {
-	
-		my $qrcode = Imager::QRCode->new(
-			size          => 4,
-			margin        => 0,
-			version       => 1,
-			level         => 'M',
-			casesensitive => 1,
-			lightcolor    => Imager::Color->new( 255, 255, 255 ),
-			darkcolor     => Imager::Color->new( 0, 0, 0 ),
-		);
-
-		my $img = $qrcode->plot(
-			$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
-			'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
-		);
-		
-		$img->write( file => $qrcode_file );
-	}
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
@@ -134,36 +106,18 @@ sub reschedule
 		and
 		Date::Calc::check_date( $3, $2, $1 )
 	) {
-	
-		$new->{ app_date } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
-		
-		# my $time_start = $self->time_interval_calculate();
-	
-		$self->{ af }->query( 'query', __LINE__, "
-			LOCK TABLES Appointments WRITE, AutoToken READ"
-		);
-		
-		my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
-			SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ af }->{ token }
-		);
-		
-		$self->{ af }->query( 'query', __LINE__, "
-			UPDATE Appointments SET AppDate = ?, TimeslotID = ? WHERE ID = ?", {}, 
-			$new->{ app_date }, $new->{ timeslot }, $app_id
-		);
-		
-		$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES");
-	
-		# my $milliseconds = $self->time_interval_calculate( $time_start );
-		# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms"; 
+		$self->set_new_appdate( $new );
 		
 		return $self->{ af }->redirect( 
-			'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' ) 
+			'?t=' . $self->{ af }->{ token } .
+			( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' ) 
 		);
 	}
 	
 	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
 
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
 		'title' 	=> 2,
@@ -171,6 +125,71 @@ sub reschedule
 		'token' 	=> $self->{ af }->{ token },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub cancel
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $app_list = $self->get_app_list();
+
+	my $ncount_correction = 0;
+	
+	for my $app ( @$app_list ) {
+
+		next unless $self->{ vars }->getparam( 'cancel' . $app->{ ID } );
+	
+		$self->{ af }->query( 'query', __LINE__, "
+			UPDATE AppData SET Status = 2 WHERE ID = ?", {}, $app->{ ID }
+		);
+
+		$ncount_correction = 1;
+	}
+	
+	if ( $ncount_correction ) {
+	
+		my $list_after_cancel = $self->get_app_list();
+		
+		my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ af }->{ token }
+		);
+		
+		my $ncount = scalar @$list_after_cancel;
+		
+		$self->{ af }->query( 'query', __LINE__, "
+			UPDATE Appointments SET NCount = ? WHERE ID = ?", {},
+			$ncount, $app_id
+		);
+		
+		if ( $ncount < 1 ) {
+
+			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ af }->{ token }
+			);
+
+			$self->{ af }->query( 'query', __LINE__, "
+				UPDATE Appointments SET Status = 2 WHERE ID = ?", {},
+				$app_id
+			);
+		}
+		
+		return $self->{ af }->redirect(
+			'?t=' . $self->{ af }->{ token } .
+			( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' ) 
+		);
+	}
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'title' 	=> 3,
+		'app_list'	=> $app_list,
+		'token' 	=> $self->{ af }->{ token },
+		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -196,6 +215,85 @@ sub get_same_info_for_timeslots_from_app
 	$_ =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for ( $app->{ fdate }, $app->{ appdate });
 
 	return $app;
+}
+
+sub get_app_list
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT AppData.ID, AppData.AppID, AppData.FName, AppData.LName, AppData.BirthDate
+		FROM AutoToken 
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		WHERE Token = ? AND AppData.Status = 1", $self->{ af }->{ token }
+	);
+
+	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
+
+	return $app_list;
+}
+
+sub set_new_appdate
+# //////////////////////////////////////////////////
+{
+	my ( $self, $new ) = @_;
+
+	$new->{ app_date } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
+	
+	# my $time_start = $self->{ af }->time_interval_calculate();
+
+	$self->{ af }->query( 'query', __LINE__, "
+		LOCK TABLES Appointments WRITE, AutoToken READ"
+	);
+	
+	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ af }->{ token }
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE Appointments SET AppDate = ?, TimeslotID = ? WHERE ID = ?", {}, 
+		$new->{ app_date }, $new->{ timeslot }, $app_id
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES");
+
+	# my $milliseconds = $self->{ af }->time_interval_calculate( $time_start );
+	# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms";
+	
+	return $app_id;
+}
+		
+sub get_qrcode
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $qrcode_file_name = "qrcode_" . $self->{ af }->{ token } . ".png";
+	
+	my $qrcode_file = $self->{ autoform }->{ qrcode }->{ file_folder } . $qrcode_file_name;
+	
+	unless ( -e $qrcode_file ) {
+	
+		my $qrcode = Imager::QRCode->new(
+			size          => 4,
+			margin        => 0,
+			version       => 1,
+			level         => 'M',
+			casesensitive => 1,
+			lightcolor    => Imager::Color->new( 255, 255, 255 ),
+			darkcolor     => Imager::Color->new( 0, 0, 0 ),
+		);
+
+		my $img = $qrcode->plot(
+			$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
+			'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
+		);
+		
+		$img->write( file => $qrcode_file );
+	}
+	
+	return $qrcode_file_name;
 }
 
 1;

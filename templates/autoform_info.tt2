@@ -167,6 +167,35 @@ function update_timeslots(date_change) {
 
 </script>
 
+[% ELSIF title == 3 %]
+
+<tr><td colspan="2">
+
+<h2>[% langreq('Отменить запись') %]</h2><br></td></tr>
+
+<tr><td>
+<table width="100%">
+
+<tr><td colspan="2"><table width="100%">
+[% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
+<tr>
+<td style="width:5%;"><input type="checkbox" value="1" name="cancel[% person.ID %]" id="cancel[% person.ID %]"></td>
+<td style="overflow:hidden;max-width:321px;text-overflow:ellipsis;"><nobr><label for="cancel[% person.ID %]">[% person.FName %] [% person.LName %]</label></nobr></td>
+<td style="text-align:right">[% person.BirthDate %]</td>
+</tr>
+[% END %]
+</table></td></tr>
+
+<tr><td colspan="2"><br>
+<input style="height:30px;margin-bottom:2px" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+<input style="height:30px;margin-bottom:2px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br></td></tr>
+
+<tr><td colspan="2" style="border-bottom: 1px dashed #000;">&nbsp;</td></tr>
+
+<tr><td colspan="2" align ="justify" style="font-size:12px;">
+<br>1. [% langreq('Некоторые комментарии по процессу отмены записи') %].
+</td></tr>
+
 [% ELSE %]
 something wrong
 [% END %]
