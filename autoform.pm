@@ -47,10 +47,8 @@ sub getContent
 	
 	my $disp_link = $dispathcher->{ $id };
 	
-	$self->{ vars }->get_system->redirect(
-		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm'
-	) if !$disp_link;
-	
+	return $self->redirect( 'to_new_app' ) if !$disp_link;
+
 	&{ $disp_link }( $self, $task, $id, $template );
 	
 	return 1;
@@ -258,9 +256,7 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	$self->{ vars }->get_system->redirect(
-		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr }
-	) if ( $self->{ vars }->get_session->{'login'} eq '' );
+	return $self->redirect( 'to_new_app' ) if ( $self->{ vars }->get_session->{'login'} eq '' );
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
@@ -288,9 +284,7 @@ sub mobile_end
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	$self->{ vars }->get_system->redirect(
-		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 'index.htm'
-	);
+	$self->redirect( 'to_new_app' );
 }
 	
 sub get_same_info_for_timeslots
@@ -2767,6 +2761,24 @@ sub time_interval_calculate
 	return [ gettimeofday() ] unless $interval_start;
 	
 	return tv_interval( $interval_start ) * 1000;
+}
+
+
+sub redirect
+# //////////////////////////////////////////////////
+{
+	my ( $self, $add_line ) = @_;
+
+	my $param = ( $add_line eq 'to_new_app' ? 
+		( $self->{ token } ? '?t=' . $self->{ token } : '' ) .
+		( $self->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' ) : ''
+	);
+
+	$self->{ vars }->get_system->redirect(
+	
+		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } .
+		( $add_line eq 'to_new_app' ? '' : $param . $add_line )
+	);
 }
 
 sub query

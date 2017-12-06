@@ -116,11 +116,6 @@ sub print_appointment
 	my $report = VCS::Reports::reports->new( 'VCS::Reports::reports', $self->{ vars } );
 	
 	$report->printReport( $appointment->createPDF( $app_id ), 'pdf', "appointment" );
-	
-	$self->{ vars }->get_system->redirect( 
-		$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
-		'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
-	);
 }
 
 sub reschedule
@@ -162,9 +157,8 @@ sub reschedule
 		# my $milliseconds = $self->time_interval_calculate( $time_start );
 		# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms"; 
 		
-		$self->{ vars }->get_system->redirect( 
-			$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
-			'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
+		return $self->{ af }->redirect( 
+			'?t=' . $self->{ af }->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' ) 
 		);
 	}
 	
