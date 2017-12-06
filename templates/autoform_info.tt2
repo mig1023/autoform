@@ -18,6 +18,7 @@
 
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
+<input type = "hidden" value = "" name = "appdata" id = "appdata">
 
 <table width="100%">
 
@@ -65,7 +66,7 @@
 [% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
 <tr>
 <td style="overflow:hidden;max-width:321px;text-overflow:ellipsis;"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
-<td style="text-align:right">[% person.BirthDate %]&nbsp;<input style="height:25px" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('forward');"></td>
+<td style="text-align:right">[% person.BirthDate %]&nbsp;<input style="height:25px" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');"></td>
 </tr>
 [% END %]
 </table></td></tr>
@@ -206,8 +207,9 @@ something wrong
 
 <script>
 
-function go_button(where) {
+function go_button(where, who) {
 	$('#action').val(where);
+	$('#appdata').val(who);
 	document.dataform.submit();
 };
 
