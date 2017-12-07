@@ -30,7 +30,6 @@
 
 <tr><td colspan="2">
 
-<img src="[% qrcode %]"><br><br>
 <h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
 
 <tr><td>

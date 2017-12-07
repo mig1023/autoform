@@ -60,8 +60,6 @@ sub get_infopage
 
 	my $app_list = $self->get_app_list();
 	
-	my $qrcode_file_name = $self->get_qrcode();
-	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
@@ -71,7 +69,6 @@ sub get_infopage
 		'app_list'	=> $app_list,
 		'token' 	=> $self->{ token },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
-		'qrcode'	=> $self->{ vars }->getform('fullhost') . '/files/' . $qrcode_file_name,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -276,38 +273,6 @@ sub set_new_appdate
 	# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms";
 	
 	return $app_id;
-}
-		
-sub get_qrcode
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-	
-	my $qrcode_file_name = "qrcode_" . $self->{ token } . ".png";
-	
-	my $qrcode_file = $self->{ autoform }->{ qrcode }->{ file_folder } . $qrcode_file_name;
-	
-	unless ( -e $qrcode_file ) {
-	
-		my $qrcode = Imager::QRCode->new(
-			size          => 4,
-			margin        => 0,
-			version       => 1,
-			level         => 'M',
-			casesensitive => 1,
-			lightcolor    => Imager::Color->new( 255, 255, 255 ),
-			darkcolor     => Imager::Color->new( 0, 0, 0 ),
-		);
-
-		my $img = $qrcode->plot(
-			$self->{ vars }->getform( 'fullhost' ) .$self->{ autoform }->{ paths }->{ addr } .
-			'?t=' . $self->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' )
-		);
-		
-		$img->write( file => $qrcode_file );
-	}
-	
-	return $qrcode_file_name;
 }
 
 sub check_existing_id_in_token
