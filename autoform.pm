@@ -2278,8 +2278,8 @@ sub create_new_appointment
 	
 	$self->query( 'query', __LINE__, "
 		LOCK TABLES
-		AutoAppointments WRITE, Appointments WRITE, AutoAppData WRITE, AppData WRITE,
-		AutoSchengenAppData WRITE, SchengenAppData WRITE, AutoSpbAlterAppData WRITE, SpbAlterAppData WRITE"
+		AutoAppointments READ, Appointments WRITE, AutoAppData READ, AppData WRITE,
+		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ, SpbAlterAppData WRITE"
 	);
 	
 	my $new_appid = $self->create_table(
