@@ -85,7 +85,7 @@ YMaps.jQuery(function () {
 [% END %]
 [% IF step == 1 %]
 	</td></tr><tr><td colspan="3">
-	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
+	<br><a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
 	<tr><td colspan="3">
 	[% INCLUDE vip_form.tt2 %]
 [% END %]
@@ -173,14 +173,14 @@ function go_button(where) {
 
 	[% IF ( step == max_step ) %]
 		if (where == 'app') {
-			location.replace('[% vcs_tools %]info.htm?&token=[% token %]&appid=[% appid %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
+			location.replace('[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
 			return;
 		}
 	[% END %]
 	
 	[% IF mobile_app %]
 		if (where == 'mobile_app') {
-			location.replace('/autoform/mobile_end.htm');
+			location.replace('[% addr %]mobile_end.htm');
 			return;
 		}
 	[% END %]
