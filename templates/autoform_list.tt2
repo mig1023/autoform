@@ -10,7 +10,7 @@
 <font face="arial">
 
 <center>
-<div style = "margin: 50px ">
+<div class="margin_big">
 
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">

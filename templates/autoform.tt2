@@ -35,7 +35,7 @@
 <font face="arial">
 
 <center>
-<div id="app_form" style = "margin: 50px ">
+<div id="app_form" class="margin_big">
 
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
@@ -54,7 +54,7 @@
 
 [% IF (special.with_map.0) %]
 <tr class="ymap"><td colspan="3">&nbsp;</td></tr>
-<tr class="ymap"><td colspan="3"><div id="YMapsID" style="width:100%;height:400px"></div></td></tr>
+<tr class="ymap"><td colspan="3"><div id="YMapsID" class="yandex_map"></div></td></tr>
 <tr class="ymap"><td colspan="3">&nbsp;</td></tr>
 
 <script type="text/javascript">
@@ -85,7 +85,7 @@ YMaps.jQuery(function () {
 [% END %]
 [% IF step == 1 %]
 	</td></tr><tr><td colspan="3">
-	<br><a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
+	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
 	<tr><td colspan="3">
 	[% INCLUDE vip_form.tt2 %]
 [% END %]
