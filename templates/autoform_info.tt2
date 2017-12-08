@@ -36,13 +36,13 @@
 <table width="100%">
 
 <tr>
-<td>[% langreq('Номер записи') %]</td><td style="text-align:right">[% app_info.new_app_num %]</td>
+<td>[% langreq('Номер записи') %]</td><td class="m_left" style="text-align:right"><span class="m_info">[% app_info.new_app_num %]</span></td>
 </tr><tr>
-<td>[% langreq('Дата и время подачи') %]</td><td style="text-align:right">[% app_info.new_app_date %] [% app_info.new_app_timeslot %]</td>
+<td>[% langreq('Дата и время подачи') %]</td><td class="m_left" style="text-align:right"><span class="m_info">[% app_info.new_app_date %] [% app_info.new_app_timeslot %]</span></td>
 </tr><tr>
-<td>[% langreq('Визовый центр') %]</td><td style="text-align:right">[% app_info.new_app_branch %]</td>
+<td>[% langreq('Визовый центр') %]</td><td class="m_left" style="text-align:right"><span class="m_info">[% app_info.new_app_branch %]</span></td>
 </tr><tr>
-<td>[% langreq('Тип визы') %]</td><td style="text-align:right">[% app_info.new_app_vname %]</td>
+<td>[% langreq('Тип визы') %]</td><td class="m_left" style="text-align:right"><span class="m_info">[% app_info.new_app_vname %]</span></td>
 </tr>
 
 </table>
@@ -51,9 +51,9 @@
 <table width="100%">
 <tr><td>
 
-<input style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('print');"><br>
-<input style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
-<input style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
+<input class="big_button" style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('print');"><br>
+<input class="big_button" style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
+<input class="big_button" style="width:100%;height:30px;margin-bottom:2px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
 
 </td></tr>
 </table>
@@ -65,7 +65,7 @@
 [% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
 <tr>
 <td style="overflow:hidden;max-width:321px;text-overflow:ellipsis;"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
-<td style="text-align:right">[% person.BirthDate %]&nbsp;<input style="height:25px" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');"></td>
+<td style="text-align:right"><span class="mobil_hide">[% person.BirthDate %]&nbsp;</span><input class="small_button" style="height:25px" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');"></td>
 </tr>
 [% END %]
 </table></td></tr>
@@ -75,12 +75,13 @@
 <tr><td colspan="2" style="border-bottom: 1px dashed #000;">&nbsp;</td></tr>
 
 <tr><td colspan="2" align ="justify" style="font-size:12px;">
-<br>1. [% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
-<br><br>2. [% langreq('C 14 сентября 2015 года, все заявители, запрашивающие визу, проходят обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждому заявителю необходимо явиться на подачу документов лично') %].
-<br><br>3. [% langreq('Обращаем ваше внимание, что прием документов на оформление визы и прохождение процедуры "Биометрия" в Визовом центре проходит при предъявлении распечатанной записи и строго в назначенное время') %].
-<br><br>4. [% langreq('Пожалуйста, будьте по указанному ниже адресу не более, чем за 10 минут до назначенного времени') %].
-<br><br>5. [% langreq('Запись в Визовый центр на подачу документов осуществляется бесплатно') %].
-<br><br>6. [% langreq('Ознакомьтесь с положением об') %] <a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('отказе от ответственности и политике конфиденциальности') %]</a>.</td></tr>
+<span id="suppl_text">
+<br>[% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
+<br><br>[% langreq('C 14 сентября 2015 года, все заявители, запрашивающие визу, проходят обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждому заявителю необходимо явиться на подачу документов лично') %].
+<br><br>[% langreq('Обращаем ваше внимание, что прием документов на оформление визы и прохождение процедуры "Биометрия" в Визовом центре проходит при предъявлении распечатанной записи и строго в назначенное время') %].
+<br><br>[% langreq('Пожалуйста, будьте по указанному ниже адресу не более, чем за 10 минут до назначенного времени') %].
+<br><br>[% langreq('Запись в Визовый центр на подачу документов осуществляется бесплатно') %].
+<br><br>[% langreq('Ознакомьтесь с положением об') %] <a target="_blank" class="dotted_link" href="http://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('отказе от ответственности и политике конфиденциальности') %]</a>.</span></td></tr>
 
 
 [% ELSIF title == 2 %]
@@ -91,17 +92,19 @@
 
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr><td width="60%"><label id="text">Новая дата записи</label></td>
-<td><input class="input_width input_gen" style="width:100%;" type="text" value="[% appinfo.appdate %]" name="app_date" id="app_date" onchange="update_timeslots(1);"></td></tr>
-<tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen" style="width:100%;" size = "1" name="timeslot" title="" id="timeslot" data-timeslot="5694"></select></td></tr>
+<td><input class="input_width input_gen mobil_big" style="width:100%;" type="text" value="[% appinfo.appdate %]" name="app_date" id="app_date" onchange="update_timeslots(1);"></td></tr>
+<tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen mobil_big" style="width:100%;" size = "1" name="timeslot" title="" id="timeslot" data-timeslot="5694"></select></td></tr>
 
 <tr><td colspan="2"><br>
-<input style="height:30px;margin-bottom:2px" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-<input style="height:30px;margin-bottom:2px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br></td></tr>
+<input class="small_button" style="height:30px;margin-bottom:2px" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+<input class="small_button" style="height:30px;margin-bottom:2px" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br></td></tr>
 
 <tr><td colspan="2" style="border-bottom: 1px dashed #000;">&nbsp;</td></tr>
 
 <tr><td colspan="2" align ="justify" style="font-size:12px;">
-<br>1. [% langreq('Некоторые комментарии по процессу выбора нового времени и даты') %].
+<span id="suppl_text">
+<br>[% langreq('Некоторые комментарии по процессу выбора нового времени и даты') %].
+</span>
 </td></tr>
 
 <script>
@@ -179,21 +182,23 @@ function update_timeslots(date_change) {
 <tr><td colspan="2"><table width="100%">
 [% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
 <tr>
-<td style="width:5%;"><input type="checkbox" value="1" name="cancel[% person.ID %]" id="cancel[% person.ID %]"></td>
-<td style="overflow:hidden;max-width:321px;text-overflow:ellipsis;"><nobr><label for="cancel[% person.ID %]">[% person.FName %] [% person.LName %]</label></nobr></td>
-<td style="text-align:right">[% person.BirthDate %]</td>
+<td class="checklist_td" style="width:5%;"><input type="checkbox" value="1" name="cancel[% person.ID %]" id="cancel[% person.ID %]"></td>
+<td class="checklist_td" style="overflow:hidden;max-width:321px;text-overflow:ellipsis;"><nobr>&nbsp;<label for="cancel[% person.ID %]">[% person.FName %] [% person.LName %]</label></nobr></td>
+<td class="checklist_td" style="text-align:right">[% person.BirthDate %]</td>
 </tr>
 [% END %]
 </table></td></tr>
 
 <tr><td colspan="2"><br>
-<input style="height:30px;margin-bottom:2px" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-<input style="height:30px;margin-bottom:2px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br></td></tr>
+<input class="small_button" style="height:30px;margin-bottom:2px" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+<input class="small_button" style="height:30px;margin-bottom:2px" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br></td></tr>
 
 <tr><td colspan="2" style="border-bottom: 1px dashed #000;">&nbsp;</td></tr>
 
 <tr><td colspan="2" align ="justify" style="font-size:12px;">
-<br>1. [% langreq('Некоторые комментарии по процессу отмены записи') %].
+<span id="suppl_text">
+<br>[% langreq('Некоторые комментарии по процессу отмены записи') %].
+</span>
 </td></tr>
 
 [% ELSE %]
@@ -205,6 +210,54 @@ something wrong
 </form>
 
 <script>
+
+$(document).ready(mobileScreenCheck);
+
+function isMobile() {
+	return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+}
+
+function mobileScreenCheck() {
+
+	var mobilScreen = isMobile();
+	
+	$('*').css( "font-size", mobilScreen ? '35px' : '' );
+	$('.m_info').css( "font-size", mobilScreen ? '70px' : '' );
+	$('.m_left').css( "text-align", mobilScreen ? 'left' : 'right' );
+	$('#suppl_text, .dotted_link').css( "font-size", mobilScreen ? '20px' : '12px' );
+	
+	$('.checklist_td').attr( "height", mobilScreen ? '100px' : '' );
+	
+	[% IF title != 3 %]
+		$("#app_table").each(function(){
+			$("td",this).each(function(){
+				$(this).css( "display", ( mobilScreen ? 'block' : '' ) );
+				$(this).css( "float", ( mobilScreen ? 'left' : '' ) );
+				$(this).css( "width", ( mobilScreen ? '100%' : '' ) );
+			});
+		});
+	[% ELSE %]
+		$(':checkbox, :radio').css( "-ms-transform", ( mobilScreen ? "scale(6)" : "" ) );
+		$(':checkbox, :radio').css( "-moz-transform:", ( mobilScreen ? "scale(6)" : "" ) );
+		$(':checkbox, :radio').css( "-webkit-transform", ( mobilScreen ? "scale(6)" : "" ) );
+		$(':checkbox, :radio').css( "-o-transform", ( mobilScreen ? "scale(6)" : "" ) );
+	[% END %]
+	
+	[% IF title == 2 %]
+		$('.mobil_big').css( "height", ( mobilScreen ? "120px" : "" ) );
+		$('.mobil_big').css( "font-size", ( mobilScreen ? "75px" : "" ) );
+	[% END %]
+	
+	$('#app_table').css( "width", ( mobilScreen ? '100%' : '600px' ) );
+	
+	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
+	
+	$('.big_button').css( "height", ( mobilScreen ? '70px' : '30px' ) );
+	$('.big_button, .small_button').css( "margin-bottom", ( mobilScreen ? '15px' : '2px' ) );
+	$('.small_button').css( "height", ( mobilScreen ? '70px' : '25px' ) );
+	$('.small_button').css( "width", ( mobilScreen ? '100%' : '' ) );
+}
+
 
 function go_button(where, who) {
 	$('#action').val(where);

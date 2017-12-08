@@ -97,7 +97,6 @@ YMaps.jQuery(function () {
 
 <script>
 
-$(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
 
 function isMobile() {
