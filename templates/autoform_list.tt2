@@ -42,15 +42,16 @@
 	[% ELSIF person.Finished == 3 %]<b>[[% langreq('в.центр') %]]</b>
 	[% END %] [% person.FName %] [% person.LName %]</td>
 	<td>[% IF person.BirthDate != '00.00.0000' %][% person.BirthDate %][% ELSE %]&nbsp;[% END %]</td>
-	<td><input class="edit_input" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
-	<td><input type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
+	<td><input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
+	<td><input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
 	</tr>
 	[% END %]
 [% END %]
 
 [% IF i < max_applicants %]
 <tr><td colspan="5">
-	<input type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');">
+	<span id="spacer"></span>
+	<input class="action_button" type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');">
 </td></tr>
 [% END %]
 
@@ -58,9 +59,9 @@
 </td></tr>
 
 <tr><td colspan="5">
-	<input type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
+	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
-	<input type="button" value="[% langreq('Оформить запись') %] &#9655;" onclick="go_button('tofinish');">
+	<input class="action_button" type="button" value="[% langreq('Оформить запись') %] &#9655;" onclick="go_button('tofinish');">
 	
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
@@ -117,7 +118,17 @@ function mobileScreenCheck() {
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '600px' ) );
 	$('.edit_input').attr("value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
-	$(':button').css( "height", ( mobilScreen ? '60px' : '' ) );
+	
+	$('.action_button').css( "height", ( mobilScreen ? '120px' : '' ) );
+	$('.action_button').css( "width", ( mobilScreen ? '100%' : '' ) );
+	$('.small_button').css( "height", ( mobilScreen ? '80px' : '' ) );
+	$('.small_button').css( "width", ( mobilScreen ? '80px' : '' ) );
+	$('#spacer').html( mobilScreen ? '<br>' : '' );
+	
+	$('*').css( "font-size", ( mobilScreen ? '35px' : '' ) );
+	
+	$('h2').css( "font-size", ( mobilScreen ? '55px' : '' ) );
+	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
 	
 	[% IF last_error_name %]
 		$('#[% last_error_name %]').poshytip('hide');

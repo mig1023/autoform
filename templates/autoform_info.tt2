@@ -36,24 +36,24 @@
 
 <table width="100%">
 <tr>
-<td>[% langreq('Номер записи') %]</td>
-<td class="m_left"><span class="m_info">[% app_info.new_app_num %]</span></td>
+<td><span class="spacer2"></span>[% langreq('Номер записи') %]</td>
+<td class="m_left"></span><span class="m_info">[% app_info.new_app_num %]</span></td>
 </tr><tr>
-<td>[% langreq('Дата и время подачи') %]</td>
-<td class="m_left"><span class="m_info">[% app_info.new_app_date %] [% app_info.new_app_timeslot %]</span></td>
+<td><span class="spacer2"></span>[% langreq('Дата и время подачи') %]</td>
+<td class="m_left"></span><span class="m_info">[% app_info.new_app_date %] [% app_info.new_app_timeslot %]</span></td>
 </tr><tr>
-<td>[% langreq('Визовый центр') %]</td>
-<td class="m_left"><span class="m_info">[% app_info.new_app_branch %]</span></td>
+<td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
+<td class="m_left"></span><span class="m_info">[% app_info.new_app_branch %]</span></td>
 </tr><tr>
-<td>[% langreq('Тип визы') %]</td>
-<td class="m_left"><span class="m_info">[% app_info.new_app_vname %]</span></td>
+<td><span class="spacer2"></span>[% langreq('Тип визы') %]</td>
+<td class="m_left"></span><span class="m_info">[% app_info.new_app_vname %]</span></td>
 </tr>
 </table>
 
 </td><td>
 
 <table width="100%">
-<tr><td>
+<tr><td><span class="spacer2"></span>
 <input class="big_button" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('print');"><br>
 <input class="big_button" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
 <input class="big_button" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
@@ -224,6 +224,7 @@ function mobileScreenCheck() {
 	$('#suppl_text, .dotted_link').css( "font-size", mobilScreen ? '20px' : '12px' );
 	
 	$('.spacer').html( mobilScreen ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '' );
+	$('.spacer2').html( mobilScreen ? '<br>' : '' );
 	
 	$('.checklist_td').attr( "height", mobilScreen ? '100px' : '' );
 	

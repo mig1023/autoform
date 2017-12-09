@@ -78,9 +78,9 @@ YMaps.jQuery(function () {
 
 [% IF ( step == max_step ) %]
 	[% IF mobile_app %]
-		<input type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] &#9655;" onclick="go_button('mobile_app');">
+		<input class="action_button" type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] &#9655;" onclick="go_button('mobile_app');">
 	[% ELSE %]
-		<input type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('app');">
+		<input class="action_button" type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('app');">
 	[% END %]
 [% END %]
 [% IF step == 1 %]
@@ -114,24 +114,14 @@ function mobileScreenCheck() {
 		init_comm( 'right', 'center' );
 	};
 	
-	$('#app_table').attr("cellspacing", ( mobilScreen ? '50' : '' ) );
-	$('#app_table').attr("width", ( mobilScreen ? '100%' : '590px' ) );
-	
-	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
-	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
-	$('.info').css( "font-size", ( mobilScreen ? '30px' : '' ) );
 	
 	$('.action_button').css( "height", ( mobilScreen ? '120px' : '' ) );
-	$('.action_button').css( "width", ( mobilScreen ? '240px' : '' ) );
+	$('.action_button').css( "width", ( mobilScreen ? '100%' : '' ) );
 	
-	$(':checkbox, :radio').css( "-ms-transform", ( mobilScreen ? "scale(4)" : "" ) );
-	$(':checkbox, :radio').css( "-moz-transform:", ( mobilScreen ? "scale(4)" : "" ) );
-	$(':checkbox, :radio').css( "-webkit-transform", ( mobilScreen ? "scale(4)" : "" ) );
-	$(':checkbox, :radio').css( "-o-transform", ( mobilScreen ? "scale(4)" : "" ) );
-	$(':checkbox, :radio').css( "margin-right", ( mobilScreen ? "30x" : "" ) );
-	$(':checkbox, :radio').css( "margin-top", ( mobilScreen ? "20px" : "" ) );
+	$(':checkbox, :radio').css( "height", ( mobilScreen ? "50px" : "" ) );
+	$(':checkbox, :radio').css( "width", ( mobilScreen ? "50px" : "" ) );
 	
 	if ( mobilScreen ) {
 		[% FOREACH picker IN special.datepicker %]
@@ -142,10 +132,8 @@ function mobileScreenCheck() {
 		$('#ui-datepicker-div').css( "font-size", "12" );
 	}
 	
-	[% FOREACH post_index IN special.post_index %]	
-		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
-		$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
-	[% END %]
+	$('#app_table').attr("cellspacing", ( mobilScreen ? '50' : '' ) );
+	$('#app_table').attr("width", ( mobilScreen ? '100%' : '590px' ) );
 	
 	$("#app_table").each(function(){
 		$("td",this).each(function(){
@@ -155,16 +143,22 @@ function mobileScreenCheck() {
 		});
 	});
 	
-	$('*').each(function(){
-		$(this).css( "font-size", mobilScreen ? '35px' : '' );
-	});
+	$('*').css( "font-size", ( mobilScreen ? '35px' : '' ) );
 	
-	$('.input_width').css( "line-height", mobilScreen ? '60px' : '' );
-	$('.input_width').css( "height", mobilScreen ? '60px' : '' );
-	$('.input_width').css( "font-size", mobilScreen ? '40px' : '' );
+	$('.input_width').css( "line-height", ( mobilScreen ? '60px' : '' ) );
+	$('.input_width').css( "height", ( mobilScreen ? '100px' : '' ) );
+	$('.input_width, .info').css( "font-size", ( mobilScreen ? '70px' : '' ) );
 	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
 	
-	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
+	[% FOREACH post_index IN special.post_index %]	
+		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
+		$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
+	[% END %]
+	
+	$('h2').css( "font-size", ( mobilScreen ? '55px' : '' ) );
+	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
+	
+	$('.mobil_hide, .moscow_only, .spb_only').css( "display", ( mobilScreen ? 'none' : '' ) );
 }
 
 
@@ -225,6 +219,9 @@ function init_comm(pos_x, pos_y) {
 		offsetX: 5,
 		showTimeout: 100
 	});
+	
+	$('.tip-yellowsimple .tip-inner ').css( "font-size", ( isMobile() ? '35px' : '' ) );
+	$('.tip-yellowsimple .tip-inner ').css( "line-height", ( isMobile() ? '1.2' : '' ) );
 }
 
 [% FOREACH picker IN special.datepicker %]
@@ -361,7 +358,7 @@ function init_comm(pos_x, pos_y) {
 	function show_error_tip() {
 		var mobScreen = isMobile();
 		var error_x = ( mobScreen ? 'inner-left' : 'left' );
-		var error_y = ( mobScreen ? 'top' : 'center' );
+		var error_y = ( mobScreen ? 'bottom' : 'center' );
 		var offset_x = ( mobScreen ? 0 : 5 );
 		var offset_y = ( mobScreen ? 5 : 0 );
 		
@@ -383,6 +380,9 @@ function init_comm(pos_x, pos_y) {
 			offsetY: offset_y,
 		});
 		$('#[% last_error_name %]').poshytip('show');
+		
+		$('.tip-redsimple .tip-inner').css( "font-size", ( isMobile() ? '35px' : '' ) );
+		$('.tip-redsimple .tip-inner').css( "line-height", ( isMobile() ? '1.2' : '' ) );
 		
 		[% IF last_error_name == 'captha_div' %]
 			$('.tip-redsimple').each( function() {
