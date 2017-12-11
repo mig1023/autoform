@@ -3,7 +3,6 @@ use strict;
 
 use VCS::Vars;
 use Data::Dumper;
-use Imager::QRCode;
 use Date::Calc;
 
 sub new

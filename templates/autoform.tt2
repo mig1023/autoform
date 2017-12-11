@@ -158,7 +158,7 @@ function mobileScreenCheck() {
 	$('h2').css( "font-size", ( mobilScreen ? '55px' : '' ) );
 	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
 	
-	$('.mobil_hide, .moscow_only, .spb_only').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
 }
 
 
