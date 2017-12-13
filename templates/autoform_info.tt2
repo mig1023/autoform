@@ -3,6 +3,8 @@
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 [% IF title == 2 %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
@@ -14,7 +16,7 @@
 <font face="arial">
 
 <center>
-<div id="info_form" class="margin_big">
+<div id="info_form">
 
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
@@ -126,7 +128,7 @@
 [% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
 <tr>
 <td class="checklist_td width_small"><input type="checkbox" value="1" name="cancel[% person.ID %]" id="cancel[% person.ID %]"></td>
-<td class="checklist_td" class="info_list"><nobr><span class="spacer">&nbsp;&nbsp;&nbsp;&nbsp;</span><label for="cancel[% person.ID %]">[% person.FName %] [% person.LName %]</label></nobr></td>
+<td class="checklist_td" class="info_list"><nobr><span class="spacer">&nbsp;&nbsp;</span><label for="cancel[% person.ID %]">[% person.FName %] [% person.LName %]</label></nobr></td>
 <td class="checklist_td m_right">[% person.BirthDate %]</td>
 </tr>
 [% END %]
@@ -216,17 +218,17 @@ function mobileScreenCheck() {
 
 	var mobilScreen = isMobile();
 	
-	$('*').css( "font-size", mobilScreen ? '35px' : '' );
-	$('h2').css( "font-size", mobilScreen ? '50px' : '' );
+	$('*').css( "font-size", mobilScreen ? '15px' : '' );
+	$('h2').css( "font-size", mobilScreen ? '20px' : '' );
 	
-	$('.m_info').css( "font-size", mobilScreen ? '70px' : '' );
+	$('.m_info').css( "font-size", mobilScreen ? '30px' : '' );
 	$('.m_left').css( "text-align", mobilScreen ? 'left' : 'right' );
-	$('#suppl_text, .dotted_link').css( "font-size", mobilScreen ? '20px' : '12px' );
+	$('#suppl_text, .dotted_link').css( "font-size", mobilScreen ? '15px' : '12px' );
 	
-	$('.spacer').html( mobilScreen ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '' );
+	$('.spacer').html( mobilScreen ? '&nbsp;&nbsp;' : '' );
 	$('.spacer2').html( mobilScreen ? '<br>' : '' );
 	
-	$('.checklist_td').attr( "height", mobilScreen ? '100px' : '' );
+	//$('.checklist_td').attr( "height", mobilScreen ? '100px' : '' );
 	
 	[% IF title == 2 %]
 	if ( mobilScreen ) {
@@ -252,15 +254,13 @@ function mobileScreenCheck() {
 			});
 		});
 	[% ELSE %]
-		$(':checkbox, :radio').css( "-ms-transform", ( mobilScreen ? "scale(6)" : "" ) );
-		$(':checkbox, :radio').css( "-moz-transform:", ( mobilScreen ? "scale(6)" : "" ) );
-		$(':checkbox, :radio').css( "-webkit-transform", ( mobilScreen ? "scale(6)" : "" ) );
-		$(':checkbox, :radio').css( "-o-transform", ( mobilScreen ? "scale(6)" : "" ) );
+		$(':checkbox, :radio').css( "height", ( mobilScreen ? "20px" : "" ) );
+		$(':checkbox, :radio').css( "width", ( mobilScreen ? "20px" : "" ) );
 	[% END %]
 	
 	[% IF title == 2 %]
-		$('.mobil_big').css( "height", ( mobilScreen ? "120px" : "" ) );
-		$('.mobil_big').css( "font-size", ( mobilScreen ? "75px" : "" ) );
+		$('.mobil_big').css( "height", ( mobilScreen ? "40px" : "" ) );
+		$('.mobil_big').css( "font-size", ( mobilScreen ? "30px" : "" ) );
 	[% END %]
 	
 	$('#app_table').css( "width", ( mobilScreen ? '100%' : '600px' ) );
