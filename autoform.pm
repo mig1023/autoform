@@ -1180,6 +1180,7 @@ sub get_specials_of_element
 		'timeslots' => [],
 		'post_index' => [],
 		'with_map' => [],
+		'captcha' => [],
 	};
 	
 	for my $element ( @$page_content ) {
@@ -1188,6 +1189,8 @@ sub get_specials_of_element
 		
 			push( $special->{ $spec_type }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
 		}
+
+		push( $special->{ captcha }, $self->get_captcha_id() ) if $element->{ type } eq 'captcha';
 	}
 
 	return ( $special );
@@ -1420,7 +1423,7 @@ sub get_html_for_element
 			$self->{ json_options } || {}
 		);
 		
-		my $captch_id = 'recaptcha_' . substr( $key, 0, 10 );
+		my $captch_id = $self->get_captcha_id();
 		
 		$content =~ s/\[captch_id\]/$captch_id/gi;
 		$content =~ s/\[json_options\]/$json_options/gi;
@@ -1477,6 +1480,16 @@ sub get_html_for_element
 	}
 
 	return $content;
+}
+
+sub get_captcha_id
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $key = $self->{ autoform }->{ captcha }->{ public_key };
+
+	return 'recaptcha_' . substr( $key, 0, 10 );
 }
 
 sub add_rules_format
@@ -1656,23 +1669,23 @@ sub check_special_in_rules_for_save
 	
 	for my $element ( @$elements ) {
 	
-		if ( $element->{special} eq 'save_info_about_hastdatatype' ) {
+		if ( $element->{ special } eq 'save_info_about_hastdatatype' ) {
 			
 			my $visa_type = $self->query( 'sel1', __LINE__, "
-				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{AutoAppData}
+				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{ AutoAppData }
 			);
 
 			if ( $visa_type != 1 ) {
 				$self->query( 'query', __LINE__, "
 					UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {}, 
-					$table_id->{AutoSchengenAppData}
+					$table_id->{ AutoSchengenAppData }
 				);
 			}
 		}
-		elsif ( $element->{special} eq 'insurer_many_id' ) {
+		elsif ( $element->{ special } eq 'insurer_many_id' ) {
 		
 			my $all_insurer = $self->query( 'selallkeys', __LINE__, "
-				SELECT ID FROM AutoAppData WHERE AppID = ?", $table_id->{AutoAppointments}
+				SELECT ID FROM AutoAppData WHERE AppID = ?", $table_id->{ AutoAppointments }
 			);
 
 			my $new_list = '';
@@ -1683,14 +1696,14 @@ sub check_special_in_rules_for_save
 			}
 
 			$self->query( 'query', __LINE__, "
-				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, $new_list, $table_id->{AutoToken}
+				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, $new_list, $table_id->{ AutoToken }
 			) if $new_list;
 		}
-		elsif ( $element->{special} eq 'cach_this_value' ) {
+		elsif ( $element->{ special } eq 'cach_this_value' ) {
 
 			$self->cached(
-				'autoform_' . $self->{ token } . '_' . $element->{name},
-				$self->{ vars }->getparam( $element->{name} )
+				'autoform_' . $self->{ token } . '_' . $element->{ name },
+				$self->{ vars }->getparam( $element->{ name } )
 			);
 		}
 	}

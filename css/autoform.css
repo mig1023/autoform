@@ -139,3 +139,12 @@
 	width:100%;
 	height:400px;
 }
+
+.captcha_container {
+	width: 100%;
+}
+
+.g-recaptcha {
+	transform-origin: left top;
+	-webkit-transform-origin: left top;
+}

@@ -5,12 +5,13 @@
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <font face="arial">
 
 <center>
-<div class="margin_big">
+<div>
 
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
@@ -116,18 +117,19 @@ function mobileScreenCheck() {
 	var mobilScreen = isMobile();	
 	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
+	$('#app_table').attr("cellspacing", ( mobilScreen ? '10' : '' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '600px' ) );
 	$('.edit_input').attr("value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
 	
-	$('.action_button').css( "height", ( mobilScreen ? '120px' : '' ) );
+	$('.action_button').css( "height", ( mobilScreen ? '60px' : '' ) );
 	$('.action_button').css( "width", ( mobilScreen ? '100%' : '' ) );
-	$('.small_button').css( "height", ( mobilScreen ? '80px' : '' ) );
-	$('.small_button').css( "width", ( mobilScreen ? '80px' : '' ) );
+	$('.small_button').css( "height", ( mobilScreen ? '30px' : '' ) );
+	$('.small_button').css( "width", ( mobilScreen ? '30px' : '' ) );
 	$('#spacer').html( mobilScreen ? '<br>' : '' );
+
+	$('*').css( "font-size", ( mobilScreen ? '15px' : '' ) );
 	
-	$('*').css( "font-size", ( mobilScreen ? '35px' : '' ) );
-	
-	$('h2').css( "font-size", ( mobilScreen ? '55px' : '' ) );
+	$('h2').css( "font-size", ( mobilScreen ? '20px' : '' ) );
 	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
 	
 	[% IF last_error_name %]

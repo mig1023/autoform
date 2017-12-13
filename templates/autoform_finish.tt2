@@ -3,6 +3,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 <font face="arial">
@@ -31,9 +32,9 @@
 </td></tr>
 
 <tr><td>
-	<input class="action_button_longue" type="button" value="&#9665; [% langreq('Вернуться к списку') %]" onclick="back_button();">
+	<input class="action_button" type="button" value="&#9665; [% langreq('Вернуться к списку') %]" onclick="back_button();">
 	&nbsp;
-	<input class="action_button_longue" type="button" value="[% langreq('Перейти к завершению') %] &#9655;" onclick="finish_button();">
+	<input class="action_button" type="button" value="[% langreq('Перейти к завершению') %] &#9655;" onclick="finish_button();">
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 </table>
@@ -66,13 +67,13 @@ function mobileScreenCheck() {
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
 	
-	$('*').css( "font-size", ( mobilScreen ? '35px' : '' ) );
+	$('*').css( "font-size", ( mobilScreen ? '15px' : '' ) );
 	
-	$('h2').css( "font-size", ( mobilScreen ? '55px' : '' ) );
+	$('h2').css( "font-size", ( mobilScreen ? '20px' : '' ) );
 	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
 	
-	$('.action_button_longue').css( "height", ( mobilScreen ? '120px' : '' ) );
-	$('.action_button_longue').css( "width", ( mobilScreen ? '400px' : '' ) );
+	$('.action_button').css( "height", ( mobilScreen ? '60px' : '' ) );
+	$('.action_button').css( "width", ( mobilScreen ? '100%' : '' ) );
 }
 
 </script>

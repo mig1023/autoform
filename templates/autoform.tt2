@@ -1,11 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
 <script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 <link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
 <link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 [% IF (special.with_map.0) %]
 <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
@@ -30,6 +32,7 @@
 	window.location.href = "[% addr %]?t=[% token %]";
 </script>
 [% END %]
+
 </head>
 
 <font face="arial">
@@ -105,7 +108,7 @@ function isMobile() {
 
 function mobileScreenCheck() {
 
-	var mobilScreen = isMobile();	
+	var mobilScreen = isMobile();
 	
 	if ( mobilScreen ) {
 		init_comm( 'center', 'bottom' );
@@ -117,11 +120,8 @@ function mobileScreenCheck() {
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	
-	$('.action_button').css( "height", ( mobilScreen ? '120px' : '' ) );
+	$('.action_button').css( "height", ( mobilScreen ? '60px' : '' ) );
 	$('.action_button').css( "width", ( mobilScreen ? '100%' : '' ) );
-	
-	$(':checkbox, :radio').css( "height", ( mobilScreen ? "50px" : "" ) );
-	$(':checkbox, :radio').css( "width", ( mobilScreen ? "50px" : "" ) );
 	
 	if ( mobilScreen ) {
 		[% FOREACH picker IN special.datepicker %]
@@ -132,7 +132,7 @@ function mobileScreenCheck() {
 		$('#ui-datepicker-div').css( "font-size", "12" );
 	}
 	
-	$('#app_table').attr("cellspacing", ( mobilScreen ? '50' : '' ) );
+	$('#app_table').attr("cellspacing", ( mobilScreen ? '10' : '' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '590px' ) );
 	
 	$("#app_table").each(function(){
@@ -143,11 +143,11 @@ function mobileScreenCheck() {
 		});
 	});
 	
-	$('*').css( "font-size", ( mobilScreen ? '35px' : '' ) );
+	$('*').css( "font-size", ( mobilScreen ? '15px' : '' ) );
 	
-	$('.input_width').css( "line-height", ( mobilScreen ? '60px' : '' ) );
-	$('.input_width').css( "height", ( mobilScreen ? '100px' : '' ) );
-	$('.input_width, .info').css( "font-size", ( mobilScreen ? '70px' : '' ) );
+	$('.input_width').css( "line-height", ( mobilScreen ? '40px' : '' ) );
+	$('.input_width').css( "height", ( mobilScreen ? '40px' : '' ) );
+	$('.input_width, .info').css( "font-size", ( mobilScreen ? '30px' : '' ) );
 	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
 	
 	[% FOREACH post_index IN special.post_index %]	
@@ -155,12 +155,25 @@ function mobileScreenCheck() {
 		$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
 	[% END %]
 	
-	$('h2').css( "font-size", ( mobilScreen ? '55px' : '' ) );
+	$('h2').css( "font-size", ( mobilScreen ? '20px' : '' ) );
 	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
 	
+	$(':checkbox, :radio').css( "height", ( mobilScreen ? "20px" : "" ) );
+	$(':checkbox, :radio').css( "width", ( mobilScreen ? "20px" : "" ) );
+	
 	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
+	
+	[% IF special.captcha.0 %]
+	if ( mobilScreen ) {
+	 	var reCaptchaWidth = 304;
+		var containerWidth = $('.captcha_container').width();
+		var captchaScale = containerWidth / reCaptchaWidth;
+		$('#[% special.captcha.0 %]').css('transform', 'scale('+captchaScale+')');
+		$('#[% special.captcha.0 %]').css('transform-origin', '0');
+		$('.captcha_container').width('150px');
+	}
+	[% END %]
 }
-
 
 function go_button(where) {
 
@@ -381,7 +394,7 @@ function init_comm(pos_x, pos_y) {
 		});
 		$('#[% last_error_name %]').poshytip('show');
 		
-		$('.tip-redsimple .tip-inner').css( "font-size", ( isMobile() ? '35px' : '' ) );
+		$('.tip-redsimple .tip-inner').css( "font-size", ( isMobile() ? '20px' : '' ) );
 		$('.tip-redsimple .tip-inner').css( "line-height", ( isMobile() ? '1.2' : '' ) );
 		
 		[% IF last_error_name == 'captha_div' %]

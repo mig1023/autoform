@@ -129,9 +129,9 @@ sub get_html_elements
 		
 		'checklist_insurer'	=> '[options]',
 		
-		'captcha'		=> '<script type="text/javascript">var onloadCallback = function(){grecaptcha.render(' .
-					"'[captch_id]'" . ', [json_options]);};</script><script src="[widget_api]" ' .
-					'type="text/javascript"></script><div id="captha_div"><div id="[captch_id]"></div></div>',
+		'captcha'		=> '<div class="captcha_container"><script type="text/javascript">var onloadCallback = function(){' .
+					'grecaptcha.render(' . "'[captch_id]'" . ', [json_options]);};</script><script src="[widget_api]" ' .
+					'type="text/javascript"></script><div id="captha_div"><div id="[captch_id]"></div></div></div>',
 		
 		'label'			=> '<label id="[name]" [u]>[value]</label>',
 		
