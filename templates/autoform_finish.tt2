@@ -17,7 +17,7 @@
 
 <table width="100%">
 
-<tr><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br><td><tr>
+<tr><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br></td></tr>
 
 <tr><td align="center">
 <table width="450px" id="app_table">
