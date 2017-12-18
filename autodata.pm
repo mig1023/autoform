@@ -31,15 +31,11 @@ sub get_settings
 			'verify_api' => 'https://www.google.com/recaptcha/api/siteverify',
 		},
 		
-		'qrcode' => {
-			'file_folder' => '/usr/local/www/data/htdocs/files/',
-		},
-		
 		'confirm' => {
 			'tt' => '/usr/local/VMS/www/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
 			'pers_data' => '/usr/local/www/data/htdocs/pers_data_agreement.pdf',
 			'link_image' => '',
-			'link_site' =>'',
+			'link_site' => '',
 			'html_website' => '',
 			'html_email' => '',
 			'spb_html_email' => '',
