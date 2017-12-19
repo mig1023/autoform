@@ -392,9 +392,6 @@ sub init_add_param
 		
 			$person->{ person } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 			
-			push ( @{ $info_from_db->{ '[persons_in_app_for_insurance]' } },
-				[ $person->{ ID }, $person->{ person } ] );
-
 			next if ( $self->age( $person->{ birthdate }, $person->{ currentdate } ) < 
 					$self->{ autoform }->{ age }->{ age_for_agreements } );
 
@@ -1407,20 +1404,6 @@ sub get_html_for_element
 		}
 		$content =~ s/\[options\]/$list/gi;
 	}
-
-	if ( $type eq 'checklist_insurer' ) {
-		
-		my $list = '';
-		my %value_list = map { $_ => 1 } split /,/, $value;
-
-		for my $opt ( sort {$a cmp $b} keys %$param ) {
-		
-			my $checked = ( $value_list{$opt} ? 'checked' : '' );
-			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $name . '_' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
-			'<label for="' . $opt . '">' . $param->{$opt} . '</label><br>';
-		}
-		$content =~ s/\[options\]/$list/gi;
-	}
 	
 	if ( $type eq 'captcha' ) {
 	
@@ -1694,23 +1677,6 @@ sub check_special_in_rules_for_save
 				);
 			}
 		}
-		elsif ( $element->{ special } eq 'insurer_many_id' ) {
-		
-			my $all_insurer = $self->query( 'selallkeys', __LINE__, "
-				SELECT ID FROM AutoAppData WHERE AppID = ?", $table_id->{ AutoAppointments }
-			);
-
-			my $new_list = '';
-				
-			for my $insurer ( @$all_insurer ) {
-				next unless $self->{ vars }->getparam( 'insurance_' . $insurer->{ ID } );
-				$new_list .= ( $new_list ? ',' : '' ) . $insurer->{ ID };
-			}
-
-			$self->query( 'query', __LINE__, "
-				UPDATE AutoToken SET Insurance = ? WHERE ID = ?", {}, $new_list, $table_id->{ AutoToken }
-			) if $new_list;
-		}
 		elsif ( $element->{ special } eq 'cach_this_value' ) {
 
 			$self->cached(
@@ -1855,7 +1821,7 @@ sub get_names_db_for_save_or_get
 	}
 
 	for my $element (@$page_content) {
-		next if ( $element->{ special } eq 'insurer_many_id' ) and ( $save_or_get eq 'save' );
+
 		next if ( $element->{ type } eq 'info' ) and ( $save_or_get eq 'save' );
 		
 		next if ref( $element->{ db } ) ne 'HASH';
@@ -2283,8 +2249,8 @@ sub create_new_appointment
 	
 	my $db_rules = $self->get_content_db_rules();
 
-	my ( $center, $insurance_line, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
-		SELECT CenterID, Insurance, PersonForAgreements
+	my ( $center, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
+		SELECT CenterID, PersonForAgreements
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
@@ -2311,8 +2277,6 @@ sub create_new_appointment
 		'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
 		$db_rules, undef, undef, undef, $info_for_contract
 	);
- 	
-	my %insurance_list = map { $_ => 1 } split /,/, $insurance_line;
 	
 	my $allapp = $self->query( 'selallkeys', __LINE__, "
 		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
@@ -2326,8 +2290,7 @@ sub create_new_appointment
 		);
 		
 		my $appid = $self->create_table(
-			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid,
-			( exists $insurance_list{ $app->{ ID } } ? 1 : 0 ), undef, $center
+			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid, undef, $center
 		);
 		
 		$self->create_table(
@@ -2350,12 +2313,11 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid,
-	$insurance, $info_for_contract, $center ) = @_;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center ) = @_;
 
 	my $hash = $self->get_hash_table( $autoname, 'ID', $transfered_id );
 
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $insurance, $info_for_contract, $center );
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center );
 	
 	return $self->insert_hash_table( $name, $hash );
 }
@@ -2363,7 +2325,7 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $insurance, $info_for_contract, $center ) = @_;
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract, $center ) = @_;
 
 	for my $column ( keys %$hash ) {
 
@@ -2386,7 +2348,6 @@ sub mod_hash
 	$hash->{ AppID } = $appid if $appid;
 	$hash->{ SchengenAppDataID } = $schappid if $schappid;
 	$hash->{ Status } = 1 if exists $hash->{ Status };
-	$hash->{ PolicyType } = 1 if $insurance;
 	
 	if ( $table_name eq 'AppData' ) {
 	

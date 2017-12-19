@@ -360,24 +360,16 @@ sub get_test_list {
 						'<div id="element"><input type="checkbox" value="test1" name="test1" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br></div>',
 				},
 				16 => {	'tester' => \&test_line,
-					'args' => [ 'checklist_insurer', 'element', 'test1=0,test2=1', { 
-						'test1' => 'Тест 1',
-						'test2' => 'Тест 2',
-					} ],
-					'expected' =>
-						'<input type="checkbox" value="test1" name="element_test1" id="test1" ><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="element_test2" id="test2" ><label for="test2">Тест 2</label><br>',
-				},
-				17 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'past', 0 ],
 					'expected' =>
 						'<td align="center" class="pr_size_gen pr_red_red_gen"><div class="ltl_progr pr_past" title=""><div class="pr_in_gen"></div></div></td>',
 				},
-				18 => {	'tester' => \&test_line,
+				17 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'current', 1 ],
 					'expected' =>
 						'<td align="center" class="pr_size_gen pr_white_gray_gen"><div class="ltl_progr pr_current" title=""><div class="pr_in_gen"></div></div></td>',
 				},
-				19 => {	'tester' => \&test_line,
+				18 => {	'tester' => \&test_line,
 					'args' => [ 'progress', 'test', undef, 'future', 2 ],
 					'expected' =>
 						'<td align="center" class="pr_size_gen pr_gray_white_gen"><div class="ltl_progr pr_future" title=""><div class="pr_in_gen"></div></div></td>',
@@ -1364,7 +1356,6 @@ sub get_test_list {
 						'isDeleted' => '0',
 						'isDefault' => '1',
 						'Display' => '1',
-						'Insurance' => '1',
 						'BAddr' => 'г.Москва',
 						'JAddr' => 'г.Москва',
 						'AddrEqualled' => '0',

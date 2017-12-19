@@ -1930,43 +1930,6 @@ sub get_content_rules_hash
 					'name' => 'ShAddress',
 				},
 			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'text',
-				'name' => 'insurance_text',
-				'label' => 'Страховка ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
-				'font' => 'bold',
-			},
-			{
-				'type' => 'free_line',
-			},
-			{
-				'type' => 'checklist_insurer',
-				'name' => 'insurance',
-				'label' => 'Включить заявителей в полис',
-				'check' => 'N',
-				'db' => {
-					'table' => 'Token',
-					'name' => 'Insurance',
-					'transfer' => 'nope',
-					},
-				'param' => '[persons_in_app_for_insurance]',
-				'special' => 'insurer_many_id',
-			},
-			{
-				'type' => 'input',
-				'name' => 'ins_days',
-				'label' => 'Количество дней страховки',
-				'comment' => 'Укажите количество дней, на которые необходима страховка; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				'example' => '14',
-				'check' => 'N',
-				'db' => {
-					'table' => 'Appointments',
-					'name' => 'Duration',
-				},
-			},
 		],
 		
 		'Предпочтительный офис получения готовых документов' => [
