@@ -840,7 +840,7 @@ sub set_appointment_finished
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
-	$self->send_app_confirm( $appnum, $new_appid, $self->{'lang'} );
+	$self->send_app_confirm( $appnum, $new_appid );
 		
 	return ( $new_appid, $appnum );
 }
@@ -1131,17 +1131,29 @@ sub get_list_of_app
 	my $self = shift;
 	
 	my $content = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName,
-		BirthDate, FinishedVType, FinishedCenter, VType, CenterID
+		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, 
+		BirthDate, FinishedVType, FinishedCenter, VType, CenterID 
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $self->{ token }
 	);
-		
+	
+	my $link = $self->query( 'selallkeys', __LINE__, "
+		SELECT LinkSended, EMail
+		FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $self->{ token }
+	)->[0];
+	
+	$self->send_link( $link->{ EMail } ) unless $link->{ LinkSended };
+	
 	if ( scalar(@$content) < 1 ) {
+	
 		$content->[ 0 ]->{ ID } = 'X';
+		
 	} else {
+	
 		for my $app ( @$content ) {
 		
 			$app->{ BirthDate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
@@ -2598,12 +2610,37 @@ sub get_pcode
 	$template->process( 'autoform_pcode.tt2', $tvars );
 }
 
+sub send_link
+# //////////////////////////////////////////////////
+{
+	my ( $self, $email ) = @_;
+	
+	my $subject = $self->lang( 'Вы начали запись на подачу документов на визу' );
+	
+	my $htmls = VCS::Site::autodata::get_link_text();
+	
+	my $body;
+	
+	my $token = $self->{ token };
+	
+	for my $html ( sort { $a <=> $b } keys %$htmls ) {
+		
+		$htmls->{ $html } =~ s/\[token\]/$token/;
+		
+		$body .= $self->lang( $htmls->{ $html } );
+	}
+	
+	$self->{ vars }->get_system->send_mail( $self->{ vars }, $email, $subject, $body, 1 );
+	
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET LinkSended = now() WHERE Token = ?", {}, $self->{ token }
+	);
+}
+
 sub send_app_confirm
 # //////////////////////////////////////////////////
 {
-	my ( $self, $appnumber, $appid, $langid ) = @_; 
-	
-	$langid = 'ru' unless $langid;
+	my ( $self, $appnumber, $appid ) = @_; 
 	
 	$appnumber = $self->{ vars }->get_system->appnum_to_str( $appnumber );
 	
@@ -2636,7 +2673,7 @@ sub send_app_confirm
 		ORDER BY ID DESC LIMIT 1", $appid
 	)->[0];
 	
-	$replacer->{ branch_addr } = $self->{ vars }->getGLangVar( 'Address-' . $data->{ CenterID }, $langid );
+	$replacer->{ branch_addr } = $self->lang( 'Address-' . $data->{ CenterID } );
 	
 	$replacer->{ branch_addr } = $self->query( 'sel1', __LINE__, "
 		SELECT BAddr FROM Branches WHERE ID = ?", $data->{ CenterID }
@@ -2645,7 +2682,7 @@ sub send_app_confirm
 	$replacer->{ branch_addr } = $self->{ vars }->get_system->converttext( $replacer->{ branch_addr } );
 	$replacer->{ branch_addr } =~ s/_?(x005F|x000D)_?//g;
 	
-	my ( $tstart,$tend ) = $self->query( 'sel1', __LINE__, "
+	my ( $tstart, $tend ) = $self->query( 'sel1', __LINE__, "
 		SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $data->{ TimeslotID }
 	);
 		
@@ -2655,7 +2692,8 @@ sub send_app_confirm
 
 	$replacer->{ date_time } = 
 		$date_sp[ 2 ] . ' ' . $months[ $date_sp[ 1 ] + 1 ] . ' ' . $date_sp[ 0 ] . ', ' . 
-		$self->{ vars }->get_system->time_to_str($tstart) . ' - ' . $self->{ vars }->get_system->time_to_str($tend);
+		$self->{ vars }->get_system->time_to_str( $tstart ) . ' - ' .
+		$self->{ vars }->get_system->time_to_str( $tend );
 	
 	$replacer->{ app_person } = ( !$data->{ dwhom } ? '<b>' . $lang_local->{ pers } .'</b>' : 
 		$lang_local->{ by_the_doc } . ' <b>' . 
