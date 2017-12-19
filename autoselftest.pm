@@ -34,7 +34,7 @@ sub get_test_list {
 					'prepare' => \&pre_finished,
 					'args' => [],
 					'param' => { 't' => '[token]' },
-					'expected' => '03',
+					'expected' => '02',
 				},
 			}
 		},
@@ -71,11 +71,7 @@ sub get_test_list {
 				},
 				3 => { 	'tester' => \&test_array,
 					'args' => [ '2' ],
-					'expected' => [ '<center>ошибка: такого токена не существует</center>', '', 'autoform.tt2' ],
-				},
-				4 => { 	'tester' => \&test_array,
-					'args' => [ '3' ],
-					'expected' => [ '<center>ошибка: запись уже завершена</center>', '', 'autoform.tt2' ],
+					'expected' => [ '<center>ошибка: запись не найдена</center>', '', 'autoform.tt2' ],
 				},
 			},
 		},
@@ -98,6 +94,7 @@ sub get_test_list {
 							'datepicker' => [],
 							'with_map' => [],
 							'post_index' => [],
+							'captcha' => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -133,6 +130,7 @@ sub get_test_list {
 							],
 							'with_map' => [],
 							'post_index' => [],
+							'captcha' => [],
 						},
 						'[progress_bar_2]',
 						undef,
@@ -155,6 +153,7 @@ sub get_test_list {
 							'datepicker' => [],
 							'with_map' => [],
 							'post_index' => [],
+							'captcha' => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -480,6 +479,7 @@ sub get_test_list {
 						'datepicker' => [],
 						'post_index' => [],
 						'with_map' => [],
+						'captcha' => [],
 					},
 
 				},
@@ -498,6 +498,7 @@ sub get_test_list {
 						],
 						'post_index' => [],
 						'with_map' => [],
+						'captcha' => [],
 					},
 
 				},
@@ -727,7 +728,7 @@ sub get_test_list {
 							check_logic => [ {
 								condition => 'unique_in_pending',
 								table => 'AutoAppData',
-								name => 'Finished',
+								name => 'FinishedCenter',
 							} ]
 						},
 						0,
@@ -742,7 +743,7 @@ sub get_test_list {
 							check_logic => [ {
 								condition => 'unique_in_pending',
 								table => 'AutoAppData',
-								name => 'Finished',
+								name => 'FinishedCenter',
 							} ]
 						},
 						0,
@@ -756,7 +757,7 @@ sub get_test_list {
 							check_logic => [ {
 								condition => 'unique_in_pending',
 								table => 'AutoAppData',
-								name => 'Finished',
+								name => 'FinishedCenter',
 							} ]
 						},
 						0,
@@ -1049,7 +1050,7 @@ sub get_test_list {
 							'AutoAppData' => '[appdata_id]',
 						},
 					],
-					'prepare' => \&pre_age_18,
+					'prepare' => \&pre_age, # fixed num 24
 					'expected' => 'field_name|Указать данное поле можно только для заявителей младше 10 лет',
 				},
 				25 => { 'tester' => \&test_line,
@@ -1062,7 +1063,7 @@ sub get_test_list {
 							'AutoAppData' => '[appdata_id]',
 						},
 					],
-					'prepare' => \&pre_age_9,
+					'prepare' => \&pre_age, # fixed num 25
 					'expected' => '',
 				},
 			},
@@ -1321,7 +1322,7 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_write_db,
 					'prepare' => \&pre_app_finish,
 					'args' => [ '[table_id]' ],
-					'expected' => '[appdata_id]:AutoAppData:Finished:13',
+					'expected' => '[appdata_id]:AutoAppData:FinishedCenter:5',
 				},
 			},
 		},
@@ -1329,23 +1330,23 @@ sub get_test_list {
 			'comment' => 'query',
 			'test' => { 	
 				1 => { 	'tester' => \&test_write_db,
-					'args' => [ 'query', 'test', 'UPDATE AutoAppData SET Finished = 5 WHERE ID = ?', {}, '[appdata_id]' ],
-					'expected' => '[appdata_id]:AutoAppData:Finished:5',
+					'args' => [ 'query', 'test', 'UPDATE AutoAppData SET FinishedCenter = 5 WHERE ID = ?', {}, '[appdata_id]' ],
+					'expected' => '[appdata_id]:AutoAppData:FinishedCenter:5',
 				},
 				2 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_logic_1,
-					'args' => [ 'sel1', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+					'args' => [ 'sel1', 'test', 'SELECT FinishedCenter FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => '21',
 				},
 				3 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_logic_1,
-					'args' => [ 'selall', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+					'args' => [ 'selall', 'test', 'SELECT FinishedCenter FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => [ [ [ '21' ] ] ],
 				},
 				4 => { 	'tester' => \&test_array,
 					'prepare' => \&pre_logic_1,
-					'args' => [ 'selallkeys', 'test', 'SELECT Finished FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
-					'expected' => [ [ { 'Finished' => '21' } ] ],
+					'args' => [ 'selallkeys', 'test', 'SELECT FinishedCenter FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
+					'expected' => [ [ { 'FinishedCenter' => '21' } ] ],
 				},
 			},
 		},
@@ -1576,7 +1577,7 @@ sub get_test_list {
 					'expected' => '7',
 				},
 				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_collect2,
+					'prepare' => \&pre_geo_or_collect, # fixed num 2
 					'args' => [],
 					'expected' => '14',
 				},
@@ -1715,21 +1716,26 @@ sub get_test_list {
 			'comment' => 'check_all_app_finished_and_not_empty',
 			'test' => { 	
 				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_logic_1,
-					'args' => [],
-					'expected' => 19,
-				},
-				2 => { 	'tester' => \&test_line,
 					'args' => [],
 					'expected' => 4,
 				},
+				2 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_logic_1, # fixed num 2
+					'args' => [],
+					'expected' => 19,
+				},
 				3 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_logic_1,
+					'args' => [],
+					'expected' => 22,
+				},
+				4 => { 	'tester' => \&test_line,
 					'prepare' => \&pre_nobody,
 					'args' => [],
 					'expected' => 5,
 				},
-				4 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_finished_app,
+				5 => { 	'tester' => \&test_line,
+					'prepare' => \&pre_logic_1,  # fixed num 5
 					'args' => [],
 					'expected' => 0,
 				},
@@ -1892,7 +1898,7 @@ sub get_test_list {
 					'expected' => { new_app_num => 20 },
 				},
 				2 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_collect2,
+					'prepare' => \&pre_geo_or_collect, # fixed num 2
 					'args' => [ \{ new_app_branch => 5 } ],
 					'expected' => { new_app_branch => 'Kazan' },
 				},
@@ -1915,7 +1921,7 @@ sub get_test_list {
 					},
 				},
 				2 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_token01,
+					'prepare' => \&pre_token, # fixed num 2
 					'param' => { 'mobile_api' => 'get_appdata' },
 					'expected' => {
 						'error' => { 'error_text' => 'ошибка токена', 'error' => 1 },
@@ -2774,13 +2780,7 @@ sub pre_init_param
 		);
 	} 
 	else {
-		$vars->db->query("
-			DELETE FROM Branches"
-		);
-			
-		$vars->db->query("
-			DELETE FROM TimeData"
-		);
+		$vars->db->query( "DELETE FROM " . $_ ) for ( "Branches", "TimeData" );
 	}
 }
 
@@ -2790,7 +2790,7 @@ sub pre_app_finish
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
-		UPDATE AutoAppData SET Finished = 0 WHERE ID = ?", {}, $appdataid 
+		UPDATE AutoAppData SET FinishedCenter = 0 WHERE ID = ?", {}, $appdataid 
 	);
 }
 
@@ -2808,11 +2808,14 @@ sub pre_cach
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
+	
 		$vars->get_memd->set( 'cach_selftest', 'cash_ok', 60 );
+		
 		$self->{ this_is_self_testing } = undef;
 	}
 	else {
 		$vars->get_memd->delete( 'cach_selftest' );
+		
 		$self->{ this_is_self_testing } = 1;
 	}
 }
@@ -2822,8 +2825,11 @@ sub pre_file
 	my ( $self, $type ) = @_;
 	
 	if ( $type eq 'PREPARE' ) { 
+	
 		open my $test_file, '>', '/tmp/autoform_selftest_file';
+		
 		print $test_file 'file_ok';
+		
 		close $test_file;
 	}
 	else {
@@ -2836,12 +2842,18 @@ sub pre_logic_1
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
-	my $finished = ( $type eq 'PREPARE' ? 21 : 0 );
-	my $status = ( $type eq 'PREPARE' ? 1 : 0 );
+	my ( $vtype, $finished ) = ( 13, 21 );
+	
+	if ( $$test->{ comment } eq "check_all_app_finished_and_not_empty" ) {
+	
+		( $vtype, $finished ) = ( 20, 21 ) if $num == 2;
+		
+		( $vtype, $finished ) = ( 13, 1 ) if $num == 5;
+	}
 	
 	$vars->db->query("
-		UPDATE AutoAppData SET Finished = ?, Status = ? WHERE ID = ?", {}, 
-		$finished, $status, $appdataid
+		UPDATE AutoAppData SET FinishedCenter = ?, FinishedVType = ?, Status = ? WHERE ID = ?", {}, 
+		( $type eq 'PREPARE' ? ( $finished, $vtype , 1 ) : ( 0, 0, 0 ) ), $appdataid
 	);
 }
 
@@ -2850,25 +2862,9 @@ sub pre_logic_2
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
-	my $date = ( $type eq 'PREPARE' ? '2010-01-01' : '0000-00-00' );
-	
 	$vars->db->query("
 		UPDATE AutoAppointments SET SDate = ? WHERE ID = ?", {}, 
-		$date, $appid
-	);
-}
-
-sub pre_finished_app
-# //////////////////////////////////////////////////
-{
-	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
-	
-	my $finished = ( $type eq 'PREPARE' ? 13 : 0 );
-	my $status = ( $type eq 'PREPARE' ? 1 : 0 );
-	
-	$vars->db->query("
-		UPDATE AutoAppData SET Finished = ?, Status = ? WHERE ID = ?", {}, 
-		$finished, $status, $appdataid
+		( $type eq 'PREPARE' ? '2010-01-01' : '0000-00-00' ), $appid
 	);
 }
 
@@ -2895,37 +2891,12 @@ sub pre_geo_or_collect
 			DELETE FROM Branches"
 		);
 	}
-}
-
-sub pre_collect2
-# //////////////////////////////////////////////////
-{
-	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
-	if ( $type eq 'PREPARE' ) { 
+	if ( ( $$test->{ comment } =~ /^(get_collect_date|correct_values)$/ ) and ( $num == 2 ) ) {
+	
 		$vars->db->query("
-			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
-			Insurance, BAddr, JAddr, AddrEqualled, SenderID, CTemplate, isConcil, 
-			isSMS, isUrgent, posShipping, isDover, calcInsurance, cdSimpl, cdUrgent, cdCatD, 
-			CollectDate, siteLink, calcConcil, ConsNDS, genbank, isTranslate, shengen, isAnketa, 
-			isPrinting, isPhoto, isVIP, Weekend, isShippingFree, isPrepayedAppointment, 
-			DefaultPaymentMethod, DisableAppSameDay) 
-			VALUES (5, 'Kazan', 90, 3, 0, 0, 1, 0, 'Казань', NULL, 1, 1, 'rtf', 0, 1, 0, 
-			1, 1, 0, 7, 0, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 1, 0, 0, 67, 0, '0', 1, 0)"
-		);
-		
-		$vars->db->query("
-			UPDATE VisaTypes SET category = 'D' WHERE ID = 13"
-		);
-		
-	}
-	else {
-		$vars->db->query("
-			DELETE FROM Branches"
-		);
-		
-		$vars->db->query("
-			UPDATE VisaTypes SET category = 'C' WHERE ID = 13"
+			UPDATE VisaTypes SET category = ? WHERE ID = 13", {},
+			( $type eq 'PREPARE' ? 'D' : 'C' )
 		);
 	}
 }
@@ -2935,11 +2906,9 @@ sub pre_draft
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 
-	my $draft = ( $type eq 'PREPARE' ? 1 : 0 );
-	
 	$vars->db->query("
 		UPDATE AutoToken SET Draft = ? WHERE Token = ?", {},
-		$draft, $$token
+		( $type eq 'PREPARE' ? 1 : 0 ), $$token
 	);
 }
 
@@ -2948,11 +2917,9 @@ sub pre_nobody
 {
 	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
 
-	my $appid = ( $type eq 'PREPARE' ? 0 : $appid_param );
-	
 	$vars->db->query("
 		UPDATE AutoAppData SET AppID = ? WHERE ID = ?", {},
-		$appid, $appdataid
+		( $type eq 'PREPARE' ? 0 : $appid_param ), $appdataid
 	);
 }
 
@@ -2962,49 +2929,31 @@ sub pre_token
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 
 	if ( $type eq 'PREPARE' ) { 
+	
 		$self->{ save_token } = $self->{ token };
-		$self->{ token } = 'Token';
+		
+		if ( ( $$test->{ comment } eq "get_mobile_api" ) and ( $num == 2 ) ) {
+			
+			$self->{ token } = '01';
+		}
+		else {
+			$self->{ token } = 'Token';
+		}
 	}
 	else {
 		$self->{ token } = $self->{ save_token };
 	}
 }
 
-sub pre_token01
-# //////////////////////////////////////////////////
-{
-	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
-
-	if ( $type eq 'PREPARE' ) { 
-		$self->{ save_token } = $self->{ token };
-		$self->{ token } = '01';
-	}
-	else {
-		$self->{ token } = $self->{ save_token };
-	}
-}
-
-sub pre_age_9
+sub pre_age
 # //////////////////////////////////////////////////
 {
 	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
 	
 	$vars->db->query("
 		UPDATE AutoAppData
-		SET birthdate = DATE_SUB(CURRENT_DATE(), INTERVAL 9 YEAR)
-		WHERE ID = ?", {}, $appdataid
-	);
-}
-
-sub pre_age_18
-# //////////////////////////////////////////////////
-{
-	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
-	
-	$vars->db->query("
-		UPDATE AutoAppData
-		SET birthdate = DATE_SUB(CURRENT_DATE(), INTERVAL 18 YEAR)
-		WHERE ID = ?", {}, $appdataid
+		SET birthdate = DATE_SUB(CURRENT_DATE(), INTERVAL ? YEAR)
+		WHERE ID = ?", {}, ( $num == 24 ? 18 : 9 ), $appdataid
 	);
 }
 

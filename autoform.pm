@@ -256,7 +256,7 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	return $self->redirect( 'to_new_app' ) if ( $self->{ vars }->get_session->{'login'} eq '' );
+	return $self->redirect( 'to_new_app' ); # develop only
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
