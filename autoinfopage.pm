@@ -57,15 +57,14 @@ sub get_infopage
 	
 	$self->{ af }->correct_values( \$app_info );
 
-	my $app_list = $self->get_app_list();
-	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
 		'title' 	=> 1,
 		'app_info'	=> $app_info,
-		'app_list'	=> $app_list,
+		'app_list'	=> $self->get_app_list(),
+		'map_in_page' 	=> $self->{ af }->get_geo_info(),
 		'token' 	=> $self->{ token },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 	};

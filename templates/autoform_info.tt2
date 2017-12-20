@@ -10,7 +10,10 @@
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
+[% ELSIF title == 1 %]
+	<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
 [% END %]
+
 </head>
 
 <font face="arial">
@@ -32,6 +35,10 @@
 
 <tr><td colspan="2">
 
+<br><br><img src="/vcs/static/images/logoVMS.png"/><br><br><br></td></tr>
+
+<tr><td colspan="2">
+
 <h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
 
 <tr><td>
@@ -41,8 +48,11 @@
 <td><span class="spacer2"></span>[% langreq('Номер записи') %]</td>
 <td class="m_left"></span><span class="m_info">[% app_info.new_app_num %]</span></td>
 </tr><tr>
-<td><span class="spacer2"></span>[% langreq('Дата и время подачи') %]</td>
-<td class="m_left"></span><span class="m_info">[% app_info.new_app_date %] [% app_info.new_app_timeslot %]</span></td>
+<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
+<td class="m_left"></span><span class="m_info">[% app_info.new_app_date %]</span></td>
+</tr><tr>
+<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
+<td class="m_left"></span><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
 </tr><tr>
 <td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
 <td class="m_left"></span><span class="m_info">[% app_info.new_app_branch %]</span></td>
@@ -64,7 +74,20 @@
 
 </td></tr>
 
-<tr><td colspan="2"><br><h2>[% langreq('Список заявителей') %]</h2><br></td></tr>
+<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+<tr class="ymap"><td colspan="3"><div id="YMapsID" class="yandex_map"></div></td></tr>
+<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+
+<script type="text/javascript">
+YMaps.jQuery(function () {
+	var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+	map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
+	map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
+	map.addControl(new YMaps.Zoom());
+});
+</script>
+
+<tr><td colspan="2"><h2>[% langreq('Список заявителей') %]</h2><br></td></tr>
 
 <tr><td colspan="2">
 <table width="100%">
@@ -95,7 +118,7 @@
 [% ELSIF title == 2 %]
 
 <tr><td colspan="2">
-
+<br><br>
 <h2>[% langreq('Назначить другую дату') %]</h2><br></td></tr>
 
 <tr><td colspan="2">&nbsp;</td></tr>
@@ -118,7 +141,7 @@
 [% ELSIF title == 3 %]
 
 <tr><td colspan="2">
-
+<br><br>
 <h2>[% langreq('Отменить запись') %]</h2><br></td></tr>
 
 <tr><td>
@@ -267,7 +290,7 @@ function mobileScreenCheck() {
 	
 	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
 	
-	$('.big_button').css( "height", ( mobilScreen ? '70px' : '30px' ) );
+	$('.big_button').css( "height", ( mobilScreen ? '70px' : '37px' ) );
 	$('.big_button, .small_button').css( "margin-bottom", ( mobilScreen ? '15px' : '2px' ) );
 	$('.small_button').css( "height", ( mobilScreen ? '70px' : '25px' ) );
 	$('.small_button').css( "width", ( mobilScreen ? '100%' : '' ) );
