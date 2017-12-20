@@ -78,13 +78,13 @@
                     0px;border: 1px solid #cad3d9;border-radius:
                     4px;color: #33c3ba;background:
                     #f7f9fa;margin-bottom: 7px;">[%info_btn%]</a> <a
-                    moz-do-not-send="true" href="[%link_site%]/autoform/?t=[%app_token%]&a=reschedule"
+                    moz-do-not-send="true" href="[%link_site%]/autoform/?t=[%app_token%]&action=reschedule"
                     style="width: 177px;text-decoration:
                     none;text-align: center;display: block;padding: 1px
                     0px;border: 1px solid #cad3d9;border-radius:
                     4px;color: #33c3ba;background:
                     #f7f9fa;margin-bottom: 7px;">[%resh_btn%]</a>
-                    <a moz-do-not-send="true" href="[%link_site%]/autoform/?t=[%app_token%]&a=cancel"
+                    <a moz-do-not-send="true" href="[%link_site%]/autoform/?t=[%app_token%]&action=cancel"
                     style="width: 177px;text-decoration:
                     none;text-align: center;display: block;padding: 1px
                     0px;border: 1px solid #cad3d9;border-radius:
