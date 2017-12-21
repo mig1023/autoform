@@ -256,7 +256,7 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	return $self->redirect( 'to_new_app' ); # develop only
+	#return $self->redirect( 'to_new_app' ); # develop only
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
@@ -1142,7 +1142,7 @@ sub get_list_of_app
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
 	)->[0];
-	
+
 	$self->send_link( $link->{ EMail } ) unless $link->{ LinkSended };
 	
 	if ( scalar(@$content) < 1 ) {
@@ -1953,13 +1953,15 @@ sub check_param
 	return if $rules eq 'z';
 
 	if ( $rules =~ /D/ ) {
+	
 		$rules =~ s/(z|D)//g;
 		
 		return $self->text_error( 1, $element ) if ( !( $value =~ /$rules/ ) and ( $value ne '' ) );
 		
 		$value =~ /(\d\d)\.(\d\d)\.(\d\d\d\d)/;
 	
-		return $self->text_error( 1, $element ) if Date::Calc::check_date( $3, $2, $1 ) == 0;
+		return $self->text_error( 1, $element )
+			if ( Date::Calc::check_date( $3, $2, $1 ) == 0  and ( $value ne '' ) );
 	}
 	else {
 		my $regexp = '';
@@ -2592,7 +2594,7 @@ sub send_link
 	}
 	
 	$self->{ vars }->get_system->send_mail( $self->{ vars }, $email, $subject, $body, 1 );
-	
+
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET LinkSended = now() WHERE Token = ?", {}, $self->{ token }
 	);
