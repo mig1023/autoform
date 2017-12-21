@@ -256,7 +256,7 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	#return $self->redirect( 'to_new_app' ); # develop only
+	return $self->redirect( 'to_new_app' ); # develop only
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
@@ -799,7 +799,7 @@ sub set_current_app_finished
 		SELECT VType, CenterID FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
 	);
 
-	$self->query( 'query', __LINE__, "
+	return $self->query( 'query', __LINE__, "
 		UPDATE AutoAppData SET FinishedVType = ?, FinishedCenter = ? WHERE ID = ?", {},
 		$vtype, $center, $tables_id->{ AutoAppData }
 	);
@@ -930,22 +930,26 @@ sub get_delete
 {
 	my ( $self, $appdata_id ) = @_;
 	
+	my $result = 0;
+	
 	if ( $self->check_existing_id_in_token( $appdata_id ) ) {
 	
 		my $sch_id = $self->query( 'sel1', __LINE__, "
 			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
 		);
 	
-		$self->query( 'query', __LINE__, "
+		$result += $self->query( 'query', __LINE__, "
 			DELETE FROM AutoAppData WHERE ID = ?", {}, $appdata_id
 		);
 		
-		$self->query( 'query', __LINE__, "
+		$result += $self->query( 'query', __LINE__, "
 			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, $sch_id
 		);
 
 		$self->mod_last_change_date();
 	}
+	
+	return $result;
 }
 
 sub check_existing_id_in_token
@@ -1143,7 +1147,7 @@ sub get_list_of_app
 		WHERE Token = ?", $self->{ token }
 	)->[0];
 
-	$self->send_link( $link->{ EMail } ) unless $link->{ LinkSended };
+	$self->send_link( $link->{ EMail } ) unless $link->{ LinkSended } or !$link->{ EMail };
 	
 	if ( scalar(@$content) < 1 ) {
 	
@@ -1648,7 +1652,7 @@ sub change_current_appdata
 {
 	my ( $self, $new_app_id, $table_id ) = @_;
 	
-	$self->query( 'query', __LINE__, "
+	return $self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, $new_app_id, $table_id->{ AutoToken }
 	);
 }
@@ -2231,10 +2235,9 @@ sub mod_last_change_date
 {
 	my $self = shift;
 	
-	my $lastip = $ENV{'HTTP_X_REAL_IP'};
-	
-	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET LastChange = now(), LastIP = ? WHERE Token = ?", {}, $lastip, $self->{ token }
+	return $self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET LastChange = now(), LastIP = ? WHERE Token = ?", {},
+		$ENV{ HTTP_X_REAL_IP }, $self->{ token }
 	);
 }
 
@@ -2534,7 +2537,7 @@ sub get_pcode
 		}
 	
 		my $limit = 0;
-	
+
 		for ( @$all_pcode ) {
 			if (
 				( $_->{ Center } == $center ) and (
@@ -2562,6 +2565,8 @@ sub get_pcode
 			);
 		}
 	}
+
+	return $finded_pcode if $self->{ this_is_self_testing };
 	
 	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 	
@@ -2595,7 +2600,7 @@ sub send_link
 	
 	$self->{ vars }->get_system->send_mail( $self->{ vars }, $email, $subject, $body, 1 );
 
-	$self->query( 'query', __LINE__, "
+	return $self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET LinkSended = now() WHERE Token = ?", {}, $self->{ token }
 	);
 }
