@@ -97,7 +97,7 @@ sub print_appdata
 	
 	$appdata =~ s/[^0-9]//g;
 
-	return $self->redirect() unless $self->check_existing_id_in_token( $appdata );
+	return $self->{ af }->redirect() unless $self->check_existing_id_in_token( $appdata );
 
 	my $print = VCS::Docs::docs->new( 'VCS::Docs::docs', $self->{ vars } );
 	
@@ -124,7 +124,7 @@ sub reschedule
 	) {
 		$self->set_new_appdate( $new );
 		
-		return $self->redirect();
+		return $self->{ af }->redirect();
 	}
 	
 	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
@@ -189,7 +189,7 @@ sub cancel
 			);
 		}
 		
-		return $self->redirect();
+		return $self->{ af }->redirect();
 	}
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -294,16 +294,6 @@ sub check_existing_id_in_token
 	}
 	
 	return $exist;
-}
-
-sub redirect
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-
-	return $self->{ af }->redirect(
-		'?t=' . $self->{ token } . ( $self->{ af }->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' ) 
-	);
 }
 	
 1;

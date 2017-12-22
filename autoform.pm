@@ -2781,18 +2781,15 @@ sub time_interval_calculate
 sub redirect
 # //////////////////////////////////////////////////
 {
-	my ( $self, $add_line ) = @_;
-
-	my $param = ( $add_line eq 'to_new_app' ? 
-		( $self->{ token } ? '?t=' . $self->{ token } : '' ) .
-		( $self->{ lang } ? '&lang=' . $self->{ af }->{ lang } : '' ) : ''
-	);
-
-	$self->{ vars }->get_system->redirect(
+	my ( $self, $to_new_app ) = @_;
 	
-		$self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } .
-		( $add_line eq 'to_new_app' ? '' : $param . $add_line )
-	);
+	my $addr = $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr };
+
+	my $param = ( ( $self->{ token } and !$to_new_app ) ? '?t=' . $self->{ token } : '' );
+	
+	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ af }->{ lang } : '' );
+	
+	$self->{ vars }->get_system->redirect( $addr . $param );
 }
 
 sub query

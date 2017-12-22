@@ -132,7 +132,8 @@ sub set_values_from_api
 	}
 	
 	$vars->get_system->redirect( 
-		$vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 
+		$vars->getform('fullhost') .
+		$self->{ autoform }->{ paths }->{ addr } .
 		'?t=' . $self->{ token } . '&mobile_app=on'
 	);
 }
@@ -211,7 +212,7 @@ sub get_advertisment
 # //////////////////////////////////////////////////
 {
 	return [
-		'http://',
+		'http://www.italyvms.ru',
 	];
 }
 
