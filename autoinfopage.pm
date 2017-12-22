@@ -21,20 +21,21 @@ sub autoinfopage
 	
 	$self->{ $_ } = $self->{ af }->{ $_ } for ( 'vars', 'token' );
 	
-	$self->{ vars }->{'session'}->{'login'} = 'website';
+	$self->{ vars }->{ session }->{ login } = 'website';
 		
-	my $action = lc( $self->{ vars }->getparam('action') );
-	$action =~ s/[^a-z_]//g;
+	my $_ = $self->{ vars }->getparam( 'action' );
 	
-	return $self->print_appointment() if $action eq 'print';
+	s/[^a-z_]//g;
 	
-	return $self->print_appdata() if $action eq 'print_a';
+	return $self->print_appointment() if /^print$/i;
+	
+	return $self->print_appdata() if /^print_a$/i;
 
-	return $self->reschedule( $task, $id, $template ) if $action eq 'reschedule';
+	return reschedule( @_ ) if /^reschedule$/;
 	
-	return $self->cancel( $task, $id, $template ) if $action eq 'cancel';
+	return cancel( @_ ) if /^cancel$/;
 	
-	return $self->get_infopage( $task, $id, $template );
+	return get_infopage( @_ );
 }
 
 sub get_infopage
