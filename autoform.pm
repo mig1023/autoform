@@ -32,26 +32,21 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
-	my ( $self, $task, $id, $template ) = @_;
+	my ( $self, undef, $_ ) = @_;
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
 	
-	my $dispathcher = {
-		'index'		=> \&autoform,
-		'selftest'	=> \&autoselftest,
-		'findpcode'	=> \&get_pcode,
-		'mobile_end'	=> \&mobile_end,
-	};
+	return autoform( @_ ) if /^index$/i;
 	
-	my $disp_link = $dispathcher->{ $id };
+	return autoselftest( @_ ) if /^selftest$/i;
 	
-	return $self->redirect( 'to_new_app' ) if !$disp_link;
-
-	&{ $disp_link }( $self, $task, $id, $template );
+	return get_pcode( @_ ) if /^findpcode$/i;
 	
-	return 1;
+	return mobile_end( @_ ) if /^mobile_end$/i;
+	
+	return redirect( 'to_new_app' );
 }
 
 sub get_content_rules
