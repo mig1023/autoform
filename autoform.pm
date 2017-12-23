@@ -44,6 +44,8 @@ sub getContent
 	
 	return get_pcode( @_ ) if /^findpcode$/i;
 	
+	return infopage_entry( @_ ) if /^info$/i;
+	
 	return mobile_end( @_ ) if /^mobile_end$/i;
 	
 	return redirect( 'to_new_app' );
@@ -272,6 +274,48 @@ sub autoinfopage
 	$autoinfopage->{ af } = $self;
 	
 	$autoinfopage->autoinfopage( $task, $id, $template );
+}
+
+sub infopage_entry
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $appnum = $self->{ vars }->getparam( 'appnum' ) || "";
+	
+	my $passnum = $self->{ vars }->getparam( 'passnum' ) || "";
+	
+	s/[^0-9]//g for ( $appnum, $passnum );
+	
+	my $appdata = $self->query( 'selallkeys', __LINE__, "
+		SELECT Token, AppData.PassNum as passnum
+		FROM AutoToken
+		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+		JOIN AppData ON Appointments.ID = AppData.AppID
+		WHERE AppNum = ?", $appnum
+	);
+
+	for my $app ( @$appdata ) {
+
+		if ( ( $app->{ passnum } eq $passnum ) and ( !$self->check_captcha() ) ) {
+
+			$self->{ token } = $app->{ Token };
+		
+			return $self->redirect();
+		}
+	}
+	
+	my $key = $self->{ autoform }->{ captcha }->{ public_key };
+			
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq' 	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'widget_api'	=> $self->{ autoform }->{ captcha }->{ widget_api },
+		'json_options'	=> to_json( { sitekey => $key, theme => 'light' }, $self->{ json_options } || {} ),
+	};
+	$template->process( 'autoform_info_entry.tt2', $tvars );
 }
 
 sub mobile_end
