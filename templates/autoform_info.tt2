@@ -251,8 +251,6 @@ function mobileScreenCheck() {
 	$('.spacer').html( mobilScreen ? '&nbsp;&nbsp;' : '' );
 	$('.spacer2').html( mobilScreen ? '<br>' : '' );
 	
-	//$('.checklist_td').attr( "height", mobilScreen ? '100px' : '' );
-	
 	[% IF title == 2 %]
 	if ( mobilScreen ) {
 		$('#app_date').datepicker('destroy');
