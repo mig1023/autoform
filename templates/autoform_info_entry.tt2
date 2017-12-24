@@ -20,7 +20,7 @@
 
 <table width="600px" id="app_table">
 
-<tr><td>
+<tr><td align="center">
 
 <br><br><img src="/vcs/static/images/logoVMS.png"/><br><br><br></td></tr>
 
@@ -42,7 +42,7 @@
 </td></tr>
 					
 <tr><td colspan="3"><br>
-	<input type="submit" value="[% langreq('Далее') %] ▷">
+	<input type="submit" class="small_button" value="[% langreq('Далее') %] ▷">
 </td></tr>
 
 </table>
@@ -74,20 +74,9 @@ function mobileScreenCheck() {
 	$('*').css( "font-size", mobilScreen ? '15px' : '' );
 	$('h2').css( "font-size", mobilScreen ? '20px' : '' );
 	
-	$('.m_info').css( "font-size", mobilScreen ? '30px' : '' );
-	$('.m_left').css( "text-align", mobilScreen ? 'left' : 'right' );
-	$('#suppl_text, .dotted_link').css( "font-size", mobilScreen ? '15px' : '12px' );
-	
-	$('.spacer').html( mobilScreen ? '&nbsp;&nbsp;' : '' );
-	$('.spacer2').html( mobilScreen ? '<br>' : '' );
-	
 	$('#app_table').css( "width", ( mobilScreen ? '100%' : '302px' ) );
 	$('.input_width').css( "width", '100%' );
 	
-	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
-	
-	$('.big_button').css( "height", ( mobilScreen ? '70px' : '37px' ) );
-	$('.big_button, .small_button').css( "margin-bottom", ( mobilScreen ? '15px' : '2px' ) );
 	$('.small_button').css( "height", ( mobilScreen ? '70px' : '25px' ) );
 	$('.small_button').css( "width", ( mobilScreen ? '100%' : '' ) );
 }
