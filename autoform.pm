@@ -273,13 +273,7 @@ sub autoinfopage
 	
 	$autoinfopage->{ af } = $self;
 	
-	if ( $entry ) {
-
-		$autoinfopage->infopage_entry( $task, $id, $template );
-	}
-	else {
-		$autoinfopage->autoinfopage( $task, $id, $template );
-	}
+	$autoinfopage->autoinfopage( $task, $id, $template, $entry );
 }
 
 sub mobile_end
