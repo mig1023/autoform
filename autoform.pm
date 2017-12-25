@@ -44,7 +44,7 @@ sub getContent
 	
 	return get_pcode( @_ ) if /^findpcode$/i;
 	
-	return infopage_entry( @_ ) if /^info$/i;
+	return autoinfopage( @_, 'entry' ) if /^info$/i;
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
 	
@@ -265,7 +265,7 @@ sub autoselftest
 sub autoinfopage
 # //////////////////////////////////////////////////
 {
-	my ( $self, $task, $id, $template ) = @_;
+	my ( $self, $task, $id, $template, $entry ) = @_;
 
 	my $autoinfopage = VCS::Site::autoinfopage->new('VCS::Site::autoinfopage', $self->{ vars } );
 	
@@ -273,49 +273,13 @@ sub autoinfopage
 	
 	$autoinfopage->{ af } = $self;
 	
-	$autoinfopage->autoinfopage( $task, $id, $template );
-}
+	if ( $entry ) {
 
-sub infopage_entry
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $appnum = $self->{ vars }->getparam( 'appnum' ) || "";
-	
-	my $passnum = $self->{ vars }->getparam( 'passnum' ) || "";
-	
-	s/[^0-9]//g for ( $appnum, $passnum );
-	
-	my $appdata = $self->query( 'selallkeys', __LINE__, "
-		SELECT Token, AppData.PassNum as passnum
-		FROM AutoToken
-		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
-		JOIN AppData ON Appointments.ID = AppData.AppID
-		WHERE AppNum = ?", $appnum
-	);
-
-	for my $app ( @$appdata ) {
-
-		if ( ( $app->{ passnum } eq $passnum ) and ( !$self->check_captcha() ) ) {
-
-			$self->{ token } = $app->{ Token };
-		
-			return $self->redirect();
-		}
+		$autoinfopage->infopage_entry( $task, $id, $template );
 	}
-	
-	my $key = $self->{ autoform }->{ captcha }->{ public_key };
-			
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	my $tvars = {
-		'langreq' 	=> sub { return $self->{ vars }->getLangSesVar(@_) },
-		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
-		'widget_api'	=> $self->{ autoform }->{ captcha }->{ widget_api },
-		'json_options'	=> to_json( { sitekey => $key, theme => 'light' }, $self->{ json_options } || {} ),
-	};
-	$template->process( 'autoform_info_entry.tt2', $tvars );
+	else {
+		$autoinfopage->autoinfopage( $task, $id, $template );
+	}
 }
 
 sub mobile_end
@@ -526,6 +490,10 @@ sub get_token_and_create_new_form_if_need
 	my ( $self, $mobile_api ) = @_;
 	
 	my $token = lc( $self->{ vars }->getparam('t') );
+	
+	return '02' if $token eq 'no_app';
+	
+	return '03' if $token eq 'no_field';
 
 	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
 	

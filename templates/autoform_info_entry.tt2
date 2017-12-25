@@ -13,6 +13,7 @@
 <div id="info_form">
 
 <form action = "[% addr %]/info.htm" method = "POST" name = "dataform">
+<input type = "hidden" value = "1" name = "action" id = "action">
 
 <table width="100%">
 

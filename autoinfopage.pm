@@ -4,6 +4,7 @@ use strict;
 use VCS::Vars;
 use Data::Dumper;
 use Date::Calc;
+use JSON;
 
 sub new
 # //////////////////////////////////////////////////
@@ -294,6 +295,72 @@ sub check_existing_id_in_token
 	}
 	
 	return $exist;
+}
+
+sub infopage_entry
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $param = {};
+	
+	$self->{ vars } = $self->{ af }->{ vars };
+	
+	for ( "action", "appnum", "passnum" ) {
+	
+		$param->{ $_ } = $self->{ vars }->getparam( $_ ) || undef;
+		
+		$param->{ $_ } =~ s/[^0-9]//g;
+	}
+
+	if ( !$param->{ action } ) {
+	
+		# nothing to do here
+	}
+	elsif ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
+	
+		return $self->return_with_token( 'no_field' );
+	}
+	else {
+
+		my $appdata = $self->{ af }->query( 'selallkeys', __LINE__, "
+			SELECT Token, AppData.PassNum as passnum
+			FROM AutoToken
+			JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+			JOIN AppData ON Appointments.ID = AppData.AppID
+			WHERE AppNum = ?", $param->{ appnum }
+		);
+
+		for my $app ( @$appdata ) {
+
+			return $self->return_with_token( $app->{ Token } )
+			if $app->{ passnum } eq $param->{ passnum };
+		}
+			
+		return $self->return_with_token( 'no_app' );
+	}
+	
+	my $key = $self->{ autoform }->{ captcha }->{ public_key };
+			
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq' 	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'widget_api'	=> $self->{ autoform }->{ captcha }->{ widget_api },
+		'json_options'	=> to_json( { sitekey => $key, theme => 'light' }, $self->{ json_options } || {} ),
+	};
+	$template->process( 'autoform_info_entry.tt2', $tvars );
+}
+
+sub return_with_token
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+	
+	$self->{ af }->{ token } = $token;
+
+	return $self->{ af }->redirect();
 }
 	
 1;
