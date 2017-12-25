@@ -328,13 +328,6 @@ sub get_content_rules_hash
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
-						'condition' => 'equal_or_later',
-						'table' => 'Appointments',
-						'name' => 'FDate',
-						'offset' => 3650,
-						'error' => 'Дата начала поездки',
-					},
-					{
 						'condition' => 'now_or_earlier',
 					},
 				],
@@ -351,15 +344,6 @@ sub get_content_rules_hash
 				'comment' => 'Введите дату окончания действия загранпаспорта, указанную в паспорте',
 				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
-				'check_logic' => [
-					{
-						'condition' => 'equal_or_later',
-						'table' => 'Appointments',
-						'name' => 'FDate',
-						'offset' => 90,
-						'error' => 'Дата окончания поездки',
-					},
-				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PassTill',
@@ -831,6 +815,15 @@ sub get_content_rules_hash
 				'comment' => 'Укажите дату начала действия запрашивамой визы',
 				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'equal_or_earlier',
+						'table' => 'AppData',
+						'name' => 'PassDate',
+						'offset' => 3650,
+						'error' => 'Дата выдачи паспорта',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'AppSDate',
@@ -848,6 +841,15 @@ sub get_content_rules_hash
 				'comment' => 'Укажите дату окончания действия запрашивамой визы',
 				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'not_closer_than_in_spb',
+						'table' => 'AppData',
+						'name' => 'PassTill',
+						'offset' => 90, # only for error text
+						'error' => 'Дате окончания действия паспорта',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'AppFDate',

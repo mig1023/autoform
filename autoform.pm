@@ -2052,9 +2052,35 @@ sub check_logic
 			$error = 12 if ( $error and $rule->{ condition } =~ /^now/ );
 			
 			$error++ if ( $offset and ( $error == 6 or $error == 8 ) );
+			$error = 23 if ( $offset < -1 and $error == 9 );
 			
-			$first_error = $self->text_error( $error , $element, undef, $rule->{ error }, $offset ) 
+			$offset *= -1 if $offset < 0;
+			
+			$first_error = $self->text_error( $error, $element, undef, $rule->{ error }, $offset ) 
 				if $error;
+		}
+		
+		if ( $rule->{ condition } =~ /^not_closer_than(_in_spb)?$/ ) {
+		
+			my $spb = $1;
+
+			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
+			
+			$value = sprintf( "%04d-%02d-%02d",
+				( Date::Calc::Add_Delta_YMD( ( split /-/, $value ), 0, 3, 1 ) )
+			) if $spb;
+			
+			my $datediff = $self->query( 'sel1', __LINE__, "
+				SELECT DATEDIFF( $rule->{name}, ? ) FROM Auto$rule->{table} WHERE ID = ?",
+				$value, $tables_id->{ 'Auto'.$rule->{table} }
+			);
+		
+			$first_error = $self->text_error( 23, $element, undef, $rule->{ error }, $rule->{ offset } ) 
+				if (
+					( ( $datediff < $rule->{ offset } ) and !$spb )
+					or
+					( ( $datediff <= 0 ) and $spb )
+				);
 		}
 		
 		if ( $rule->{ condition } =~ /^younger_than$/ ) {
