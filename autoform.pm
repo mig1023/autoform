@@ -88,6 +88,7 @@ sub get_content_rules
 		if ( $current_page == $page_ord ) {
 
 			for ( 'persons_in_page', 'collect_date', 'param', 'ussr_or_rf_first' ) {
+			
 				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[0]->{ $_ } ? 1 : 0 );
 			}
 		}
@@ -99,6 +100,7 @@ sub get_content_rules
 		elsif ( !$full ) {
 		
 			delete $new_content->{ $page_ord }->[0];
+			
 			@{ $new_content->{ $page_ord } } = grep defined, @{ $new_content->{ $page_ord } };
 		}
 		else {
@@ -123,6 +125,7 @@ sub get_app_visa_and_center
 	return if !$self->{ token };
 	
 	my $visa_vtype = $self->cached( 'autoform_' . $self->{ token } . '_vtype' );
+	
 	my $center_id = $self->cached( 'autoform_' . $self->{ token }. '_center' );
 		
 	if ( !$visa_vtype or !$center_id ) {
@@ -136,6 +139,7 @@ sub get_app_visa_and_center
 		);
 		
 		$self->cached( 'autoform_' . $self->{ token } . '_vtype', $visa_vtype ) if $visa_vtype;
+		
 		$self->cached( 'autoform_' . $self->{ token } . '_center', $center_id ) if $center_id;
 	}
 	
@@ -194,9 +198,11 @@ sub autoform
 	
 	my ( $appinfo_for_timeslots, $map_in_page );
 
-	if ( ( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) ) or
-		( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) ) ) {
-		
+	if ( 
+		( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) )
+		or
+		( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) )
+	) {
 		$appinfo_for_timeslots = $self->get_same_info_for_timeslots();
 	}
 
@@ -345,17 +351,16 @@ sub init_add_param
 		$info_from_db = $self->cached( 'autoform_addparam' );
 		
 		if ( !$info_from_db ) {
+		
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
 				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
-				'[brh_countries]' => 'SELECT ID, EnglishName FROM Countries',
-				'[citizenship_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE Ex = 0',
-				'[prevcitizenship_countries]' => 'SELECT ID, EnglishName FROM Countries',
+				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
-				'[eu_countries]' => 'SELECT ID, EnglishName FROM Countries WHERE MemberOfEU = 1',
 			};
 			
 			for ( keys %$info_from_sql ) {
+			
 				$info_from_db->{ $_ } = $self->query( 'selall', __LINE__, $info_from_sql->{ $_ } );
 			}
 			
@@ -367,8 +372,18 @@ sub init_add_param
 				[ 215, "ROMANIA" ],
 			];
 
+			for ( @{ $info_from_db->{ '[brh_countries]' } } ) {
+			
+				push @{ $info_from_db->{ '[prevcitizenship_countries]' } }, $_;
+				
+				push @{ $info_from_db->{ '[citizenship_countries]' } }, $_ if $_->[ 2 ] == 0;
+				
+				push @{ $info_from_db->{ '[eu_countries]' } }, $_ if $_->[ 3 ] == 1;
+			}
+			
 			for ( @{ $info_from_db->{ '[eu_countries]' } }, @$add_eu_countries ) {
-				push ( @{ $info_from_db->{ '[first_countries]' } }, $_ );
+			
+				push @{ $info_from_db->{ '[first_countries]' } }, $_;
 			}
 
 			$self->cached( 'autoform_addparam', $info_from_db );
@@ -410,9 +425,9 @@ sub init_add_param
 		$ussr_first = 1 if $birthdate < 0;
 	}
 
-	if ( $keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date } or 
-		$keys_in_current_page->{ persons_in_page } or $keys_in_current_page->{ ussr_or_rf_first } ) {
-
+	if ( 	$keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date } or 
+		$keys_in_current_page->{ persons_in_page } or $keys_in_current_page->{ ussr_or_rf_first } 
+	) {
 		for my $page ( keys %$content_rules ) {
 		
 			next if $content_rules->{$page} =~ /^\[/;
@@ -422,12 +437,17 @@ sub init_add_param
 				if ( ref( $element->{ param } ) ne 'HASH' ) {
 				
 					my $param_array = $info_from_db->{ $element->{ param } };
+					
 					$element->{ param } = {};
+					
 					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
 				}
 				
-				if ( exists $element->{ check_logic } and $self->{ token } and $keys_in_current_page->{ collect_date } ) {
+				if (	exists $element->{ check_logic } and $self->{ token }
+					and $keys_in_current_page->{ collect_date }
+				) {	
 					for ( @{ $element->{ check_logic } } ) {
+					
 						$_->{ offset } = $self->get_collect_date()	
 							if $_->{ offset } =~ /\[collect_date_offset\]/;
 					}
@@ -605,26 +625,32 @@ sub get_autoform_content
 	$step = $max_step if $step > $max_step;
 
 	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
+	
 		$step = $self->get_back( $step );
 	}
 
 	if ( ( $action eq 'forward' ) and ( $step < $max_step ) ) {
+	
 		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
 	}
 
 	if ( ( $action eq 'edit' ) and $appdata_id ) {
+	
 		$step = $self->get_edit( $step, $appdata_id );
 	}
 	
 	if ( ( $action eq 'delapp' ) and $appdata_id ) {
+	
 		$self->get_delete( $appdata_id );
 	}
 	
 	if ( $action eq 'addapp' ) {
+	
 		$step = $self->get_add( $app_id );
 	}
 	
 	if ( $action eq 'tofinish' ) {
+	
 		my $app_status = $self->check_all_app_finished_and_not_empty();
 		
 		if ( $app_status == 0 ) {
@@ -637,6 +663,7 @@ sub get_autoform_content
 	}
 	
 	if ( $action eq 'tolist' ) {
+	
 		$step = $self->set_step_by_content( '[list_of_applicants]' );
 	}
 	
@@ -645,10 +672,12 @@ sub get_autoform_content
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
 	if ( !$last_error and ( exists $page->[0]->{relation} ) ) {
+	
 		( $step, $page ) = $self->check_relation( $step, $page, $back );
 	}
 	
-	if ( $page !~ /\[/ ) { 
+	if ( $page !~ /\[/ ) {
+	
 		$title = $self->lang( $page->[0]->{ page_name } );
 	}
 
@@ -675,6 +704,7 @@ sub check_relation
 		$skip_this_page = 0;
 
 		for my $relation ( keys %{ $page->[0]->{ relation } } ) {
+		
 			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{ relation }->{ $relation } );
 		}
 		
@@ -693,6 +723,7 @@ sub check_relation
 			my $current_table_id = $self->get_current_table_id(); 
 			
 			if ( $step == $self->get_step_by_content('[app_finish]') ) {
+			
 				$self->set_current_app_finished( $current_table_id );
 			}
 		}
@@ -734,10 +765,12 @@ sub skip_by_condition
 	my %relation = map { $_ => 1 } split /,\s?/, $relation; 
 
 	if ( $condition eq 'only_if' ) {
+	
 		$skip_it = 1 unless exists $relation{ $value };
 	}
 	
 	if ( $condition eq 'only_if_not' ) {
+	
 		$skip_it = 1 if exists $relation{ $value };
 	}
 
@@ -752,6 +785,7 @@ sub get_forward
 	my $current_table_id = $self->get_current_table_id();
 	
 	if ( !$current_table_id->{AutoAppointments} ) {
+	
 		$self->create_clear_form( $self->{ vars }->getparam( 'center' ) );
 		$current_table_id = $self->get_current_table_id();
 	}
@@ -768,6 +802,7 @@ sub get_forward
 		if !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) );
 
 	if ( $last_error ) {
+	
 		my @last_error = split /\|/, $last_error;
 
 		$self->query( 'query', __LINE__, "
@@ -854,6 +889,7 @@ sub check_timeslots_already_full_or_not_actual
 	my $timeslots = $appobj->get_timeslots_arr( $app->{ center }, $app->{ persons }, $app->{ appdate } );
 
 	for ( @$timeslots ) {
+
 		return ( '', $step ) if $_->{id} == $app->{ timeslot };
 	}
 
@@ -969,6 +1005,7 @@ sub check_existing_id_in_token
 	);
 
 	for my $app ( @$list_of_app_in_token ) {
+	
 		$exist = 1 if ( $app->{ID} == $appdata_id );
 	}
 	
@@ -1052,6 +1089,7 @@ sub get_back
 	$step--;
 	
 	if ( $step == $self->get_step_by_content( '[app_finish]' ) ) {
+	
 		$step = $self->set_step_by_content( '[list_of_applicants]' );
 	}
 	
@@ -1081,6 +1119,7 @@ sub get_html_page
 	$self->correct_values( \$current_values, $appnum );
 	
 	for my $element ( @$page_content ) {
+	
 		$content .= $self->get_html_line( $element, $current_values );
 	}
 	
@@ -1235,7 +1274,9 @@ sub get_html_line
 	my $current_value = $values->{ $element->{name} };
 
 	if ( $element->{ db }->{ name } eq 'complex' ) {
+	
 		for my $sub_value ( keys %{ $element->{ param } } ) {
+		
 			$current_value->{ $sub_value } = $values->{ $sub_value };
 		}
 	}
@@ -1257,6 +1298,7 @@ sub get_html_line
 	$content .= $self->get_html_for_element( 'end_line' );
 	
 	if ( $element->{ example } ne '' ) {
+	
 		$content .= $self->get_html_for_element( 'example', $element->{name}, $element->{example} );
 	}
 
@@ -1352,6 +1394,7 @@ sub get_html_for_element
 	}
 	
 	if ( ( $type eq 'stages' ) and ( !$first_elements ) ) {
+	
 		$content =~ s/\[progress_stage\]//gi;
 	}
 	else {
@@ -1363,6 +1406,7 @@ sub get_html_for_element
 	$content =~ s/\[example\]/$example/gi;
 	
 	if ( $type eq 'checkbox' ) {
+	
 		$content =~ s/\[checked\]/checked/gi if $value_original;
 		$content =~ s/\s\[checked\]//gi;
 	}
@@ -1502,6 +1546,7 @@ sub add_rules_format
 	);
 	
 	if ( $rules =~ /D/ ) {
+	
 		$format_add_string .= $self->get_html_for_element( 'new_line' ) . 
 			$self->lang( 'В поле вводится дата в формате ДД.ММ.ГГГГ' );
 			
@@ -1521,6 +1566,7 @@ sub add_rules_format
 	$rules =~ s/(\s|\n|z|W|Ё|N|'|\))//g;
 		
 	if ( $rules ) {
+	
 		my @symbols = split /\\/, $rules;
 		
 		my $symbols_help = VCS::Site::autodata::get_symbols_help();
@@ -1595,10 +1641,12 @@ sub resort_with_first_elements
 		$first =~ s/^\s+|\s+$//g;
 		
 		if ( $first eq 'default_free' ) {
+		
 			push @array_with_first_elements, 0;
 		}
 		else {
 			for my $elem (keys %$country_hash) {
+			
 				push @array_with_first_elements, $first if $elem == $first;
 			}
 		}
@@ -1607,6 +1655,7 @@ sub resort_with_first_elements
 	my %first_elements = map { $_ => 1 } @first_elements; 
 	
 	for my $e ( sort { $country_hash->{ $a } cmp $country_hash->{ $b } } keys %$country_hash ) {
+	
 		push @array_with_first_elements, $e if !exists $first_elements{ $e };
 	}
 
@@ -1725,7 +1774,9 @@ sub get_all_values
 	if ( $alt ) {
 
 		for my $field ( keys %{ $alt } ) {
+		
 			if ( !$all_values->{ $field } ) {
+			
 				my $alt_value = $self->query( 'sel1', __LINE__, "
 					SELECT $alt->{ $field }->{ field } FROM $alt->{ $field }->{ table } WHERE ID = ?", 
 					$table_id->{ $alt->{ $field }->{ table } }
@@ -1791,10 +1842,13 @@ sub get_element_by_name
 	my $element;
 	
 	for my $element_search ( @$page_content ) {
+	
 		return $element_search if $element_search->{name} eq $element_name;
 		
 		if ( $element_search->{db}->{name} eq 'complex' ) {
+		
 			for my $sub_element ( keys %{ $element_search->{param} } ) {
+			
 				return $element_search if $sub_element eq $element_name;
 			}
 		};
@@ -1832,7 +1886,9 @@ sub get_names_db_for_save_or_get
 		next if ref( $element->{ db } ) ne 'HASH';
 
 		if ( $element->{ db }->{ name } eq 'complex' ) {
+		
 			for my $sub_element ( keys %{ $element->{ param } } ) {
+			
 				$request_tables->{ 'Auto' . $element->{ db }->{ table } }->{ $element->{ param }->{ $sub_element }->{ db } } = 
 					$sub_element;
 			}
@@ -1841,6 +1897,7 @@ sub get_names_db_for_save_or_get
 			$request_tables->{ 'Auto' . $element->{ db }->{ table } }->{ $element->{ db }->{ name } } = $element->{ name };
 			
 			if ( $element->{ load_if_free_field } ) {
+			
 				$alternative_data_source->{ $element->{ name } }->{ table } = 'Auto' . $element->{ load_if_free_field }->{ table };
 				$alternative_data_source->{ $element->{ name } }->{ field } = $element->{ load_if_free_field }->{ name };
 			}
@@ -1872,6 +1929,7 @@ sub get_current_table_id
 	my $max_index = scalar( keys %$tables_controled_by_AutoToken );
 	
 	for my $id ( 0..$max_index ) {
+	
 		$tables_id->{ $tables_list[ $id ] } = $ids[ $id ];
 	};
 	
@@ -1896,9 +1954,11 @@ sub check_data_from_form
 		
 		if ( $element->{check} ) {
 			if ( $element->{type} =~ /checkbox/ ) {
+			
 				$first_error = $self->check_chkbox( $element );
 			}
 			elsif ( $element->{type} =~ /checklist/ ) {
+			
 				$first_error = $self->check_checklist( $element );
 			}
 			else {
@@ -1909,6 +1969,7 @@ sub check_data_from_form
 		$first_error = $self->check_captcha() if $element->{type} =~ /captcha/;
 
 		if ( !$first_error and $element->{check_logic} ) {
+		
 			$first_error = $self->check_logic( $element, $tables_id );
 		}
 		
@@ -1926,10 +1987,12 @@ sub check_checklist
 	my $at_least_one = 0;
 	
 	for my $field ( keys %{ $element->{ param } } ) {
+	
 		$at_least_one += ( $self->{ vars }->getparam( $field ) ? 1 : 0 );
 	}
 	
-	return $self->text_error( 11, $element ) if ( ( $element->{ check } =~ /at_least_one/ ) and ( $at_least_one == 0 ) );
+	return $self->text_error( 11, $element )
+		if ( ( $element->{ check } =~ /at_least_one/ ) and ( $at_least_one == 0 ) );
 }
 
 sub check_chkbox
@@ -2191,6 +2254,7 @@ sub text_error
 	my $current_error = $self->lang( $text->[ $error_code ] );
 	
 	$current_error =~ s/\[name\]/$name_of_element/;
+	
 	$current_error =~ s/\[relation\]/$relation/;
 	
 	$offset = $self->offset_calc( $offset ) if $offset;
@@ -2367,6 +2431,7 @@ sub mod_hash
 	};
 	
 	$hash = $self->visapurpose_assembler( $hash ) if exists $hash->{ VisaPurpose };
+	
 	$hash = $self->mezzi_assembler( $hash ) if exists $hash->{ Mezzi1 };
 	
 	if ( $hash->{ ShIndex } ) {
@@ -2384,7 +2449,9 @@ sub mod_hash
 	if ( $table_name eq 'AppData' ) {
 	
 		$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) ;
+		
 		$hash->{ CountryLive } = ( $hash->{ NRes } ? 2 : 1 );
+		
 		$hash->{ PrevVisa }--; 
 		
 		if ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
@@ -2567,12 +2634,9 @@ sub get_pcode
 
 		for ( @$all_pcode ) {
 			if (
-				( $_->{ Center } == $center ) and (
-				
+				( $_->{ Center } == $center ) and (	
 					( ( $request =~ /[^0-9]/ ) and ( ( $_->{ CName } =~ /^$request/ or $_->{ RName } =~ /^$request/ ) ) )
-					
-					or 
-					
+					or 	
 					( ( $request =~ /^[0-9]+$/ ) and ( $_->{ PCode } =~ /^$request/ ) )
 				)	
 			) {
@@ -2659,6 +2723,7 @@ sub send_app_confirm
 	my $subject = $lang_local->{ subject } . ", #$appnumber";
 	
 	my $conf = $self->{ autoform }->{ confirm };
+	
 	my $html = $self->get_file_content( $conf->{ tt } );
 	
 	my $data = $self->query( 'selallkeys', __LINE__, "
@@ -2675,6 +2740,7 @@ sub send_app_confirm
 	) if $replacer->{ branch_addr } eq 'Address-' . $data->{ CenterID };
 
 	$replacer->{ branch_addr } = $self->{ vars }->get_system->converttext( $replacer->{ branch_addr } );
+	
 	$replacer->{ branch_addr } =~ s/_?(x005F|x000D)_?//g;
 	
 	my ( $tstart, $tend ) = $self->query( 'sel1', __LINE__, "
@@ -2754,6 +2820,7 @@ sub age
 	my $age_free_days = $self->{ vars }->getConfig( 'general' )->{ age_free_days } + 0;
 
 	my ( $birth_year, $birth_month, $birth_day ) = split /\-/, shift; 
+	
 	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
 	
 	my $age = $year - $birth_year;
@@ -2836,7 +2903,9 @@ sub query
 	# my $time_start = $self->time_interval_calculate();
 
 	$return = $self->{ vars }->db->selall(@_) if $type eq 'selall';
+	
 	$return = $self->{ vars }->db->selallkeys(@_) if $type eq 'selallkeys';
+	
 	$return = $self->{ vars }->db->query(@_) if $type eq 'query';
 	
 	my @result = $self->{ vars }->db->sel1(@_) if $type eq 'sel1';
