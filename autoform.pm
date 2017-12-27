@@ -2360,7 +2360,7 @@ sub create_new_appointment
 			FROM AutoAppData WHERE ID = ?", $person_for_contract
 		)->[0];
 	}
-	
+
 	# my $time_start = $self->time_interval_calculate();
 	
 	$self->query( 'query', __LINE__, "
@@ -2371,7 +2371,7 @@ sub create_new_appointment
 	
 	my $new_appid = $self->create_table(
 		'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
-		$db_rules, undef, undef, undef, $info_for_contract
+		$db_rules, undef, undef, $info_for_contract
 	);
 	
 	my $allapp = $self->query( 'selallkeys', __LINE__, "
@@ -2435,6 +2435,7 @@ sub mod_hash
 	$hash = $self->mezzi_assembler( $hash ) if exists $hash->{ Mezzi1 };
 	
 	if ( $hash->{ ShIndex } ) {
+	
 		# my ( $postcode_id, $city ) = $self->get_postcode_id( $hash->{ ShIndex } );
 		
 		$hash->{ Shipping } = 1;
@@ -2484,7 +2485,7 @@ sub mod_hash
 		$hash->{ OfficeToReceive } = ( $hash->{ OfficeToReceive } == 2 ? 39 : undef ) ;
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
-		
+	
 			$hash->{ dwhom } = 0;
 		
 			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
