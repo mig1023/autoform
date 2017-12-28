@@ -128,7 +128,7 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2"><br>
 <input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-<input class="small_button" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br></td></tr>
+<input class="small_button" type="button" value="[% langreq('Назначить другую дату') %] &#9655;" onclick="go_button('reschedule');"><br></td></tr>
 
 <tr><td colspan="2" class="dashed_line">&nbsp;</td></tr>
 
@@ -159,7 +159,7 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2"><br>
 <input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-<input class="small_button" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br></td></tr>
+<input class="small_button" type="button" value="[% langreq('Отменить запись') %] &#9655;" onclick="go_button('cancel');"><br></td></tr>
 
 <tr><td colspan="2" class="dashed_line">&nbsp;</td></tr>
 
