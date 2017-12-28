@@ -508,6 +508,8 @@ sub get_token_and_create_new_form_if_need
 	return '02' if $token eq 'no_app';
 	
 	return '03' if $token eq 'no_field';
+	
+	return '04' if $token eq 'already';
 
 	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
 	
@@ -2345,12 +2347,15 @@ sub create_new_appointment
 	
 	my $db_rules = $self->get_content_db_rules();
 
-	my ( $center, $person_for_contract ) = $self->query( 'sel1', __LINE__, "
-		SELECT CenterID, PersonForAgreements
-		FROM AutoToken 
+	my $app_data = $self->query( 'selallkeys', __LINE__, "
+		SELECT CenterID, PersonForAgreements, AutoAppData.PassNum
+		FROM AutoToken
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $self->{ token }
 	);
+	
+	my ( $center, $person_for_contract ) = $app_data->[ 0 ];
 
 	if ( $person_for_contract ) {
 	
@@ -2359,6 +2364,13 @@ sub create_new_appointment
 			RPWhen as PassDate, RPWhere as PassWhom, AppPhone as Phone, RAddress as Address 
 			FROM AutoAppData WHERE ID = ?", $person_for_contract
 		)->[0];
+	}
+
+	if ( $self->mutex_fail( $app_data ) ) {
+	
+		$self->{ token } = 'already';
+		
+		return $self->redirect();
 	}
 
 	# my $time_start = $self->time_interval_calculate();
@@ -2860,11 +2872,35 @@ sub cached
 {
 	my ( $self, $name, $save ) = @_;
 	
-	return $self->{ vars }->get_memd->set( $name, $save, $self->{ autoform }->{ memcached }->{ memcached_exptime } ) if $save;
+	return $self->{ vars }->get_memd->set(
+		$name, $save, $self->{ autoform }->{ memcached }->{ memcached_exptime }
+	) if $save;
 	
 	return if $self->{ this_is_self_testing };
 
 	return $self->{ vars }->get_memd->get( $name );
+}
+
+sub mutex_fail
+# //////////////////////////////////////////////////
+{
+	my ( $self, $app_data ) = @_;
+	
+	my $pass_list = [];
+	
+	push @$pass_list, $_->{ PassNum } for @$app_data;
+	
+	return 1 if $self->query( 'sel1', __LINE__, "
+		SELECT COUNT(ID) FROM AppData
+		WHERE PassNum IN ('" . join( "','", @$pass_list ) . "') AND Status = 1"
+	);
+	
+	for ( @$pass_list ) {
+	
+		return 1 unless $self->{ vars }->get_memd->add(
+			'autoform_pass' . $_, $_, $self->{ autoform }->{ memcached }->{ mutex_exptime }
+		);
+	}
 }
 
 sub time_interval_calculate

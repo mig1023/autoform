@@ -22,6 +22,7 @@ sub get_settings
 		
 		'memcached' => {
 			'memcached_exptime' => 43200, # 12*3600 sec
+			'mutex_exptime' => 125,
 		},
 		
 		'captcha' => {
@@ -51,6 +52,7 @@ sub get_page_error
 		'неправильный токен',
 		'запись не найдена',
 		'не все поля были заполнены',
+		'запись уже была создана',
 	];
 }
 
