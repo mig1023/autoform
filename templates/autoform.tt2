@@ -25,7 +25,7 @@
 
 [% IF javascript_check %]
 <noscript>
-	<meta http-equiv="refresh" content="0"; url=[% addr %]?t=[% token %]&script=no">
+	<meta http-equiv="refresh" content="0; url=[% addr %]?t=[% token %]&script=no">
 </noscript>
 [% ELSE %]
 <script>
