@@ -168,14 +168,12 @@ sub autoform
 	my $step = 0;
 	my $special = {};
 	my $javascript_check = 1;
-	
+
 	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
 	
-	my $mobile_api = ( $self->{ vars }->getparam( 'mobile_api' ) ? 1 : 0 );
-	
-	( $self->{ token }, my $finished ) = $self->get_token_and_create_new_form_if_need( $mobile_api );
+	( $self->{ token }, my $finished ) = $self->get_token_and_create_new_form_if_need();
 
-	return $self->get_mobile_api() if $mobile_api;
+	return $self->get_mobile_api() if $self->{ vars }->getparam( 'mobile_api' );
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and $self->{ token } !~ /^\d\d$/;
 
@@ -501,7 +499,7 @@ sub get_collect_date
 sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
 {
-	my ( $self, $mobile_api ) = @_;
+	my $self = shift;
 	
 	my $token = lc( $self->{ vars }->getparam('t') );
 	
