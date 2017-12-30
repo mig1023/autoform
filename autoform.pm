@@ -2918,7 +2918,7 @@ sub redirect
 		
 	my $param = ( $token ? '?t=' . $token : '' );
 	
-	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ af }->{ lang } : '' );
+	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
 	
 	$self->{ vars }->get_system->redirect( $addr . $param );
 }
