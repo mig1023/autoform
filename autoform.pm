@@ -48,7 +48,7 @@ sub getContent
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
 	
-	return redirect( 'to_new_app' );
+	return redirect();
 }
 
 sub get_content_rules
@@ -257,7 +257,7 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	return $self->redirect( 'to_new_app' ); # develop only
+	return $self->redirect(); # develop only
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
@@ -285,7 +285,7 @@ sub mobile_end
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	$self->redirect( 'to_new_app' );
+	return $self->redirect();
 }
 	
 sub get_same_info_for_timeslots
@@ -2364,12 +2364,7 @@ sub create_new_appointment
 		)->[0];
 	}
 
-	if ( $self->mutex_fail( $app_data ) ) {
-	
-		$self->{ token } = 'already';
-		
-		return $self->redirect();
-	}
+	return $self->redirect( 'already' ) if $self->mutex_fail( $app_data );
 
 	# my $time_start = $self->time_interval_calculate();
 	
@@ -2915,11 +2910,13 @@ sub time_interval_calculate
 sub redirect
 # //////////////////////////////////////////////////
 {
-	my ( $self, $to_new_app ) = @_;
+	my ( $self, $target ) = @_;
 	
 	my $addr = $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr };
-
-	my $param = ( ( $self->{ token } and !$to_new_app ) ? '?t=' . $self->{ token } : '' );
+	
+	my $token = ( $target eq 'current' ? $self->{ token } : $target );
+		
+	my $param = ( $token ? '?t=' . $token : '' );
 	
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ af }->{ lang } : '' );
 	

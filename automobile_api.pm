@@ -131,11 +131,7 @@ sub set_values_from_api
 		$self->insert_hash_table( 'AutoAppData', $data->{ appdata }->[ $_ ] );
 	}
 	
-	$vars->get_system->redirect( 
-		$vars->getform('fullhost') .
-		$self->{ autoform }->{ paths }->{ addr } .
-		'?t=' . $self->{ token } . '&mobile_app=on'
-	);
+	$self->redirect( $self->{ token } . '&mobile_app=on' );
 }
 
 sub get_api_centers

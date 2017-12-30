@@ -61,7 +61,7 @@ sub autoinfopage_entry
 	}
 	elsif ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
 	
-		return $self->return_with_token( 'no_field' );
+		return $self->{ af }->redirect( 'no_field' );
 	}
 	else {
 
@@ -75,11 +75,10 @@ sub autoinfopage_entry
 
 		for my $app ( @$appdata ) {
 
-			return $self->return_with_token( $app->{ Token } )
-			if $app->{ passnum } eq $param->{ passnum };
+			return $self->{ af }->redirect( $app->{ Token } ) if $app->{ passnum } eq $param->{ passnum };
 		}
 			
-		return $self->return_with_token( 'no_app' );
+		return $self->{ af }->redirect( 'no_app' );
 	}
 	
 	my $key = $self->{ autoform }->{ captcha }->{ public_key };
@@ -154,7 +153,7 @@ sub print_appdata
 	
 	$appdata =~ s/[^0-9]//g;
 
-	return $self->{ af }->redirect() unless $self->check_existing_id_in_token( $appdata );
+	return $self->{ af }->redirect( 'current' ) unless $self->check_existing_id_in_token( $appdata );
 
 	my $print = VCS::Docs::docs->new( 'VCS::Docs::docs', $self->{ vars } );
 	
@@ -181,7 +180,7 @@ sub reschedule
 	) {
 		$self->set_new_appdate( $new );
 		
-		return $self->{ af }->redirect();
+		return $self->{ af }->redirect( 'current' );
 	}
 	
 	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
@@ -246,7 +245,7 @@ sub cancel
 			);
 		}
 		
-		return $self->{ af }->redirect();
+		return $self->{ af }->redirect( 'current' );
 	}
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -351,16 +350,6 @@ sub check_existing_id_in_token
 	}
 	
 	return $exist;
-}
-
-sub return_with_token
-# //////////////////////////////////////////////////
-{
-	my ( $self, $token ) = @_;
-	
-	$self->{ af }->{ token } = $token;
-
-	return $self->{ af }->redirect();
 }
 	
 1;
