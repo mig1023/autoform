@@ -11,28 +11,18 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_token_and_create_new_form_if_need },
 			'comment' => 'get_token_and_create_new_form_if_need',
 			'test' => {	
-				1 => { 	'tester' => \&test_regexp,
-					'args' => [],
-					'expected' => '^t[a-z0-9]{63}$',
+				1 => { 	'expected' => '^t[a-z0-9]{63}$'
 				},
-				2 => {	'tester' => \&test_line,
-					'args' => [],
-					'param' => { 't' => '[token]' },
+				2 => {	'param' => { 't' => '[token]' },
 					'expected' => '[token]',
 				},
-				3 => {	'tester' => \&test_line,
-					'args' => [],
-					'param' => { 't' => '7[token]' },
+				3 => {	'param' => { 't' => '7[token]' },
 					'expected' => '01',
 				},
-				4 => {	'tester' => \&test_line,
-					'prepare' => \&pre_corrupt_token,
-					'args' => [],
+				4 => {	'prepare' => \&pre_corrupt_token,
 					'expected' => '02',
 				},
-				5 => {	'tester' => \&test_line,
-					'prepare' => \&pre_finished,
-					'args' => [],
+				5 => {	'prepare' => \&pre_finished,
 					'param' => { 't' => '[token]' },
 					'expected' => '02',
 				},
@@ -41,9 +31,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::token_generation },
 			'comment' => 'token_generation',
 			'test' => { 	
-				1 => { 	'tester' => \&test_regexp,
-					'args' => [],
-					'expected' => '^t[a-z0-9]{63}$',
+				1 => { 	'expected' => '^t[a-z0-9]{63}$'
 				},
 			},
 		},
@@ -60,17 +48,14 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_page_error },
 			'comment' => 'get_page_error',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'args' => [ '0' ],
+				1 => { 	'args' => [ '0' ],
 					'expected' => [ '<center>ошибка: для правильной работы анкеты необходимо, чтобы в браузере' .
 							' был включён javascript</center>', '', 'autoform.tt2' ],
 				},
-				2 => { 	'tester' => \&test_array,
-					'args' => [ '1' ],
+				2 => { 	'args' => [ '1' ],
 					'expected' => [ '<center>ошибка: неправильный токен</center>', '', 'autoform.tt2' ],
 				},
-				3 => { 	'tester' => \&test_array,
-					'args' => [ '2' ],
+				3 => { 	'args' => [ '2' ],
 					'expected' => [ '<center>ошибка: запись не найдена</center>', '', 'autoform.tt2' ],
 				},
 			},
@@ -78,9 +63,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_autoform_content },
 			'comment' => 'get_autoform_content',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_content_1,
-					'args' => [],
+				1 => { 	'prepare' => \&pre_content_1,
 					'expected' => [
 						'1', 
 						'Начало записи', 
@@ -100,9 +83,7 @@ sub get_test_list {
 						undef,
 					],
 				},
-				2 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_content_1,
-					'args' => [],
+				2 => { 	'prepare' => \&pre_content_1,
 					'param' => {
 						'action' => 'forward',
 						'center' => '1',
@@ -136,9 +117,7 @@ sub get_test_list {
 						undef,
 					],
 				},
-				3 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_content_2,
-					'args' => [],
+				3 => { 	'prepare' => \&pre_content_2,
 					'param' => { 'action' => 'back' },
 					'expected' => [
 						'1', 
@@ -173,8 +152,7 @@ sub get_test_list {
 					'args' => [ 'AutoToken', { Token => 'Token2', AutoAppID => 123 } ],
 					'expected' => 'Token2:AutoToken:AutoAppID:123',
 				},
-				3 => { 	'tester' => \&test_regexp,
-					'args' => [ 'AutoToken', { Token => 'Token2', AutoAppID => 123 } ],
+				3 => { 	'args' => [ 'AutoToken', { Token => 'Token2', AutoAppID => 123 } ],
 					'expected' => '^\d+$',
 				},
 			},
@@ -214,11 +192,13 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_line_in_hash,
 					'args' => [ { VisaPurpose => '13' } ],
 					'expected' => 'VisaPurpose:0|0|0|0|0|0|0|0|0|0|0|0|1|0|0|0|0',
+					debug => 1,
 				},
 				2 => { 	'tester' => \&test_line_in_hash,
 					'args' => [ { VisaPurpose => '2' } ],
 					'expected' => 'VisaPurpose:0|1|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0',
 				},
+				
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::mod_hash },
@@ -250,24 +230,19 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::text_error },
 			'comment' => 'text_error',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 0, { 'name' => 'test' },  ],
+				1 => { 	'args' => [ 0, { 'name' => 'test' },  ],
 					'expected' => 'test|Поле "test" не заполнено',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 1, { 'name' => 'test', 'label' => 'label' },  ],
+				2 => { 	'args' => [ 1, { 'name' => 'test', 'label' => 'label' },  ],
 					'expected' => 'test|В поле "label" указана неверная дата',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 2, { 'name' => 'test', 'label_for' => 'label_for' }, 'ABC' ],
+				3 => { 	'args' => [ 2, { 'name' => 'test', 'label_for' => 'label_for' }, 'ABC' ],
 					'expected' => 'test|В поле "label_for" введены недопустимые символы: ABC',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 4 ],
+				4 => { 	'args' => [ 4 ],
 					'expected' => '|Вы должны полностью заполнить анкеты или удалить ненужные черновики',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ 7, { 'name' => 'test', 'label_for' => 'label_for' }, 
+				5 => { 	'args' => [ 7, { 'name' => 'test', 'label_for' => 'label_for' }, 
 						undef, 'label2', 400 ],
 					'expected' => 'test|"label_for" не может быть раньше, чем "label2" более, чем на 1 год',
 				},
@@ -276,16 +251,13 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::resort_with_first_elements },
 			'comment' => 'resort_with_first_elements',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'args' => [ { 10 => 10, 20 => 20, 30 => 30, 50 => 50, 40 => 40 }, '20, 40' ],
+				1 => { 	'args' => [ { 10 => 10, 20 => 20, 30 => 30, 50 => 50, 40 => 40 }, '20, 40' ],
 					'expected' => [ 20, 40, 10, 30, 50 ],
 				},
-				2 => { 	'tester' => \&test_array,
-					'args' => [ { 10 => 10, 20 => 20, 30 => 30, 50 => 50, 40 => 40 }, '40' ],
+				2 => { 	'args' => [ { 10 => 10, 20 => 20, 30 => 30, 50 => 50, 40 => 40 }, '40' ],
 					'expected' => [ 40, 10, 20, 30, 50 ],
 				},
-				3 => { 	'tester' => \&test_array,
-					'args' => [ { 10 => 10, 20 => 20, 30 => 30, 50 => 50, 40 => 40 } ],
+				3 => { 	'args' => [ { 10 => 10, 20 => 20, 30 => 30, 50 => 50, 40 => 40 } ],
 					'expected' => [ 10, 20, 30, 40, 50 ],
 				},
 			},
@@ -293,84 +265,66 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_html_for_element },
 			'comment' => 'get_html_for_element',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 'start_line' ],
+				1 => { 	'args' => [ 'start_line' ],
 					'expected' => '<tr>',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 'end_line' ],
+				2 => { 	'args' => [ 'end_line' ],
 					'expected' => '</tr>',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 'start_cell' ],
+				3 => { 	'args' => [ 'start_cell' ],
 					'expected' => '<td>',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 'end_cell' ],
+				4 => { 	'args' => [ 'end_cell' ],
 					'expected' => '</td>',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ 'input', 'element', 'val', {}, 'uniq', undef, 'comm' ],
+				5 => { 	'args' => [ 'input', 'element', 'val', {}, 'uniq', undef, 'comm' ],
 					'expected' => '<input class="input_width input_gen optional_field" type="text" value="val" name="element" id="element" title="comm<br><br><b>Необязательное поле</b><br>В поле допустимо вводить " uniq>',
 				},
-				6 => { 	'tester' => \&test_line,
-					'args' => [ 'checkbox', 'element', 'val', {} ],
+				6 => { 	'args' => [ 'checkbox', 'element', 'val', {} ],
 					'expected' => '<input type="checkbox" value="element" name="element" id="element" checked>',
 				},
-				7 => { 	'tester' => \&test_line,
-					'args' => [ 'checkbox', 'element' ],
+				7 => { 	'args' => [ 'checkbox', 'element' ],
 					'expected' => '<input type="checkbox" value="element" name="element" id="element">',
 				},
-				8 => { 	'tester' => \&test_line,
-					'args' => [ 'select', 'element', '3', { 1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth' }, undef, '2' ],
+				8 => { 	'args' => [ 'select', 'element', '3', { 1 => 'first', 2 => 'second', 3 => 'third', 4 => 'fourth' }, undef, '2' ],
 					'expected' => 
 						'<select class="input_width select_gen" size = "1" name="element" title="" id="element"><option  value="2">second</option><option  value="1">first</option><option  value="4">fourth</option><option selected value="3">third</option></select>',
 				},
-				9 => { 	'tester' => \&test_line,
-					'args' => [ 'radiolist', 'element', '2', { 1 => 'first', 2 => 'second', 3 => 'third' } ],
+				9 => { 	'args' => [ 'radiolist', 'element', '2', { 1 => 'first', 2 => 'second', 3 => 'third' } ],
 					'expected' => 
 						'<div id="element"><input type="radio" name="element" value="1"  id="element1"><label for="element1">first</label><br><input type="radio" name="element" value="2" checked id="element2"><label for="element2">second</label><br><input type="radio" name="element" value="3"  id="element3"><label for="element3">third</label><br></div>',
 				},
-				10 => {	'tester' => \&test_line,
-					'args' => [ 'text', undef, 'text' ],
+				10 => {	'args' => [ 'text', undef, 'text' ],
 					'expected' => '<td colspan="3">text</td>',
 				},
-				11 => {	'tester' => \&test_line,
-					'args' => [ 'example', undef, 'text' ],
-					'expected' => '<tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: text</span></td>',
+				11 => {	'args' => [ 'example', undef, 'text' ],
+					'expected' => '<tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: text</span></td></tr>',
 				},
-				12 => {	'tester' => \&test_line,
-					'args' => [ 'info', 'element', 'text' ],
+				12 => {	'args' => [ 'info', 'element', 'text' ],
 					'expected' => '<label class="info" title="" id="element">text</label>',
 				},
-				13 => {	'tester' => \&test_line,
-					'args' => [ 'label', 'element', 'text' ],
+				13 => {	'args' => [ 'label', 'element', 'text' ],
 					'expected' => '<label id="element">text</label>',
 				},
-				14 => {	'tester' => \&test_line,
-					'args' => [ 'label_for', 'element', 'text' ],
+				14 => {	'args' => [ 'label_for', 'element', 'text' ],
 					'expected' => '<label for="element">text</label>',
 				},
-				15 => {	'tester' => \&test_line,
-					'args' => [ 'checklist', 'element', { 'test1' => 1 }, { 
+				15 => {	'args' => [ 'checklist', 'element', { 'test1' => 1 }, { 
 						'test1' => { 'db' => 'test1', 'label_for' => 'Тест 1' },
 						'test2' => { 'db' => 'test2', 'label_for' => 'Тест 2' },
 					} ],
 					'expected' =>
 						'<div id="element"><input type="checkbox" value="test1" name="test1" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br></div>',
 				},
-				16 => {	'tester' => \&test_line,
-					'args' => [ 'progress', 'test', undef, 'past', 0 ],
+				16 => {	'args' => [ 'progress', 'test', undef, 'past', 0 ],
 					'expected' =>
 						'<td align="center" class="pr_size_gen pr_red_red_gen"><div class="ltl_progr pr_past" title=""><div class="pr_in_gen"></div></div></td>',
 				},
-				17 => {	'tester' => \&test_line,
-					'args' => [ 'progress', 'test', undef, 'current', 1 ],
+				17 => {	'args' => [ 'progress', 'test', undef, 'current', 1 ],
 					'expected' =>
 						'<td align="center" class="pr_size_gen pr_white_gray_gen"><div class="ltl_progr pr_current" title=""><div class="pr_in_gen"></div></div></td>',
 				},
-				18 => {	'tester' => \&test_line,
-					'args' => [ 'progress', 'test', undef, 'future', 2 ],
+				18 => {	'args' => [ 'progress', 'test', undef, 'future', 2 ],
 					'expected' =>
 						'<td align="center" class="pr_size_gen pr_gray_white_gen"><div class="ltl_progr pr_future" title=""><div class="pr_in_gen"></div></div></td>',
 				},
@@ -379,8 +333,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_cell },
 			'comment' => 'get_cell',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 'test' ],
+				1 => { 	'args' => [ 'test' ],
 					'expected' => '<td>test</td>',
 				},
 			},
@@ -388,8 +341,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_html_line },
 			'comment' => 'get_html_line',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [
+				1 => { 	'args' => [
 						{
 							'type' => 'input',
 							'name' => 'email',
@@ -403,10 +355,9 @@ sub get_test_list {
 						}
 					],
 					'expected' => 
-						'<tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td>',
+						'<tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr>',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [
+				2 => { 	'args' => [
 						{
 							'type' => 'checklist',
 							'name' => 'test',
@@ -434,8 +385,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_html_page },
 			'comment' => 'get_html_page',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'args' => [ 1, '999' ],
+				1 => { 	'args' => [ 1, '999' ],
 					'expected' => [ '[first_page_selected]', 'autoform.tt2' ],
 				},
 			},
@@ -443,8 +393,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_progressbar },
 			'comment' => 'get_progressbar',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '[page1]' ],
+				1 => { 	'args' => [ '[page1]' ],
 					'expected' => '[progress_bar]',
 				},
 			},
@@ -452,16 +401,14 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_finish },
 			'comment' => 'get_finish',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'expected' => [ undef, 'autoform_finish.tt2' ],
+				1 => { 	'expected' => [ undef, 'autoform_finish.tt2' ],
 				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_specials_of_element },
 			'comment' => 'get_specials_of_element',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'args' => [ 1 ],
+				1 => { 	'args' => [ 1 ],
 					'expected' => {
 						'nearest_date' => [
 							'free_date',
@@ -475,8 +422,7 @@ sub get_test_list {
 					},
 
 				},
-				2 => { 	'tester' => \&test_hash,
-					'args' => [ 2 ],
+				2 => { 	'args' => [ 2 ],
 					'expected' => {
 						'nearest_date' => [],
 						'timeslots' => [],
@@ -499,16 +445,13 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::decode_data_from_db },
 			'comment' => 'decode_data_from_db',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'test', '2010-01-03' ],
+				1 => { 	'args' => [ 1, 'test', '2010-01-03' ],
 					'expected' => '03.01.2010',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'test', '03.01.2010' ],
+				2 => { 	'args' => [ 1, 'test', '03.01.2010' ],
 					'expected' => '03.01.2010',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'test', '0000-00-00' ],
+				3 => { 	'args' => [ 1, 'test', '0000-00-00' ],
 					'expected' => '',
 				},
 			},
@@ -516,24 +459,19 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::encode_data_for_db },
 			'comment' => 'encode_data_for_db',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'pers_info', 'pers_info' ],
+				1 => { 	'args' => [ 1, 'pers_info', 'pers_info' ],
 					'expected' => 1,
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'pers_info', '' ],
+				2 => { 	'args' => [ 1, 'pers_info', '' ],
 					'expected' => 0,
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'email', '   email   ' ],
+				3 => { 	'args' => [ 1, 'email', '   email   ' ],
 					'expected' => 'email',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'email', '03.01.2010' ],
+				4 => { 	'args' => [ 1, 'email', '03.01.2010' ],
 					'expected' => '2010-01-03',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ 1, 'email', '2010-01-03' ],
+				5 => { 	'args' => [ 1, 'email', '2010-01-03' ],
 					'expected' => '2010-01-03',
 				},
 			},
@@ -541,8 +479,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_element_by_name },
 			'comment' => 'get_element_by_name',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'args' => [ 1, 'email' ],
+				1 => { 	'args' => [ 1, 'email' ],
 					'expected' => {
 						'db' => {
 								'name' => 'EMail',
@@ -561,8 +498,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_names_db_for_save_or_get },
 			'comment' => 'get_names_db_for_save_or_get',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'args' => [ '[page1]' ],
+				1 => { 	'args' => [ '[page1]' ],
 					'expected' => {
 						'AutoAppointments' => {
 							'PersonalDataPermission' => 'pers_info',
@@ -574,8 +510,7 @@ sub get_test_list {
 						'alternative_data_source' => {},
 					}
 				},
-				2 => { 	'tester' => \&test_hash,
-					'args' => [ '[page2]' ],
+				2 => { 	'args' => [ '[page2]' ],
 					'expected' => {
 						'AutoAppointments' => {
 							'SDate' => 's_date',
@@ -594,8 +529,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_checklist },
 			'comment' => 'check_checklist',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [
+				1 => { 	'args' => [
 						{
 							'name' => 'test',
 							'label' => 'Средства',
@@ -610,8 +544,7 @@ sub get_test_list {
 					'param' => { 'test2' => '1' },
 					'expected' => '',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [
+				2 => { 	'args' => [
 						{
 							'name' => 'test',
 							'label' => 'Test',
@@ -635,18 +568,15 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_chkbox },
 			'comment' => 'check_chkbox',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'true' } ],
+				1 => { 	'args' => [ { 'name' => 'test', 'check' => 'true' } ],
 					'param' => { 'test' => '1' },
 					'expected' => '',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'true'} ],
+				2 => { 	'args' => [ { 'name' => 'test', 'check' => 'true'} ],
 					'param' => { 'test' => '' },
 					'expected' => 'test|Вы должны указать поле "test"',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => '' } ],
+				3 => { 	'args' => [ { 'name' => 'test', 'check' => '' } ],
 					'param' => { 'test' => '' },
 					'expected' => '',
 				},
@@ -655,68 +585,55 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_param },
 			'comment' => 'check_param',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'z'} ],
+				1 => { 	'args' => [ { 'name' => 'test', 'check' => 'z'} ],
 					'param' => { 'test' => 'text' },
 					'expected' => '',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'z' } ],
+				2 => { 	'args' => [ { 'name' => 'test', 'check' => 'z' } ],
 					'param' => { 'test' => '' },
 					'expected' => 'test|Поле "test" не заполнено',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
+				3 => { 	'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
 					'param' => { 'test' => '2010-03-01' },
 					'expected' => 'test|В поле "test" указана неверная дата',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'W' } ],
+				4 => { 	'args' => [ { 'name' => 'test', 'check' => 'W' } ],
 					'param' => { 'test' => 'abcАБВ' },
 					'expected' => 'test|В поле "test" введены недопустимые символы: АБВ',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'Ё' } ],
+				5 => { 	'args' => [ { 'name' => 'test', 'check' => 'Ё' } ],
 					'param' => { 'test' => 'ABCабв' },
 					'expected' => 'test|В поле "test" введены недопустимые символы: ABC',
 				},
-				6 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'N' } ],
+				6 => { 	'args' => [ { 'name' => 'test', 'check' => 'N' } ],
 					'param' => { 'test' => '123XYZ456' },
 					'expected' => 'test|В поле "test" введены недопустимые символы: XYZ',
 				},
-				7 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
+				7 => { 	'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
 					'param' => { 'test' => '31.12.1999' },
 					'expected' => '',
 				},
-				8 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
+				8 => { 	'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
 					'param' => { 'test' => '32.12.1999' },
 					'expected' => 'test|В поле "test" указана неверная дата',
 				},
-				9 => { 	'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
+				9 => { 	'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
 					'param' => { 'test' => '31.02.1999' },
 					'expected' => 'test|В поле "test" указана неверная дата',
 				},
-				10 => { 'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
+				10 => { 'args' => [ { 'name' => 'test', 'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
 					'param' => { 'test' => '' },
 					'expected' => 'test|Поле "test" не заполнено',
 				},
-				11 => { 'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
+				11 => { 'args' => [ { 'name' => 'test', 'check' => 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' } ],
 					'param' => { 'test' => '' },
 					'expected' => '',
 				},
-				12 => { 'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'W\@\.' } ],
+				12 => { 'args' => [ { 'name' => 'test', 'check' => 'W\@\.' } ],
 					'param' => { 'test' => 'test@test.com' },
 					'expected' => '',
 				},
-				13 => { 'tester' => \&test_line,
-					'args' => [ { 'name' => 'test', 'check' => 'W' } ],
+				13 => { 'args' => [ { 'name' => 'test', 'check' => 'W' } ],
 					'param' => { 'test' => 'test@test.com' },
 					'expected' => 'test|В поле "test" введены недопустимые символы: @.',
 				},
@@ -725,12 +642,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_existing_id_in_token },
 			'comment' => 'check_existing_id_in_token',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '[appdata_id]' ],
+				1 => { 	'args' => [ '[appdata_id]' ],
 					'expected' => '1',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ '1' ],
+				2 => { 	'args' => [ '1' ],
 					'expected' => '0',
 				},
 			},
@@ -738,8 +653,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_logic },
 			'comment' => 'check_logic',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_logic_1,
+				1 => { 	'prepare' => \&pre_logic_1,
 					'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
@@ -753,8 +667,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '21' },
 					'expected' => 'field_name|Поле "field_name" уже встречается в актуальных записях',
 				},
-				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_logic_1,
+				2 => { 	'prepare' => \&pre_logic_1,
 					'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
@@ -768,8 +681,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '20' },
 					'expected' => '',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 
+				3 => { 	'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
 								condition => 'unique_in_pending',
@@ -782,8 +694,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '21' },
 					'expected' => '',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 
+				4 => { 	'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { condition => 'email_not_blocked' } ]
 						},
@@ -794,8 +705,7 @@ sub get_test_list {
 					'param' => { 'field_name' => 'blocked1mail@mail.com' },
 					'expected' => 'field_name|Вы ввели недопустимый адрес электронной почты',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ 
+				5 => { 	'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { condition => 'email_not_blocked', } ]
 						},
@@ -806,8 +716,7 @@ sub get_test_list {
 					'param' => { 'field_name' => 'blocked2mail@mail.com' },
 					'expected' => 'field_name|Этот электронный адрес был заблокирован.<br>Вы превысили допустимое количество записей',
 				},
-				6 => { 	'tester' => \&test_line,
-					'args' => [ 
+				6 => { 	'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { condition => 'email_not_blocked', }, ]
 						},
@@ -818,8 +727,7 @@ sub get_test_list {
 					'param' => { 'field_name' => 'blocked3mail@mail.com' },
 					'expected' => '',
 				},
-				7 => { 	'tester' => \&test_line,
-					'args' => [ 
+				7 => { 	'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { condition => 'email_not_blocked', }, ]
 						},
@@ -830,8 +738,7 @@ sub get_test_list {
 					'param' => { 'field_name' => 'blocked4mail@mail.com' },
 					'expected' => '',
 				},
-				8 => { 	'tester' => \&test_line,
-					'args' => [ 
+				8 => { 	'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
 								'condition' => 'free_only_if',
@@ -847,8 +754,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '' },
 					'expected' => '',
 				},
-				9 => { 	'tester' => \&test_line,
-					'args' => [ 
+				9 => { 	'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
 								'condition' => 'free_only_if',
@@ -864,8 +770,7 @@ sub get_test_list {
 					'param' => { 'field_name' => 'PrintSrv' },
 					'expected' => '',
 				},
-				10 => { 	'tester' => \&test_line,
-					'args' => [ 
+				10 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
 								'condition' => 'free_only_if',
@@ -881,8 +786,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '' },
 					'expected' => 'field_name|Необходимо заполнить поле "field_name" или указать "PrintSrv"',
 				},
-				11 => { 'tester' => \&test_line,
-					'args' => [ 
+				11 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 	
 								'condition' => 'free_only_if_not',
@@ -898,8 +802,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '' },
 					'expected' => '',
 				},
-				12 => { 'tester' => \&test_line,
-					'args' => [ 
+				12 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
 								'condition' => 'free_only_if_not',
@@ -915,8 +818,7 @@ sub get_test_list {
 					'param' => { 'field_name' => 'PrintSrv' },
 					'expected' => '',
 				},
-				13 => { 'tester' => \&test_line,
-					'args' => [ 
+				13 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 	'condition' => 'free_only_if_not',
 								'table' => 'Appointments',
@@ -932,8 +834,7 @@ sub get_test_list {
 					'expected' => 'field_name|Необходимо заполнить поле "field_name", если заполнено "Draft"',
 				},				
 
-				14 => { 'tester' => \&test_line,
-					'args' => [ 
+				14 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'now_or_later' } ]
 						},
@@ -941,8 +842,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '2100-01-01' },
 					'expected' => '',
 				},
-				15 => { 'tester' => \&test_line,
-					'args' => [ 
+				15 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'now_or_later' } ]
 						},
@@ -950,8 +850,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '1999-01-01' },
 					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
 				},
-				16 => { 'tester' => \&test_line,
-					'args' => [ 
+				16 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
@@ -959,8 +858,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '1999-01-01' },
 					'expected' => '',
 				},
-				17 => { 'tester' => \&test_line,
-					'args' => [ 
+				17 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
@@ -968,8 +866,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '2100-01-01' },
 					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
 				},
-				18 => { 'tester' => \&test_line,
-					'prepare' => \&pre_logic_2,
+				18 => { 'prepare' => \&pre_logic_2,
 					'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
@@ -986,8 +883,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '2011-01-01' },
 					'expected' => '',
 				},
-				19 => { 'tester' => \&test_line,
-					'prepare' => \&pre_logic_2,
+				19 => { 'prepare' => \&pre_logic_2,
 					'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
@@ -1004,8 +900,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '2008-01-01' },
 					'expected' => 'field_name|"field_name" не может быть раньше, чем "Draft"',
 				},
-				20 => { 'tester' => \&test_line,
-					'prepare' => \&pre_logic_2,
+				20 => { 'prepare' => \&pre_logic_2,
 					'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
@@ -1022,8 +917,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '2008-01-01' },
 					'expected' => '',
 				},
-				21 => { 'tester' => \&test_line,
-					'prepare' => \&pre_logic_2,
+				21 => { 'prepare' => \&pre_logic_2,
 					'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ {
@@ -1040,8 +934,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '2011-01-01' },
 					'expected' => 'field_name|"field_name" не может быть позднее, чем "Draft"',
 				},
-				22 => { 'tester' => \&test_line,
-					'args' => [ 
+				22 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
@@ -1049,8 +942,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '01.01.2009' },
 					'expected' => '',
 				},
-				23 => { 'tester' => \&test_line,
-					'args' => [ 
+				23 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'now_or_earlier' } ]
 						},
@@ -1058,8 +950,7 @@ sub get_test_list {
 					'param' => { 'field_name' => '01.01.2113' },
 					'expected' => 'field_name|Недопустимая дата в поле "field_name"',
 				},
-				24 => { 'tester' => \&test_line,
-					'args' => [ 
+				24 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'younger_than', 'offset' => 10 } ]
 						},
@@ -1070,8 +961,7 @@ sub get_test_list {
 					'prepare' => \&pre_age, # fixed num 24
 					'expected' => 'field_name|Указать данное поле можно только для заявителей младше 10 лет',
 				},
-				25 => { 'tester' => \&test_line,
-					'args' => [ 
+				25 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'younger_than', 'offset' => 10 } ],
 							
@@ -1089,9 +979,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_current_table_id },
 			'comment' => 'get_current_table_id',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'args' => [],
-					'expected' =>  {
+				1 => { 	'expected' =>  {
 						'AutoAppData' => '[appdata_id]',
 						'AutoSchengenAppData' => '[schdata_id]',
 						'AutoToken' => '[token_id]',
@@ -1104,24 +992,19 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::skip_by_condition },
 			'comment' => 'skip_by_condition',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 12, '12', 'only_if' ],
+				1 => { 	'args' => [ 12, '12', 'only_if' ],
 					'expected' => '0',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 9, '8,9,10', 'only_if' ],
+				2 => { 	'args' => [ 9, '8,9,10', 'only_if' ],
 					'expected' => '0',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 9, '7,8,10', 'only_if' ],
+				3 => { 	'args' => [ 9, '7,8,10', 'only_if' ],
 					'expected' => '1',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 9, '6,8,10', 'only_if_not' ],
+				4 => { 	'args' => [ 9, '6,8,10', 'only_if_not' ],
 					'expected' => '0',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ 9, '10,9,8', 'only_if_not' ],
+				5 => { 	'args' => [ 9, '10,9,8', 'only_if_not' ],
 					'expected' => '1',
 				},
 			},
@@ -1129,20 +1012,16 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::skip_page_by_relation },
 			'comment' => 'skip_page_by_relation',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' } ],
+				1 => { 	'args' => [ 'only_if', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '0',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' } ],
+				2 => { 	'args' => [ 'only_if', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '1',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if_not', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' } ],
+				3 => { 	'args' => [ 'only_if_not', { 'value' => '12', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '0',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 'only_if_not', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' } ],
+				4 => { 	'args' => [ 'only_if_not', { 'value' => '13', 'name' => 'VType', 'table' => 'Appointments' } ],
 					'expected' => '1',
 				},
 			},
@@ -1150,9 +1029,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_same_info_for_timeslots },
 			'comment' => 'get_same_info_for_timeslots',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_getinfo,
-					'args' => [],
+				1 => { 	'prepare' => \&pre_getinfo,
 					'expected' =>  {
 						'persons' => '1',
 						'center' => '5',
@@ -1167,8 +1044,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::init_add_param },
 			'comment' => 'init_add_param',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_init_param,
+				1 => {	'prepare' => \&pre_init_param,
 					'args' => [ 
 						{ 
 							1 => [
@@ -1212,8 +1088,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_content_rules },
 			'comment' => 'get_content_rules',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'args' => [ '2', 'full', 'init' ],
+				1 => { 	'args' => [ '2', 'full', 'init' ],
 					'expected' =>  
 					[
 						[
@@ -1273,8 +1148,7 @@ sub get_test_list {
 						],
 					],
 				},
-				2 => { 	'tester' => \&test_array,
-					'args' => [ '2', undef, 'init' ],
+				2 => { 	'args' => [ '2', undef, 'init' ],
 					'expected' =>  
 					[
 						[
@@ -1327,8 +1201,7 @@ sub get_test_list {
 						],
 					],
 				},
-				3 => { 	'tester' => \&test_regexp,
-					'args' => [ 'length' ],
+				3 => { 	'args' => [ 'length' ],
 					'expected' => '^\d+$',
 				},
 			},
@@ -1341,8 +1214,7 @@ sub get_test_list {
 					'args' => [ '[table_id]' ],
 					'expected' => '[appdata_id]:AutoAppData:FinishedCenter:5',
 				},
-				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_app_finish,
+				2 => { 	'prepare' => \&pre_app_finish,
 					'args' => [ '[table_id]' ],
 					'expected' => 1,
 				},
@@ -1355,18 +1227,15 @@ sub get_test_list {
 					'args' => [ 'query', 'test', 'UPDATE AutoAppData SET FinishedCenter = 5 WHERE ID = ?', {}, '[appdata_id]' ],
 					'expected' => '[appdata_id]:AutoAppData:FinishedCenter:5',
 				},
-				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_logic_1,
+				2 => { 	'prepare' => \&pre_logic_1,
 					'args' => [ 'sel1', 'test', 'SELECT FinishedCenter FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => '21',
 				},
-				3 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_logic_1,
+				3 => { 	'prepare' => \&pre_logic_1,
 					'args' => [ 'selall', 'test', 'SELECT FinishedCenter FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => [ [ [ '21' ] ] ],
 				},
-				4 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_logic_1,
+				4 => { 	'prepare' => \&pre_logic_1,
 					'args' => [ 'selallkeys', 'test', 'SELECT FinishedCenter FROM AutoAppData WHERE ID = ?', '[appdata_id]' ],
 					'expected' => [ [ { 'FinishedCenter' => '21' } ] ],
 				},
@@ -1375,8 +1244,7 @@ sub get_test_list {
 		{	'func' 	=> \&{ VCS::Site::autoform::get_hash_table },
 			'comment' => 'get_hash_table',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_init_param,
+				1 => { 	'prepare' => \&pre_init_param,
 					'args' => [ 'Branches', 'ID', '1' ],
 					'expected' => {
 						'ID' => '1',	
@@ -1424,8 +1292,7 @@ sub get_test_list {
 		{	'func' 	=> \&{ VCS::Site::autoform::create_table },
 			'comment' => 'create_table',
 			'test' => { 	
-				1 => { 	'tester' => \&test_regexp,
-					'args' => [ 
+				1 => { 	'args' => [ 
 						'AutoAppointments', 'Appointments', { 'AutoAppointments' => '[app_id]' }, 
 						{
 							'Appointments' => { 
@@ -1442,12 +1309,10 @@ sub get_test_list {
 		{	'func' 	=> \&{ VCS::Site::autoform::age },
 			'comment' => 'age',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '1999-06-23', '2017-06-15' ],
+				1 => { 	'args' => [ '1999-06-23', '2017-06-15' ],
 					'expected' => '17',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ '1999-06-22', '2017-06-15' ],
+				2 => { 	'args' => [ '1999-06-22', '2017-06-15' ],
 					'expected' => '18',
 				},
 			},
@@ -1455,23 +1320,19 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::lang },
 			'comment' => 'lang',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_lang,
+				1 => { 	'prepare' => \&pre_lang,
 					'args' => [ 'Дата вылета' ],
 					'expected' => 'Departure date',
 				},
-				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_lang,
+				2 => { 	'prepare' => \&pre_lang,
 					'args' => [ 'Фраза не имеющая никакого перевода' ],
 					'expected' => 'Фраза не имеющая никакого перевода',
 				},
-				3 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_lang,
+				3 => { 	'prepare' => \&pre_lang,
 					'args' => [ 'Дата вылета', 'ru' ],
 					'expected' => 'Дата вылета',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 'Фраза не имеющая никакого перевода', 'en' ],
+				4 => { 	'args' => [ 'Фраза не имеющая никакого перевода', 'en' ],
 					'expected' => 'Фраза не имеющая никакого перевода',
 				},
 			},
@@ -1479,12 +1340,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::add_css_class },
 			'comment' => 'add_css_class',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '<label class="info">text</label>', 'class2' ],
+				1 => { 	'args' => [ '<label class="info">text</label>', 'class2' ],
 					'expected' => '<label class="info class2">text</label>',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ '<label id="name">text</label>', 'class2' ],
+				2 => { 	'args' => [ '<label id="name">text</label>', 'class2' ],
 					'expected' => '<label class="class2" id="name">text</label>',
 				},
 			},
@@ -1492,36 +1351,28 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::offset_calc },
 			'comment' => 'offset_calc',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '1' ],
+				1 => { 	'args' => [ '1' ],
 					'expected' => '1 день',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ '2' ],
+				2 => { 	'args' => [ '2' ],
 					'expected' => '2 дня',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ '59' ],
+				3 => { 	'args' => [ '59' ],
 					'expected' => '59 дней',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ '60' ],
+				4 => { 	'args' => [ '60' ],
 					'expected' => '2 месяца',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ '187' ],
+				5 => { 	'args' => [ '187' ],
 					'expected' => '6 месяцев',
 				},
-				6 => { 	'tester' => \&test_line,
-					'args' => [ '365' ],
+				6 => { 	'args' => [ '365' ],
 					'expected' => '1 год',
 				},
-				7 => { 	'tester' => \&test_line,
-					'args' => [ '1100' ],
+				7 => { 	'args' => [ '1100' ],
 					'expected' => '3 года',
 				},
-				8 => { 	'tester' => \&test_line,
-					'args' => [ '3650' ],
+				8 => { 	'args' => [ '3650' ],
 					'expected' => '10 лет',
 				},
 			},
@@ -1529,18 +1380,15 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::cached },
 			'comment' => 'cached',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_cach,
+				1 => { 	'prepare' => \&pre_cach,
 					'args' => [ 'cach_selftest' ],
 					'expected' => 'cash_ok',
 				},
-				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_cach,
+				2 => { 	'prepare' => \&pre_cach,
 					'args' => [ 'cach_selftest_fail' ],
 					'expected' => '',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 'cach_selftest' ],
+				3 => { 	'args' => [ 'cach_selftest' ],
 					'expected' => '',
 				},
 				4 => { 	'tester' => \&test_cached,
@@ -1552,8 +1400,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_file_content },
 			'comment' => 'get_file_content',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_file,
+				1 => { 	'prepare' => \&pre_file,
 					'args' => [ '/tmp/autoform_selftest_file' ],
 					'expected' => 'file_ok',
 				},
@@ -1566,16 +1413,13 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_postcode_id },
 			'comment' => 'get_postcode_id',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '655000,       Абакан' ],
+				1 => { 	'args' => [ '655000,       Абакан' ],
 					'expected' => 1,
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ '      655000, Абакан' ],
+				2 => { 	'args' => [ '      655000, Абакан' ],
 					'expected' => 1,
 				},
-				3 => { 	'tester' => \&test_array,
-					'args' => [ '123456, Спрингфилд' ],
+				3 => { 	'args' => [ '123456, Спрингфилд' ],
 					'expected' => [ undef, 'Спрингфилд' ],
 				},
 			},
@@ -1583,9 +1427,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_geo_info },
 			'comment' => 'get_geo_info',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_geo_or_collect,
-					'args' => [],
+				1 => { 	'prepare' => \&pre_geo_or_collect,
 					'expected' => [ [ 55, 49, 'Казань' ] ],
 				},
 			},
@@ -1593,14 +1435,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_collect_date },
 			'comment' => 'get_collect_date',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_geo_or_collect,
-					'args' => [],
+				1 => { 	'prepare' => \&pre_geo_or_collect,
 					'expected' => '7',
 				},
-				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_geo_or_collect, # fixed num 2
-					'args' => [],
+				2 => { 	'prepare' => \&pre_geo_or_collect, # fixed num 2
 					'expected' => '14',
 				},
 			},
@@ -1608,16 +1446,13 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_relation },
 			'comment' => 'check_relation',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'args' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' }, 0 ],
+				1 => { 	'args' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' }, 0 ],
 					'expected' => [ 1, get_content_rules_hash( 'with_raltion' )->{ 'Начало записи' } ],
 				},
-				2 => { 	'tester' => \&test_array,
-					'args' => [ 1, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Начало записи' }, 0 ],
+				2 => { 	'args' => [ 1, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Начало записи' }, 0 ],
 					'expected' => [ 2, get_content_rules_hash( 'with_raltion', undef, 'add' )->{ 'Данные поездки' } ],
 				},
-				3 => { 	'tester' => \&test_array,
-					'args' => [ 2, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Данные поездки' }, 'moonwalk' ],
+				3 => { 	'args' => [ 2, get_content_rules_hash( 'with_raltion', 'skip', 'add' )->{ 'Данные поездки' }, 'moonwalk' ],
 					'expected' => [ 1, get_content_rules_hash( 'with_raltion', undef, 'add' )->{ 'Начало записи' } ],
 				},
 			},
@@ -1625,12 +1460,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_step_by_content },
 			'comment' => 'get_step_by_content',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '[list_of_applicants]', 0 ],
+				1 => { 	'args' => [ '[list_of_applicants]', 0 ],
 					'expected' => '3',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ '[list_of_applicants]', 'next' ],
+				2 => { 	'args' => [ '[list_of_applicants]', 'next' ],
 					'expected' => '4',
 				},
 			},
@@ -1651,8 +1484,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_forward },
 			'comment' => 'get_forward',
 			'test' => { 
-				1 => { 	'tester' => \&test_array,
-					'args' => [ 1, 'Token' ],
+				1 => { 	'args' => [ 1, 'Token' ],
 					'param' => { 
 						'center' => '1',
 						'vtype' => '13',
@@ -1663,8 +1495,7 @@ sub get_test_list {
 					},
 					'expected' => [ 2, '', undef, undef],
 				},			
-				2 => { 	'tester' => \&test_array,
-					'args' => [ 1, 'Token' ],
+				2 => { 	'args' => [ 1, 'Token' ],
 					'param' => { 
 						'center' => '1',
 						'vtype' => '',
@@ -1675,8 +1506,7 @@ sub get_test_list {
 					},
 					'expected' => [ 1, 'vtype|Поле "Тип визы" не заполнено', undef, undef],
 				},
-				3 => { 	'tester' => \&test_array,
-					'args' => [ 1, 'Token' ],
+				3 => { 	'args' => [ 1, 'Token' ],
 					'param' => { 
 						'center' => '1',
 						'vtype' => '13',
@@ -1693,12 +1523,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_back },
 			'comment' => 'get_back',
 			'test' => { 
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 2, 'Token' ],
+				1 => { 	'args' => [ 2, 'Token' ],
 					'expected' => 1,
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 6, 'Token' ],
+				2 => { 	'args' => [ 6, 'Token' ],
 					'expected' => 3,
 				},
 			},
@@ -1706,12 +1534,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::set_appointment_finished },
 			'comment' => 'set_appointment_finished',
 			'test' => { 	
-				1 => { 	'tester' => \&test_regexp,
-					'args' => [ '[token]' ],
+				1 => { 	'args' => [ '[token]' ],
 					'expected' => '^[1-9]\d*$',
 				},
-				2 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_draft,
+				2 => { 	'prepare' => \&pre_draft,
 					'args' => [ '[token]' ],
 					'expected' => [ 0, 'draft_app_num' ],
 				},
@@ -1737,28 +1563,18 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_all_app_finished_and_not_empty },
 			'comment' => 'check_all_app_finished_and_not_empty',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [],
-					'expected' => 4,
+				1 => { 	'expected' => 4,
 				},
-				2 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_logic_1, # fixed num 2
-					'args' => [],
+				2 => { 	'prepare' => \&pre_logic_1, # fixed num 2
 					'expected' => 19,
 				},
-				3 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_logic_1,
-					'args' => [],
+				3 => { 	'prepare' => \&pre_logic_1,
 					'expected' => 22,
 				},
-				4 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_nobody,
-					'args' => [],
+				4 => { 	'prepare' => \&pre_nobody,
 					'expected' => 5,
 				},
-				5 => { 	'tester' => \&test_line,
-					'prepare' => \&pre_logic_1,  # fixed num 5
-					'args' => [],
+				5 => { 	'prepare' => \&pre_logic_1,  # fixed num 5
 					'expected' => 0,
 				},
 			},
@@ -1766,8 +1582,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_list_of_app },
 			'comment' => 'get_list_of_app',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_token,
+				1 => { 	'prepare' => \&pre_token,
 					'args' => [ 'Token' ],
 					'expected' => [ [ { 'ID' => 'X' } ], 'autoform_list.tt2' ],
 				},
@@ -1776,20 +1591,16 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_comments_alter_version },
 			'comment' => 'check_comments_alter_version',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ { '1' => 'test1', '10' => 'test2' } ],
+				1 => { 	'args' => [ { '1' => 'test1', '10' => 'test2' } ],
 					'expected' => 'test1',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ { '2,4,5' => 'test1', '2,1,3' => 'test2' } ],
+				2 => { 	'args' => [ { '2,4,5' => 'test1', '2,1,3' => 'test2' } ],
 					'expected' => 'test2',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ { '2,3,4' => 'test1' } ],
+				3 => { 	'args' => [ { '2,3,4' => 'test1' } ],
 					'expected' => '',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 'test0' ],
+				4 => { 	'args' => [ 'test0' ],
 					'expected' => 'test0',
 				},
 			},
@@ -1797,8 +1608,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::change_current_appdata },
 			'comment' => 'change_current_appdata',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 785, '[table_id]' ],
+				1 => { 	'args' => [ 785, '[table_id]' ],
 					'expected' => 1,
 				},
 				2 => { 	'tester' => \&test_write_db,
@@ -1810,12 +1620,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_all_values },
 			'comment' => 'get_all_values',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'args' => [ 23, '[table_id]' ],
+				1 => { 	'args' => [ 23, '[table_id]' ],
 					'expected' => { { 'visa_text' => undef } },
 				},
-				2 => { 	'tester' => \&test_hash,
-					'args' => [ 1, '[table_id]' ],
+				2 => { 	'args' => [ 1, '[table_id]' ],
 					'expected' => {
 						'email' => 'mail@mail.ru',
 						'vtype' => '13',
@@ -1824,8 +1632,7 @@ sub get_test_list {
 						'center' => '1',
 					},
 				},
-				3 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_getinfo,
+				3 => { 	'prepare' => \&pre_getinfo,
 					'args' => [ 2, '[table_id]' ],
 					'expected' => {
 						'f_date' => '01.05.2011',
@@ -1837,8 +1644,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_data_from_form },
 			'comment' => 'check_data_from_form',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 1 ],
+				1 => { 	'args' => [ 1 ],
 					'param' => { 
 						'center' => '1',
 						'vtype' => '13',
@@ -1849,12 +1655,10 @@ sub get_test_list {
 					},
 					'expected' => '',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 3 ],
+				2 => { 	'args' => [ 3 ],
 					'expected' => '',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 1 ],
+				3 => { 	'args' => [ 1 ],
 					'param' => {
 						'center' => '',
 						'vtype' => '13',
@@ -1865,8 +1669,7 @@ sub get_test_list {
 					},
 					'expected' => 'center|Поле "Визовый центр" не заполнено',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 1 ],
+				4 => { 	'args' => [ 1 ],
 					'param' => { 
 						'center' => '1',
 						'vtype' => '13',
@@ -1877,8 +1680,7 @@ sub get_test_list {
 					},
 					'expected' => 'email|Поле "Email" не заполнено',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ 1 ],
+				5 => { 	'args' => [ 1 ],
 					'param' => {
 						'center' => '1',
 						'vtype' => '13',
@@ -1919,17 +1721,14 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::correct_values },
 			'comment' => 'correct_values',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'args' => [ \{ new_app_num => 10 }, 20 ],
+				1 => { 	'args' => [ \{ new_app_num => 10 }, 20 ],
 					'expected' => { new_app_num => 20 },
 				},
-				2 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_geo_or_collect, # fixed num 2
+				2 => { 	'prepare' => \&pre_geo_or_collect, # fixed num 2
 					'args' => [ \{ new_app_branch => 5 } ],
 					'expected' => { new_app_branch => 'Kazan' },
 				},
-				3 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_init_param,
+				3 => { 	'prepare' => \&pre_init_param,
 					'args' => [ \{ new_app_timeslot => 10 } ],
 					'expected' => { new_app_timeslot => '9:00 - 9:25' },
 				},
@@ -1938,24 +1737,21 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_mobile_api },
 			'comment' => 'get_mobile_api',
 			'test' => { 	
-				1 => { 	'tester' => \&test_hash,
-					'args' => [ '[token]' ],
+				1 => { 	'args' => [ '[token]' ],
 					'param' => { 'mobile_api' => 'get_token_wrong' },
 					'expected' => {
 						'error' => { 'error_text' => 'ошибка API-запроса', 'error' => 2 },
 						'token' => '[token]',
 					},
 				},
-				2 => { 	'tester' => \&test_hash,
-					'prepare' => \&pre_token, # fixed num 2
+				2 => { 	'prepare' => \&pre_token, # fixed num 2
 					'param' => { 'mobile_api' => 'get_appdata' },
 					'expected' => {
 						'error' => { 'error_text' => 'ошибка токена', 'error' => 1 },
 						'token' => '01',
 					},
 				},
-				3 => { 	'tester' => \&test_hash,
-					'param' => { 'mobile_api' => 'get_token' },
+				3 => { 	'param' => { 'mobile_api' => 'get_token' },
 					'expected' => {
 						'error' => { 'error_text' => undef, 'error' => 0 },
 						'token' => '[token]',
@@ -1966,8 +1762,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_delete },
 			'comment' => 'get_delete',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '[appdata_id]' ],
+				1 => { 	'args' => [ '[appdata_id]' ],
 					'expected' => 2,
 				},
 				2 => { 	'tester' => \&test_write_db,
@@ -1979,12 +1774,10 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_prepare_line },
 			'comment' => 'get_prepare_line',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ '    start_line   end_line     ' ],
+				1 => { 	'args' => [ '    start_line   end_line     ' ],
 					'expected' => 'start_line   end_line',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 'line with nbsp' ],
+				2 => { 	'args' => [ 'line with nbsp' ],
 					'expected' => 'line with nbsp',
 				},
 			},
@@ -1992,24 +1785,19 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::add_rules_format },
 			'comment' => 'add_rules_format',
 			'test' => {
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 'zN' ],
+				1 => { 	'args' => [ 'zN' ],
 					'expected' => '<br><br><b>Обязательное поле</b><br>В поле допустимо вводить цифры',
 				},
-				2 => { 	'tester' => \&test_line,
-					'args' => [ 'WN\s\@' ],
+				2 => { 	'args' => [ 'WN\s\@' ],
 					'expected' => '<br><br><b>Необязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы пробела, @',
 				},
-				3 => { 	'tester' => \&test_line,
-					'args' => [ 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' ],
+				3 => { 	'args' => [ 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$' ],
 					'expected' => '<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ',
 				},
-				4 => { 	'tester' => \&test_line,
-					'args' => [ 'zЁ\s\-' ],
+				4 => { 	'args' => [ 'zЁ\s\-' ],
 					'expected' => '<br><br><b>Обязательное поле</b><br>В поле допустимо вводить русские буквы, а также символы пробела, дефиса',
 				},
-				5 => { 	'tester' => \&test_line,
-					'args' => [ 'zWЁ\(\)' ],
+				5 => { 	'args' => [ 'zWЁ\(\)' ],
 					'expected' => '<br><br><b>Обязательное поле</b><br>В поле допустимо вводить русские и английские буквы, а также символы скобок',
 				},
 			},
@@ -2017,17 +1805,14 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::mod_last_change_date },
 			'comment' => 'mod_last_change_date',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [],
-					'expected' => 1,
+				1 => { 	'expected' => 1,
 				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::send_link },
 			'comment' => 'send_link',
 			'test' => { 	
-				1 => { 	'tester' => \&test_line,
-					'args' => [ 'test@test.com' ],
+				1 => { 	'args' => [ 'test@test.com' ],
 					'expected' => 1,
 				},
 			},
@@ -2035,8 +1820,7 @@ sub get_test_list {
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_pcode },
 			'comment' => 'get_pcode',
 			'test' => { 	
-				1 => { 	'tester' => \&test_array,
-					'prepare' => \&pre_init_param,
+				1 => { 	'prepare' => \&pre_init_param,
 					'param' => { 'name_startsWith' => 'ABA' },
 					'expected' => [ [
 						{
@@ -2065,13 +1849,13 @@ my $progress_bar_2 =
 	'<td align="center" class="pr_size_gen pr_white_red_gen"><div class="big_progr pr_past" title=""><div class="pr_in_gen">1</div></div></td><td align="center" class="pr_size_gen pr_red_gray_gen"><div class="ltl_progr pr_current" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">2</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Паспорта"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Допданные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Поездка"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Проживание"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Расходы"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Ещё?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="На кого?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">3</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Офис"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_white_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
 my $first_page = 
-	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" title="" id="free_date">(не указано)</label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" title="" id="free_date">(не указано)</label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 
 my $first_page_selected = 
-	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" title="" id="free_date">(не указано)</label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td><label id="text">Визовый центр</label></td><td><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td><label id="text">Тип визы</label></td><td><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td><label id="text">Ближайшее доступное время</label></td><td><label class="info" title="" id="free_date">(не указано)</label></td></tr><tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td><label id="text"></label></td><td><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 	
 my $second_page = 
-	'<tr><td rowspan=2><label id="text">Дата начала поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: 01.01.2025</span></td><tr><td rowspan=2><label id="text">Дата окончания поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: 31.12.2025</span></td>';
+	'<tr><td rowspan=2><label id="text">Дата начала поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: 01.01.2025</span></td></tr><tr><td rowspan=2><label id="text">Дата окончания поездки</label></td><td><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr class="mobil_hide"><td class="exam_td_gen"><span class="exam_span_gen">пример: 31.12.2025</span></td></tr>';
 
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
@@ -2431,7 +2215,7 @@ sub get_tests
 			$test_num++;
 
 			my $t = $test->{test}->{$_};
-			
+
 			&{ $t->{prepare} }( $self, 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
 			
@@ -2446,7 +2230,27 @@ sub get_tests
 				$vars->setparam( $_, $t->{param}->{ $_ } );
 			}
 
-			my $test_result = &{ $t->{tester} }( 
+			my $tester = $t->{tester};
+			
+			unless ( $tester ) {
+				if ( ref $t->{expected} eq 'HASH' ) {
+				
+					$tester = \&test_hash;
+				}
+				elsif ( ref $t->{expected} eq 'ARRAY' ) {
+				
+					$tester = \&test_array;
+				}
+				elsif ( $t->{expected} =~ /^\^/ ) {
+				
+					$tester = \&test_regexp;
+				}
+				else {
+					$tester = \&test_line;
+				}
+			}
+
+			my $test_result = &{ $tester }( 
 				$t->{debug}, $t->{expected}, "$test->{comment}-$test_num", $self, 
 				&{ $test->{func} }( $self, @{ $t->{args} } )
 			);
@@ -2634,7 +2438,7 @@ sub test_line
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 
-	warn "$comm :: $expected / $result" if $debug;
+	warn "$comm\n\nEXPECTED\n\n$expected\n\nRESULT\n\n$result" if $debug;
 	
 	return $comm if lc( $expected ) ne lc( $result );
 }
@@ -2645,7 +2449,7 @@ sub test_line_in_hash
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my ( $key, $value ) = split /:/, $expected;
 	
-	warn "$comm ::\n" . Dumper( $expected, $result ) if $debug;
+	warn "$comm\n\n" . Dumper( $expected, $result ) if $debug;
 
 	return $comm if lc( $result->{ $key } ) ne lc( $value );
 }
@@ -2656,7 +2460,7 @@ sub test_hash
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my $not_eq = 0;
 
-	warn "$comm ::\n" . Dumper( $expected, $result ) if $debug;
+	warn "$comm\n\n" . Dumper( $expected, $result ) if $debug;
 	
 	$not_eq += ( keys %$expected != keys %$result );
 	
@@ -2678,7 +2482,7 @@ sub test_array
 	
 	my $not_eq = 0;
 	
-	warn "$comm ::\n" . Dumper( $expected, \@result ) if $debug;
+	warn "$comm\n\n" . Dumper( $expected, \@result ) if $debug;
 	
 	return 0 if ( $#result < 0 ) and ( $#$expected < 0 );
 	return 1 if ( $#result < 0 ) or ( $#$expected < 0 );
@@ -2696,7 +2500,7 @@ sub test_array_ref
 {
 	my ( $debug, $expected, $comm, $self, $result ) = @_;
 
-	warn "$comm ::\n" . Dumper( $expected, $result ) if $debug;
+	warn "$comm\n\n" . Dumper( $expected, $result ) if $debug;
 	
 	my $not_eq = 0;
 	
@@ -2717,7 +2521,7 @@ sub test_regexp
 {
 	my ( $debug, $regexp, $comm, undef, $result ) = @_;
 	
-	warn "$comm :: $regexp / $result" if $debug;
+	warn "$comm\n\nREGEXP:\n\n$regexp\n\nRESULT\n\n$result" if $debug;
 	
 	return $comm if $result !~ /$regexp/;
 }
@@ -2733,7 +2537,7 @@ sub test_cached
 	
 	my $result = $vars->get_memd->get( $cached_name );
 	
-	warn "$comm :: $cached_value / $result" if $debug;
+	warn "$comm\n\nCACHED\n\n$cached_value\n\nRESULT\n\n$result" if $debug;
 	
 	return $comm if $result ne $cached_value;
 }
@@ -2753,7 +2557,7 @@ sub test_write_db
 		SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'"
 	);
 
-	warn "$comm :: $db_value / $value" if $debug;
+	warn "$comm\n\nDB VALUE\n\n$db_value\n\nVALUE\n\n$value" if $debug;
 
 	return $comm if lc( $db_value ) ne lc( $value );
 }

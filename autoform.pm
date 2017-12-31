@@ -2879,6 +2879,8 @@ sub mutex_fail
 {
 	my ( $self, $app_data ) = @_;
 	
+	return if $self->{ this_is_self_testing };
+	
 	my $pass_list = [];
 	
 	push @$pass_list, $_->{ PassNum } for @$app_data;
