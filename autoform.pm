@@ -2264,6 +2264,7 @@ sub text_error
 	$incorrect_symbols =~ s/'/\\'/g if $incorrect_symbols;
 	
 	my $text_error = "$element->{name}|$current_error";
+	
 	$text_error .= ": $incorrect_symbols" if $error_code == 2;
 	
 	return $text_error;	
@@ -2921,6 +2922,8 @@ sub redirect
 	my $param = ( $token ? '?t=' . $token : '' );
 	
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
+	
+	return $param if $self->{ this_is_self_testing };
 	
 	$self->{ vars }->get_system->redirect( $addr . $param );
 }

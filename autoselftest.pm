@@ -192,7 +192,6 @@ sub get_test_list {
 				1 => { 	'tester' => \&test_line_in_hash,
 					'args' => [ { VisaPurpose => '13' } ],
 					'expected' => 'VisaPurpose:0|0|0|0|0|0|0|0|0|0|0|0|1|0|0|0|0',
-					debug => 1,
 				},
 				2 => { 	'tester' => \&test_line_in_hash,
 					'args' => [ { VisaPurpose => '2' } ],
@@ -1836,6 +1835,20 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::redirect },
+			'comment' => 'redirect',
+			'test' => {
+				1 => { 	'args' => [ '' ],
+					'expected' => '?lang=ru',
+				},
+				2 => { 	'args' => [ 'current' ],
+					'expected' => '?t=[token]&lang=ru',
+				},
+				3 => { 	'args' => [ 'something' ],
+					'expected' => '?t=something&lang=ru',
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
@@ -2207,8 +2220,7 @@ sub get_tests
 	
 	for my $test (@$tests) {
 	
-		my $err_line = '';
-		my $test_num = 0;
+		my ( $err_line, $test_num, $tester ) = ( '', 0, undef );
 		
 		for( sort { $a <=> $b } keys %{ $test->{test} } ) {
 	
@@ -2229,27 +2241,9 @@ sub get_tests
 				$t->{param}->{ $_ } = replace_var( $t->{param}->{ $_ }, @_ );
 				$vars->setparam( $_, $t->{param}->{ $_ } );
 			}
-
-			my $tester = $t->{tester};
 			
-			unless ( $tester ) {
-				if ( ref $t->{expected} eq 'HASH' ) {
-				
-					$tester = \&test_hash;
-				}
-				elsif ( ref $t->{expected} eq 'ARRAY' ) {
-				
-					$tester = \&test_array;
-				}
-				elsif ( $t->{expected} =~ /^\^/ ) {
-				
-					$tester = \&test_regexp;
-				}
-				else {
-					$tester = \&test_line;
-				}
-			}
-
+			my $tester = tester_func( $t );
+			
 			my $test_result = &{ $tester }( 
 				$t->{debug}, $t->{expected}, "$test->{comment}-$test_num", $self, 
 				&{ $test->{func} }( $self, @{ $t->{args} } )
@@ -2267,6 +2261,22 @@ sub get_tests
 	}
 	
 	return @result;
+}
+
+sub tester_func
+# //////////////////////////////////////////////////
+{
+	my $t = shift;
+	
+	return $t->{tester} if $t->{tester};
+	
+	return \&test_hash if ref $t->{expected} eq 'HASH';
+	
+	return \&test_array if ref $t->{expected} eq 'ARRAY';
+	
+	return \&test_regexp if $t->{expected} =~ /^\^/ ;
+	
+	return \&test_line;
 }
 
 sub replace_var
