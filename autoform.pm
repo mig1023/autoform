@@ -1952,31 +1952,27 @@ sub check_data_from_form
 
 		last if $first_error;
 		
-		if ( $element->{check} ) {
-			if ( $element->{type} =~ /checkbox/ ) {
-			
-				$first_error = $self->check_chkbox( $element );
-			}
-			elsif ( $element->{type} =~ /checklist/ ) {
-			
-				$first_error = $self->check_checklist( $element );
-			}
-			else {
-				$first_error = $self->check_param( $element );
-			}
-		}
+		$first_error = $self->check_diff_types( $element ) if $element->{check};
 
 		$first_error = $self->check_captcha() if $element->{type} =~ /captcha/;
 
-		if ( !$first_error and $element->{check_logic} ) {
-		
-			$first_error = $self->check_logic( $element, $tables_id );
-		}
-		
-		
+		$first_error = $self->check_logic( $element, $tables_id )
+			if !$first_error and $element->{check_logic}
 	}
 	
 	return $first_error;
+}
+
+sub check_diff_types
+# //////////////////////////////////////////////////
+{
+	my ( $self, $element ) = @_;
+	
+	return $self->check_chkbox( $element ) if $element->{type} =~ /checkbox/;
+
+	return $self->check_checklist( $element ) if $element->{type} =~ /checklist/;
+
+	return $self->check_param( $element );
 }
 
 sub check_checklist
