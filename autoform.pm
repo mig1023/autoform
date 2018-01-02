@@ -506,8 +506,6 @@ sub get_token_and_create_new_form_if_need
 	return '02' if $token eq 'no_app';
 	
 	return '03' if $token eq 'no_field';
-	
-	return '04' if $token eq 'already';
 
 	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
 	
@@ -798,8 +796,12 @@ sub get_forward
 	my $appnum = undef;
 	my $appid = undef;
 	
-	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step, $current_table_id )
-		if !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) );
+	if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) ) {
+	
+		( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step );
+	
+		( $last_error, $step ) = $self->check_mutex_for_creation( $step );
+	}
 
 	if ( $last_error ) {
 	
@@ -860,7 +862,7 @@ sub set_appointment_finished
 	}
 	
 	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment();
-	
+
 	$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
 
 	$self->query( 'query', __LINE__, "
@@ -878,10 +880,30 @@ sub set_appointment_finished
 	return ( $new_appid, $appnum );
 }
 
+sub check_mutex_for_creation
+# //////////////////////////////////////////////////
+{
+	my ( $self, $step ) = @_;
+	
+	my $app_data = $self->query( 'selallkeys', __LINE__, "
+		SELECT AutoAppData.PassNum
+		FROM AutoToken
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+		WHERE Token = ?", $self->{ token }
+	);
+
+	return ( '', $step ) unless $self->mutex_fail( $app_data );
+	
+	$step = $self->get_step_by_content( 'back_to_appdata' );
+	 
+	return ( $self->text_error( 24, { name => 'applist' } ), $step );
+}
+
 sub check_timeslots_already_full_or_not_actual
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $current_table_id ) = @_;
+	my ( $self, $step ) = @_;
 	
 	my $app = $self->get_same_info_for_timeslots();
 
@@ -2334,24 +2356,19 @@ sub create_new_appointment
 {
 	my $self = shift;
 	
-	my $new_appid;
-	
 	my $info_for_contract = "from_db";
 	
 	my $tables_transfered_id = $self->get_current_table_id();
 	
 	my $db_rules = $self->get_content_db_rules();
 
-	my $app_data = $self->query( 'selallkeys', __LINE__, "
-		SELECT CenterID, PersonForAgreements, AutoAppData.PassNum
+	my ( $center, $person_for_contract ) = $self->query( 'selallkeys', __LINE__, "
+		SELECT CenterID, PersonForAgreements
 		FROM AutoToken
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $self->{ token }
-	);
+	)->[0];
 	
-	my ( $center, $person_for_contract ) = $app_data->[ 0 ];
-
 	if ( $person_for_contract ) {
 	
 		$info_for_contract = $self->query( 'selallkeys', __LINE__, "
@@ -2360,8 +2377,6 @@ sub create_new_appointment
 			FROM AutoAppData WHERE ID = ?", $person_for_contract
 		)->[0];
 	}
-
-	return $self->redirect( 'already' ) if $self->mutex_fail( $app_data );
 
 	# my $time_start = $self->time_interval_calculate();
 	

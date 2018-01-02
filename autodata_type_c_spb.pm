@@ -165,6 +165,7 @@ sub get_content_rules_hash
 			{
 				'page_ord' => 3,
 				'progress' => 3,
+				'goto_link' => 'back_to_appdata',
 				'replacer' => '[list_of_applicants]',
 			},
 		],
