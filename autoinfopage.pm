@@ -233,17 +233,9 @@ sub cancel
 			$ncount, $app_id
 		);
 		
-		if ( $ncount < 1 ) {
-
-			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
-				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
-			);
-
-			$self->{ af }->query( 'query', __LINE__, "
-				UPDATE Appointments SET Status = 2 WHERE ID = ?", {},
-				$app_id
-			);
-		}
+		$self->{ af }->query( 'query', __LINE__, "
+			UPDATE Appointments SET Status = 2 WHERE ID = ?", {}, $app_id
+		) if $ncount < 1;
 		
 		return $self->{ af }->redirect( 'current' );
 	}
