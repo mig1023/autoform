@@ -848,19 +848,6 @@ sub set_appointment_finished
 {
 	my $self = shift;
 	
-	my $this_is_draft = $self->query( 'sel1', __LINE__, "
-		SELECT Draft FROM AutoToken WHERE Token = ?", $self->{ token }
-	);
-
-	if ( $this_is_draft ) {
-	
-		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET EndDate = now(), Step = 1 WHERE Token = ?", {}, $self->{ token }
-		);
-	
-		return ( 0, 'draft_app_num' );
-	}
-	
 	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment();
 
 	$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
@@ -871,7 +858,7 @@ sub set_appointment_finished
 	);
 
 	$self->query( 'query', __LINE__, "
-		UPDATE Appointments SET RDate = now(), Login = 'website_nf', Draft = 0, NCount = ? 
+		UPDATE Appointments SET RDate = now(), Login = 'website', Draft = 0, NCount = ? 
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
