@@ -121,7 +121,7 @@ sub get_infopage
 		'title' 	=> 1,
 		'app_info'	=> $app_info,
 		'app_list'	=> $self->get_app_list(),
-		'map_in_page' 	=> $self->{ af }->get_geo_info(),
+		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'token' 	=> $self->{ token },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 	};

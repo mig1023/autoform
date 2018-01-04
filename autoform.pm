@@ -314,14 +314,20 @@ sub get_same_info_for_timeslots
 sub get_geo_info
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $app_already_crated ) = @_;
+	
+	my $from_app =
+		"JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+		JOIN Branches ON Appointments.CenterID = Branches.ID";
+	
+	my $from_autoapp =
+		"JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN Branches ON AutoAppointments.CenterID = Branches.ID";
 	
 	my ( $center, $addr ) = $self->query( 'sel1', __LINE__, "
 		SELECT CenterID, BAddr
-		FROM AutoToken 
-		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		JOIN Branches ON AutoAppointments.CenterID = Branches.ID
-		WHERE Token = ?", $self->{ token }
+		FROM AutoToken " . ( $app_already_crated ? $from_app : $from_autoapp ) .
+		" WHERE Token = ?", $self->{ token }
 	);
 
 	my $branches = ( $self->{ this_is_self_testing } ?
