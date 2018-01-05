@@ -174,6 +174,8 @@ sub reschedule
 	if (
 		$new->{ timeslot } =~ /^\d+$/
 		and
+		$new->{ timeslot } > 0
+		and
 		$new->{ app_date } =~ /(\d\d)\.(\d\d)\.(\d\d\d\d)/
 		and
 		Date::Calc::check_date( $3, $2, $1 )
