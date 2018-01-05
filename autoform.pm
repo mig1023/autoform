@@ -314,7 +314,7 @@ sub get_same_info_for_timeslots
 sub get_geo_info
 # //////////////////////////////////////////////////
 {
-	my ( $self, $app_already_crated ) = @_;
+	my ( $self, $app_already_created ) = @_;
 	
 	my $from_app =
 		"JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
@@ -326,7 +326,7 @@ sub get_geo_info
 	
 	my ( $center, $addr ) = $self->query( 'sel1', __LINE__, "
 		SELECT CenterID, BAddr
-		FROM AutoToken " . ( $app_already_crated ? $from_app : $from_autoapp ) .
+		FROM AutoToken " . ( $app_already_created ? $from_app : $from_autoapp ) .
 		" WHERE Token = ?", $self->{ token }
 	);
 
