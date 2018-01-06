@@ -169,6 +169,8 @@ sub reschedule
 	
 	my $new = {};
 	
+	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
+	
 	$new->{ $_ } = $self->{ vars }->getparam( $_ ) for ( 'app_date', 'timeslot' );
 	
 	if (
@@ -176,16 +178,17 @@ sub reschedule
 		and
 		$new->{ timeslot } > 0
 		and
+		$self->check_timeslots_already_full( $appinfo_for_timeslots, $new->{ timeslot } )
+		and
 		$new->{ app_date } =~ /(\d\d)\.(\d\d)\.(\d\d\d\d)/
 		and
 		Date::Calc::check_date( $3, $2, $1 )
 	) {
+
 		$self->set_new_appdate( $new );
 		
 		return $self->{ af }->redirect( 'current' );
 	}
-	
-	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -270,11 +273,29 @@ sub get_same_info_for_timeslots_from_app
 			WHERE Token = ?", $self->{ token }
 		);
 	
-	$app->{ fdate_iso } = $app->{ fdate };
+	for ( 'fdate', 'appdate' ) {
 	
-	$_ =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for ( $app->{ fdate }, $app->{ appdate });
+		$app->{ $_ . '_iso' } = $app->{ $_ };
+		
+		$app->{ $_ } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	}
 
 	return $app;
+}
+
+sub check_timeslots_already_full
+# //////////////////////////////
+{
+	my ( $self, $app, $timeslot ) = @_;
+
+	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } );
+	
+	my $timeslots = $appobj->get_timeslots_arr( $app->{ center }, $app->{ persons }, $app->{ appdate_iso } );
+
+	for ( @$timeslots ) {
+
+		return 1 if $_->{id} == $timeslot;
+	}
 }
 
 sub get_app_list

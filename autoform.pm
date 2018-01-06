@@ -901,6 +901,7 @@ sub check_timeslots_already_full_or_not_actual
 	my $app = $self->get_same_info_for_timeslots();
 
 	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } );
+	
 	my $timeslots = $appobj->get_timeslots_arr( $app->{ center }, $app->{ persons }, $app->{ appdate } );
 
 	for ( @$timeslots ) {
