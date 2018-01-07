@@ -34,9 +34,9 @@ sub autoinfopage
 	
 	return autoinfopage_entry ( @_ ) if $entry;
 
-	return reschedule( @_ ) if /^reschedule$/;
+	return reschedule( @_ ) if /^reschedule$/i;
 	
-	return cancel( @_ ) if /^cancel$/;
+	return cancel( @_ ) if /^cancel$/i;
 	
 	return get_infopage( @_ );
 }
