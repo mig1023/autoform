@@ -111,6 +111,11 @@ sub get_content_rules_hash
 				},
 				'relation' => {},
 			},
+			{
+				'type' => 'include',
+				'place' => 'out',
+				'template' => 'vip_form.tt2',
+			},
 		],
 		
 		'Даты поездки' => [
@@ -2021,6 +2026,11 @@ sub get_content_rules_hash
 					'name' => 'ShAddress',
 				},
 			},
+			{
+				'type' => 'include',
+				'place' => 'in',
+				'template' => 'insurance_form.tt2',
+			}
 		],
 		
 		'Подтверждение записи' => [

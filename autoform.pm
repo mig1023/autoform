@@ -193,21 +193,6 @@ sub autoform
 	}
 
 	my ( $last_error_name, $last_error_text ) = split /\|/, $last_error;
-	
-	my ( $appinfo_for_timeslots, $map_in_page );
-
-	if ( 
-		( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) )
-		or
-		( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) )
-	) {
-		$appinfo_for_timeslots = $self->get_same_info_for_timeslots();
-	}
-
-	if ( ( ref( $special->{ with_map } ) eq 'ARRAY' ) and ( @{ $special->{ with_map } } > 0 ) ) {
-	
-		$map_in_page = $self->get_geo_info();
-	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -226,13 +211,26 @@ sub autoform
 		'last_error_text' 	=> $last_error_text,
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
-		'appinfo' 		=> $appinfo_for_timeslots,
 		'progress' 		=> $progress,
 		'lang_in_link' 		=> $self->{ lang },
 		'javascript_check' 	=> $javascript_check,
-		'map_in_page' 		=> $map_in_page,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
+	
+	$tvars->{ appinfo } = $self->get_same_info_for_timeslots()
+		if ( 
+			( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) )
+			or
+			( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) )
+		);
+
+	$tvars->{ map_in_page } = $self->get_geo_info()
+		if ( ref( $special->{ with_map } ) eq 'ARRAY' ) and ( @{ $special->{ with_map } } > 0 );
+
+	for ( 'in', 'out' ) {
+		$tvars->{ "include_name_$_" } = $special->{ "include_$_" } if $special->{ "include_$_" };
+	}
+	
 	$template->process( $template_file, $tvars );
 }
 
@@ -1250,6 +1248,8 @@ sub get_specials_of_element
 		'post_index' => [],
 		'with_map' => [],
 		'captcha' => [],
+		'include_in' => [],
+		'include_out' => [],
 	};
 	
 	for my $element ( @$page_content ) {
@@ -1260,6 +1260,9 @@ sub get_specials_of_element
 		}
 
 		push( $special->{ captcha }, $self->get_captcha_id() ) if $element->{ type } eq 'captcha';
+		
+		push( $special->{ "include_" . $element->{ place } }, $element->{ template } )
+			if $element->{ type } eq 'include';
 	}
 
 	return ( $special );

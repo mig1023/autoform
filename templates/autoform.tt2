@@ -70,6 +70,10 @@ YMaps.jQuery(function () {
 </script>
 [% END %]
 
+[% FOREACH include_name IN special.include_in %]
+	[% INCLUDE $include_name %]
+[% END %]
+
 <tr><td colspan="3"><br>
 [% IF ( step > min_step ) && ( step != max_step ) %]
 	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
@@ -90,8 +94,12 @@ YMaps.jQuery(function () {
 	</td></tr><tr><td colspan="3">
 	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
 	<tr><td colspan="3">
-	[% INCLUDE vip_form.tt2 %]
 [% END %]
+
+[% FOREACH include_name IN special.include_out %]
+	[% INCLUDE $include_name %]
+[% END %]
+
 </td></tr></table>
 
 </td></tr></table>
