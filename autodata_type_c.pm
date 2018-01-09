@@ -336,6 +336,11 @@ sub get_content_rules_hash
 					{
 						'condition' => 'now_or_earlier',
 					},
+					{
+						'condition' => 'now_or_later',
+						'offset' => ( 10 * 365 ), # 10 years
+						'full_error' => 'Паспорт не должен быть выдан больше [offset] назад',
+					},
 				],
 				'db' => {
 					'table' => 'AppData',
@@ -350,6 +355,12 @@ sub get_content_rules_hash
 				'comment' => 'Введите дату окончания действия загранпаспорта, указанную в паспорте',
 				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'now_or_later',
+						'full_error' => 'Паспорт c истекшим сроком действия, не может быть принят',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PassTill',
@@ -772,10 +783,14 @@ sub get_content_rules_hash
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
+						'condition' => 'now_or_later',
+						'offset' => '[collect_date_offset]',
+					},
+					{
 						'condition' => 'equal_or_earlier',
 						'table' => 'AppData',
 						'name' => 'PassDate',
-						'offset' => 3650,
+						'offset' => ( 10 * 365 ), # 10 years
 						'error' => 'Дата выдачи паспорта',
 					},
 				],
@@ -798,11 +813,17 @@ sub get_content_rules_hash
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
 				'check_logic' => [
 					{
+						'condition' => 'equal_or_later',
+						'table' => 'AppData',
+						'name' => 'AppSDate',
+						'error' => 'Дата начала поездки',
+					},
+					{
 						'condition' => 'not_closer_than',
 						'table' => 'AppData',
 						'name' => 'PassTill',
 						'offset' => 90,
-						'error' => 'Дате окончания действия паспорта',
+						'full_error' => 'Между окончанием срока действия паспорта и датой окончания поездки должно быть как минимум [offset]',
 					},
 				],
 				'db' => {
@@ -985,6 +1006,18 @@ sub get_content_rules_hash
 				'comment' => 'Укажите дату окончания действия визы',
 				'example' => '31.12.1900',
 				'check' => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				'check_logic' => [
+					{
+						'condition' => 'now_or_later',
+						'offset' => ( 3 * 365 ), # 3 years
+					},
+					{
+						'condition' => 'equal_or_later',
+						'table' => 'AppData',
+						'name' => 'PrevVisaFD',
+						'error' => 'Дата начала действия визы',
+					},
+				],
 				'db' => {
 					'table' => 'AppData',
 					'name' => 'PrevVisaED',

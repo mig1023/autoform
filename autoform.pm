@@ -2133,9 +2133,10 @@ sub check_logic
 			$error = 23 if ( $offset < -1 and $error == 9 );
 			
 			$offset *= -1 if $offset < 0;
-			
-			$first_error = $self->text_error( $error, $element, undef, $rule->{ error }, $offset ) 
-				if $error;
+	
+			$first_error = $self->text_error(
+				$error, $element, undef, $rule->{ error }, $offset, $rule->{ full_error }
+			) if $error;
 		}
 		
 		if ( $rule->{ condition } =~ /^not_closer_than(_in_spb)?$/ ) {
@@ -2153,12 +2154,13 @@ sub check_logic
 				$value, $tables_id->{ 'Auto'.$rule->{table} }
 			);
 		
-			$first_error = $self->text_error( 23, $element, undef, $rule->{ error }, $rule->{ offset } ) 
-				if (
-					( ( $datediff < $rule->{ offset } ) and !$spb )
-					or
-					( ( $datediff <= 0 ) and $spb )
-				);
+			$first_error = $self->text_error(
+				23, $element, undef, $rule->{ error }, $rule->{ offset }, $rule->{ full_error }
+			) if (
+				( ( $datediff < $rule->{ offset } ) and !$spb )
+				or
+				( ( $datediff <= 0 ) and $spb )
+			);
 		}
 		
 		if ( $rule->{ condition } =~ /^younger_than$/ ) {
@@ -2255,7 +2257,7 @@ sub get_postcode_id
 sub text_error
 # //////////////////////////////////////////////////
 {
-	my ( $self, $error_code, $element, $incorrect_symbols, $relation, $offset ) = @_;
+	my ( $self, $error_code, $element, $incorrect_symbols, $relation, $offset, $full_error ) = @_;
 	
 	my $text = VCS::Site::autodata::get_text_error();
 	
@@ -2266,7 +2268,7 @@ sub text_error
 	my $name_of_element = (	$element->{label} ? $element->{label} : ( 
 				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
 	
-	my $current_error = $self->lang( $text->[ $error_code ] );
+	my $current_error = $self->lang( $full_error ? $full_error : $text->[ $error_code ] );
 	
 	$current_error =~ s/\[name\]/$name_of_element/;
 	
