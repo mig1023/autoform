@@ -338,7 +338,7 @@ sub get_content_rules_hash
 					},
 					{
 						'condition' => 'now_or_later',
-						'offset' => ( 10 * 365 ), # 10 years
+						'offset' => ( 10 * 365 ), # <--- 10 years
 						'full_error' => 'Паспорт не должен быть выдан больше [offset] назад',
 					},
 				],
@@ -485,7 +485,7 @@ sub get_content_rules_hash
 					'name' => 'BrhCountry',
 				},
 				'param' => '[brh_countries]',
-				'first_elements' => '70, 272', # chng in init_add_param
+				'first_elements' => '70, 272', # <--- chng in init_add_param
 			},
 			{
 				'type' => 'input',
@@ -526,7 +526,7 @@ sub get_content_rules_hash
 					'name' => 'PrevCitizenship',
 				},
 				'param' => '[prevcitizenship_countries]',
-				'first_elements' => '70, 272', # chng in init_add_param
+				'first_elements' => '70, 272', # <--- chng in init_add_param
 			},
 			{
 				'type' => 'free_line',
@@ -790,7 +790,7 @@ sub get_content_rules_hash
 						'condition' => 'equal_or_earlier',
 						'table' => 'AppData',
 						'name' => 'PassDate',
-						'offset' => ( 10 * 365 ), # 10 years
+						'offset' => ( 10 * 365 ), # <--- 10 years
 						'error' => 'Дата выдачи паспорта',
 					},
 				],
@@ -1009,7 +1009,7 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'now_or_later',
-						'offset' => ( 3 * 365 ), # 3 years
+						'offset' => ( 3 * 365 ), # <--- 3 years
 					},
 					{
 						'condition' => 'equal_or_later',

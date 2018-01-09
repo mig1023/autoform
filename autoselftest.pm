@@ -957,7 +957,7 @@ sub get_test_list {
 							'AutoAppData' => '[appdata_id]',
 						},
 					],
-					'prepare' => \&pre_age, # fixed num 24
+					'prepare' => \&pre_age, # <--- fixed num 24
 					'expected' => 'field_name|Указать данное поле можно только для заявителей младше 10 лет',
 				},
 				25 => { 'args' => [ 
@@ -969,7 +969,7 @@ sub get_test_list {
 							'AutoAppData' => '[appdata_id]',
 						},
 					],
-					'prepare' => \&pre_age, # fixed num 25
+					'prepare' => \&pre_age, # <--- fixed num 25
 					'expected' => '',
 				},
 			},
@@ -1437,7 +1437,7 @@ sub get_test_list {
 				1 => { 	'prepare' => \&pre_geo_or_collect,
 					'expected' => '7',
 				},
-				2 => { 	'prepare' => \&pre_geo_or_collect, # fixed num 2
+				2 => { 	'prepare' => \&pre_geo_or_collect, # <--- fixed num 2
 					'expected' => '14',
 				},
 			},
@@ -1564,7 +1564,7 @@ sub get_test_list {
 			'test' => { 	
 				1 => { 	'expected' => 4,
 				},
-				2 => { 	'prepare' => \&pre_logic_1, # fixed num 2
+				2 => { 	'prepare' => \&pre_logic_1, # <--- fixed num 2
 					'expected' => 19,
 				},
 				3 => { 	'prepare' => \&pre_logic_1,
@@ -1573,7 +1573,7 @@ sub get_test_list {
 				4 => { 	'prepare' => \&pre_nobody,
 					'expected' => 5,
 				},
-				5 => { 	'prepare' => \&pre_logic_1,  # fixed num 5
+				5 => { 	'prepare' => \&pre_logic_1,  # <--- fixed num 5
 					'expected' => 0,
 				},
 			},
@@ -1723,7 +1723,7 @@ sub get_test_list {
 				1 => { 	'args' => [ \{ new_app_num => 10 }, 20 ],
 					'expected' => { new_app_num => 20 },
 				},
-				2 => { 	'prepare' => \&pre_geo_or_collect, # fixed num 2
+				2 => { 	'prepare' => \&pre_geo_or_collect, # <--- fixed num 2
 					'args' => [ \{ new_app_branch => 5 } ],
 					'expected' => { new_app_branch => 'Kazan' },
 				},
@@ -1743,7 +1743,7 @@ sub get_test_list {
 						'token' => '[token]',
 					},
 				},
-				2 => { 	'prepare' => \&pre_token, # fixed num 2
+				2 => { 	'prepare' => \&pre_token, # <--- fixed num 2
 					'param' => { 'mobile_api' => 'get_appdata' },
 					'expected' => {
 						'error' => { 'error_text' => 'ошибка токена', 'error' => 1 },
@@ -2328,11 +2328,9 @@ sub show_result
 	
 	my $result_line = self_test_htm( 'body_start' );
 	
-	my $test_num = 18; 	
-	# 16 self_self + create_clear_form + get_add
+	my $test_num = 18; # <--- 16 self_self + create_clear_form + get_add
 	
-	my $test_func = 2;	
-	# create_clear_form + get_add
+	my $test_func = 2; # <--- create_clear_form + get_add
 	
 	my $fails = 0;
 

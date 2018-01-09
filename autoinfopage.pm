@@ -57,7 +57,7 @@ sub autoinfopage_entry
 
 	if ( !$param->{ action } ) {
 	
-		# nothing to do here
+		# <--- nothing to do here
 	}
 	elsif ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
 	

@@ -21,7 +21,7 @@ sub get_settings
 		},
 		
 		'memcached' => {
-			'memcached_exptime' => 43200, # 12*3600 sec
+			'memcached_exptime' => 43200, # <--- 12*3600 sec
 			'mutex_exptime' => 30,
 		},
 		

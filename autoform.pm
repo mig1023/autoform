@@ -255,7 +255,7 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	return $self->redirect(); # develop only
+	return $self->redirect(); # <--- only for development; comment for use
 	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
