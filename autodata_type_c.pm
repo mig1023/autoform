@@ -827,7 +827,7 @@ sub get_content_rules_hash
 						'condition' => 'not_closer_than',
 						'table' => 'AppData',
 						'name' => 'PassTill',
-						'offset' => 90,
+						'offset' => -90,
 						'full_error' => 'Между окончанием срока действия паспорта и датой окончания поездки должно быть как минимум [offset]',
 					},
 				],

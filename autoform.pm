@@ -2111,20 +2111,9 @@ sub check_logic
 		
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 			
-			my $datediff;
-			
-			if ( $rule->{ condition } =~ /^equal/ ) {
-			
-				$datediff = $self->query( 'sel1', __LINE__, "
-					SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
-					$value, $tables_id->{ 'Auto'.$rule->{table} }
-				);
-			}
-			else {
-				$datediff = $self->query( 'sel1', __LINE__, "
-					SELECT DATEDIFF( ?, now() )", $value
-				);
-			}
+			my $datediff = $self->get_datediff(
+				$value, $rule, $tables_id, ( $rule->{ condition } =~ /^equal/ )
+			);
 
 			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
 				
@@ -2152,27 +2141,16 @@ sub check_logic
 				( Date::Calc::Add_Delta_YMD( ( split /-/, $value ), 0, 3, 1 ) )
 			) if $spb;
 			
-			my $datediff;
+			my $datediff = $self->get_datediff( $value, $rule, $tables_id, !$from_now );
 
-			if ( $from_now ) {
-			
-				$datediff = $self->query( 'sel1', __LINE__, "
-					SELECT DATEDIFF( ?,  now() )", $value
-				);
-			}
-			else {
-				$datediff = $self->query( 'sel1', __LINE__, "
-					SELECT DATEDIFF( $rule->{name}, now() ) FROM Auto$rule->{table} WHERE ID = ?",
-					$tables_id->{ 'Auto'.$rule->{table} }
-				);
-			}
-	
 			$first_error = $self->text_error(
 				23, $element, undef, $rule->{ error }, $rule->{ offset }, $rule->{ full_error }
 			) if (
-				( ( $datediff < $rule->{ offset } ) and !$spb )
+				( ( $datediff < $rule->{ offset } ) and ( $rule->{ offset } >= 0  ) and !$spb )
 				or
-				( ( $datediff <= 0 ) and $spb )
+				( ( $datediff > $rule->{ offset } ) and ( $rule->{ offset } < 0  ) and !$spb )
+				or
+				( ( $datediff >= 0 ) and $spb )
 			);
 		}
 		
@@ -2249,6 +2227,22 @@ sub check_logic
 	return $first_error;	
 }
 
+sub get_datediff
+# //////////////////////////////////////////////////
+{
+	my ( $self, $value, $rule, $tables_id, $use_date ) = @_;
+
+	return $self->query( 'sel1', __LINE__, "
+		SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
+		$value, $tables_id->{ 'Auto'.$rule->{table} }
+		
+	) if $use_date;
+
+	return $self->query( 'sel1', __LINE__, "
+		SELECT DATEDIFF( ?,  now() )", $value
+	);
+}
+
 sub get_postcode_id
 # //////////////////////////////////////////////////
 {
@@ -2286,7 +2280,7 @@ sub text_error
 	
 	$current_error =~ s/\[relation\]/$relation/;
 	
-	$offset = $self->offset_calc( $offset ) if $offset;
+	$offset = $self->offset_calc( abs $offset ) if $offset;
 	
 	$current_error =~ s/\[offset\]/$offset/;
 	
