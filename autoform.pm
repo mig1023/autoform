@@ -58,25 +58,10 @@ sub get_content_rules
 	
 	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
-	my $content;
+	my $content = $self->get_content_rules_hash_opt();
 
-	if ( $self->{ this_is_self_testing } ) {
-	
-		$content = VCS::Site::autoselftest::get_content_rules_hash();
-	}
-	elsif ( $visa_category eq 'D' ) {
-
-		$content = VCS::Site::autodata_type_d::get_content_rules_hash();
-	}
-	elsif ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
-
-		$content = VCS::Site::autodata_type_c_spb::get_content_rules_hash();
-	}
-	else {
-		$content = VCS::Site::autodata_type_c::get_content_rules_hash();
-	};
-	
 	my $keys_in_current_page = {};
+	
 	my $new_content = {};
 	
 	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content ) {
@@ -115,6 +100,22 @@ sub get_content_rules
 	return scalar( keys %$content ) if $current_page =~ /^length$/i;
 	
 	return $content->{ $current_page };
+}
+
+sub get_content_rules_hash_opt
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
+		
+	return VCS::Site::autoselftest::get_content_rules_hash() if $self->{ this_is_self_testing };
+
+	return VCS::Site::autodata_type_d::get_content_rules_hash() if $visa_category eq 'D';
+
+	return VCS::Site::autodata_type_c_spb::get_content_rules_hash() if VCS::Site::autodata::this_is_spb_center( $center );
+
+	return VCS::Site::autodata_type_c::get_content_rules_hash();
 }
 
 sub get_app_visa_and_center
@@ -167,7 +168,7 @@ sub autoform
 	my ( $page_content, $template_file, $title, $progress, $appid, $last_error );
 	my $step = 0;
 	my $special = {};
-	my $javascript_check = 1;
+	my $javascript_check = 'need_to_check';
 
 	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
 	
@@ -183,7 +184,7 @@ sub autoform
 	}
 	elsif ( $self->{ vars }->getparam( 'script' ) ) {
 	
-		$javascript_check = 0;
+		$javascript_check = undef;
 		
 		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
 	}
@@ -328,10 +329,9 @@ sub get_geo_info
 		" WHERE Token = ?", $self->{ token }
 	);
 
-	my $branches = ( $self->{ this_is_self_testing } ?
-		VCS::Site::autoselftest::get_geo_branches() :
-		VCS::Site::autodata::get_geo_branches()
-	);
+	my $branches = VCS::Site::autodata::get_geo_branches();
+	
+	$branches = VCS::Site::autoselftest::get_geo_branches() if $self->{ this_is_self_testing };
 
 	$addr =~ s/\r?\n/<br>/g;
 	
@@ -1342,27 +1342,14 @@ sub get_progressbar
 {
 	my ( $self, $page ) = @_;
 	
-	my ( $line, $content, $progress_line );
+	my ( $line, $content );
 	
 	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
-	if ( $self->{ this_is_self_testing } ) {
-	
-		$progress_line = VCS::Site::autoselftest::get_progressline();
-	}
-	elsif ( $visa_category eq 'D' ) {
-	
-		$progress_line = VCS::Site::autodata_type_d::get_progressline();
-	}
-	elsif ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
-
-		$progress_line = VCS::Site::autodata_type_c_spb::get_progressline();
-	}
-	else {
-		$progress_line = VCS::Site::autodata_type_c::get_progressline();
-	};
+	my $progress_line = $self->get_progressbar_hash_opt();
 	
 	my $current_progress = $page->[0]->{ progress };
+	
 	my $big_element = 0;
 	
 	for ( 1..$#$progress_line ) {
@@ -1383,6 +1370,22 @@ sub get_progressbar
 	}
 	
 	return $line . $self->get_html_for_element( 'end_line' ) . $self->get_html_for_element( 'start_line' ) . $content;
+}
+
+sub get_progressbar_hash_opt
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
+		
+	return VCS::Site::autoselftest::get_progressline() if $self->{ this_is_self_testing };
+	
+	return VCS::Site::autodata_type_d::get_progressline() if $visa_category eq 'D';
+	
+	return VCS::Site::autodata_type_c_spb::get_progressline() if VCS::Site::autodata::this_is_spb_center( $center );
+
+	return VCS::Site::autodata_type_c::get_progressline();
 }
 
 sub get_html_for_element
@@ -2139,9 +2142,9 @@ sub check_logic
 			) if $error;
 		}
 		
-		if ( $rule->{ condition } =~ /^not_closer_than(_in_spb)?$/ ) {
+		if ( $rule->{ condition } =~ /^not_closer_than(_in_spb)?(_from_now)?$/ ) {
 		
-			my $spb = $1;
+			my ( $spb, $from_now ) = ( $1, $2 );
 
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 			
@@ -2149,11 +2152,21 @@ sub check_logic
 				( Date::Calc::Add_Delta_YMD( ( split /-/, $value ), 0, 3, 1 ) )
 			) if $spb;
 			
-			my $datediff = $self->query( 'sel1', __LINE__, "
-				SELECT DATEDIFF( $rule->{name}, ? ) FROM Auto$rule->{table} WHERE ID = ?",
-				$value, $tables_id->{ 'Auto'.$rule->{table} }
-			);
-		
+			my $datediff;
+
+			if ( $from_now ) {
+			
+				$datediff = $self->query( 'sel1', __LINE__, "
+					SELECT DATEDIFF( ?,  now() )", $value
+				);
+			}
+			else {
+				$datediff = $self->query( 'sel1', __LINE__, "
+					SELECT DATEDIFF( $rule->{name}, now() ) FROM Auto$rule->{table} WHERE ID = ?",
+					$tables_id->{ 'Auto'.$rule->{table} }
+				);
+			}
+	
 			$first_error = $self->text_error(
 				23, $element, undef, $rule->{ error }, $rule->{ offset }, $rule->{ full_error }
 			) if (
@@ -2214,10 +2227,9 @@ sub check_logic
 		
 			my ( $center ) = $self->get_app_visa_and_center();
 
-			my $blocket_emails = ( $self->{ this_is_self_testing } ?
-				VCS::Site::autoselftest::get_blocked_emails() :
-				VCS::Site::autodata::get_blocked_emails()
-			);
+			my $blocket_emails = VCS::Site::autodata::get_blocked_emails();
+			
+			$blocket_emails = VCS::Site::autoselftest::get_blocked_emails() if $self->{ this_is_self_testing };
 			
 			for my $m ( @$blocket_emails ) {
 				

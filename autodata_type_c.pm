@@ -360,6 +360,11 @@ sub get_content_rules_hash
 						'condition' => 'now_or_later',
 						'full_error' => 'Паспорт c истекшим сроком действия, не может быть принят',
 					},
+					{
+						'condition' => 'not_closer_than_from_now',
+						'offset' => 90,
+						'full_error' => 'Для получения визы паспорт должен действовать ещё как минимум [offset]',
+					},
 				],
 				'db' => {
 					'table' => 'AppData',
