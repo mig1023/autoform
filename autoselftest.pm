@@ -49,14 +49,14 @@ sub get_test_list {
 			'comment' => 'get_page_error',
 			'test' => { 	
 				1 => { 	'args' => [ '0' ],
-					'expected' => [ '<center>ошибка: для правильной работы анкеты необходимо, чтобы в браузере' .
-							' был включён javascript</center>', '', 'autoform.tt2' ],
+					'expected' => [ '<center>ошибка: для работы анкеты необходимо,<br>чтобы в браузере' .
+							' был включён javascript</center>', undef, 'autoform.tt2' ],
 				},
 				2 => { 	'args' => [ '1' ],
-					'expected' => [ '<center>ошибка: неправильный токен</center>', '', 'autoform.tt2' ],
+					'expected' => [ '<center>ошибка: неправильный токен</center>', undef, 'autoform.tt2' ],
 				},
 				3 => { 	'args' => [ '2' ],
-					'expected' => [ '<center>ошибка: запись не найдена</center>', '', 'autoform.tt2' ],
+					'expected' => [ '<center>ошибка: запись не найдена</center>', undef, 'autoform.tt2' ],
 				},
 			},
 		},
@@ -78,6 +78,8 @@ sub get_test_list {
 							'with_map' => [],
 							'post_index' => [],
 							'captcha' => [],
+							'include_in' => [],
+							'include_out' => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -112,6 +114,8 @@ sub get_test_list {
 							'with_map' => [],
 							'post_index' => [],
 							'captcha' => [],
+							'include_in' => [],
+							'include_out' => [],
 						},
 						'[progress_bar_2]',
 						undef,
@@ -133,6 +137,8 @@ sub get_test_list {
 							'with_map' => [],
 							'post_index' => [],
 							'captcha' => [],
+							'include_in' => [],
+							'include_out' => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -418,6 +424,8 @@ sub get_test_list {
 						'post_index' => [],
 						'with_map' => [],
 						'captcha' => [],
+						'include_in' => [],
+						'include_out' => [],
 					},
 
 				},
@@ -436,6 +444,8 @@ sub get_test_list {
 						'post_index' => [],
 						'with_map' => [],
 						'captcha' => [],
+						'include_in' => [],
+						'include_out' => [],
 					},
 
 				},
@@ -963,7 +973,6 @@ sub get_test_list {
 				25 => { 'args' => [ 
 						{	name => 'field_name',
 							check_logic => [ { 'condition' => 'younger_than', 'offset' => 10 } ],
-							
 						},
 						{
 							'AutoAppData' => '[appdata_id]',
@@ -971,6 +980,132 @@ sub get_test_list {
 					],
 					'prepare' => \&pre_age, # <--- fixed num 25
 					'expected' => '',
+				},
+				26 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'not_closer_than',
+								'table' => 'AppData',
+								'name' => 'FingersDate',
+								'error' => 'Draft',
+								'offset' => 10,
+							} ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'param' => { 'field_name' => '01.05.2000' },
+					'prepare' => \&pre_not_closer,
+					'expected' => 'field_name|"field_name" не может быть ближе к "Draft" менее, чем на 10 дней',
+				},
+				27 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'not_closer_than',
+								'table' => 'AppData',
+								'name' => 'FingersDate',
+								'error' => 'Draft',
+								'offset' => 10,
+							} ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'param' => { 'field_name' => '11.05.2000' },
+					'prepare' => \&pre_not_closer,
+					'expected' => '',
+				},
+				28 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'not_closer_than',
+								'table' => 'AppData',
+								'name' => 'FingersDate',
+								'error' => 'Draft',
+								'offset' => -10,
+							} ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'param' => { 'field_name' => '24.04.2000' },
+					'prepare' => \&pre_not_closer,
+					'expected' => 'field_name|"field_name" не может быть ближе к "Draft" менее, чем на 10 дней',
+				},
+				29 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'not_closer_than',
+								'table' => 'AppData',
+								'name' => 'FingersDate',
+								'error' => 'Draft',
+								'offset' => -10,
+							} ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'param' => { 'field_name' => '20.04.2000' },
+					'prepare' => \&pre_not_closer,
+					'expected' => '',
+				},
+				30 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'not_closer_than_in_spb',
+								'table' => 'AppData',
+								'name' => 'FingersDate',
+								'error' => 'Draft',
+								'offset' => 90,
+							} ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'param' => { 'field_name' => '31.01.2000' },
+					'prepare' => \&pre_not_closer,
+					'expected' => 'field_name|"field_name" не может быть ближе к "Draft" менее, чем на 3 месяца',
+				},
+				31 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'not_closer_than_in_spb',
+								'table' => 'AppData',
+								'name' => 'FingersDate',
+								'error' => 'Draft',
+								'offset' => 90,
+							} ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'param' => { 'field_name' => '29.01.2000' },
+					'prepare' => \&pre_not_closer,
+					'expected' => '',
+				},
+				32 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'not_closer_than_in_spb',
+								'table' => 'AppData',
+								'name' => 'FingersDate',
+								'full_error' => 'test error message',
+								'offset' => 90,
+							} ]
+						},
+						{
+							'AutoAppData' => '[appdata_id]',
+						},
+					],
+					'param' => { 'field_name' => '31.01.2000' },
+					'prepare' => \&pre_not_closer,
+					'expected' => 'field_name|test error message',
 				},
 			},
 		},
@@ -1536,10 +1671,6 @@ sub get_test_list {
 				1 => { 	'args' => [ '[token]' ],
 					'expected' => '^[1-9]\d*$',
 				},
-				2 => { 	'prepare' => \&pre_draft,
-					'args' => [ '[token]' ],
-					'expected' => [ 0, 'draft_app_num' ],
-				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_edit },
@@ -1846,6 +1977,38 @@ sub get_test_list {
 				},
 				3 => { 	'args' => [ 'something' ],
 					'expected' => '?t=something&lang=ru',
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_content_rules_hash_opt },
+			'comment' => 'get_content_rules_hash_opt',
+			'test' => { 	
+				1 => { 	'expected' => get_content_rules_hash()
+				},
+				2 => { 	'prepare' => \&pre_show_no_testing,
+					'expected' => VCS::Site::autodata_type_c::get_content_rules_hash(),
+				},
+				3 => { 	'prepare' => [ \&pre_visa_type_d, \&pre_show_no_testing ],
+					'expected' => VCS::Site::autodata_type_d::get_content_rules_hash(),
+				},
+				4 => { 	'prepare' => [ \&pre_spb_centers, \&pre_show_no_testing ],
+					'expected' => VCS::Site::autodata_type_c_spb::get_content_rules_hash(),
+				}
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_progressbar_hash_opt },
+			'comment' => 'get_progressbar_hash_opt',
+			'test' => { 	
+				1 => { 	'expected' => [ get_progressline() ],
+				},
+				2 => { 	'prepare' => \&pre_show_no_testing,
+					'expected' => [ VCS::Site::autodata_type_c::get_progressline() ],
+				},
+				3 => { 	'prepare' => [ \&pre_visa_type_d, \&pre_show_no_testing ],
+					'expected' => [ VCS::Site::autodata_type_d::get_progressline() ],
+				},
+				4 => { 	'prepare' => [ \&pre_spb_centers, \&pre_show_no_testing ],
+					'expected' => [ VCS::Site::autodata_type_c_spb::get_progressline() ],
 				},
 			},
 		},
@@ -2231,6 +2394,12 @@ sub get_tests
 			&{ $t->{prepare} }( $self, 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
 			
+			if ( ref( $t->{prepare} ) eq 'ARRAY' ) {
+				for my $func_prepare ( @{ $t->{prepare} } ) {
+					&{ $func_prepare }( $self, 'PREPARE', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars );
+				}
+			}	
+			
 			$_ = replace_var( $_, @_ ) for ( @{ $t->{args} }, 
 				( ref( $t->{expected} ) eq 'ARRAY' ? @{ $t->{expected} } : 
 				( ref( $t->{expected} ) eq 'HASH' ? values %{ $t->{expected} } : $t->{expected} ) )
@@ -2255,6 +2424,12 @@ sub get_tests
 			
 			&{ $t->{prepare} }( $self, 'CLEAR', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars ) 
 				if ref( $t->{prepare} ) eq 'CODE';
+				
+			if ( ref( $t->{prepare} ) eq 'ARRAY' ) {
+				for my $func_prepare ( @{ $t->{prepare} } ) {
+					&{ $func_prepare }( $self, 'CLEAR', \$test, $_, \$test_token, $test_appid, $test_appdataid, $vars );
+				}
+			}	
 		}
 		
 		push @result, { 'text' => "$test->{comment}", 'status' => $err_line };
@@ -2335,6 +2510,7 @@ sub show_result
 	my $fails = 0;
 
 	my $tests = get_test_list();
+	
 	for my $test (@$tests) {
 		$test_num++ for( keys %{ $test->{test} } );
 		$test_func++;
@@ -2575,16 +2751,15 @@ sub pre_corrupt_token
 {
 	my ( $self, $type, $test, $num, $token ) = @_;
 	
-	if ( $type eq 'PREPARE' ) { 
+	return unless $type eq 'PREPARE'; 
 	
-		my $vars = $self->{ 'VCS::Vars' };
+	my $vars = $self->{ 'VCS::Vars' };
+
+	my $t = $$token;
 	
-		my $t = $$token;
-		
-		$t =~ s/\w$/-/;
-		
-		$vars->setparam( 't', $t );
-	}	
+	$t =~ s/\w$/-/;
+	
+	$vars->setparam( 't', $t );
 }
 
 sub pre_finished
@@ -2604,6 +2779,8 @@ sub pre_content_1
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
+	return unless $type eq 'PREPARE'; 
+	
 	$vars->db->query("
 		UPDATE AutoToken SET Step = 1 WHERE Token = '$$token'"
 	);
@@ -2613,6 +2790,8 @@ sub pre_content_2
 # //////////////////////////////////////////////////
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
+	
+	return unless $type eq 'PREPARE'; 
 	
 	$vars->db->query("
 		UPDATE AutoAppointments SET PersonalDataPermission = 0, MobilPermission = 0, EMail = '' 
@@ -2629,6 +2808,8 @@ sub pre_getinfo
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
+	return unless $type eq 'PREPARE'; 
+	
 	$vars->db->query("
 		UPDATE AutoAppointments SET SDate = '2011-05-01', FDate = '2011-05-01', CenterID = '5'
 		WHERE ID = '$appid'"
@@ -2643,6 +2824,7 @@ sub pre_init_param
 	my $info_from_db = $vars->get_memd->delete('autoform_addparam');
 	
 	if ( $type eq 'PREPARE' ) { 
+	
 		$vars->db->query("
 			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
 			Insurance, BAddr, JAddr, AddrEqualled, SenderID, CTemplate, isConcil, 
@@ -2669,6 +2851,8 @@ sub pre_app_finish
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
+	return unless $type eq 'PREPARE'; 
+	
 	$vars->db->query("
 		UPDATE AutoAppData SET FinishedCenter = 0 WHERE ID = ?", {}, $appdataid 
 	);
@@ -2690,14 +2874,12 @@ sub pre_cach
 	if ( $type eq 'PREPARE' ) { 
 	
 		$vars->get_memd->set( 'cach_selftest', 'cash_ok', 60 );
-		
-		$self->{ this_is_self_testing } = undef;
 	}
 	else {
 		$vars->get_memd->delete( 'cach_selftest' );
-		
-		$self->{ this_is_self_testing } = 1;
 	}
+	
+	pre_show_no_testing( @_ );
 }
 sub pre_file
 # //////////////////////////////////////////////////
@@ -2753,7 +2935,8 @@ sub pre_geo_or_collect
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
-	if ( $type eq 'PREPARE' ) { 
+	if ( $type eq 'PREPARE' ) {
+	
 		$vars->db->query("
 			INSERT INTO Branches (ID, BName, Ord, Timezone, isDeleted, isDefault, Display, 
 			Insurance, BAddr, JAddr, AddrEqualled, SenderID, CTemplate, isConcil, 
@@ -2764,7 +2947,6 @@ sub pre_geo_or_collect
 			VALUES (5, 'Kazan', 90, 3, 0, 0, 1, 0, 'Казань', NULL, 1, 1, 'rtf', 0, 1, 0, 
 			1, 1, 0, 7, 0, 14, 1, 'http', 0, 0, 0, 0, 1, 1, 1, 0, 0, 67, 0, '0', 1, 0)"
 		);
-			
 	}
 	else {
 		$vars->db->query("
@@ -2772,24 +2954,7 @@ sub pre_geo_or_collect
 		);
 	}
 	
-	if ( ( $$test->{ comment } =~ /^(get_collect_date|correct_values)$/ ) and ( $num == 2 ) ) {
-	
-		$vars->db->query("
-			UPDATE VisaTypes SET category = ? WHERE ID = 13", {},
-			( $type eq 'PREPARE' ? 'D' : 'C' )
-		);
-	}
-}
-
-sub pre_draft
-# //////////////////////////////////////////////////
-{
-	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
-
-	$vars->db->query("
-		UPDATE AutoToken SET Draft = ? WHERE Token = ?", {},
-		( $type eq 'PREPARE' ? 1 : 0 ), $$token
-	);
+	pre_visa_type_d( @_ ) if ( $$test->{ comment } =~ /^(get_collect_date|correct_values)$/ ) and ( $num == 2 );
 }
 
 sub pre_nobody
@@ -2830,11 +2995,68 @@ sub pre_age
 {
 	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
 	
+	return unless $type eq 'PREPARE'; 
+
 	$vars->db->query("
 		UPDATE AutoAppData
 		SET birthdate = DATE_SUB(CURRENT_DATE(), INTERVAL ? YEAR)
 		WHERE ID = ?", {}, ( $num == 24 ? 18 : 9 ), $appdataid
 	);
+}
+
+sub pre_not_closer
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	return unless $type eq 'PREPARE'; 
+	
+	$vars->db->query("
+		UPDATE AutoAppData SET FingersDate = '2000-05-01' WHERE ID = ?", {}, $appdataid
+	);
+}
+
+sub pre_show_no_testing
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+
+	$self->{ this_is_self_testing } = ( $type eq 'PREPARE' ? undef : 1 );
+
+	$vars->get_memd->delete( 'autoform_' . $token . $_  ) for ( '_vtype', '_center' );
+}
+
+sub pre_visa_type_d
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	$vars->db->query("
+		UPDATE VisaTypes SET category = ? WHERE ID = 13", {},
+		( $type eq 'PREPARE' ? 'D' : 'C' )
+	);
+	
+	$vars->get_memd->delete( 'autoform_vcategory_13' );
+	
+	return unless $type eq 'PREPARE'; 
+	
+	$vars->db->query("
+		UPDATE AutoAppointments SET VType = 13 WHERE ID = ?", {}, $appid_param
+	);
+}
+
+sub pre_spb_centers
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	my $centerid = ( $type eq 'PREPARE' ? 11 : 1 ); 
+	
+	$vars->db->query("
+		UPDATE AutoAppointments SET CenterID = ? WHERE ID = ?", {}, $centerid, $appid_param
+	);
+
+	$vars->get_memd->delete( 'autoform_' . $$token . '_center' );
 }
 
 1;
