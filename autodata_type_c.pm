@@ -361,9 +361,11 @@ sub get_content_rules_hash
 						'full_error' => 'Паспорт c истекшим сроком действия, не может быть принят',
 					},
 					{
-						'condition' => 'not_closer_than_from_now',
+						'condition' => 'not_closer_than',
+						'table' => 'Appointments',
+						'name' => 'FDate',
 						'offset' => 90,
-						'full_error' => 'Для получения визы паспорт должен действовать ещё как минимум [offset]',
+						'full_error' => 'Срок действия паспорта должен превышать срок запрашиваемой визы на [offset]',
 					},
 				],
 				'db' => {
@@ -591,7 +593,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'workdata',
 				'label' => 'Профессиональная деятельность',
-				'comment' => 'Профессию необходимо указывать на английском или итальянском языках. Если на данный момент вы не работаете, то укажите безработный/домохозяйка, для учащихся указывается студент/школьник, для пенсионеров - пенсионер',
+				'comment' => 'Профессию необходимо указывать на английском или итальянском языках. Если на данный момент Вы не работаете, то укажите unemployed / housewife, для учащихся указывается student / pupil, для пенсионеров – pensioner',
 				'example' => 'Doctor',
 				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
@@ -1095,6 +1097,11 @@ sub get_content_rules_hash
 						'table' => 'SchengenAppData',
 						'name' => 'HostDataType',
 						'value' => 'P',
+					},
+					'only_if_not_1' => {
+						'table' => 'AppData',
+						'name' => 'VisaPurpose',
+						'value' => '7',
 					}
 				},
 			},
@@ -1138,9 +1145,66 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Приглашение' => [
+		'Информация о месте проживания' => [
 			{
 				'page_ord' => 15,
+				'progress' => 7,
+				'relation' => {
+					'only_if_not' => {
+						'table' => 'SchengenAppData',
+						'name' => 'HostDataType',
+						'value' => 'P',
+					},
+					'only_if' => {
+						'table' => 'AppData',
+						'name' => 'VisaPurpose',
+						'value' => '7',
+					}
+				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotels',
+				'label' => 'Название гостиницы или ФИО приглашающего',
+				'comment' => 'Укажите полное название гостиницы и данные приглашающего лица',
+				'example' => 'VMS',
+				'check' => 'W\s\-\.',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'Hotels',
+				},
+				'format' => 'capslock',
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotelsaddr',
+				'label' => 'Адрес места пребывания',
+				'comment' => 'Укажите адрес гостиницы',
+				'example' => 'Via Esempio 1, Rome',
+				'check' => 'WN\s\-\_\.\,\;\'\"',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'HotelAdresses',
+				},
+				'format' => 'capslock',
+			},
+			{
+				'type' => 'input',
+				'name' => 'hotelpho',
+				'label' => 'Телефон',
+				'comment' => 'Укажите контактный телефон гостиницы',
+				'example' => '39XXXXXXXX',
+				'check' => 'N',
+				'db' => {
+					'table' => 'AppData',
+					'name' => 'HotelPhone',
+				},
+			},
+		],
+		
+		'Приглашение' => [
+			{
+				'page_ord' => 16,
 				'progress' => 7,
 				'param' => 1,
 				'relation' => {
@@ -1152,7 +1216,7 @@ sub get_content_rules_hash
 					'only_if' => {
 						'table' => 'AppData',
 						'name' => 'VisaPurpose',
-						'value' => '1',
+						'value' => '14',
 					}
 				},
 			},
@@ -1261,7 +1325,7 @@ sub get_content_rules_hash
 	
 		'Приглашение организации' => [
 			{
-				'page_ord' => 16,
+				'page_ord' => 17,
 				'progress' => 7,
 				'param' => 1,
 				'relation' => {
@@ -1365,7 +1429,7 @@ sub get_content_rules_hash
 		
 		'Расходы заявителя' => [
 			{
-				'page_ord' => 17,
+				'page_ord' => 18,
 				'progress' => 8,
 			},
 			{
@@ -1387,7 +1451,7 @@ sub get_content_rules_hash
 		
 		'Уточните спонсора' => [
 			{
-				'page_ord' => 18,
+				'page_ord' => 19,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1413,7 +1477,7 @@ sub get_content_rules_hash
 		
 		'Средства заявителя' => [
 			{
-				'page_ord' => 19,
+				'page_ord' => 20,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1445,7 +1509,7 @@ sub get_content_rules_hash
 		
 		'Средства спонсора' => [
 			{
-				'page_ord' => 20,
+				'page_ord' => 21,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1476,7 +1540,7 @@ sub get_content_rules_hash
 		
 		'Уточните иные средства' => [
 			{
-				'page_ord' => 21,
+				'page_ord' => 22,
 				'progress' => 8,
 				'relation' => {
 					'only_if' => {
@@ -1502,7 +1566,7 @@ sub get_content_rules_hash
 				
 		'Данные родственника в ЕС' => [
 			{
-				'page_ord' => 22,
+				'page_ord' => 23,
 				'progress' => 8,
 				'param' => 1,
 				'relation' => {
@@ -1569,7 +1633,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'eu_idnum',
 				'label' => 'Номер паспорта',
-				'comment' => 'Введите серию и номер паспорта как единый набор цифр и букв без пробелов',
+				'comment' => 'Введите серию и номер паспорта',
 				'example' => '750000001',
 				'check' => 'zWN',
 				'db' => {
@@ -1582,7 +1646,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				'page_ord' => 23,
+				'page_ord' => 24,
 				'progress' => 9,
 				'replacer' => '[app_finish]',
 			},
@@ -1590,7 +1654,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				'page_ord' => 24,
+				'page_ord' => 25,
 				'progress' => 10,
 				'persons_in_page' => 1,
 			},
@@ -1610,7 +1674,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
-				'page_ord' => 25,
+				'page_ord' => 26,
 				'progress' => 11,
 				'relation' => {
 					'only_if_not' => {
@@ -1729,7 +1793,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные доверенного лица' => [
 			{
-				'page_ord' => 26,
+				'page_ord' => 27,
 				'progress' => 11,
 				'relation' => {
 					'only_if' => {
@@ -1845,7 +1909,7 @@ sub get_content_rules_hash
 		
 		'Оформление записи' => [
 			{
-				'page_ord' => 27,
+				'page_ord' => 28,
 				'progress' => 12,
 				'persons_in_page' => 1,
 				'goto_link' => 'back_to_appdate',
@@ -1985,7 +2049,7 @@ sub get_content_rules_hash
 		
 		'Предпочтительный офис получения готовых документов' => [
 			{
-				'page_ord' => 28,
+				'page_ord' => 29,
 				'progress' => 13,
 				'relation' => {
 					'only_if' => {
@@ -2014,7 +2078,7 @@ sub get_content_rules_hash
 		
 		'Подтверждение записи' => [
 			{
-				'page_ord' => 29,
+				'page_ord' => 30,
 				'progress' => 14,
 			},
 			{
@@ -2028,7 +2092,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				'page_ord' => 30,
+				'page_ord' => 31,
 				'progress' => 15,
 			},
 			{

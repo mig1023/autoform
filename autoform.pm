@@ -711,7 +711,7 @@ sub check_relation
 		}
 		
 		if ( $skip_this_page ) {
-		
+
 			$at_least_one_page_skipped = 1;
 			
 			if ( $moonwalk ) {
@@ -762,21 +762,13 @@ sub skip_by_condition
 {
 	my ( $self, $value, $relation, $condition ) = @_;
 
-	my $skip_it = 0;
-	
-	my %relation = map { $_ => 1 } split /,\s?/, $relation; 
+	my %relation = map { $_ => 1 } split /,\s?/, $relation;
 
-	if ( $condition eq 'only_if' ) {
+	return 1 if $condition =~ /^only_if_not(_\d+)?$/ and exists $relation{ $value };
 	
-		$skip_it = 1 unless exists $relation{ $value };
-	}
-	
-	if ( $condition eq 'only_if_not' ) {
-	
-		$skip_it = 1 if exists $relation{ $value };
-	}
+	return 1 if $condition =~ /^only_if(_\d+)?$/ and !exists $relation{ $value };
 
-	return $skip_it;
+	return 0;
 }
 
 sub get_forward
@@ -1746,12 +1738,11 @@ sub check_special_in_rules_for_save
 				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{ AutoAppData }
 			);
 
-			if ( $visa_type != 1 ) {
-				$self->query( 'query', __LINE__, "
-					UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {}, 
-					$table_id->{ AutoSchengenAppData }
-				);
-			}
+			$self->query( 'query', __LINE__, "
+				UPDATE AutoSchengenAppData SET HostDataType = 'S'
+				WHERE ID = ?", {}, $table_id->{ AutoSchengenAppData }
+				
+			) if $visa_type != 1;
 		}
 		elsif ( $element->{ special } eq 'cach_this_value' ) {
 
