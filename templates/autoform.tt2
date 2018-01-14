@@ -401,12 +401,12 @@ function init_comm(pos_x, pos_y) {
 			offsetY: offset_y,
 		});
 		
-		$('#[% last_error_name %]').bind({
-			click: function(e) {
-				$('#[% last_error_name %]').poshytip('hide');
-				return false;
-			}
-		});
+		// $('#[% last_error_name %]').bind({
+		//	click: function(e) {
+		//		$('#[% last_error_name %]').poshytip('hide');
+		//		return false;
+		//	}
+		// });
 		
 		$('#[% last_error_name %]').poshytip('show');
 		
