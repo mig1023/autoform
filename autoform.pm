@@ -380,12 +380,12 @@ sub init_add_param
 				
 				push @{ $info_from_db->{ '[citizenship_countries]' } }, $_ if $_->[ 2 ] == 0;
 				
-				push @{ $info_from_db->{ '[eu_countries]' } }, $_ if $_->[ 3 ] == 1;
+				push @{ $info_from_db->{ '[first_countries]' } }, $_ if $_->[ 3 ] == 1;
 			}
 			
-			for ( @{ $info_from_db->{ '[eu_countries]' } }, @$add_eu_countries ) {
+			for ( @{ $info_from_db->{ '[first_countries]' } }, @$add_eu_countries ) {
 			
-				push @{ $info_from_db->{ '[first_countries]' } }, $_;
+				push @{ $info_from_db->{ '[eu_countries]' } }, $_;
 			}
 
 			$self->cached( 'autoform_addparam', $info_from_db );
