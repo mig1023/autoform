@@ -986,8 +986,8 @@ sub get_content_rules_hash
 				'relation' => {
 					'only_if' => {
 						'table' => 'Appointments',
-						'name' => 'VType',
-						'value' => '14',
+						'name' => 'VisaPurpose',
+						'value' => '7',
 					}
 				},
 			},

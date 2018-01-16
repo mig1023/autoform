@@ -934,9 +934,9 @@ sub get_content_rules_hash
 				'progress' => 6,
 				'relation' => {
 					'only_if' => {
-						'table' => 'Appointments',
-						'name' => 'VType',
-						'value' => '14',
+						'table' => 'AppData',
+						'name' => 'VisaPurpose',
+						'value' => '7',
 					}
 				},
 			},
