@@ -1447,7 +1447,8 @@ sub get_html_for_element
 			my $checked = ( $value_original eq $opt ? 'checked' : '' );
 			
 			$uniq_id++;
-			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' . $checked . ' id="'.$name.$uniq_id.'">'.
+			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' .
+				$checked . ' title="' . $comment . '" id="'.$name.$uniq_id.'">' .
 				'<label for="'.$name.$uniq_id.'">'.$param->{$opt}.'</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
@@ -1462,7 +1463,8 @@ sub get_html_for_element
 		
 			my $checked = ( $value->{$opt} ? 'checked' : '' );
 			
-			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt . '" id="' . $opt . '" ' . $checked . '>'.
+			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt .
+			'" title="' . $comment . '" id="' . $opt . '" ' . $checked . '>'.
 			'<label for="' . $opt . '">' . $param->{$opt}->{label_for} . '</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
