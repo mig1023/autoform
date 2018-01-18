@@ -530,7 +530,7 @@ sub get_content_rules_hash
 				'name' => 'dovpassnum',
 				'label' => '№ паспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '754300001',
+				'example' => '4510ХХХХХХ',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',

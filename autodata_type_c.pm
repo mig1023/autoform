@@ -607,7 +607,7 @@ sub get_content_rules_hash
 				'name' => 'workaddr',
 				'label' => 'Работодатель: название компании, адрес, телефон',
 				'comment' => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
-				'example' => 'VMS, M.Tolmachevskiy pereulok 6 b.1, (495)7273577',
+				'example' => 'VMS, Moscow, M.Tolmachevskiy pereulok 6 b.1, (495)7273577',
 				'check' => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				'db' => {
 					'table' => 'AppData',
@@ -1844,7 +1844,7 @@ sub get_content_rules_hash
 				'name' => 'dovpassnum',
 				'label' => '№ паспорта',
 				'comment' => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				'example' => '754300001',
+				'example' => '4510ХХХХХХ',
 				'check' => 'zN',
 				'db' => {
 					'table' => 'Appointments',
