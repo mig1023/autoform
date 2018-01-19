@@ -41,7 +41,12 @@
 	[% IF person.Finished == 0 %]<b>[[% langreq('черновик') %]]</b>
 	[% ELSIF person.Finished == 2 %]<b>[[% langreq('тип визы') %]]</b>
 	[% ELSIF person.Finished == 3 %]<b>[[% langreq('в.центр') %]]</b>
-	[% END %] [% person.FName %] [% person.LName %]</td>
+	[% END %]
+	[% IF (person.FName != '') || (person.LName != '') %]
+	[% person.FName %] [% person.LName %]
+	[% ELSE %]
+	([% langreq('ФИО пока не указано') %])
+	[% END %]</td>
 	<td>[% IF person.BirthDate != '00.00.0000' %][% person.BirthDate %][% ELSE %]&nbsp;[% END %]</td>
 	<td><input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
 	<td><input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
