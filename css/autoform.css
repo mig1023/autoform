@@ -141,10 +141,20 @@
 }
 
 .captcha_container {
-	width: 100%;
+	width:100%;
 }
 
 .g-recaptcha {
 	transform-origin: left top;
 	-webkit-transform-origin: left top;
+}
+
+.suppl_text {
+	color:#585858;
+}
+
+.grayborder {
+	border-collapse:collapse;
+	border:1px solid #D3D3D3;
+	padding:10px;"
 }
