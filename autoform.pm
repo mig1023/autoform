@@ -64,9 +64,9 @@ sub get_content_rules
 	
 	my $new_content = {};
 	
-	for my $page ( sort { $content->{$a}->[0]->{page_ord} <=> $content->{$b}->[0]->{page_ord} } keys %$content ) {
+	for my $page ( sort { $content->{ $a }->[ 0 ]->{page_ord} <=> $content->{ $b }->[ 0 ]->{ page_ord } } keys %$content ) {
 		
-		my $page_ord = $content->{$page}->[0]->{page_ord};
+		my $page_ord = $content->{$page}->[ 0 ]->{ page_ord };
 		
 		$new_content->{ $page_ord } = $content->{ $page };
 		
@@ -74,22 +74,22 @@ sub get_content_rules
 
 			for ( 'persons_in_page', 'collect_date', 'param', 'ussr_or_rf_first' ) {
 			
-				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[0]->{ $_ } ? 1 : 0 );
+				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[ 0 ]->{ $_ } ? 1 : 0 );
 			}
 		}
 		
-		if ( !$full && $content->{ $page }->[0]->{replacer} ) {
+		if ( !$full && $content->{ $page }->[ 0 ]->{ replacer } ) {
 		
-			$new_content->{ $page_ord } = $content->{ $page }->[0]->{replacer};
+			$new_content->{ $page_ord } = $content->{ $page }->[ 0 ]->{ replacer };
 		}
 		elsif ( !$full ) {
 		
-			delete $new_content->{ $page_ord }->[0];
+			delete $new_content->{ $page_ord }->[ 0 ];
 			
 			@{ $new_content->{ $page_ord } } = grep defined, @{ $new_content->{ $page_ord } };
 		}
 		else {
-			$new_content->{ $page_ord }->[0]->{page_name} = $page;
+			$new_content->{ $page_ord }->[ 0 ]->{ page_name } = $page;
 		}
 	}
 
@@ -427,12 +427,13 @@ sub init_add_param
 		$ussr_first = 1 if $birthdate < 0;
 	}
 
-	if ( 	$keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date } or 
+	if ( 	$keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date }
+		or 
 		$keys_in_current_page->{ persons_in_page } or $keys_in_current_page->{ ussr_or_rf_first } 
 	) {
 		for my $page ( keys %$content_rules ) {
 		
-			next if $content_rules->{$page} =~ /^\[/;
+			next if $content_rules->{ $page } =~ /^\[/;
 			
 			for my $element ( @{ $content_rules->{$page} } ) {
 
@@ -442,11 +443,12 @@ sub init_add_param
 					
 					$element->{ param } = {};
 					
-					$element->{ param }->{ $_->[0] } = $_->[1] for ( @$param_array );
+					$element->{ param }->{ $_->[ 0 ] } = $_->[ 1 ] for ( @$param_array );
 				}
 				
 				if (	exists $element->{ check_logic } and $self->{ token }
-					and $keys_in_current_page->{ collect_date }
+					and
+					$keys_in_current_page->{ collect_date }
 				) {	
 					for ( @{ $element->{ check_logic } } ) {
 					
@@ -673,14 +675,14 @@ sub get_autoform_content
 
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
-	if ( !$last_error and ( exists $page->[0]->{relation} ) ) {
+	if ( !$last_error and ( exists $page->[ 0 ]->{ relation } ) ) {
 	
 		( $step, $page ) = $self->check_relation( $step, $page, $back );
 	}
 	
 	if ( $page !~ /\[/ ) {
 	
-		$title = $self->lang( $page->[0]->{ page_name } );
+		$title = $self->lang( $page->[ 0 ]->{ page_name } );
 	}
 
 	my ( $content, $template ) = $self->get_html_page( $step, $appnum );
@@ -705,9 +707,9 @@ sub check_relation
 	do {
 		$skip_this_page = 0;
 
-		for my $relation ( keys %{ $page->[0]->{ relation } } ) {
+		for my $relation ( keys %{ $page->[ 0 ]->{ relation } } ) {
 		
-			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[0]->{ relation }->{ $relation } );
+			$skip_this_page += $self->skip_page_by_relation( $relation, $page->[ 0 ]->{ relation }->{ $relation } );
 		}
 		
 		if ( $skip_this_page ) {
@@ -1191,7 +1193,7 @@ sub get_list_of_app
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
-	)->[0];
+	)->[ 0 ];
 
 	$self->send_link( $link->{ EMail } ) unless $link->{ LinkSended } or !$link->{ EMail };
 	
@@ -1340,7 +1342,7 @@ sub get_progressbar
 		
 	my $progress_line = $self->get_progressbar_hash_opt();
 	
-	my $current_progress = $page->[0]->{ progress };
+	my $current_progress = $page->[ 0 ]->{ progress };
 	
 	my $big_element = 0;
 	
@@ -1449,7 +1451,7 @@ sub get_html_for_element
 			$uniq_id++;
 			$list .= '<input type="radio" name="' . $name . '" value="' . $opt . '" ' .
 				$checked . ' title="' . $comment . '" id="'.$name.$uniq_id.'">' .
-				'<label for="'.$name.$uniq_id.'">'.$param->{$opt}.'</label><br>';
+				'<label for="'.$name.$uniq_id.'">'.$param->{ $opt }.'</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
 		
@@ -1459,13 +1461,13 @@ sub get_html_for_element
 
 		my $list = '';
 
-		for my $opt ( sort {$a cmp $b} keys %$param ) {
+		for my $opt ( sort { $a cmp $b } keys %$param ) {
 		
-			my $checked = ( $value->{$opt} ? 'checked' : '' );
+			my $checked = ( $value->{ $opt } ? 'checked' : '' );
 			
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt .
-			'" title="' . $comment . '" id="' . $opt . '" ' . $checked . '>'.
-			'<label for="' . $opt . '">' . $param->{$opt}->{label_for} . '</label><br>';
+				'" title="' . $comment . '" id="' . $opt . '" ' . $checked . '>'.
+				'<label for="' . $opt . '">' . $param->{ $opt }->{ label_for } . '</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
 	}
@@ -1775,7 +1777,7 @@ sub get_all_values
 
 		my $result = $self->query( 'selallkeys', __LINE__, "
 			SELECT $request FROM $table WHERE ID = ?", $table_id->{ $table }
-		)->[0];
+		)->[ 0 ];
 
 		for my $value ( keys %$result ) {
 		
@@ -2152,7 +2154,7 @@ sub check_logic
 			my $app = $self->query( 'selallkeys', __LINE__, "
 				SELECT birthdate, CURRENT_DATE() as currentdate
 				FROM AutoAppData WHERE ID = ?", $tables_id->{ AutoAppData }
-			)->[0];
+			)->[ 0 ];
 		
 			$first_error = $self->text_error( 21, $element, undef, $rule->{ offset } ) 
 				if ( $self->age( $app->{ birthdate }, $app->{ currentdate } ) >= $rule->{ offset } )
@@ -2365,7 +2367,7 @@ sub create_new_appointment
 		FROM AutoToken
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
-	)->[0];
+	)->[ 0 ];
 	
 	if ( $person_for_contract ) {
 	
@@ -2373,7 +2375,7 @@ sub create_new_appointment
 			SELECT RLName as LName, RFName as FName, RMName as MName, RPassNum as PassNum, 
 			RPWhen as PassDate, RPWhere as PassWhom, AppPhone as Phone, RAddress as Address 
 			FROM AutoAppData WHERE ID = ?", $person_for_contract
-		)->[0];
+		)->[ 0 ];
 	}
 
 	# my $time_start = $self->time_interval_calculate();
@@ -2579,7 +2581,7 @@ sub get_hash_table
 	
 	my $hash_table = $self->query( 'selallkeys', __LINE__, "
 		SELECT * FROM $table_name WHERE $field = ?", $table_id
-	)->[0];
+	)->[ 0 ];
 	
 	return $hash_table;
 }
@@ -2747,7 +2749,7 @@ sub send_app_confirm
 		FROM Appointments
 		WHERE ID = ?
 		ORDER BY ID DESC LIMIT 1", $appid
-	)->[0];
+	)->[ 0 ];
 	
 	$replacer->{ branch_addr } = $self->lang( 'Address-' . $data->{ CenterID } );
 	
@@ -2960,7 +2962,7 @@ sub query
 	# warn Dumper( \@_ );
 	# warn "sql (line $line) - $milliseconds ms" if $milliseconds > 1; 
 	
-	return ( wantarray ? @result : $result[0] ) if $type eq 'sel1';
+	return ( wantarray ? @result : $result[ 0 ] ) if $type eq 'sel1';
 	
 	return $return;
 }
