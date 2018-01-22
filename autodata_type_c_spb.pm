@@ -1068,6 +1068,7 @@ sub get_content_rules_hash
 					{
 						'condition' => 'now_or_later',
 						'offset' => ( 3 * 365 ), # <--- 3 years
+						'full_error' => 'Допустимо указывать только визы, выданные за последние [offset]'
 					},
 					{
 						'condition' => 'equal_or_later',
@@ -1107,6 +1108,13 @@ sub get_content_rules_hash
 					'table' => 'AppData',
 					'name' => 'FingersDate',
 				},
+				'check_logic' => [
+					{
+						'condition' => 'now_or_later',
+						'offset' => ( 5 * 365 ), # <--- 3 years
+						'full_error' => 'Дата сканирования отпечатков пальцев, не должна быть более [offset] назад'
+					},
+				],
 				'special' => 'mask',
 			},
 		],
