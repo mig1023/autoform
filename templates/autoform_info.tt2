@@ -103,17 +103,19 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" class="dashed_line">&nbsp;</td></tr>
-
-<tr><td colspan="2" align ="justify">
-<span id="suppl_text">
-<br>[% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
+<tr><td colspan="2" align ="justify" class="grayborder">
+<span class="suppl_text">
+[% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
 <br><br>[% langreq('C 14 сентября 2015 года, все заявители, запрашивающие визу, проходят обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждому заявителю необходимо явиться на подачу документов лично') %].
 <br><br>[% langreq('Обращаем ваше внимание, что прием документов на оформление визы и прохождение процедуры "Биометрия" в Визовом центре проходит при предъявлении распечатанной записи и строго в назначенное время') %].
+<br><br>[% langreq('Ознакомьтесь с положением об') %] <a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('отказе от ответственности и политике конфиденциальности') %]</a>.
 <br><br>[% langreq('Пожалуйста, будьте по указанному ниже адресу не более, чем за 10 минут до назначенного времени') %].
 <br><br>[% langreq('Запись в Визовый центр на подачу документов осуществляется бесплатно') %].
-<br><br>[% langreq('Ознакомьтесь с положением об') %] <a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('отказе от ответственности и политике конфиденциальности') %]</a>.</span></td></tr>
+</span></td></tr>
 
+<tr><td colspan="2">&nbsp;</td></tr>
+
+<tr><td colspan="2"><h2>[% langreq('Спасибо') %]<br>[% langreq('Итальянский визовый центр') %]</h2></td></tr>
 
 [% ELSIF title == 2 %]
 
@@ -130,11 +132,11 @@ YMaps.jQuery(function () {
 <input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 <input class="small_button" type="button" value="[% langreq('Назначить другую дату') %] &#9655;" onclick="go_button('reschedule');"><br></td></tr>
 
-<tr><td colspan="2" class="dashed_line">&nbsp;</td></tr>
+<tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" align ="justify">
-<span id="suppl_text">
-<br>[% langreq('Некоторые комментарии по процессу выбора нового времени и даты') %].
+<tr><td colspan="2" align ="justify" class="grayborder">
+<span class="suppl_text">
+[% langreq('Некоторые комментарии по процессу выбора нового времени и даты') %].
 </span>
 </td></tr>
 
@@ -161,11 +163,11 @@ YMaps.jQuery(function () {
 <input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 <input class="small_button" type="button" value="[% langreq('Отменить запись') %] &#9655;" onclick="go_button('cancel');"><br></td></tr>
 
-<tr><td colspan="2" class="dashed_line">&nbsp;</td></tr>
+<tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" align="justify">
-<span id="suppl_text">
-<br>[% langreq('Некоторые комментарии по процессу отмены записи') %].
+<tr><td colspan="2" align="justify" class="grayborder">
+<span class="suppl_text">
+[% langreq('Некоторые комментарии по процессу отмены записи') %].
 </span>
 </td></tr>
 
@@ -246,7 +248,7 @@ function mobileScreenCheck() {
 	
 	$('.m_info').css( "font-size", mobilScreen ? '30px' : '' );
 	$('.m_left').css( "text-align", mobilScreen ? 'left' : 'right' );
-	$('#suppl_text, .dotted_link').css( "font-size", mobilScreen ? '15px' : '12px' );
+	$('.suppl_text, .dotted_link').css( "font-size", mobilScreen ? '15px' : '12px' );
 	
 	$('.spacer').html( mobilScreen ? '&nbsp;&nbsp;' : '' );
 	$('.spacer2').html( mobilScreen ? '<br>' : '' );
