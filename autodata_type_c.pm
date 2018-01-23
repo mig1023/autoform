@@ -1060,7 +1060,7 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'now_or_later',
-						'offset' => ( 5 * 365 ), # <--- 3 years
+						'offset' => ( 5 * 365 ), # <--- 5 years
 						'full_error' => 'Дата сканирования отпечатков пальцев, не должна быть более [offset] назад'
 					},
 				],
