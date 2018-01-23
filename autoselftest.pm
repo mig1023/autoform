@@ -317,7 +317,7 @@ sub get_test_list {
 				},
 				9 => { 	'args' => [ 'radiolist', 'element', '2', { 1 => 'first', 2 => 'second', 3 => 'third' } ],
 					'expected' => 
-						'<div id="element"><input type="radio" name="element" value="1"  id="element1"><label for="element1">first</label><br><input type="radio" name="element" value="2" checked id="element2"><label for="element2">second</label><br><input type="radio" name="element" value="3"  id="element3"><label for="element3">third</label><br></div>',
+						'<div id="element"><input type="radio" name="element" value="1"  title="" id="element1"><label for="element1">first</label><br><input type="radio" name="element" value="2" checked title="" id="element2"><label for="element2">second</label><br><input type="radio" name="element" value="3"  title="" id="element3"><label for="element3">third</label><br></div>',
 				},
 				10 => {	'args' => [ 'text', undef, 'text' ],
 					'expected' => '<td colspan="3">text</td>',
@@ -339,7 +339,7 @@ sub get_test_list {
 						'test2' => { 'db' => 'test2', 'label_for' => 'Тест 2' },
 					} ],
 					'expected' =>
-						'<div id="element"><input type="checkbox" value="test1" name="test1" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br></div>',
+						'<div id="element"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">Тест 2</label><br></div>',
 				},
 				16 => {	'args' => [ 'progress', 'test', undef, 'past', 0 ],
 					'expected' =>
@@ -403,7 +403,7 @@ sub get_test_list {
 						}
 					],
 					'expected' => 
-						'<tr><td><label id="text">Средства</label></td><td><div id="test"><input type="checkbox" value="test1" name="test1" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" id="test2" ><label for="test2">Тест 2</label><br></div></td></tr>',
+						'<tr><td><label id="text">Средства</label></td><td><div id="test"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">Тест 2</label><br></div></td></tr>',
 				}
 			},
 		},
@@ -2704,12 +2704,18 @@ sub recursive_check
 	
 }
 
+sub debug_head
+# //////////////////////////////////////////////////
+{
+	return '>'x12 . ' ' . shift . ' ' . '<'x12;
+}
+
 sub test_line
 # //////////////////////////////////////////////////
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 
-	warn "$comm\n\nEXPECTED\n\n$expected\n\nRESULT\n\n$result" if $debug;
+	warn debug_head( $comm ) . "\n\nEXPECTED\n\n$expected\n\nRESULT\n\n$result" if $debug;
 	
 	return $comm if lc( $expected ) ne lc( $result );
 }
@@ -2720,7 +2726,7 @@ sub test_line_in_hash
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my ( $key, $value ) = split /:/, $expected;
 	
-	warn "$comm\n\n" . Dumper( $expected, $result ) if $debug;
+	warn debug_head( $comm ) . "\n\n" . Dumper( $expected, $result ) if $debug;
 
 	return $comm if lc( $result->{ $key } ) ne lc( $value );
 }
@@ -2731,7 +2737,7 @@ sub test_hash
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
 	my $not_eq = 0;
 
-	warn "$comm\n\n" . Dumper( $expected, $result ) if $debug;
+	warn debug_head( $comm ) . "\n\n" . Dumper( $expected, $result ) if $debug;
 	
 	$not_eq += ( keys %$expected != keys %$result );
 	
@@ -2753,7 +2759,7 @@ sub test_array
 	
 	my $not_eq = 0;
 	
-	warn "$comm\n\n" . Dumper( $expected, \@result ) if $debug;
+	warn debug_head( $comm ) . "\n\n" . Dumper( $expected, \@result ) if $debug;
 	
 	return 0 if ( $#result < 0 ) and ( $#$expected < 0 );
 	return 1 if ( $#result < 0 ) or ( $#$expected < 0 );
@@ -2771,7 +2777,7 @@ sub test_array_ref
 {
 	my ( $debug, $expected, $comm, $self, $result ) = @_;
 
-	warn "$comm\n\n" . Dumper( $expected, $result ) if $debug;
+	warn debug_head( $comm ) . "\n\n" . Dumper( $expected, $result ) if $debug;
 	
 	my $not_eq = 0;
 	
@@ -2792,7 +2798,7 @@ sub test_regexp
 {
 	my ( $debug, $regexp, $comm, undef, $result ) = @_;
 	
-	warn "$comm\n\nREGEXP:\n\n$regexp\n\nRESULT\n\n$result" if $debug;
+	warn debug_head( $comm ) . "\n\nREGEXP:\n\n$regexp\n\nRESULT\n\n$result" if $debug;
 	
 	return $comm if $result !~ /$regexp/;
 }
@@ -2808,7 +2814,7 @@ sub test_cached
 	
 	my $result = $vars->get_memd->get( $cached_name );
 	
-	warn "$comm\n\nCACHED\n\n$cached_value\n\nRESULT\n\n$result" if $debug;
+	warn debug_head( $comm ) . "\n\nCACHED\n\n$cached_value\n\nRESULT\n\n$result" if $debug;
 	
 	return $comm if $result ne $cached_value;
 }
@@ -2828,7 +2834,7 @@ sub test_write_db
 		SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'"
 	);
 
-	warn "$comm\n\nDB VALUE\n\n$db_value\n\nVALUE\n\n$value" if $debug;
+	warn debug_head( $comm ) . "\n\nDB VALUE\n\n$db_value\n\nVALUE\n\n$value" if $debug;
 
 	return $comm if lc( $db_value ) ne lc( $value );
 }
