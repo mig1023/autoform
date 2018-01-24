@@ -343,12 +343,12 @@ sub get_geo_info
 sub init_add_param
 # //////////////////////////////////////////////////
 {
-	my ( $self, $content_rules, $keys_in_current_page ) = @_;
+	my ( $self, $content_rules, $keys ) = @_;
 	
 	my $info_from_db = undef;
 	my $ussr_first = 0;
 	
-	if ( $keys_in_current_page->{ param } ) {
+	if ( $keys->{ param } ) {
 	
 		$info_from_db = $self->cached( 'autoform_addparam' );
 		
@@ -392,7 +392,7 @@ sub init_add_param
 		}
 	}
 
-	if ( $self->{ token } and $keys_in_current_page->{ persons_in_page } ) {
+	if ( $self->{ token } and $keys->{ persons_in_page } ) {
 
 		my $app_person_in_app = $self->query( 'selallkeys', __LINE__, "
 			SELECT AutoAppData.ID as ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person,
@@ -415,7 +415,7 @@ sub init_add_param
 		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
 	}
 	
-	if ( $self->{ token } and $keys_in_current_page->{ ussr_or_rf_first } ) {
+	if ( $self->{ token } and $keys->{ ussr_or_rf_first } ) {
 	
 		my $birthdate = $self->query( 'sel1', __LINE__, "
 			SELECT DATEDIFF(AutoAppData.BirthDate, '1991-12-26')
@@ -427,10 +427,8 @@ sub init_add_param
 		$ussr_first = 1 if $birthdate < 0;
 	}
 
-	if ( 	$keys_in_current_page->{ param } or $keys_in_current_page->{ collect_date }
-		or 
-		$keys_in_current_page->{ persons_in_page } or $keys_in_current_page->{ ussr_or_rf_first } 
-	) {
+	if ( $keys->{ param } or $keys->{ collect_date } or $keys->{ persons_in_page } or $keys->{ ussr_or_rf_first } ) {
+	
 		for my $page ( keys %$content_rules ) {
 		
 			next if $content_rules->{ $page } =~ /^\[/;
@@ -446,10 +444,8 @@ sub init_add_param
 					$element->{ param }->{ $_->[ 0 ] } = $_->[ 1 ] for ( @$param_array );
 				}
 				
-				if (	exists $element->{ check_logic } and $self->{ token }
-					and
-					$keys_in_current_page->{ collect_date }
-				) {	
+				if ( exists $element->{ check_logic } and $self->{ token } and $keys->{ collect_date } ) {
+				
 					for ( @{ $element->{ check_logic } } ) {
 					
 						$_->{ offset } = $self->get_collect_date()	
@@ -458,6 +454,7 @@ sub init_add_param
 				}
 				
 				if ( $element->{ name } =~ /^(brhcountry|prev_сitizenship)$/ ) {
+				
 					$element->{ first_elements } = '272, 70' if $ussr_first;
 				}
 			}
@@ -628,38 +625,26 @@ sub get_autoform_content
 	$step = $min_step if $step < $min_step;
 	$step = $max_step if $step > $max_step;
 
-	if ( ( $action eq 'back' ) and ( $step > 1 ) ) {
+	$step = $self->get_back( $step ) if ( $action eq 'back' ) and ( $step > 1 );
 	
-		$step = $self->get_back( $step );
-	}
-
-	if ( ( $action eq 'forward' ) and ( $step < $max_step ) ) {
+	( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
+		if ( $action eq 'forward' ) and ( $step < $max_step );
 	
-		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
-	}
-
-	if ( ( $action eq 'edit' ) and $appdata_id ) {
+	$step = $self->get_edit( $step, $appdata_id ) if ( $action eq 'edit' ) and $appdata_id;
 	
-		$step = $self->get_edit( $step, $appdata_id );
-	}
+	$self->get_delete( $appdata_id ) if ( $action eq 'delapp' ) and $appdata_id;
 	
-	if ( ( $action eq 'delapp' ) and $appdata_id ) {
-	
-		$self->get_delete( $appdata_id );
-	}
-	
-	if ( $action eq 'addapp' ) {
-	
-		$step = $self->get_add( $app_id );
-	}
+	$step = $self->get_add( $app_id ) if $action eq 'addapp';
 	
 	if ( $action eq 'tofinish' ) {
 	
 		my $app_status = $self->check_all_app_finished_and_not_empty();
 		
 		if ( $app_status == 0 ) {
+		
 			$step = $self->set_step_by_content( '[app_finish]', 'next' );
-		} else {
+		}
+		else {
 			$step = $self->set_step_by_content( '[list_of_applicants]' );
 			
 			$last_error = $self->text_error( $app_status, { 'name' => 'applist' }, undef);
@@ -700,6 +685,7 @@ sub check_relation
 	my ( $self, $step, $page, $moonwalk ) = @_;
 
 	my $skip_this_page;
+	
 	my $at_least_one_page_skipped = 0;
 	
 	my $current_table_id = $self->get_current_table_id(); 
@@ -716,11 +702,7 @@ sub check_relation
 
 			$at_least_one_page_skipped = 1;
 			
-			if ( $moonwalk ) {
-				$step--;
-			} else {
-				$step++;
-			}
+			$step += ( $moonwalk ? -1 : 1 );
 			
 			$page = $self->get_content_rules( $step, 'full' );
 			
@@ -783,15 +765,18 @@ sub get_forward
 	if ( !$current_table_id->{AutoAppointments} ) {
 	
 		$self->create_clear_form( $self->{ vars }->getparam( 'center' ) );
+		
 		$current_table_id = $self->get_current_table_id();
 	}
 	
 	$self->save_data_from_form( $step, $current_table_id );
+	
 	$self->mod_last_change_date();
 	
 	my $last_error = $self->check_data_from_form( $step );
 	
 	my $appnum = undef;
+	
 	my $appid = undef;
 	
 	if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) ) {
@@ -912,15 +897,19 @@ sub get_step_by_content
 	my ( $self, $content, $next ) = @_;
 	
 	my $page_content = $self->get_content_rules();
+	
 	my $page_content_full = $self->get_content_rules( undef, 'full' );
 	
 	my $step;
 
 	for my $page ( keys %$page_content ) {
 	
-		$step = $page if ( $page_content->{ $page } eq $content );
+		$step = $page if (
 		
-		$step = $page if ( $page_content_full->{ $page }->[ 0 ]->{ goto_link } eq $content );
+			( $page_content->{ $page } eq $content )
+			or
+			( $page_content_full->{ $page }->[ 0 ]->{ goto_link } eq $content )
+		);
 	}
 
 	$step++ if $next;
@@ -1114,6 +1103,7 @@ sub get_html_page
 	my ( $self, $step, $appnum ) = @_;
 	
 	my $content = '';
+	
 	my $template = 'autoform.tt2';
 	
 	my $page_content = $self->get_content_rules( $step, undef, 'init' );
