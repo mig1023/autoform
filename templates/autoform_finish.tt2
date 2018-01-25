@@ -9,7 +9,7 @@
 <font face="arial">
 
 <center>
-<div  class="margin_big">
+<div id="app_form" class="margin_big">
 
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
@@ -66,6 +66,7 @@ function mobileScreenCheck() {
 	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
+	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	
 	$('*').css( "font-size", ( mobilScreen ? '15px' : '' ) );
 	

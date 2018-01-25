@@ -5,13 +5,13 @@
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-[% IF title == 2 %]
+[% IF title == 1 %]
+	<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
+[% ELSIF title == 2 %]
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
-[% ELSIF title == 1 %]
-	<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
 [% END %]
 
 </head>
@@ -103,7 +103,7 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" align ="justify" class="grayborder">
+<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
 <span class="suppl_text">
 [% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
 <br><br>[% langreq('C 14 сентября 2015 года, все заявители, запрашивающие визу, проходят обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждому заявителю необходимо явиться на подачу документов лично') %].
@@ -134,7 +134,7 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" align ="justify" class="grayborder">
+<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
 <span class="suppl_text">
 [% langreq('Некоторые комментарии по процессу выбора нового времени и даты') %].
 </span>
@@ -165,7 +165,7 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" align="justify" class="grayborder">
+<tr><td colspan="2" align="justify" id="comment_place"  class="grayborder">
 <span class="suppl_text">
 [% langreq('Некоторые комментарии по процессу отмены записи') %].
 </span>
@@ -289,6 +289,10 @@ function mobileScreenCheck() {
 	$('#app_table').css( "width", ( mobilScreen ? '100%' : '600px' ) );
 	
 	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
+
+	if ( mobilScreen ) {
+		$('#comment_place').removeClass( "grayborder" );
+	}
 	
 	$('.big_button').css( "height", ( mobilScreen ? '70px' : '37px' ) );
 	$('.big_button, .small_button').css( "margin-bottom", ( mobilScreen ? '15px' : '2px' ) );
