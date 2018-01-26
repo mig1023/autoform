@@ -20,7 +20,7 @@
 
 <table id="app_list" width="100%">
 
-<tr><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br></td></tr>
+<tr class="mobil_hide"><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br></td></tr>
 
 <tr><td align="center">
 <table width="600px" id="app_table">
@@ -138,6 +138,8 @@ function mobileScreenCheck() {
 	$('.small_button').css( "height", ( mobilScreen ? '30px' : '' ) );
 	$('.small_button').css( "width", ( mobilScreen ? '30px' : '' ) );
 	$('#spacer').html( mobilScreen ? '<br>' : '' );
+
+	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
 
 	$('*').css( "font-size", ( mobilScreen ? '15px' : '' ) );
 	
