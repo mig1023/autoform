@@ -124,14 +124,14 @@ sub get_app_visa_and_center
 	my $self = shift;
 
 	return if !$self->{ token };
+
+	my $app_data = {};
 	
-	my $visa_vtype = $self->cached( 'autoform_' . $self->{ token } . '_vtype' );
-	
-	my $center_id = $self->cached( 'autoform_' . $self->{ token }. '_center' );
+	$app_data->{ $_ } = $self->cached( 'autoform_' . $self->{ token } . '_' . $_ ) for ( 'vtype', 'center' );
 		
-	if ( !$visa_vtype or !$center_id ) {
+	if ( !$app_data->{ vtype } or !$app_data->{ center } ) {
 		
-		( $center_id, $visa_vtype ) = $self->query( 'sel1', __LINE__, "
+		( $app_data->{ center }, $app_data->{ vtype } ) = $self->query( 'sel1', __LINE__, "
 			SELECT CenterID, VisaTypes.ID
 			FROM AutoAppointments
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
@@ -139,25 +139,33 @@ sub get_app_visa_and_center
 			WHERE Token = ?", $self->{ token }
 		);
 		
-		$self->cached( 'autoform_' . $self->{ token } . '_vtype', $visa_vtype ) if $visa_vtype;
+		for ( 'vtype', 'center' ) {
+
+			$app_data->{ $_ } = 'X' unless $app_data->{ $_ };
+
+			$self->cached( 'autoform_' . $self->{ token } . '_' . $_, $app_data->{ $_ } );
+		}
+	}
+
+	for ( 'vtype', 'center' ) {
 		
-		$self->cached( 'autoform_' . $self->{ token } . '_center', $center_id ) if $center_id;
+		$app_data->{ $_ } = undef if $app_data->{ $_ } eq 'X';
 	}
 	
-	return ( $center_id ) if !$visa_vtype;
+	return ( $app_data->{ center } ) if !$app_data->{ vtype };
 	
-	my $visa_category = $self->cached( 'autoform_vcategory_' . $visa_vtype );
+	my $visa_category = $self->cached( 'autoform_vcategory_' . $app_data->{ vtype } );
 	
 	if ( !$visa_category ) {
 		
 		$visa_category = $self->query( 'sel1', __LINE__, "
-			SELECT Category FROM VisaTypes WHERE ID = ?", $visa_vtype
+			SELECT Category FROM VisaTypes WHERE ID = ?", $app_data->{ vtype }
 		);
 		
-		$self->cached( 'autoform_vcategory_' . $visa_vtype, $visa_category  );
+		$self->cached( 'autoform_vcategory_' . $app_data->{ vtype }, $visa_category  );
 	}
 
-	return ( $center_id, $visa_category );
+	return ( $app_data->{ center }, $visa_category );
 }
 
 sub autoform
@@ -1736,7 +1744,7 @@ sub check_special_in_rules_for_save
 				UPDATE AutoSchengenAppData SET HostDataType = 'S'
 				WHERE ID = ?", {}, $table_id->{ AutoSchengenAppData }
 				
-			) if $visa_type != 1;
+			) unless $visa_type == 1;
 		}
 		elsif ( $element->{ special } eq 'cach_this_value' ) {
 
@@ -2895,7 +2903,7 @@ sub mutex_fail
 	for ( @$pass_list ) {
 	
 		return 1 unless $self->{ vars }->get_memd->add(
-			'autoform_pass' . $_, $_, $self->{ autoform }->{ memcached }->{ mutex_exptime }
+			"autoform_pass$_", $_, $self->{ autoform }->{ memcached }->{ mutex_exptime }
 		);
 	}
 }
