@@ -42,6 +42,7 @@
 
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
+<input type = "hidden" value = "0" name = "mobile_ver" id = "mobile_ver">
 <input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
 
 <table width="100%">
@@ -119,6 +120,7 @@ function mobileScreenCheck() {
 	var mobilScreen = isMobile();
 	
 	if ( mobilScreen ) {
+		$('#mobile_ver').val(1); 
 		init_comm( 'center', 'bottom' );
 	}
 	else {

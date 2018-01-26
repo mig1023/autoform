@@ -2349,6 +2349,20 @@ sub mod_last_change_date
 	);
 }
 
+sub get_app_version
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $version = VCS::Site::autodata::get_app_version_list();
+	
+	return $version->[ 2 ] if $self->{ vars }->getparam( 'mobile_app' );
+
+	return $version->[ 1 ] if $self->{ vars }->getparam( 'mobile_ver' );
+
+	return $version->[ 0 ];
+}
+
 sub create_new_appointment
 # //////////////////////////////////////////////////
 {
@@ -2359,6 +2373,8 @@ sub create_new_appointment
 	my $tables_transfered_id = $self->get_current_table_id();
 	
 	my $db_rules = $self->get_content_db_rules();
+
+	my $ver = $self->get_app_version();
 
 	my ( $center, $person_for_contract ) = $self->query( 'selallkeys', __LINE__, "
 		SELECT CenterID, PersonForAgreements
@@ -2386,7 +2402,7 @@ sub create_new_appointment
 	
 	my $new_appid = $self->create_table(
 		'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
-		$db_rules, undef, undef, $info_for_contract
+		$db_rules, undef, undef, $info_for_contract, undef, $ver
 	);
 	
 	my $allapp = $self->query( 'selallkeys', __LINE__, "
@@ -2424,11 +2440,11 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center ) = @_;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver ) = @_;
 
 	my $hash = $self->get_hash_table( $autoname, 'ID', $transfered_id );
 
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center );
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver );
 	
 	return $self->insert_hash_table( $name, $hash );
 }
@@ -2436,7 +2452,7 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract, $center ) = @_;
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract, $center, $ver ) = @_;
 
 	for my $column ( keys %$hash ) {
 
@@ -2498,6 +2514,8 @@ sub mod_hash
 		$hash->{ AppNum } = $appointments->getLastAppNum( $self->{ vars }, $hash->{ CenterID }, $hash->{ AppDate } );
 		
 		$hash->{ OfficeToReceive } = ( $hash->{ OfficeToReceive } == 2 ? 39 : undef ) ;
+
+		$hash->{ Notes } = $ver;
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
 	
