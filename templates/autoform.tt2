@@ -118,70 +118,70 @@ function isMobile() {
 function mobileScreenCheck() {
 
 	var mobilScreen = isMobile();
-	
-	if ( mobilScreen ) {
-		$('#mobile_ver').val(1); 
-		init_comm( 'center', 'bottom' );
-	}
-	else {
-		init_comm( 'right', 'center' );
-	};
-	
-	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
-	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
-	
-	$('.action_button').css( "height", ( mobilScreen ? '60px' : '' ) );
-	$('.action_button').css( "width", ( mobilScreen ? '100%' : '' ) );
-	
-	if ( mobilScreen ) {
-		[% FOREACH picker IN special.datepicker %]
-			$('#[% picker %]').datepicker('destroy');
-		[% END %]
-	}
-	else {
-		$('#ui-datepicker-div').css( "font-size", "12" );
-	}
-	
-	$('#app_table').attr("cellspacing", ( mobilScreen ? '10' : '' ) );
-	$('#app_table').attr("width", ( mobilScreen ? '100%' : '590px' ) );
-	
-	$("#app_table").each(function(){
-		$("td",this).each(function(){
-			$(this).css( "display", ( mobilScreen ? 'block' : '' ) );
-			$(this).css( "float", ( mobilScreen ? 'left' : '' ) );
-			$(this).css( "width", ( mobilScreen ? '100%' : '' ) );
-		});
-	});
-	
-	$('*').css( "font-size", ( mobilScreen ? '15px' : '' ) );
-	
-	$('.input_width').css( "line-height", ( mobilScreen ? '40px' : '' ) );
-	$('.input_width').css( "height", ( mobilScreen ? '40px' : '' ) );
-	$('.input_width, .info').css( "font-size", ( mobilScreen ? '30px' : '' ) );
-	$('.input_width').css( "width", ( mobilScreen ? '100%' : '20em' ) );
-	
+
 	[% FOREACH post_index IN special.post_index %]	
 		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
 		$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
 	[% END %]
 	
-	$('h2').css( "font-size", ( mobilScreen ? '20px' : '' ) );
-	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
+	if ( !mobilScreen ) {
+		
+		init_comm( 'right', 'center' );
+		$('#progressbar').css( "display", 'table' );
+		$('#app_form').css( "margin", '50px' );
+		$('#ui-datepicker-div').css( "font-size", "12" );
+		$('#app_table').attr( "width", '590px' );
+		$('.input_width').css( "width", '20em' );
+
+		return;
+	}
+
+	$('#mobile_ver').val(1); 
+	init_comm( 'center', 'bottom' );
 	
-	$(':checkbox, :radio').css( "height", ( mobilScreen ? "20px" : "" ) );
-	$(':checkbox, :radio').css( "width", ( mobilScreen ? "20px" : "" ) );
+	$('#progressbar').css( "display", 'none' );
+	$('#app_form').css( "margin", '0px' );
 	
-	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('.action_button').css( "height", '60px' );
+	$('.action_button').css( "width", '100%' );
+	
+	[% FOREACH picker IN special.datepicker %]
+		$('#[% picker %]').datepicker( 'destroy' );
+	[% END %]
+
+	$('#app_table').attr( "cellspacing", '10' );
+	$('#app_table').attr( "width", '100%' );
+	
+	$("#app_table").each(function(){
+		$("td",this).each(function(){
+			$(this).css( "display", 'block' );
+			$(this).css( "float", 'left' );
+			$(this).css( "width", '100%' );
+		});
+	});
+	
+	$('*').css( "font-size", '15px' );
+	
+	$('.input_width').css( "line-height", '40px' );
+	$('.input_width').css( "height", '40px' );
+	$('.input_width, .info').css( "font-size", '30px' );
+	$('.input_width').css( "width", '100%' );
+	
+	$('h2').css( "font-size", '20px' );
+	$('h2, .bold_text').css( "color", '#FF6666' );
+	
+	$(':checkbox, :radio').css( "height", "20px" );
+	$(':checkbox, :radio').css( "width", "20px" );
+	
+	$('.mobil_hide').css( "display", 'none' );
 	
 	[% IF special.captcha.0 %]
-	if ( mobilScreen ) {
 	 	var reCaptchaWidth = 304;
 		var containerWidth = $('.captcha_container').width();
 		var captchaScale = containerWidth / reCaptchaWidth;
 		$('#[% special.captcha.0 %]').css('transform', 'scale('+captchaScale+')');
 		$('#[% special.captcha.0 %]').css('transform-origin', '0');
 		$('.captcha_container').width('150px');
-	}
 	[% END %]
 }
 

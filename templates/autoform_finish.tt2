@@ -65,18 +65,20 @@ function mobileScreenCheck() {
 	var mobilScreen = isMobile();	
 	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
-	$('#app_table').attr("width", ( mobilScreen ? '100%' : '450px' ) );
+	$('#app_table').attr( "width", ( mobilScreen ? '100%' : '450px' ) );
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	
-	$('*').css( "font-size", ( mobilScreen ? '15px' : '' ) );
+	if ( !mobilScreen ) { return; }
 
-	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('*').css( "font-size", '15px' );
+
+	$('.mobil_hide').css( "display", 'none' );
 	
-	$('h2').css( "font-size", ( mobilScreen ? '20px' : '' ) );
-	$('h2, .bold_text').css( "color", ( mobilScreen ? '#FF6666' : '' ) );
+	$('h2').css( "font-size", '20px' );
+	$('h2, .bold_text').css( "color", '#FF6666' );
 	
-	$('.action_button').css( "height", ( mobilScreen ? '60px' : '' ) );
-	$('.action_button').css( "width", ( mobilScreen ? '100%' : '' ) );
+	$('.action_button').css( "height", '60px' );
+	$('.action_button').css( "width", '100%' );
 }
 
 </script>
