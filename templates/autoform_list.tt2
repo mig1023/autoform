@@ -116,7 +116,6 @@ function go_button(where) {
 	document.dataform.submit();
 };
 
-$(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
 
 function isMobile() {
@@ -127,15 +126,15 @@ function mobileScreenCheck() {
 
 	var mobilScreen = isMobile();
 
-	[% IF last_error_name %]
-		$('#[% last_error_name %]').poshytip('hide');
-		$('#[% last_error_name %]').poshytip('show');
-	[% END %]
-	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr( "width", ( mobilScreen ? '100%' : '600px' ) );
 	$('#app_list_div').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	$('.edit_input').attr( "value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
+	
+	[% IF last_error_name %]
+		$('#[% last_error_name %]').poshytip('hide');
+		$('#[% last_error_name %]').poshytip('show');
+	[% END %]
 	
 	if ( !mobilScreen ) { return; }
 
