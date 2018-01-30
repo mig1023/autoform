@@ -2099,6 +2099,37 @@ sub get_test_list {
 				},
 			},
 		},
+		{	'func' 	=> \&{ VCS::Site::autoform::mutex_fail },
+			'comment' => 'mutex_fail',
+			'test' => { 	
+				1 => { 	'prepare' => \&pre_show_no_testing,
+					'args' => [ [ { PassNum => '' } ] ],
+					'expected' => 1,
+				},
+				2 => { 	'prepare' => \&pre_show_no_testing,
+					'args' => [ [ { PassNum => 'TEST_PASS_UNIQ' } ] ],
+					'expected' => 1,
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::check_mutex_for_creation },
+			'comment' => 'check_mutex_for_creation',
+			'test' => { 	
+				1 => { 	'args' => [ 1 ],
+					'expected' => [ '', 1 ],
+				},
+				2 => { 	'args' => [ 5 ],
+					'expected' => [ '', 5 ],
+				},
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_app_visa_and_center },
+			'comment' => 'get_app_visa_and_center',
+			'test' => { 	
+				1 => { 	'expected' => [ '', 1 ],
+				},
+			},
+		},
 	];
 	
 	my $test_obj = bless $tests, 'test';
