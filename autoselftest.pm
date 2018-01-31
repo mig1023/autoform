@@ -26,6 +26,12 @@ sub get_test_list {
 					'param' => { 't' => '[token]' },
 					'expected' => '02',
 				},
+				6 => {	'param' => { 't' => 'no_app' },
+					'expected' => '02',
+				},
+				7 => {	'param' => { 't' => 'no_field' },
+					'expected' => '03',
+				},
 			}
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::token_generation },
@@ -1500,7 +1506,8 @@ sub get_test_list {
 								'MobilPermission' => 'nope',
 								'PersonForAgreements' => 'nope',
 							}
-						}
+						},
+						undef, undef, undef, undef, 'test_ver',
 					],
 					'expected' => '^[1-9]\d*$',
 				},
@@ -1973,18 +1980,6 @@ sub get_test_list {
 				},
 			},
 		},
-		{ 	'func' 	=> \&{ VCS::Site::autoform::get_delete },
-			'comment' => 'get_delete',
-			'test' => { 	
-				1 => { 	'args' => [ '[appdata_id]' ],
-					'expected' => 2,
-				},
-				2 => { 	'tester' => \&test_write_db,
-					'args' => [ '[appdata_id]' ],
-					'expected' => '[appdata_id]:AutoAppData:ID:',
-				},
-			},
-		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_prepare_line },
 			'comment' => 'get_prepare_line',
 			'test' => { 	
@@ -2101,32 +2096,59 @@ sub get_test_list {
 		},
 		{	'func' 	=> \&{ VCS::Site::autoform::mutex_fail },
 			'comment' => 'mutex_fail',
-			'test' => { 	
+			'test' => {
 				1 => { 	'prepare' => \&pre_show_no_testing,
 					'args' => [ [ { PassNum => '' } ] ],
 					'expected' => 1,
 				},
 				2 => { 	'prepare' => \&pre_show_no_testing,
 					'args' => [ [ { PassNum => 'TEST_PASS_UNIQ' } ] ],
+					'expected' => undef,
+				},
+				3 => { 	'prepare' => [ \&pre_show_no_testing, \&pre_mutex_fail_cach ],
+					'args' => [ [ { PassNum => '332211' } ] ],
 					'expected' => 1,
 				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::check_mutex_for_creation },
 			'comment' => 'check_mutex_for_creation',
-			'test' => { 	
-				1 => { 	'args' => [ 1 ],
-					'expected' => [ '', 1 ],
+			'test' => {
+				1 => { 	'args' => [ 2 ],
+					'expected' => [ '', 2 ],
 				},
-				2 => { 	'args' => [ 5 ],
+				2 => { 	'prepare' => [ \&pre_show_no_testing, \&pre_mutex_fail_creation ],
+					'args' => [ 5 ],
+					'expected' => [ 'applist|Один из указанных загранпаспортов уже присутствует в активной записи', 3 ],
+				},
+				3 => { 	'prepare' => [ \&pre_show_no_testing, \&pre_mutex_fail_creation ], # <--- fixed num 3
+					'args' => [ 5 ],
 					'expected' => [ '', 5 ],
 				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_app_visa_and_center },
 			'comment' => 'get_app_visa_and_center',
-			'test' => { 	
-				1 => { 	'expected' => [ '', 1 ],
+			'test' => {
+				1 => { 	'expected' => [ 1, 'C' ],
+				},
+				2 => { 	'prepare' => \&pre_token,
+					'expected' => '',
+				},
+				3 => {	'prepare' => \&pre_vtype_clear,
+					'expected' => [ 1 ],
+				}
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_delete }, # <--- fixed last
+			'comment' => 'get_delete',
+			'test' => {
+				1 => { 	'args' => [ '[appdata_id]' ],
+					'expected' => 2,
+				},
+				2 => { 	'tester' => \&test_write_db,
+					'args' => [ '[appdata_id]' ],
+					'expected' => '[appdata_id]:AutoAppData:ID:',
 				},
 			},
 		},
@@ -2755,7 +2777,7 @@ sub test_line_in_hash
 # //////////////////////////////////////////////////
 {
 	my ( $debug, $expected, $comm, undef, $result ) = @_;
-	my ( $key, $value ) = split /:/, $expected;
+	my ( $key, $value ) = split( /:/, $expected );
 	
 	warn debug_head( $comm ) . "\n\n" . Dumper( $expected, $result ) if $debug;
 
@@ -2841,7 +2863,7 @@ sub test_cached
 	
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my ( $cached_name, $cached_value ) = split /:/, shift;
+	my ( $cached_name, $cached_value ) = split( /:/, shift );
 	
 	my $result = $vars->get_memd->get( $cached_name );
 	
@@ -2854,7 +2876,7 @@ sub test_write_db
 # //////////////////////////////////////////////////
 {
 	my $debug = shift;
-	my ( $token_or_appid, $db_table, $db_name, $db_value ) = split /:/, shift;
+	my ( $token_or_appid, $db_table, $db_name, $db_value ) = split( /:/, shift );
 	my ( $comm, $self, $result ) = @_;
 
 	my $vars = $self->{ 'VCS::Vars' };
@@ -3036,10 +3058,12 @@ sub pre_logic_1
 		
 		( $vtype, $finished ) = ( 13, 1 ) if $num == 5;
 	}
+
+	my @params = ( $type eq 'PREPARE' ? ( $finished, $vtype , 1 ) : ( 0, 0, 0 ) );
 	
 	$vars->db->query("
 		UPDATE AutoAppData SET FinishedCenter = ?, FinishedVType = ?, Status = ? WHERE ID = ?", {}, 
-		( $type eq 'PREPARE' ? ( $finished, $vtype , 1 ) : ( 0, 0, 0 ) ), $appdataid
+		@params, $appdataid
 	);
 }
 
@@ -3048,9 +3072,11 @@ sub pre_logic_2
 {
 	my ( $self, $type, $test, $num, $token, $appid, $appdataid, $vars ) = @_;
 	
+	my $new_date = ( $type eq 'PREPARE' ? '2010-01-01' : '0000-00-00' );
+
 	$vars->db->query("
 		UPDATE AutoAppointments SET SDate = ? WHERE ID = ?", {}, 
-		( $type eq 'PREPARE' ? '2010-01-01' : '0000-00-00' ), $appid
+		$new_date, $appid
 	);
 }
 
@@ -3086,9 +3112,11 @@ sub pre_nobody
 {
 	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
 
+	my $new_appid = ( $type eq 'PREPARE' ? 0 : $appid_param );
+
 	$vars->db->query("
 		UPDATE AutoAppData SET AppID = ? WHERE ID = ?", {},
-		( $type eq 'PREPARE' ? 0 : $appid_param ), $appdataid
+		$new_appid, $appdataid
 	);
 }
 
@@ -3106,7 +3134,7 @@ sub pre_token
 			$self->{ token } = '01';
 		}
 		else {
-			$self->{ token } = 'Token';
+			$self->{ token } = '';
 		}
 	}
 	else {
@@ -3169,6 +3197,18 @@ sub pre_visa_type_d
 	);
 }
 
+sub pre_vtype_clear
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	my $vtype = ( $type eq 'PREPARE' ? 0 : 13 );
+
+	$vars->db->query("
+		UPDATE AutoAppointments SET VType = ? WHERE ID = ?", {}, $vtype, $appid_param
+	);
+}
+
 sub pre_spb_centers
 # //////////////////////////////////////////////////
 {
@@ -3181,6 +3221,32 @@ sub pre_spb_centers
 	);
 
 	$vars->get_memd->delete( 'autoform_' . $$token . '_center' );
+}
+
+sub pre_mutex_fail_creation
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	my $new_passnum = ( $type eq 'PREPARE' ? '112233' : '' ); 
+
+	$vars->db->query("
+		UPDATE AutoAppData SET PassNum = ? WHERE ID = ?", {}, $new_passnum, $appdataid
+	);
+
+	$new_passnum = '' if ( $$test->{ comment } eq "check_mutex_for_creation" ) and ( $num == 3 );
+
+	$vars->db->query("
+		UPDATE AppData SET PassNum = ? ORDER BY ID LIMIT 1", {}, $new_passnum
+	);
+}
+
+sub pre_mutex_fail_cach
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	$vars->get_memd->add( "autoform_pass332211", 332211, 10 );
 }
 
 1;
