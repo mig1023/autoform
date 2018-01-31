@@ -138,7 +138,7 @@ sub get_app_visa_and_center
 			JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
 			WHERE Token = ?", $self->{ token }
 		);
-		
+
 		for ( 'vtype', 'center' ) {
 
 			$app_data->{ $_ } = 'X' unless $app_data->{ $_ };
@@ -201,7 +201,7 @@ sub autoform
 			$self->get_autoform_content();
 	}
 
-	my ( $last_error_name, $last_error_text ) = split /\|/, $last_error;
+	my ( $last_error_name, $last_error_text ) = split( /\|/, $last_error );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -215,7 +215,7 @@ sub autoform
 		'min_step' 		=> 1,
 		'max_step' 		=> $self->get_content_rules( 'length' ),
 		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
-		'addr' 			=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'last_error_name' 	=> $last_error_name,
 		'last_error_text' 	=> $last_error_text,
 		'special' 		=> $special,
@@ -331,10 +331,10 @@ sub get_geo_info
 		"JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN Branches ON AutoAppointments.CenterID = Branches.ID";
 	
+	my $join = ( $app_already_created ? $from_app : $from_autoapp );
+
 	my ( $center, $addr ) = $self->query( 'sel1', __LINE__, "
-		SELECT CenterID, BAddr
-		FROM AutoToken " . ( $app_already_created ? $from_app : $from_autoapp ) .
-		" WHERE Token = ?", $self->{ token }
+		SELECT CenterID, BAddr FROM AutoToken $join WHERE Token = ?", $self->{ token }
 	);
 
 	my $branches = VCS::Site::autodata::get_geo_branches();
@@ -580,7 +580,7 @@ sub token_generation
 
 	my $token_existing = 1;
 	my $token = 't';
-	my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
+	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 	
 	do {
 		$token .= @alph[ int( rand( 36 ) ) ] for ( 1..63 );
@@ -754,7 +754,7 @@ sub skip_by_condition
 {
 	my ( $self, $value, $relation, $condition ) = @_;
 
-	my %relation = map { $_ => 1 } split /,\s?/, $relation;
+	my %relation = map { $_ => 1 } split( /,\s?/, $relation );
 
 	return 1 if $condition =~ /^only_if_not(_\d+)?$/ and exists $relation{ $value };
 	
@@ -796,7 +796,7 @@ sub get_forward
 
 	if ( $last_error ) {
 	
-		my @last_error = split /\|/, $last_error;
+		my @last_error = split( /\|/, $last_error );
 
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
@@ -1062,7 +1062,7 @@ sub get_add
 	);
 	
 	my $appdata_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
-	
+
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoSpbAlterAppData (AppDataID) VALUES (?)", {},
 		$appdata_id
@@ -1583,7 +1583,7 @@ sub add_rules_format
 		
 	if ( $rules ) {
 	
-		my @symbols = split /\\/, $rules;
+		my @symbols = split( /\\/, $rules );
 		
 		my $symbols_help = VCS::Site::autodata::get_symbols_help();
 		
@@ -1616,7 +1616,7 @@ sub check_comments_alter_version
 
 	for ( keys %$comment ) {
 	
-		my %centers = map { $_ => 1 } split /,/, $_;
+		my %centers = map { $_ => 1 } split( /,/, $_ );
 		
 		return $comment->{ $_ } if exists $centers{ $current_center };
 	}
@@ -1648,7 +1648,7 @@ sub resort_with_first_elements
 	return sort { $country_hash->{ $a } cmp $country_hash->{ $b } } keys %$country_hash
 		if !$first_elements;	
 	
-	my @first_elements = split /,/, $first_elements;
+	my @first_elements = split( /,/, $first_elements );
 
 	my @array_with_first_elements = ();
 	
@@ -1771,7 +1771,7 @@ sub get_all_values
 		
 		next if $table eq 'alternative_data_source';
 
-		my $request = join ',', keys %{ $request_tables->{ $table } };
+		my $request = join( ',', keys %{ $request_tables->{ $table } } );
 
 		my $result = $self->query( 'selallkeys', __LINE__, "
 			SELECT $request FROM $table WHERE ID = ?", $table_id->{ $table }
@@ -1935,7 +1935,7 @@ sub get_current_table_id
 
 	my @tables_list = ( 'AutoToken', keys %$tables_controled_by_AutoToken );
 	
-	my $request_tables = 'ID, ' . join ', ', values %$tables_controled_by_AutoToken;
+	my $request_tables = 'ID, ' . join( ', ', values %$tables_controled_by_AutoToken );
 	
 	my @ids = $self->query( 'sel1', __LINE__, "
 		SELECT $request_tables FROM AutoToken WHERE Token = ?", $self->{ token }
@@ -2131,7 +2131,7 @@ sub check_logic
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 			
 			$value = sprintf( "%04d-%02d-%02d",
-				( Date::Calc::Add_Delta_YMD( ( split /-/, $value ), 0, 3, 1 ) )
+				( Date::Calc::Add_Delta_YMD( split( /-/, $value  ), 0, 3, 1 ) )
 			) if $spb;
 			
 			my $datediff = $self->get_datediff( $value, $rule, $tables_id, !$from_now );
@@ -2241,7 +2241,7 @@ sub get_postcode_id
 {
 	my ( $self, $value ) = @_;
 	
-	my ( $index, $city ) = split /,/, $value;
+	my ( $index, $city ) = split( /,/, $value );
 	
 	s/^\s+|\s+$//g for ( $index, $city );
 	
@@ -2490,17 +2490,17 @@ sub mod_hash
 		
 			my $spb_hash = $self->get_hash_table( 'AutoSpbAlterAppData', 'AppDataID', $hash->{ ID } );
 
-			$hash->{ WorkOrg } = join ', ', (
+			$hash->{ WorkOrg } = join( ', ', (
 				$spb_hash->{ JobName }, $spb_hash->{ JobCity }, $spb_hash->{ JobAddr }, $spb_hash->{ JobPhone }
-			);
+			) );
 	
-			$hash->{ FullAddress } = join ', ', (
+			$hash->{ FullAddress } = join( ', ', (
 				$spb_hash->{ HomeCity }, $spb_hash->{ HomeAddr }, $spb_hash->{ HomeEmail }
-			);
+			) );
 					
-			$hash->{ HotelAdresses } = join ', ', (
+			$hash->{ HotelAdresses } = join( ', ', (
 				$spb_hash->{ HotelPostCode }, $spb_hash->{ HotelCity }, $spb_hash->{ HotelStreet }, $spb_hash->{ HotelHouse }
-			);
+			) );
 		}
 		else {
 			$hash->{ FullAddress } .= ' ' . $hash->{ AppEMail };
@@ -2609,9 +2609,9 @@ sub insert_hash_table
 	
 	my @request_values = ();
 	
-	my $request_columns = join ',', keys %$hash;
+	my $request_columns = join( ',', keys %$hash );
 
-	my $request_values = join ',', split //, '?' x keys %$hash;
+	my $request_values = join( ',', split( //, '?' x keys %$hash ) );
 	
 	push @request_values, $hash->{ $_ } for keys %$hash;
 	
@@ -2781,9 +2781,9 @@ sub send_app_confirm
 		SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $data->{ TimeslotID }
 	);
 		
-	my @date_sp = split /\-/, $data->{ AppDate };
+	my @date_sp = split( /\-/, $data->{ AppDate } );
 
-	my @months = split /\|/, $lang_local->{ months };
+	my @months = split( /\|/, $lang_local->{ months } );
 
 	$replacer->{ date_time } = 
 		$date_sp[ 2 ] . ' ' . $months[ $date_sp[ 1 ] + 1 ] . ' ' . $date_sp[ 0 ] . ', ' . 
@@ -2853,7 +2853,7 @@ sub age
 	
 	my $age_free_days = $self->{ vars }->getConfig( 'general' )->{ age_free_days } + 0;
 
-	my ( $birth_year, $birth_month, $birth_day ) = split /\-/, shift; 
+	my ( $birth_year, $birth_month, $birth_day ) = split( /\-/, shift ); 
 	
 	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
 	
@@ -2908,14 +2908,15 @@ sub mutex_fail
 	my ( $self, $app_data ) = @_;
 	
 	return if $self->{ this_is_self_testing };
-	
+
 	my $pass_list = [];
 	
 	push @$pass_list, $_->{ PassNum } for @$app_data;
-	
+
+	my $pass_line = join( "','", @$pass_list );
+
 	return 1 if $self->query( 'sel1', __LINE__, "
-		SELECT COUNT(ID) FROM AppData
-		WHERE PassNum IN ('" . join( "','", @$pass_list ) . "') AND Status = 1"
+		SELECT COUNT(ID) FROM AppData WHERE PassNum IN ('$pass_line') AND Status = 1"
 	);
 	
 	for ( @$pass_list ) {
