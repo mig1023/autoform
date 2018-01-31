@@ -132,10 +132,9 @@ sub get_app_visa_and_center
 	if ( !$app_data->{ vtype } or !$app_data->{ center } ) {
 		
 		( $app_data->{ center }, $app_data->{ vtype } ) = $self->query( 'sel1', __LINE__, "
-			SELECT CenterID, VisaTypes.ID
+			SELECT CenterID, VType
 			FROM AutoAppointments
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
-			JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
 			WHERE Token = ?", $self->{ token }
 		);
 
