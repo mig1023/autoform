@@ -2078,6 +2078,13 @@ sub get_content_rules_hash
 				'comment' => 'Введите номер сотового телефона для получения СМС о готовности документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				'example' => '79XXXXXXXXX',
 				'check' => 'N',
+				'check_logic' => [
+					{
+						'condition' => 'length_strict',
+						'length' => 11,
+						'full_error' => 'Неправильный формат телефонного номера',
+					}
+				],
 				'db' => {
 					'table' => 'Appointments',
 					'name' => 'Mobile',
