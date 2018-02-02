@@ -214,7 +214,7 @@ sub autoform
 		'min_step' 		=> 1,
 		'max_step' 		=> $self->get_content_rules( 'length' ),
 		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
-		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'addr' 			=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'last_error_name' 	=> $last_error_name,
 		'last_error_text' 	=> $last_error_text,
 		'special' 		=> $special,
@@ -521,13 +521,15 @@ sub get_token_and_create_new_form_if_need
 	
 	return $self->save_new_token_in_db( $self->token_generation() ) if $token eq '';
 	
-	my ( $token_exist, $finished, $app ) = $self->query( 'sel1', __LINE__, "
-		SELECT ID, Finished, CreatedApp FROM AutoToken WHERE Token = ?", $token
+	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
 	);
 
 	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 	
-	return '02' if !$token_exist;
+	return '02' unless $token_exist;
+
+	return '04' if $deleted;
 	
 	return $token unless $finished;
 	
@@ -2191,6 +2193,12 @@ sub check_logic
 			my ( $postcode_id, undef ) = $self->get_postcode_id( $value );
 			
 			$first_error = $self->text_error( 15, $element ) unless ( $postcode_id );
+		}
+
+		if ( $rule->{ condition } =~ /^length_strict$/ and $value ) {
+			
+			$first_error = $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
+				if length( $value ) != $rule->{ length };
 		}
 		
 		if ( $rule->{ condition } =~ /^email_not_blocked$/ and $value ) {
