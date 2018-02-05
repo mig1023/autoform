@@ -9,11 +9,11 @@
 <link href="/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-[% IF (special.with_map.0) %]
+[% IF ( special.with_map.0 ) %]
 <script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
 [% END %]
 
-[% IF (special.datepicker.0 || special.post_index.0 ) %]
+[% IF ( special.datepicker.0 || special.post_index.0 || special.mask.0 ) %]
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
@@ -145,6 +145,11 @@ function mobileScreenCheck() {
 	}
 
 	$('#mobile_ver').val(1); 
+
+	if ($('#app_date').length > 0) {
+		$('#app_date').prop('title', '');
+	}
+
 	init_comm( 'center', 'bottom' );
 	
 	$('#progressbar').css( "display", 'none' );
@@ -152,10 +157,6 @@ function mobileScreenCheck() {
 	
 	$('.action_button').css( "height", '60px' );
 	$('.action_button').css( "width", '100%' );
-	
-	[% FOREACH picker IN special.datepicker %]
-		$('#[% picker %]').datepicker( 'destroy' );
-	[% END %]
 
 	$('#app_table').attr( "cellspacing", '10' );
 	$('#app_table').attr( "width", '100%' );
@@ -267,18 +268,29 @@ function init_comm(pos_x, pos_y) {
 	$('.tip-yellowsimple .tip-inner ').css( "line-height", ( isMobile() ? '1.2' : '' ) );
 }
 
-[% FOREACH picker IN special.datepicker %]
-	$('#[% picker %]').datepicker({
+[% IF ( special.datepicker.0 || special.mask.0 ) %]
+
+function crate_datepicker(date_id) {
+	$('#'+date_id).datepicker({
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
 		showOn: 'both',
 		buttonImage: '/vcs/static/images/1x1.png',
 		buttonImageOnly:true
 	});
+};
 [% END %]
 
 [% FOREACH mask IN special.mask %]
 	$("#[% mask %]").mask("99.99.9999");
+
+	if (mobilScreen) {
+		crate_datepicker("[% mask %]");
+	};
+[% END %]
+
+[% FOREACH picker IN special.datepicker %]
+	crate_datepicker("[% picker %]");
 [% END %]
 
 [% FOREACH near IN special.nearest_date %]
