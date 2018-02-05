@@ -95,7 +95,14 @@
 		offsetX: 0,
 		offsetY: 5
 	});
+
+	function show_error() {
+		$('#[% last_error_name %]').poshytip('hide');
+		$('#[% last_error_name %]').poshytip('show');
+	}
 [% END %]
+
+	
 
 function edit_button(id) {
 	$('#action').val('edit');
@@ -125,18 +132,19 @@ function isMobile() {
 function mobileScreenCheck() {
 
 	var mobilScreen = isMobile();
-
+	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr( "width", ( mobilScreen ? '100%' : '600px' ) );
 	$('#app_list_div').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
 	$('.edit_input').attr( "value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
-	
-	[% IF last_error_name %]
-		$('#[% last_error_name %]').poshytip('hide');
-		$('#[% last_error_name %]').poshytip('show');
-	[% END %]
-	
-	if ( !mobilScreen ) { return; }
+
+	if ( !mobilScreen ) {
+		[% IF last_error_name %]
+			show_error();
+		[% END %]
+
+		return;
+	}
 
 	$('#app_table').attr( "cellspacing", '10' );
 	$('.action_button').css( "height", '60px' );
@@ -151,6 +159,10 @@ function mobileScreenCheck() {
 	
 	$('h2').css( "font-size", '20px' );
 	$('h2, .bold_text').css( "color", '#FF6666' );
+
+	[% IF last_error_name %]
+		show_error();
+	[% END %]
 }
 
 </script>
