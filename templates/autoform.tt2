@@ -40,6 +40,20 @@
 <center>
 <div id="app_form" class="margin_big">
 
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+
+	var mobilScreen = isMobile();
+
+	if ( mobilScreen ) {
+		$('#app_form').hide();
+	}
+
+</script>
+
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "0" name = "mobile_ver" id = "mobile_ver">
@@ -111,13 +125,7 @@ YMaps.jQuery(function () {
 
 $(document).ready(mobileScreenCheck);
 
-function isMobile() {
-	return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-}
-
 function mobileScreenCheck() {
-
-	var mobilScreen = isMobile();
 
 	[% FOREACH post_index IN special.post_index %]	
 		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
@@ -183,6 +191,8 @@ function mobileScreenCheck() {
 		$('#[% special.captcha.0 %]').css('transform-origin', '0');
 		$('.captcha_container').width('150px');
 	[% END %]
+
+	$('#app_form').show();
 }
 
 function go_button(where) {
