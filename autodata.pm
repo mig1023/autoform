@@ -131,7 +131,7 @@ sub get_html_elements
 		
 		'text'			=> '<td colspan="3" [u]>[value]</td>',
 		
-		'example'		=> '<tr class="mobil_hide" [u]><td class="exam_td_gen">' .
+		'example'		=> '<tr [u]><td class="exam_td_gen">' .
 					'<span class="exam_span_gen">[example]: [value]</span></td></tr>',
 
 		'info'			=> '<label class="info" title="[comment]" id="[name]" [u]>[text]</label>',

@@ -134,7 +134,7 @@ function mobileScreenCheck() {
 	
 	if ( !mobilScreen ) {
 		
-		init_comm( 'right', 'center' );
+		init_comm();
 		$('#progressbar').css( "display", 'table' );
 		$('#app_form').css( "margin", '50px' );
 		$('#ui-datepicker-div').css( "font-size", "12" );
@@ -146,17 +146,13 @@ function mobileScreenCheck() {
 
 	$('#mobile_ver').val(1); 
 
-	if ($('#app_date').length > 0) {
-		$('#app_date').prop('title', '');
-	}
-
-	init_comm( 'center', 'bottom' );
-	
 	$('#progressbar').css( "display", 'none' );
 	$('#app_form').css( "margin", '0px' );
 	
 	$('.action_button').css( "height", '60px' );
 	$('.action_button').css( "width", '100%' );
+
+	$('.exam_span_gen').css( "float", 'right' );
 
 	$('#app_table').attr( "cellspacing", '10' );
 	$('#app_table').attr( "width", '100%' );
@@ -222,47 +218,26 @@ function go_button(where) {
 	document.dataform.submit();
 };
 
-function init_comm(pos_x, pos_y) {
+function init_poshytip(cls, fcs, aTo, aX, aY, ofX) {
+
+	$(cls).poshytip({
+		className: 'tip-yellowsimple',
+		showOn: fcs,
+		alignTo: aTo,
+		alignX: aX,
+		alignY: aY,
+		offsetX: ofX,
+		showTimeout: 100
+	});
+}
+
+function init_comm() {
 	$('.input_gen, .select_gen,').poshytip('destroy');
 
-	$('.input_gen').poshytip({
-		className: 'tip-yellowsimple',
-		showOn: 'focus',
-		alignTo: 'target',
-		alignX: pos_x,
-		alignY: pos_y,
-		offsetX: 5,
-		showTimeout: 100
-	});
-	
-	$('.select_gen').poshytip({
-		className: 'tip-yellowsimple',
-		showOn: 'focus',
-		alignTo: 'target',
-		alignX: 'center',
-		alignY: 'top',
-		offsetX: 5,
-		showTimeout: 100
-	});
-	
-	$('label').poshytip({
-		className: 'tip-yellowsimple',
-		alignTo: 'target',
-		alignX: pos_x,
-		alignY: pos_y,
-		offsetX: 5,
-		showTimeout: 100
-	});
-	
-		
-	$(':radio, :checkbox').poshytip({
-		className: 'tip-yellowsimple',
-		alignTo: 'target',
-		alignX: pos_x,
-		alignY: pos_y,
-		offsetX: 200,
-		showTimeout: 100
-	});
+	init_poshytip('.input_gen', 'focus', 'target', 'right', 'center', 5);
+	init_poshytip('.select_gen', 'focus', 'target', 'center', 'top', 5);
+	init_poshytip('label', '', 'target', 'right', 'center', 5);
+	init_poshytip(':radio, :checkbox', '', 'target', 'right', 'center', 200);
 	
 	$('.tip-yellowsimple .tip-inner ').css( "font-size", ( isMobile() ? '35px' : '' ) );
 	$('.tip-yellowsimple .tip-inner ').css( "line-height", ( isMobile() ? '1.2' : '' ) );
