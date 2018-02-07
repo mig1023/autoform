@@ -86,6 +86,7 @@ sub get_test_list {
 							'captcha' => [],
 							'include_in' => [],
 							'include_out' => [],
+							'no_copypast' => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -122,6 +123,7 @@ sub get_test_list {
 							'captcha' => [],
 							'include_in' => [],
 							'include_out' => [],
+							'no_copypast' => [],
 						},
 						'[progress_bar_2]',
 						undef,
@@ -145,6 +147,7 @@ sub get_test_list {
 							'captcha' => [],
 							'include_in' => [],
 							'include_out' => [],
+							'no_copypast' => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -452,6 +455,7 @@ sub get_test_list {
 						'captcha' => [],
 						'include_in' => [],
 						'include_out' => [],
+						'no_copypast' => [],
 					},
 
 				},
@@ -472,6 +476,7 @@ sub get_test_list {
 						'captcha' => [],
 						'include_in' => [],
 						'include_out' => [],
+						'no_copypast' => [],
 					},
 
 				},
@@ -1153,6 +1158,38 @@ sub get_test_list {
 					],
 					'param' => { 'field_name' => '31.01.2000' },
 					'prepare' => \&pre_not_closer,
+					'expected' => 'field_name|test error message',
+				},
+				33 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'equal',
+								'table' => 'Appointments',
+								'name' => 'VType',
+								'full_error' => 'test error message',
+							} ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => { 'field_name' => '13' },
+					'expected' => '',
+				},
+				34 => { 'args' => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								'condition' => 'equal',
+								'table' => 'Appointments',
+								'name' => 'VType',
+								'full_error' => 'test error message',
+							} ]
+						},
+						{
+							'AutoAppointments' => '[app_id]',
+						},
+					],
+					'param' => { 'field_name' => '14' },
 					'expected' => 'field_name|test error message',
 				},
 			},
