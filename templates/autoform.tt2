@@ -268,6 +268,16 @@ function crate_datepicker(date_id) {
 	crate_datepicker("[% picker %]");
 [% END %]
 
+[% FOREACH no_copy IN special.no_copypast %]
+	$('#[% no_copy %]').live("keydown", function(e){
+		var e = e || event, k = e.which || e.button;
+		if(e.ctrlKey && k == 86) return false;
+	});
+	$('#[% no_copy %]').bind("contextmenu", function(e) {
+		e.preventDefault();
+	});
+[% END %]
+
 [% FOREACH near IN special.nearest_date %]
 	update_nearest_date_[% near %]();
 			

@@ -1188,7 +1188,7 @@ sub get_list_of_app
 	);
 	
 	my $link = $self->query( 'selallkeys', __LINE__, "
-		SELECT LinkSended, EMail
+		SELECT LinkSended, AutoAppointments.EMail
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
@@ -1243,6 +1243,7 @@ sub get_specials_of_element
 		'captcha' => [],
 		'include_in' => [],
 		'include_out' => [],
+		'no_copypast' => [],
 	};
 	
 	for my $element ( @$page_content ) {
@@ -1901,20 +1902,22 @@ sub get_names_db_for_save_or_get
 		
 		next if ref( $element->{ db } ) ne 'HASH';
 
+		my $prefix = ( $element->{ db }->{ table } !~ /^Auto/i ? 'Auto' : '' );
+
 		if ( $element->{ db }->{ name } eq 'complex' ) {
 		
 			for my $sub_element ( keys %{ $element->{ param } } ) {
 			
-				$request_tables->{ 'Auto' . $element->{ db }->{ table } }->{ $element->{ param }->{ $sub_element }->{ db } } = 
+				$request_tables->{ $prefix . $element->{ db }->{ table } }->{ $element->{ param }->{ $sub_element }->{ db } } = 
 					$sub_element;
 			}
 		}
 		else { 
-			$request_tables->{ 'Auto' . $element->{ db }->{ table } }->{ $element->{ db }->{ name } } = $element->{ name };
+			$request_tables->{ $prefix . $element->{ db }->{ table } }->{ $element->{ db }->{ name } } = $element->{ name };
 			
 			if ( $element->{ load_if_free_field } ) {
 			
-				$alternative_data_source->{ $element->{ name } }->{ table } = 'Auto' . $element->{ load_if_free_field }->{ table };
+				$alternative_data_source->{ $element->{ name } }->{ table } = $prefix . $element->{ load_if_free_field }->{ table };
 				$alternative_data_source->{ $element->{ name } }->{ field } = $element->{ load_if_free_field }->{ name };
 			}
 		}
@@ -2101,6 +2104,17 @@ sub check_logic
 
 	for my $rule ( @{ $element->{ check_logic } } ) {
 	
+		if ( $rule->{ condition } =~ /^equal$/ ) {
+			
+			my $related_value = $self->query( 'sel1', __LINE__, "
+				SELECT $rule->{name} FROM Auto$rule->{table} WHERE ID = ?",
+				$tables_id->{ 'Auto'.$rule->{table} }
+			);
+
+			$first_error = $self->text_error( 25, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
+				if lc( $related_value ) ne lc( $value );
+		}
+
 		if ( $rule->{ condition } =~ /^(equal|now)_or_(later|earlier)$/ ) {
 		
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;

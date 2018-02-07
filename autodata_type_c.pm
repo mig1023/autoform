@@ -75,7 +75,7 @@ sub get_content_rules_hash
 				'type' => 'input',
 				'name' => 'email',
 				'label' => 'Email',
-				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение записи в визовый центр',
+				'comment' => 'Введите существующий адрес почты. На него будет выслано подтверждение записи в визовый центр. Пожалуйста, проверьте правильность каждой буквы/символа, из которых состоит адрес Вашей электронной почты',
 				'example' => 'info@italyvms.ru',
 				'check' => 'zWN\@\-\_\.',
 				'check_logic' => [
@@ -87,6 +87,27 @@ sub get_content_rules_hash
 					'table' => 'Appointments',
 					'name' => 'EMail',
 				},
+			},
+			{
+				'type' => 'input',
+				'name' => 'emailcheck',
+				'label' => 'Подтвердите email',
+				'comment' => 'Обратите внимание, что адрес электронной почты необходимо вводить вручную, не копируя его из предыдущего поля. Это поможет Вам избежать ошибки и возможной отправки подтверждения Вашей записи не тому адресату. ',
+				'example' => 'info@italyvms.ru',
+				'check' => 'zWN\@\-\_\.',
+				'check_logic' => [
+					{
+						'condition' => 'equal',
+						'table' => 'Appointments',
+						'name' => 'EMail',
+						'full_error' => 'EMail не совпадает с подтверждением',
+					},
+				],
+				'db' => {
+					'table' => 'AutoToken',
+					'name' => 'EMail',
+				},
+				'special' => 'no_copypast',
 			},
 			{
 				'type' => 'checkbox',
