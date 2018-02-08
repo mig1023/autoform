@@ -141,6 +141,10 @@ function mobileScreenCheck() {
 		$('#app_table').attr( "width", '590px' );
 		$('.input_width').css( "width", '20em' );
 
+		[% IF (last_error_name && (last_error_name != 'timeslot')) %]
+			show_error_tip();
+		[% END %]
+
 		return;
 	}
 
@@ -190,6 +194,10 @@ function mobileScreenCheck() {
 	[% END %]
 
 	$('#app_form').show();
+
+	[% IF (last_error_name && (last_error_name != 'timeslot')) %]
+		show_error_tip();
+	[% END %]
 }
 
 function go_button(where) {
@@ -283,7 +291,14 @@ function crate_datepicker(date_id) {
 			
 	function update_nearest_date_[% near %]()
 	{	
-		$("#[% near %]").html("<img src='[% vcs_tools %]static/images/autoform_wait.gif' />");
+		var mobScreen = isMobile();
+
+		$("#[% near %]").html("<div id='tmp_near_img'><img src='[% vcs_tools %]static/images/autoform_wait.gif' /></div>");
+
+		if ( mobScreen ) {
+			$("#tmp_near_img").css('height', '38px');
+		}
+
 		$.get("[% vcs_tools %]get_nearest.htm", {
 			'center': $('#center').val(), 
 			'persons': 1, 
@@ -297,7 +312,12 @@ function crate_datepicker(date_id) {
 		var restore_el = 0;
 		
 		$('#vtype').hide();
-		$('#vtype').parent().prepend("<img id='tmp_img' src='[% vcs_tools %]static/images/autoform_wait.gif' />");
+		$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% vcs_tools %]static/images/autoform_wait.gif' />");
+
+		if ( mobScreen ) {
+			$("#tmp_vtype_img").css('height', '38px');
+		}
+
 		$('#vtype').find('option').remove();
 		
 		$.get("[% vcs_tools %]get_vtypes.htm", 
@@ -316,7 +336,7 @@ function crate_datepicker(date_id) {
 				if (restore_el) {
 					$('#vtype').val(selected_el);
 				}
-				$('#tmp_img').remove();
+				$('#tmp_vtype_img').remove();
 				$('#vtype').show();
 				
 			}, 
@@ -378,13 +398,6 @@ function crate_datepicker(date_id) {
 [% END %]
 
 [% IF last_error_name %]
-
-	[% IF last_error_name != 'timeslot' %]
-		$(document).ready(function() {
-			show_error_tip();
-		});
-	[% END %]
-
 	function find_pos(obj) {
 		var curtop = 0;
 		if (obj.offsetParent) {
