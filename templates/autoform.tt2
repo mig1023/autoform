@@ -142,7 +142,7 @@ function mobileScreenCheck() {
 		$('.input_width').css( "width", '20em' );
 
 		[% IF (last_error_name && (last_error_name != 'timeslot')) %]
-			show_error_tip();
+			show_error_tip( '[% last_error_name %]', '[% langreq(last_error_text) %]' );
 		[% END %]
 
 		return;
@@ -196,7 +196,7 @@ function mobileScreenCheck() {
 	$('#app_form').show();
 
 	[% IF (last_error_name && (last_error_name != 'timeslot')) %]
-		show_error_tip();
+		show_error_tip( '[% last_error_name %]', '[% langreq(last_error_text) %]' );
 	[% END %]
 }
 
@@ -216,11 +216,15 @@ function go_button(where) {
 		}
 	[% END %]
 	
-	[% IF ( ( step + 1 ) == max_step ) %]
-		if (where == 'forward') {
+	if (where == 'forward') {
+		[% IF ( ( step + 1 ) == max_step ) %]
 			$('#next_button').prop('disabled', true);
+		[% END %]
+		
+		if ( check_all_inputs_errors() > 0 ) {
+			return;
 		}
-	[% END %]
+	}
 	
 	$('#action').val(where);
 	document.dataform.submit();
@@ -381,7 +385,7 @@ function crate_datepicker(date_id) {
 			[% IF last_error_name == 'timeslot' %]
 				if ( !date_change ) {
 					$(document).ready(function() {
-						show_error_tip();
+						show_error_tip( 'timeslot', '[% langreq(last_error_text) %]' );
 					});
 				} else {
 					$('#timeslot').poshytip('destroy');
@@ -397,62 +401,66 @@ function crate_datepicker(date_id) {
 	};
 [% END %]
 
-[% IF last_error_name %]
-	function find_pos(obj) {
-		var curtop = 0;
-		if (obj.offsetParent) {
-			do {
-				curtop += obj.offsetTop;
-			} while (obj = obj.offsetParent);
-			return [curtop];
+
+function find_pos( obj ) {
+
+	var curtop = 0;
+
+	if ( obj.offsetParent ) {
+		do {
+			curtop += obj.offsetTop;
+		} while ( obj = obj.offsetParent );
+		return [ curtop ];
+	}
+}
+
+function show_error_tip( last_error_name, last_error_text ) {
+
+	var mobScreen = isMobile();
+	var error_x = ( mobScreen ? 'inner-left' : 'left' );
+	var error_y = ( mobScreen ? 'bottom' : 'center' );
+	var offset_x = ( mobScreen ? 0 : 5 );
+	var offset_y = ( mobScreen ? 5 : 0 );
+	
+	if ( last_error_name == 'captha_div' ) {
+		error_x = 'inner-left';
+		offset_x = ( mobScreen ? 0 : 20 );
+	}
+	
+	window.scroll( 0,find_pos( document.getElementById( last_error_name ) ) );
+	
+	$( '#' + last_error_name ).poshytip({
+		className: 'tip-redsimple',
+		content: last_error_text,
+		showOn: 'none',
+		alignTo: 'target',
+		alignX: error_x,
+		alignY: error_y,
+		offsetX: offset_x,
+		offsetY: offset_y,
+	});
+	
+	$( '#' + last_error_name ).bind({
+		click: function( e ) {
+			$('#' + last_error_name ).poshytip( 'hide' );
 		}
+	});
+	
+	$( '#' + last_error_name ).poshytip( 'show' );
+	
+	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( isMobile() ? '20px' : '' ) );
+	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( isMobile() ? '1.2' : '' ) );
+	
+	if ( last_error_name == 'captha_div' ) {
+		$( '.tip-redsimple' ).each( function() {
+			$( this ).css( 'top', ( parseFloat( $( this ).css( 'top' ) ) + 38 ) );
+		});
+	} else {
+		$( '#' + last_error_name ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
 	}
 
-	function show_error_tip() {
-		var mobScreen = isMobile();
-		var error_x = ( mobScreen ? 'inner-left' : 'left' );
-		var error_y = ( mobScreen ? 'bottom' : 'center' );
-		var offset_x = ( mobScreen ? 0 : 5 );
-		var offset_y = ( mobScreen ? 5 : 0 );
-		
-		[% IF last_error_name == 'captha_div' %]
-			error_x = 'inner-left';
-			offset_x = ( mobScreen ? 0 : 20 );
-		[% END %]
-		
-		window.scroll(0,find_pos(document.getElementById("[% last_error_name %]")));
-		
-		$('#[% last_error_name %]').poshytip({
-			className: 'tip-redsimple',
-			content: '[% langreq(last_error_text) %]',
-			showOn: 'none',
-			alignTo: 'target',
-			alignX: error_x,
-			alignY: error_y,
-			offsetX: offset_x,
-			offsetY: offset_y,
-		});
-		
-		$('#[% last_error_name %]').bind({
-			click: function(e) {
-				$('#[% last_error_name %]').poshytip('hide');
-			}
-		});
-		
-		$('#[% last_error_name %]').poshytip('show');
-		
-		$('.tip-redsimple .tip-inner').css( "font-size", ( isMobile() ? '20px' : '' ) );
-		$('.tip-redsimple .tip-inner').css( "line-height", ( isMobile() ? '1.2' : '' ) );
-		
-		[% IF last_error_name == 'captha_div' %]
-			$('.tip-redsimple').each( function() {
-				$(this).css('top', (parseFloat($(this).css('top')) + 38) );
-			});
-		[% ELSE %]
-			$('#[% last_error_name %]').css({'background-color' : '#FF9999', 'border-width' : '1px'});
-		[% END %]
-	}
-[% END %]
+	return 1;
+}
 
 [% FOREACH post_index IN special.post_index %]
 
@@ -505,7 +513,91 @@ function crate_datepicker(date_id) {
 			.appendTo( ul );
 	};
 [% END %]
+
+function check_all_inputs_errors() {
 	
+	var checks = {
+		[% FOREACH rule IN js_rules %]
+			"[% rule.key %]": {
+				[% FOREACH param IN rule.value %]
+					[% param.key %]: '[% param.value %]',
+				[% END %]
+			},
+		[% END %]
+	}
+
+	var errors_num = 0;
+
+	$('.input_gen, .select_gen,').poshytip('hide');
+	
+	Object.keys( checks ).forEach( function( field ) {
+		
+		$( '#' + field ).css( { 'background-color' : '' } );
+
+		if ( errors_num == 0 ) {
+			errors_num += check_input( field, checks[field].type, checks[field].check, checks[field].label ) || 0;
+		}
+	});
+
+	return errors_num;
+}
+
+function check_input( field, type, check, label ) {
+
+	if ( ( field == '' ) || ( check == '' ) ) {
+		return 0;
+	}
+
+	var val = $( '#' + field ).val().replace(/^\s+|\s+$/g, '');
+
+	if ( type == 'input' ) {
+		
+		if ( /z/.test( check ) && ( val == '' ) ) {
+
+			return show_error_tip( field, 'JS: [% langreq( js_errors.0 ) %]'.replace( /\[name\]/, label ) );
+		}
+
+		if ( /D/.test( check ) ) {
+			
+			var date_reg = new RegExp( check.replace( /(z|D)/g, '' ) );
+
+			if ( !date_reg.test( val ) ) {
+				
+				return show_error_tip( field, 'JS: [% langreq( js_errors.1 ) %]'.replace( /\[name\]/, label ) );
+			}
+		}
+		else {
+			var regexp = '';
+
+			if ( /W/.test( check ) ) {
+				regexp += 'A-Za-z';
+			}
+			if ( /Ё/.test( check ) ) {
+				regexp += 'А-Яа-я';
+			}
+			if ( /N/.test( check ) ) {
+				regexp += '0-9';
+			}
+
+			var regexp_add = check.replace( /(z|W|Ё|N)/g, '' );
+
+			var input_reg = new RegExp( '[^' + regexp + ']' );
+
+			var reverse_reg = new RegExp( '[' + regexp + ']' );
+
+			if ( input_reg.test( val ) && ( val != '' ) ) {
+				
+				var symbols_incorrect = val.replace( reverse_reg, '' );
+				
+				return show_error_tip( field, 'JS: [% langreq( js_errors.2 ) %]'.replace( /\[name\]/, label ) +
+					': ' + symbols_incorrect );
+			}
+		}
+	}
+
+	return 0;
+}
+
 </script>
 
 </div>

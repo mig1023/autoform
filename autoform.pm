@@ -172,7 +172,7 @@ sub autoform
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my ( $page_content, $template_file, $title, $progress, $appid, $last_error );
+	my ( $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules );
 	my $step = 0;
 	my $special = {};
 	my $javascript_check = 'need_to_check';
@@ -196,7 +196,7 @@ sub autoform
 		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
 	}
 	else {
-		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid ) = 
+		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $js_rules ) = 
 			$self->get_autoform_content();
 	}
 
@@ -214,13 +214,19 @@ sub autoform
 		'min_step' 		=> 1,
 		'max_step' 		=> $self->get_content_rules( 'length' ),
 		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
-		'addr' 			=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		# 'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+
+			# debug
+			'addr' => $self->{ autoform }->{ paths }->{ addr },
+
 		'last_error_name' 	=> $last_error_name,
 		'last_error_text' 	=> $last_error_text,
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'progress' 		=> $progress,
 		'lang_in_link' 		=> $self->{ lang },
+		'js_rules'		=> $js_rules,
+		'js_errors'		=> VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
@@ -683,9 +689,9 @@ sub get_autoform_content
 
 	my $progress = $self->get_progressbar( $page );
 	
-	my ( $special ) = $self->get_specials_of_element( $step );
+	my ( $special, $js_check ) = $self->get_specials_of_element( $step );
 	
-	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid );
+	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check );
 }
 
 sub check_relation
@@ -1245,6 +1251,8 @@ sub get_specials_of_element
 		'include_out' => [],
 		'no_copypast' => [],
 	};
+
+	my $js_check = {};
 	
 	for my $element ( @$page_content ) {
 	
@@ -1257,9 +1265,15 @@ sub get_specials_of_element
 		
 		push( $special->{ "include_" . $element->{ place } }, $element->{ template } )
 			if $element->{ type } eq 'include';
+
+		next if $element->{ type } ne 'input'; 
+			
+		$js_check->{ $element->{ name } }->{ $_ } = $element->{ $_ } for ( 'type', 'label', 'check' );
+		
+		$js_check->{ $element->{ name } }->{ check } =~ s/'/\\'/g;
 	}
 
-	return ( $special );
+	return ( $special, $js_check );
 }
 
 sub get_html_line
