@@ -535,6 +535,7 @@ function check_all_inputs_errors() {
 		$( '#' + field ).css( { 'background-color' : '' } );
 
 		if ( errors_num == 0 ) {
+
 			errors_num += check_input( field, checks[field].type, checks[field].check, checks[field].label ) || 0;
 		}
 	});
@@ -558,7 +559,7 @@ function check_input( field, type, check, label ) {
 		}
 
 		if ( /D/.test( check ) ) {
-			
+
 			var date_reg = new RegExp( check.replace( /(z|D)/g, '' ) );
 
 			if ( !date_reg.test( val ) ) {
@@ -581,14 +582,14 @@ function check_input( field, type, check, label ) {
 
 			var regexp_add = check.replace( /(z|W|Ё|N)/g, '' );
 
-			var input_reg = new RegExp( '[^' + regexp + ']' );
+			var input_reg = new RegExp( '[^' + regexp + regexp_add + ']' );
 
-			var reverse_reg = new RegExp( '[' + regexp + ']' );
+			var reverse_reg = new RegExp( '[' + regexp + regexp_add + ']', "g" );
 
 			if ( input_reg.test( val ) && ( val != '' ) ) {
-				
+
 				var symbols_incorrect = val.replace( reverse_reg, '' );
-				
+	
 				return show_error_tip( field, 'JS: [% langreq( js_errors.2 ) %]'.replace( /\[name\]/, label ) +
 					': ' + symbols_incorrect );
 			}

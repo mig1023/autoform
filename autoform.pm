@@ -1270,6 +1270,8 @@ sub get_specials_of_element
 			
 		$js_check->{ $element->{ name } }->{ $_ } = $element->{ $_ } for ( 'type', 'label', 'check' );
 		
+		$js_check->{ $element->{ name } }->{ check } =~ s/\\/\\\\/g;
+
 		$js_check->{ $element->{ name } }->{ check } =~ s/'/\\'/g;
 	}
 
