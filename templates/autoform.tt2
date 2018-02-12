@@ -595,6 +595,27 @@ function check_input( field, type, check, label ) {
 			}
 		}
 	}
+	else if ( type == 'checkbox' ) {
+
+		if ( ( check == 'true' ) && ( !$( '#' + field ).is( ':checked' ) ) ) {
+
+			return show_error_tip( field, 'JS: [% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
+		}
+	}
+	else if ( type == 'checklist' ) {
+
+		if ( ( check == 'at_least_one' ) && ( !$( 'input[name^=' + field + ']' ).is( ':checked' ) ) ) {
+
+			return show_error_tip( field, 'JS: [% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
+		}
+	}
+	else if ( type == 'radiolist' ) {
+
+		if ( /z/.test( check ) && ( !$( 'input[name=' + field + ']' ).is( ':checked' ) ) ) {
+
+			return show_error_tip( field, 'JS: [% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
+		}
+	}
 
 	return 0;
 }

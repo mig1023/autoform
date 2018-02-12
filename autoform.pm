@@ -1266,9 +1266,11 @@ sub get_specials_of_element
 		push( $special->{ "include_" . $element->{ place } }, $element->{ template } )
 			if $element->{ type } eq 'include';
 
-		next if $element->{ type } ne 'input'; 
+		next unless $element->{ check };
 			
 		$js_check->{ $element->{ name } }->{ $_ } = $element->{ $_ } for ( 'type', 'label', 'check' );
+		
+		$js_check->{ $element->{ name } }->{ label } = $element->{ label_for } unless $element->{ label };
 		
 		$js_check->{ $element->{ name } }->{ check } =~ s/\\/\\\\/g;
 
