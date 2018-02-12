@@ -516,27 +516,27 @@ function show_error_tip( last_error_name, last_error_text ) {
 
 function check_all_inputs_errors() {
 	
-	var checks = {
+	var checks = [
 		[% FOREACH rule IN js_rules %]
-			"[% rule.key %]": {
-				[% FOREACH param IN rule.value %]
-					[% param.key %]: '[% param.value %]',
-				[% END %]
+			{
+			[% FOREACH param IN rule %]
+				[% param.key %]: '[% param.value %]',
+			[% END %]
 			},
 		[% END %]
-	}
+	]
 
 	var errors_num = 0;
 
 	$('.input_gen, .select_gen,').poshytip('hide');
 	
-	Object.keys( checks ).forEach( function( field ) {
+	checks.forEach( function( field ) {
 		
-		$( '#' + field ).css( { 'background-color' : '' } );
+		$( '#' + field.name ).css( { 'background-color' : '' } );
 
 		if ( errors_num == 0 ) {
 
-			errors_num += check_input( field, checks[field].type, checks[field].check, checks[field].label ) || 0;
+			errors_num += check_input( field.name, field.type, field.check, field.label ) || 0;
 		}
 	});
 

@@ -1252,7 +1252,7 @@ sub get_specials_of_element
 		'no_copypast' => [],
 	};
 
-	my $js_check = {};
+	my $js_rules = [];
 	
 	for my $element ( @$page_content ) {
 	
@@ -1268,16 +1268,20 @@ sub get_specials_of_element
 
 		next unless $element->{ check };
 			
-		$js_check->{ $element->{ name } }->{ $_ } = $element->{ $_ } for ( 'type', 'label', 'check' );
+		my $js_rule = {};
 		
-		$js_check->{ $element->{ name } }->{ label } = $element->{ label_for } unless $element->{ label };
+		$js_rule->{ $_ } = $element->{ $_ } for ( 'name', 'type', 'label', 'check' );
 		
-		$js_check->{ $element->{ name } }->{ check } =~ s/\\/\\\\/g;
+		$js_rule->{ label } = $element->{ label_for } unless $element->{ label };
+		
+		$js_rule->{ check } =~ s/\\/\\\\/g;
 
-		$js_check->{ $element->{ name } }->{ check } =~ s/'/\\'/g;
+		$js_rule->{ check } =~ s/'/\\'/g;
+		
+		push( @$js_rules, $js_rule );
 	}
 
-	return ( $special, $js_check );
+	return ( $special, $js_rules );
 }
 
 sub get_html_line
