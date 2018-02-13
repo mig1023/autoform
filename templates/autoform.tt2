@@ -555,7 +555,7 @@ function check_input( field, type, check, label ) {
 		
 		if ( /z/.test( check ) && ( val == '' ) ) {
 
-			return show_error_tip( field, 'JS: [% langreq( js_errors.0 ) %]'.replace( /\[name\]/, label ) );
+			return show_error_tip( field, '[% langreq( js_errors.0 ) %]'.replace( /\[name\]/, label ) );
 		}
 
 		if ( /D/.test( check ) ) {
@@ -564,7 +564,7 @@ function check_input( field, type, check, label ) {
 
 			if ( !date_reg.test( val ) ) {
 				
-				return show_error_tip( field, 'JS: [% langreq( js_errors.1 ) %]'.replace( /\[name\]/, label ) );
+				return show_error_tip( field, '[% langreq( js_errors.1 ) %]'.replace( /\[name\]/, label ) );
 			}
 		}
 		else {
@@ -590,7 +590,7 @@ function check_input( field, type, check, label ) {
 
 				var symbols_incorrect = val.replace( reverse_reg, '' );
 	
-				return show_error_tip( field, 'JS: [% langreq( js_errors.2 ) %]'.replace( /\[name\]/, label ) +
+				return show_error_tip( field, '[% langreq( js_errors.2 ) %]'.replace( /\[name\]/, label ) +
 					': ' + symbols_incorrect );
 			}
 		}
@@ -599,21 +599,21 @@ function check_input( field, type, check, label ) {
 
 		if ( ( check == 'true' ) && ( !$( '#' + field ).is( ':checked' ) ) ) {
 
-			return show_error_tip( field, 'JS: [% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
+			return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
 		}
 	}
 	else if ( type == 'checklist' ) {
 
 		if ( ( check == 'at_least_one' ) && ( !$( 'input[name^=' + field + ']' ).is( ':checked' ) ) ) {
 
-			return show_error_tip( field, 'JS: [% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
+			return show_error_tip( field, '[% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
 		}
 	}
 	else if ( type == 'radiolist' ) {
 
 		if ( /z/.test( check ) && ( !$( 'input[name=' + field + ']' ).is( ':checked' ) ) ) {
 
-			return show_error_tip( field, 'JS: [% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
+			return show_error_tip( field, '[% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
 		}
 	}
 
