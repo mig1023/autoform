@@ -195,7 +195,7 @@ YMaps.jQuery(function () {
 				
 		$('#timeslot').hide();
 		$('#timeslot').find('option').remove();
-		$('#timeslot').parent().prepend("<img id='tmp_img' src='/files/autoform_wait.gif' />");
+		$('#timeslot').parent().prepend("<img id='tmp_img' src='[% vcs_tools %]static/images/autoform_wait.gif' />");
 		
 		var reload_timeslot = $('#timeslot').attr('data-timeslot');
 

@@ -122,6 +122,7 @@ sub get_infopage
 		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
+		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
