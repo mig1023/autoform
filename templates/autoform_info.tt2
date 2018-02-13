@@ -87,6 +87,13 @@ YMaps.jQuery(function () {
 });
 </script>
 
+[% IF center_msk %]
+	<tr><td colspan="3">
+	<img src="/vcs/static/images/vms_moscow.jpg" width="100%">
+	</td></tr>
+	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+[% END %]
+
 <tr><td colspan="2"><h2>[% langreq('Список заявителей') %]</h2><br></td></tr>
 
 <tr><td colspan="2">

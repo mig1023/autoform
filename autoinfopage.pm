@@ -55,15 +55,11 @@ sub autoinfopage_entry
 		$param->{ $_ } =~ s/[^0-9]//g;
 	}
 
-	if ( !$param->{ action } ) {
-	
-		# <--- nothing to do here
-	}
-	elsif ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
+	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
 	
 		return $self->{ af }->redirect( 'no_field' );
 	}
-	else {
+	elsif ( $param->{ action } ) {
 
 		my $appdata = $self->{ af }->query( 'selallkeys', __LINE__, "
 			SELECT Token, AppData.PassNum as passnum
@@ -111,7 +107,9 @@ sub get_infopage
 	$app_info->{ new_app_date } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
 	
 	$app_info->{ new_app_num } =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
-	
+
+	my $center_msk = ( $app_info->{ new_app_branch } == 1 ? 1 : 0 );
+
 	$self->{ af }->correct_values( \$app_info );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -123,6 +121,7 @@ sub get_infopage
 		'app_list'	=> $self->get_app_list(),
 		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'token' 	=> $self->{ token },
+		'center_msk'	=> $center_msk,
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
