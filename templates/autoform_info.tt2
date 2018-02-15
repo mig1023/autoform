@@ -132,7 +132,7 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr><td width="60%"><label id="text">Новая дата записи</label></td>
-<td><input class="input_width input_gen mobil_big width_full" type="text" value="[% appinfo.appdate %]" name="app_date" id="app_date" onchange="update_timeslots(1);"></td></tr>
+<td><input class="input_width input_gen mobil_big width_full" type="text" value="[% appinfo.appdate %]" name="app_date" id="app_date" onchange="update_timeslots();"></td></tr>
 <tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen mobil_big width_full" size = "1" name="timeslot" title="" id="timeslot" data-timeslot="5694"></select></td></tr>
 
 <tr><td colspan="2"><br>
@@ -172,7 +172,7 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" align="justify" id="comment_place"  class="grayborder">
+<tr><td colspan="2" align="justify" id="comment_place" class="grayborder">
 <span class="suppl_text">
 [% langreq('Некоторые комментарии по процессу отмены записи') %].
 </span>
@@ -191,7 +191,7 @@ YMaps.jQuery(function () {
 
 	$(document).ready( update_timeslots() );
 
-	function update_timeslots(date_change) {
+	function update_timeslots() {
 				
 		$('#timeslot').hide();
 		$('#timeslot').find('option').remove();
@@ -220,16 +220,6 @@ YMaps.jQuery(function () {
 			
 			$('#tmp_img').remove();
 			$('#timeslot').show();
-			
-			[% IF last_error_name == 'timeslot' %]
-				if ( !date_change ) {
-					$(document).ready(function() {
-						show_error_tip();
-					});
-				} else {
-					$('#timeslot').poshytip('destroy');
-				}
-			[% END %]
 			
 			var al = $(xml).find('urgent_flag');
 			if (al.text() != '') {
