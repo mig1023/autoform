@@ -173,8 +173,11 @@ sub autoform
 	my ( $self, $task, $id, $template ) = @_;
 
 	my ( $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules );
+
 	my $step = 0;
+
 	my $special = {};
+
 	my $javascript_check = 'need_to_check';
 
 	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
@@ -214,11 +217,7 @@ sub autoform
 		'min_step' 		=> 1,
 		'max_step' 		=> $self->get_content_rules( 'length' ),
 		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
-		# 'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
-
-			# debug
-			'addr' => $self->{ autoform }->{ paths }->{ addr },
-
+		'addr' 			=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'last_error_name' 	=> $last_error_name,
 		'last_error_text' 	=> $last_error_text,
 		'special' 		=> $special,
@@ -389,16 +388,16 @@ sub init_add_param
 
 			for ( @{ $info_from_db->{ '[brh_countries]' } } ) {
 			
-				push @{ $info_from_db->{ '[prevcitizenship_countries]' } }, $_;
+				push( @{ $info_from_db->{ '[prevcitizenship_countries]' } }, $_ );
 				
-				push @{ $info_from_db->{ '[citizenship_countries]' } }, $_ if $_->[ 2 ] == 0;
+				push( @{ $info_from_db->{ '[citizenship_countries]' } }, $_ ) if $_->[ 2 ] == 0;
 				
-				push @{ $info_from_db->{ '[first_countries]' } }, $_ if $_->[ 3 ] == 1;
+				push( @{ $info_from_db->{ '[first_countries]' } }, $_ ) if $_->[ 3 ] == 1;
 			}
 			
 			for ( @{ $info_from_db->{ '[first_countries]' } }, @$add_eu_countries ) {
 			
-				push @{ $info_from_db->{ '[eu_countries]' } }, $_;
+				push( @{ $info_from_db->{ '[eu_countries]' } }, $_ );
 			}
 
 			$self->cached( 'autoform_addparam', $info_from_db );
@@ -425,7 +424,7 @@ sub init_add_param
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		};
 			
-		push @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ];
+		push( @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ] );
 	}
 	
 	if ( $self->{ token } and $keys->{ ussr_or_rf_first } ) {
@@ -1258,12 +1257,12 @@ sub get_specials_of_element
 	
 		for my $spec_type ( keys %$special ) {
 		
-			push( $special->{ $spec_type }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
+			push( @{ $special->{ $spec_type } }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
 		}
 
-		push( $special->{ captcha }, $self->get_captcha_id() ) if $element->{ type } eq 'captcha';
+		push( @{ $special->{ captcha } }, $self->get_captcha_id() ) if $element->{ type } eq 'captcha';
 		
-		push( $special->{ "include_" . $element->{ place } }, $element->{ template } )
+		push( @{ $special->{ "include_" . $element->{ place } } }, $element->{ template } )
 			if $element->{ type } eq 'include';
 
 		next unless $element->{ check };
@@ -1682,12 +1681,12 @@ sub resort_with_first_elements
 		
 		if ( $first eq 'default_free' ) {
 		
-			push @array_with_first_elements, 0;
+			push( @array_with_first_elements, 0 );
 		}
 		else {
 			for my $elem (keys %$country_hash) {
 			
-				push @array_with_first_elements, $first if $elem == $first;
+				push( @array_with_first_elements, $first ) if $elem == $first;
 			}
 		}
 	}
@@ -1696,7 +1695,7 @@ sub resort_with_first_elements
 	
 	for my $e ( sort { $country_hash->{ $a } cmp $country_hash->{ $b } } keys %$country_hash ) {
 	
-		push @array_with_first_elements, $e if !exists $first_elements{ $e };
+		push( @array_with_first_elements, $e ) if !exists $first_elements{ $e };
 	}
 
 	return @array_with_first_elements;
@@ -1912,7 +1911,7 @@ sub get_names_db_for_save_or_get
 		
 			next if $page_content->{ $page } =~ /^\[/;
 			
-			push @$allpages_content, $_ for @{ $page_content->{ $page } };
+			push( @$allpages_content, $_ ) for @{ $page_content->{ $page } };
 		}
 		
 		$page_content = $allpages_content;
@@ -2656,7 +2655,7 @@ sub insert_hash_table
 
 	my $request_values = join( ',', split( //, '?' x keys %$hash ) );
 	
-	push @request_values, $hash->{ $_ } for keys %$hash;
+	push( @request_values, $hash->{ $_ } ) for keys %$hash;
 	
 	$self->query( 'query', __LINE__, "
 		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, @request_values
@@ -2954,7 +2953,7 @@ sub mutex_fail
 
 	my $pass_list = [];
 	
-	push @$pass_list, $_->{ PassNum } for @$app_data;
+	push( @$pass_list, $_->{ PassNum } ) for @$app_data;
 
 	my $pass_line = join( "','", @$pass_list );
 
