@@ -12,6 +12,20 @@
 <center>
 <div id="info_form">
 
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+
+	var mobilScreen = isMobile();
+
+		if ( mobilScreen ) {
+		$('#info_form').hide();
+	}
+
+</script>
+
 <form action = "[% addr %]/info.htm" method = "POST" name = "dataform">
 <input type = "hidden" value = "1" name = "action" id = "action">
 
@@ -56,30 +70,35 @@ $(document).ready( mobileScreenCheck() );
 
 $("#appnum").mask("999/9999/99/99/9999");
 
-function isMobile() {
-	return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-}
-
 function mobileScreenCheck() {
-
-	var mobilScreen = isMobile();
 	
+	$('.input_width').css( "width", '100%' );
+
+	if ( !mobilScreen ) {
+
+		$('#app_table').css( "width", '302px' );
+		$('.small_button').css( "height", '25px' );
+
+		return;
+	}
+
 	$("#app_table").each(function(){
 		$("td",this).each(function(){
-			$(this).css( "display", ( mobilScreen ? 'block' : '' ) );
-			$(this).css( "float", ( mobilScreen ? 'left' : '' ) );
-			$(this).css( "width", ( mobilScreen ? '100%' : '' ) );
+			$(this).css( "display", 'block' );
+			$(this).css( "float", 'left' );
+			$(this).css( "width", '100%' );
 		});
 	});
 	
-	$('*').css( "font-size", mobilScreen ? '15px' : '' );
-	$('h2').css( "font-size", mobilScreen ? '20px' : '' );
+	$('*').css( "font-size", '15px' );
+	$('h2').css( "font-size", '20px' );
 	
-	$('#app_table').css( "width", ( mobilScreen ? '100%' : '302px' ) );
-	$('.input_width').css( "width", '100%' );
+	$('#app_table').css( "width", '100%' );
 	
-	$('.small_button').css( "height", ( mobilScreen ? '70px' : '25px' ) );
-	$('.small_button').css( "width", ( mobilScreen ? '100%' : '' ) );
+	$('.small_button').css( "height", '70px' );
+	$('.small_button').css( "width", '100%' );
+
+	$('#info_form').show(); 
 }
 
 </script>
