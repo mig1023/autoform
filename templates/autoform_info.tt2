@@ -21,6 +21,20 @@
 <center>
 <div id="info_form">
 
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+
+	var mobilScreen = isMobile();
+
+	if ( mobilScreen ) {
+		$('#info_form').hide();
+	}
+
+</script>
+
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "" name = "appdata" id = "appdata">
@@ -232,69 +246,77 @@ YMaps.jQuery(function () {
 
 $(document).ready( mobileScreenCheck() );
 
-function isMobile() {
-	return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-}
+
 
 function mobileScreenCheck() {
 
-	var mobilScreen = isMobile();
+	if ( !mobilScreen ) {
+		
+		$('#app_table').css( "width", '600px' );
+		$('.big_button').css( "height", '37px' );
+		$('.big_button, .small_button').css( "margin-bottom", '2px' );
+		$('.small_button').css( "height", '25px' );
+		$('.m_left').css( "text-align", 'right' );
+		$('.suppl_text, .dotted_link').css( "font-size", '12px' );
+
+		[% IF title == 2 %]
+			$('#app_date').datepicker({
+				dateFormat: 'dd.mm.yy',
+				firstDay: 1,
+				showOn: 'both',
+				buttonImage: '/vcs/static/images/1x1.png',
+				buttonImageOnly:true
+			});
+		[% END %]
+
+		return;
+	}
 	
-	$('*').css( "font-size", mobilScreen ? '15px' : '' );
-	$('h2').css( "font-size", mobilScreen ? '20px' : '' );
+	$('#app_table').css( "width", '100%' );
+	$('.big_button').css( "height", '70px' );
+	$('.big_button, .small_button').css( "margin-bottom", '15px' );
+	$('.small_button').css( "height", '70px' );
+	$('.m_left').css( "text-align", 'left' );
+	$('.suppl_text, .dotted_link').css( "font-size", '15px' );
+
+	$('*').css( "font-size", '15px' );
+	$('h2').css( "font-size", '20px' );
 	
-	$('.m_info').css( "font-size", mobilScreen ? '30px' : '' );
-	$('.m_left').css( "text-align", mobilScreen ? 'left' : 'right' );
-	$('.suppl_text, .dotted_link').css( "font-size", mobilScreen ? '15px' : '12px' );
+	$('.m_info').css( "font-size", '30px' );
+
 	
-	$('.spacer').html( mobilScreen ? '&nbsp;&nbsp;' : '' );
-	$('.spacer2').html( mobilScreen ? '<br>' : '' );
+	$('.spacer').html( '&nbsp;&nbsp;' );
+	$('.spacer2').html( '<br>' );
 	
 	[% IF title == 2 %]
-	if ( mobilScreen ) {
 		$('#app_date').datepicker('destroy');
-	}
-	else {
-		$('#app_date').datepicker({
-			dateFormat: 'dd.mm.yy',
-			firstDay: 1,
-			showOn: 'both',
-			buttonImage: '/vcs/static/images/1x1.png',
-			buttonImageOnly:true
-		});
-	}
 	[% END %]
 	
 	[% IF title != 3 %]
 		$("#app_table").each(function(){
 			$("td",this).each(function(){
-				$(this).css( "display", ( mobilScreen ? 'block' : '' ) );
-				$(this).css( "float", ( mobilScreen ? 'left' : '' ) );
-				$(this).css( "width", ( mobilScreen ? '100%' : '' ) );
+				$(this).css( "display", 'block' );
+				$(this).css( "float", 'left' );
+				$(this).css( "width", '100%' );
 			});
 		});
 	[% ELSE %]
-		$(':checkbox, :radio').css( "height", ( mobilScreen ? "20px" : "" ) );
-		$(':checkbox, :radio').css( "width", ( mobilScreen ? "20px" : "" ) );
+		$(':checkbox, :radio').css( "height", "20px" );
+		$(':checkbox, :radio').css( "width", "20px" );
 	[% END %]
 	
 	[% IF title == 2 %]
-		$('.mobil_big').css( "height", ( mobilScreen ? "40px" : "" ) );
-		$('.mobil_big').css( "font-size", ( mobilScreen ? "30px" : "" ) );
+		$('.mobil_big').css( "height", "40px" );
+		$('.mobil_big').css( "font-size", "30px" );
 	[% END %]
 	
-	$('#app_table').css( "width", ( mobilScreen ? '100%' : '600px' ) );
-	
-	$('.mobil_hide').css( "display", ( mobilScreen ? 'none' : '' ) );
+	$('.mobil_hide').css( "display", 'none' );
 
-	if ( mobilScreen ) {
-		$('#comment_place').removeClass( "grayborder" );
-	}
-	
-	$('.big_button').css( "height", ( mobilScreen ? '70px' : '37px' ) );
-	$('.big_button, .small_button').css( "margin-bottom", ( mobilScreen ? '15px' : '2px' ) );
-	$('.small_button').css( "height", ( mobilScreen ? '70px' : '25px' ) );
-	$('.small_button').css( "width", ( mobilScreen ? '100%' : '' ) );
+	$('#comment_place').removeClass( "grayborder" );
+
+	$('.small_button').css( "width", '100%' );
+
+	$('#info_form').show(); 
 }
 
 

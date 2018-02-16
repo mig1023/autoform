@@ -11,6 +11,21 @@
 <center>
 <div id="app_form" class="margin_big">
 
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+
+	var mobilScreen = isMobile();
+
+	
+	if ( mobilScreen ) {
+		$('#app_form').hide();
+	}
+
+</script>
+
 <form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
@@ -53,17 +68,10 @@ function back_button() {
 	document.dataform.submit();
 };
 
-$(window).resize(mobileScreenCheck);
 $(document).ready(mobileScreenCheck);
-
-function isMobile() {
-	return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-}
 
 function mobileScreenCheck() {
 
-	var mobilScreen = isMobile();	
-	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr( "width", ( mobilScreen ? '100%' : '450px' ) );
 	$('#app_form').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
@@ -79,6 +87,8 @@ function mobileScreenCheck() {
 	
 	$('.action_button').css( "height", '60px' );
 	$('.action_button').css( "width", '100%' );
+
+	$('#app_form').show();
 }
 
 </script>
