@@ -8,9 +8,12 @@
 [% IF title == 1 %]
 	<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
 [% ELSIF title == 2 %]
+	<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
 	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
 	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
 	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
+	<link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+	<link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 [% END %]
 
@@ -146,8 +149,8 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 <tr><td width="60%"><label id="text">Новая дата записи</label></td>
-<td><input class="input_width input_gen mobil_big width_full" type="text" value="[% appinfo.appdate %]" name="app_date" id="app_date" onchange="update_timeslots();"></td></tr>
-<tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen mobil_big width_full" size = "1" name="timeslot" title="" id="timeslot" data-timeslot="5694"></select></td></tr>
+<td><input class="input_width input_gen mobil_big width_full" type="text" value="[% appinfo.appdate %]" name="appdate" id="appdate" onchange="update_timeslots();"></td></tr>
+<tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen mobil_big width_full" size = "1" name="apptime" title="" id="apptime" data-timeslot="5694"></select></td></tr>
 
 <tr><td colspan="2"><br>
 <input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
@@ -201,22 +204,22 @@ YMaps.jQuery(function () {
 <script>
 
 [% IF title == 2 %]
-	$("#app_date").mask("99.99.9999");
+	$("#appdate").mask("99.99.9999");
 
 	$(document).ready( update_timeslots() );
 
 	function update_timeslots() {
 				
-		$('#timeslot').hide();
-		$('#timeslot').find('option').remove();
-		$('#timeslot').parent().prepend("<img id='tmp_img' src='[% vcs_tools %]static/images/autoform_wait.gif' />");
+		$('#apptime').hide();
+		$('#apptime').find('option').remove();
+		$('#apptime').parent().prepend("<img id='tmp_img' src='[% vcs_tools %]static/images/autoform_wait.gif' />");
 		
-		var reload_timeslot = $('#timeslot').attr('data-timeslot');
+		var reload_timeslot = $('#apptime').attr('data-timeslot');
 
 		$.get("[% vcs_tools %]get_times.htm", {
 			'center': '[% appinfo.center %]', 
 			'persons': '[% appinfo.persons %]', 
-			'appdate':$('#app_date').val(),
+			'appdate':$('#appdate').val(),
 			'fdate': '[% appinfo.fdate %]', 
 			'lang': 'ru',
 			
@@ -225,7 +228,7 @@ YMaps.jQuery(function () {
 					var apptimeValue = $(this).find('id').text();
 					var apptimeText = $(this).find('title').text();
 					
-					$('#timeslot').append(
+					$('#apptime').append(
 						'<option value="' + apptimeValue + '" ' +
 						( ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) ? 'selected' : '' )
 						+ ' >'+ apptimeText + '</option>'
@@ -233,7 +236,7 @@ YMaps.jQuery(function () {
 			});
 			
 			$('#tmp_img').remove();
-			$('#timeslot').show();
+			$('#apptime').show();
 			
 			var al = $(xml).find('urgent_flag');
 			if (al.text() != '') {
@@ -245,8 +248,6 @@ YMaps.jQuery(function () {
 [% END %]
 
 $(document).ready( mobileScreenCheck() );
-
-
 
 function mobileScreenCheck() {
 
@@ -260,7 +261,7 @@ function mobileScreenCheck() {
 		$('.suppl_text, .dotted_link').css( "font-size", '12px' );
 
 		[% IF title == 2 %]
-			$('#app_date').datepicker({
+			$('#appdate').datepicker({
 				dateFormat: 'dd.mm.yy',
 				firstDay: 1,
 				showOn: 'both',
@@ -269,6 +270,10 @@ function mobileScreenCheck() {
 			});
 		[% END %]
 
+		[% IF ( title == 2 ) && error %]
+			showErrorTip();
+		[% END %]
+	
 		return;
 	}
 	
@@ -317,8 +322,48 @@ function mobileScreenCheck() {
 	$('.small_button').css( "width", '100%' );
 
 	$('#info_form').show(); 
+	
+	[% IF ( title == 2 ) && error %]
+		showErrorTip();
+	[% END %]
 }
 
+[% IF ( title == 2 ) && error %]
+
+function showErrorTip() {
+
+	var mobScreen = isMobile();
+	var error_x = ( mobScreen ? 'inner-left' : 'left' );
+	var error_y = ( mobScreen ? 'bottom' : 'center' );
+	var offset_x = ( mobScreen ? 0 : 5 );
+	var offset_y = ( mobScreen ? 5 : 0 );
+	
+	$( '#apptime' ).poshytip({
+		className: 'tip-redsimple',
+		content: '[% error %]',
+		showOn: 'none',
+		alignTo: 'target',
+		alignX: error_x,
+		alignY: error_y,
+		offsetX: offset_x,
+		offsetY: offset_y,
+	});
+	
+	$( '#apptime' ).bind({
+		click: function( e ) {
+			$( '#apptime' ).poshytip( 'hide' );
+		}
+	});
+	
+	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( isMobile() ? '20px' : '' ) );
+	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( isMobile() ? '1.2' : '' ) );
+	
+	$( '#apptime' ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
+	
+	$( '#apptime' ).poshytip( 'show' );
+}
+
+[% END %]
 
 function go_button(where, who) {
 	$('#action').val(where);

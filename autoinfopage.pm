@@ -168,26 +168,36 @@ sub reschedule
 	my ( $self, $task, $id, $template ) = @_;
 	
 	my $new = {};
+
+	my $id_or_error;
 	
 	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
-	
-	$new->{ $_ } = $self->{ vars }->getparam( $_ ) for ( 'app_date', 'timeslot' );
-	
+
+	$new->{ $_ } = $self->{ vars }->getparam( $_ ) for ( 'appdate', 'apptime' );
+
 	if (
-		$new->{ timeslot } =~ /^\d+$/
+		$new->{ apptime } =~ /^\d+$/
 		and
-		$new->{ timeslot } > 0
-		and
-		$self->check_timeslots_already_full( $appinfo_for_timeslots, $new->{ timeslot } )
-		and
-		$new->{ app_date } =~ /(\d\d)\.(\d\d)\.(\d\d\d\d)/
-		and
-		Date::Calc::check_date( $3, $2, $1 )
+		$new->{ appdate } =~ /\d\d\.\d\d\.\d\d\d\d/
 	) {
 
-		$self->set_new_appdate( $new );
-		
-		return $self->{ af }->redirect( 'current' );
+		$appinfo_for_timeslots->{ $_  } = $new->{ appdate } for ( 'appdate', 'appdate_iso' );
+
+		$appinfo_for_timeslots->{ appdate_iso } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
+
+		if (
+			$new->{ apptime } > 0
+			and
+			$self->check_timeslots_already_full( $appinfo_for_timeslots, $new->{ apptime } )
+			and
+			Date::Calc::check_date( $3, $2, $1 )
+		) {
+
+			$id_or_error = $self->set_new_appdate( $new );
+			
+			return $self->{ af }->redirect( 'current' ) if $id_or_error =~ /^\d+$/;
+		}
+
 	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -199,6 +209,7 @@ sub reschedule
 		'token' 	=> $self->{ token },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'error'		=> $id_or_error,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -289,7 +300,7 @@ sub check_timeslots_already_full
 	my ( $self, $app, $timeslot ) = @_;
 
 	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } );
-	
+
 	my $timeslots = $appobj->get_timeslots_arr( $app->{ center }, $app->{ persons }, $app->{ appdate_iso } );
 
 	for ( @$timeslots ) {
@@ -320,29 +331,25 @@ sub set_new_appdate
 {
 	my ( $self, $new ) = @_;
 
-	$new->{ app_date } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
-	
-	# my $time_start = $self->{ af }->time_interval_calculate();
 
-	$self->{ af }->query( 'query', __LINE__, "
-		LOCK TABLES Appointments WRITE, AutoToken READ"
-	);
-	
-	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+	my $appid = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
-	
-	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE Appointments SET AppDate = ?, TimeslotID = ? WHERE ID = ?", {}, 
-		$new->{ app_date }, $new->{ timeslot }, $app_id
-	);
-	
-	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES");
 
-	# my $milliseconds = $self->{ af }->time_interval_calculate( $time_start );
-	# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms";
-	
-	return $app_id;
+	my ( $newnum, $new_app_id );
+
+	my $urgent = VCS::Site::newapps::getUrgent( $self, $new->{ fdate }, $new->{ app_date }, $new->{ center } );
+
+	my $docobj = VCS::Docs::docs->new( 'VCS::Docs::docs', $self->{ vars } );
+
+	my $error = $docobj->reschApp( $appid, $urgent, \$newnum, \$new_app_id );
+
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE AutoToken SET CreatedApp = ? WHERE Token = ?", {},
+		$new_app_id, $self->{ token }
+	) unless $error;
+
+	return ( $error ? $error : $new_app_id );
 }
 
 sub check_existing_id_in_token
