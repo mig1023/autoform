@@ -37,10 +37,10 @@ sub getContent
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
+
+	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
 	
 	return autoform( @_ ) if /^index$/i;
-	
-	return autoselftest( @_ ) if /^selftest$/i;
 	
 	return get_pcode( @_ ) if /^findpcode$/i;
 	
@@ -48,7 +48,7 @@ sub getContent
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
 	
-	return redirect();
+	return $self->redirect();
 }
 
 sub get_content_rules
@@ -268,8 +268,6 @@ sub autoselftest
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	return $self->redirect(); # <--- only for development; comment for use
-	
 	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );

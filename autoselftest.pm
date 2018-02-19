@@ -90,7 +90,41 @@ sub get_test_list {
 						},
 						'[progress_bar]',
 						undef,
+						[
+							{
+								'check' => 'zN',
+								'name' => 'center',
+								'label' => 'Визовый центр',
+								'type' => 'select'
+							},
+							{
+								'check' => 'zN',
+								'name' => 'vtype',
+								'label' => 'Тип визы',
+								'type' => 'select'
+							},
+							{
+								'check' => 'zWN\\\\@\\\\s\\\\-\\\\.\\\\,\\\\;',
+								'name' => 'email',
+								'label' => 'Email',
+								'type' => 'input'
+							},
+							{
+								'check' => 'true',
+								'name' => 'pers_info',
+								'label' => 'я согласен на обработку персональных данных',
+								'type' => 'checkbox'
+							},
+							{
+								'check' => 'true',
+								'name' => 'mobil_info',
+								'label' => 'я согласен на условия работы с мобильными'.
+									' телефона на территории визового центра',
+								'type' => 'checkbox'
+							}
+						],
 					],
+
 				},
 				2 => { 	'prepare' => \&pre_content_1,
 					'param' => {
@@ -127,6 +161,20 @@ sub get_test_list {
 						},
 						'[progress_bar_2]',
 						undef,
+						[
+							{
+							  'check' => 'zD^(([012]\\\\d|3[01])\\\\.((0\\\\d)|(1[012]))\\\\.(19\\\\d\\\\d|20[0-2]\\\\d))$',
+							  'name' => 's_date',
+							  'label' => 'Дата начала поездки',
+							  'type' => 'input'
+							},
+							{
+							  'check' => 'zD^(([012]\\\\d|3[01])\\\\.((0\\\\d)|(1[012]))\\\\.(19\\\\d\\\\d|20[0-2]\\\\d))$',
+							  'name' => 'f_date',
+							  'label' => 'Дата окончания поездки',
+							  'type' => 'input'
+							}	
+						],
 					],
 				},
 				3 => { 	'prepare' => \&pre_content_2,
@@ -151,6 +199,39 @@ sub get_test_list {
 						},
 						'[progress_bar]',
 						undef,
+						[
+							{
+								'check' => 'zN',
+								'name' => 'center',
+								'label' => 'Визовый центр',
+								'type' => 'select'
+							},
+							{
+								'check' => 'zN',
+								'name' => 'vtype',
+								'label' => 'Тип визы',
+								'type' => 'select'
+							},
+							{
+								'check' => 'zWN\\\\@\\\\s\\\\-\\\\.\\\\,\\\\;',
+								'name' => 'email',
+								'label' => 'Email',
+								'type' => 'input'
+							},
+							{
+								'check' => 'true',
+								'name' => 'pers_info',
+								'label' => 'я согласен на обработку персональных данных',
+								'type' => 'checkbox'
+							},
+							{
+								'check' => 'true',
+								'name' => 'mobil_info',
+								'label' => 'я согласен на условия работы с мобильными'.
+									' телефона на территории визового центра',
+								'type' => 'checkbox'
+							}
+						],
 					],
 				},
 			},
@@ -2175,6 +2256,19 @@ sub get_test_list {
 				3 => {	'prepare' => \&pre_vtype_clear,
 					'expected' => [ 1 ],
 				}
+			},
+		},
+		{ 	'func' 	=> \&{ VCS::Site::autoform::get_app_version },
+			'comment' => 'get_app_version',
+			'test' => {
+				1 => { 	'expected' => 'новая форма записи',
+				},
+				2 => { 	'param' => { 'mobile_ver' => 1 },
+					'expected' => 'новая форма записи (мобильная версия)',
+				},
+				3 => { 	'param' => { 'mobile_app' => 1 },
+					'expected' => 'новая форма записи (мобильное приложение)',
+				},
 			},
 		},
 		{ 	'func' 	=> \&{ VCS::Site::autoform::get_delete }, # <--- fixed last
