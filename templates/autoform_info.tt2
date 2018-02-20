@@ -262,6 +262,16 @@ $(document).ready( mobileScreenCheck() );
 
 function mobileScreenCheck() {
 
+	[% IF title == 2 %]
+		$('#appdate').datepicker({
+			dateFormat: 'dd.mm.yy',
+			firstDay: 1,
+			showOn: 'both',
+			buttonImage: '/vcs/static/images/1x1.png',
+			buttonImageOnly:true
+		});
+	[% END %]
+
 	if ( !mobilScreen ) {
 		
 		$('#app_table').css( "width", '600px' );
@@ -270,16 +280,6 @@ function mobileScreenCheck() {
 		$('.small_button').css( "height", '25px' );
 		$('.m_left').css( "text-align", 'right' );
 		$('.suppl_text, .dotted_link').css( "font-size", '12px' );
-
-		[% IF title == 2 %]
-			$('#appdate').datepicker({
-				dateFormat: 'dd.mm.yy',
-				firstDay: 1,
-				showOn: 'both',
-				buttonImage: '/vcs/static/images/1x1.png',
-				buttonImageOnly:true
-			});
-		[% END %]
 
 		return;
 	}
@@ -295,7 +295,6 @@ function mobileScreenCheck() {
 	$('h2').css( "font-size", '20px' );
 	
 	$('.m_info').css( "font-size", '30px' );
-
 	
 	$('.spacer').html( '&nbsp;&nbsp;' );
 	$('.spacer2').html( '<br>' );
