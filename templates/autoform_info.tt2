@@ -205,6 +205,10 @@ YMaps.jQuery(function () {
 
 [% IF title == 2 %]
 	$("#appdate").mask("99.99.9999");
+	
+	[% IF error %]
+		error_already_displayed = 0;
+	[% END %]
 
 	$(document).ready( update_timeslots() );
 
@@ -238,10 +242,17 @@ YMaps.jQuery(function () {
 			$('#tmp_img').remove();
 			$('#apptime').show();
 			
+			[% IF error %]
+				if (!error_already_displayed) {
+					showErrorTip();
+					error_already_displayed = 1;
+				}
+			[% END %]
+				
 			var al = $(xml).find('urgent_flag');
+			
 			if (al.text() != '') {
-				var alertText = al.text();
-				alert(alertText);
+				alert(al.text());
 			}
 	    }, 'xml');
 	};
@@ -270,10 +281,6 @@ function mobileScreenCheck() {
 			});
 		[% END %]
 
-		[% IF ( title == 2 ) && error %]
-			showErrorTip();
-		[% END %]
-	
 		return;
 	}
 	
@@ -322,10 +329,6 @@ function mobileScreenCheck() {
 	$('.small_button').css( "width", '100%' );
 
 	$('#info_form').show(); 
-	
-	[% IF ( title == 2 ) && error %]
-		showErrorTip();
-	[% END %]
 }
 
 [% IF ( title == 2 ) && error %]
@@ -338,7 +341,12 @@ function showErrorTip() {
 	var offset_x = ( mobScreen ? 0 : 5 );
 	var offset_y = ( mobScreen ? 5 : 0 );
 	
-	$( '#apptime' ).poshytip({
+	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( isMobile() ? '20px' : '' ) );
+	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( isMobile() ? '1.2' : '' ) );
+	
+	$( '#appdate' ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
+	
+	$( '#appdate' ).poshytip({
 		className: 'tip-redsimple',
 		content: '[% error %]',
 		showOn: 'none',
@@ -349,18 +357,13 @@ function showErrorTip() {
 		offsetY: offset_y,
 	});
 	
-	$( '#apptime' ).bind({
+	$( '#appdate' ).bind({
 		click: function( e ) {
-			$( '#apptime' ).poshytip( 'hide' );
+			$( '#appdate' ).poshytip( 'hide' );
 		}
 	});
 	
-	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( isMobile() ? '20px' : '' ) );
-	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( isMobile() ? '1.2' : '' ) );
-	
-	$( '#apptime' ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
-	
-	$( '#apptime' ).poshytip( 'show' );
+	$( '#appdate' ).poshytip( 'show' );
 }
 
 [% END %]
