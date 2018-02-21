@@ -2137,14 +2137,14 @@ sub check_logic
 		if ( $rule->{ condition } =~ /^(equal|now)_or_(later|earlier)$/ ) {
 		
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
-			
+	
 			my $datediff = $self->get_datediff(
 				$value, $rule, $tables_id, ( $rule->{ condition } =~ /^equal/ )
 			);
 
 			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
 				
-			$error = 6 if ( ( $datediff < ( $offset * -1 ) ) and ( $rule->{ condition } =~ /later$/ ) );
+			$error = 6 if ( ( $datediff < $offset ) and ( $rule->{ condition } =~ /later$/ ) );
 			$error = 8 if ( ( $datediff > $offset ) and ( $rule->{ condition } =~ /earlier$/ ) );
 			$error = 12 if ( $error and $rule->{ condition } =~ /^now/ );
 			
@@ -2268,7 +2268,6 @@ sub get_datediff
 	return $self->query( 'sel1', __LINE__, "
 		SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
 		$value, $tables_id->{ 'Auto'.$rule->{table} }
-		
 	) if $use_date;
 
 	return $self->query( 'sel1', __LINE__, "

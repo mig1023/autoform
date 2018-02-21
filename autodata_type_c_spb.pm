@@ -359,7 +359,7 @@ sub get_content_rules_hash
 					},
 					{
 						'condition' => 'now_or_later',
-						'offset' => ( 10 * 365 ), # <--- 10 years
+						'offset' => ( -10 * 365 ), # <--- 10 years
 						'full_error' => 'Паспорт не должен быть выдан больше [offset] назад',
 					},
 				],
@@ -1088,7 +1088,7 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'now_or_later',
-						'offset' => ( 3 * 365 ), # <--- 3 years
+						'offset' => ( -3 * 365 ), # <--- 3 years
 						'full_error' => 'Допустимо указывать только визы, выданные за последние [offset]'
 					},
 					{
@@ -1132,8 +1132,11 @@ sub get_content_rules_hash
 				'check_logic' => [
 					{
 						'condition' => 'now_or_later',
-						'offset' => ( 5 * 365 ), # <--- 5 years
+						'offset' => ( -5 * 365 ), # <--- 5 years
 						'full_error' => 'Дата сканирования отпечатков пальцев, не должна быть более [offset] назад'
+					},
+					{
+						'condition' => 'now_or_earlier',
 					},
 				],
 				'special' => 'mask',
