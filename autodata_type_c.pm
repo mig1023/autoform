@@ -1969,7 +1969,7 @@ sub get_content_rules_hash
 						'condition' => 'equal_or_later',
 						'table' => 'Appointments',
 						'name' => 'SDate',
-						'offset' => 90,
+						'offset' => -90,
 						'full_error' => 'Запись в Визовый центр более чем за [offset] до начала поездки не осуществляется',
 					},
 				],
