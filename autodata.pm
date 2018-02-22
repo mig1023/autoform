@@ -6,40 +6,39 @@ sub get_settings
 # //////////////////////////////////////////////////
 {
 	return {
-		'general' => {
-			'max_applicants' => 10,
+		general => {
+			max_applicants => 10,
 		},
 	
-		'paths' => {
-			'addr' => '/autoform/',
-			'addr_vcs' => '/vcs/',
-			
+		paths => {
+			addr => '/autoform/',
+			addr_vcs => '/vcs/',
 		},
 		
-		'age' => {
-			'age_for_agreements' => 18,
+		age => {
+			age_for_agreements => 18,
 		},
 		
-		'memcached' => {
-			'memcached_exptime' => 43200, # <--- 12*3600 sec
-			'mutex_exptime' => 30,
+		memcached => {
+			memcached_exptime => 43200, # <--- 12*3600 sec
+			mutex_exptime => 30,
 		},
 		
-		'captcha' => {
-			'public_key' => '',
-			'private_key' => '',
-			'widget_api' => 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit',
-			'verify_api' => 'https://www.google.com/recaptcha/api/siteverify',
+		captcha => {
+			public_key => '',
+			private_key => '',
+			widget_api => 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit',
+			verify_api => 'https://www.google.com/recaptcha/api/siteverify',
 		},
 		
-		'confirm' => {
-			'tt' => '/usr/local/VMS/www/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
-			'pers_data' => '/usr/local/www/data/htdocs/pers_data_agreement.pdf',
-			'link_image' => '',
-			'link_site' => '',
-			'html_website' => '',
-			'html_email' => '',
-			'spb_html_email' => '',
+		confirm => {
+			tt => '/usr/local/VMS/www/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
+			pers_data => '/usr/local/www/data/htdocs/pers_data_agreement.pdf',
+			link_image => '',
+			link_site => '',
+			html_website => '',
+			html_email => '',
+			spb_html_email => '',
 		}
 	};
 }
@@ -107,51 +106,51 @@ sub get_html_elements
 # //////////////////////////////////////////////////
 {
 	return { 
-		'start_line'		=> '<tr [u]>',
+		start_line	=> '<tr [u]>',
 		
-		'end_line'		=> '</tr>',
+		end_line	=> '</tr>',
 		
-		'start_cell'		=> '<td [u]>',
+		start_cell	=> '<td [u]>',
 		
-		'end_cell'		=> '</td>',
+		end_cell	=> '</td>',
 		
-		'new_line'		=> '<br>',
+		new_line	=> '<br>',
 		
-		'new_and_bold'		=> '<br><br><b>[name]</b>',
+		new_and_bold	=> '<br><br><b>[name]</b>',
 		
-		'input' 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
-					' id="[name]" title="[comment]" [u]>',
+		input 		=> '<input class="input_width input_gen" type="text" value="[value]" name="[name]"'.
+				' id="[name]" title="[comment]" [u]>',
 					
-		'checkbox' 		=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
+		checkbox 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		
-		'select'		=> '<select class="input_width select_gen" size = "1" ' .
-					'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
+		select		=> '<select class="input_width select_gen" size = "1" ' .
+				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 					
-		'radiolist'		=> '<div id="[name]">[options]</div>',
+		radiolist	=> '<div id="[name]">[options]</div>',
 		
-		'text'			=> '<td colspan="3" [u]>[value]</td>',
+		text		=> '<td colspan="3" [u]>[value]</td>',
 		
-		'example'		=> '<tr [u]><td class="exam_td_gen">' .
-					'<span class="exam_span_gen">[example]: [value]</span></td></tr>',
+		example		=> '<tr [u]><td class="exam_td_gen">' .
+				'<span class="exam_span_gen">[example]: [value]</span></td></tr>',
 
-		'info'			=> '<label class="info" title="[comment]" id="[name]" [u]>[text]</label>',
+		info		=> '<label class="info" title="[comment]" id="[name]" [u]>[text]</label>',
 		
-		'checklist'		=> '<div id="[name]">[options]</div>',
+		checklist	=> '<div id="[name]">[options]</div>',
 		
-		'captcha'		=> '<div class="captcha_container"><script type="text/javascript">var onloadCallback = function(){' .
-					'grecaptcha.render(' . "'[captch_id]'" . ', [json_options]);};</script><script src="[widget_api]" ' .
-					'type="text/javascript"></script><div id="captha_div"><div id="[captch_id]"></div></div></div>',
+		captcha		=> '<div class="captcha_container"><script type="text/javascript">var onloadCallback = function(){' .
+				'grecaptcha.render(' . "'[captch_id]'" . ', [json_options]);};</script><script src="[widget_api]" ' .
+				'type="text/javascript"></script><div id="captha_div"><div id="[captch_id]"></div></div></div>',
 		
-		'label'			=> '<label id="[name]" [u]>[value]</label>',
+		label		=> '<label id="[name]" [u]>[value]</label>',
 		
-		'label_for'		=> '<label for="[name]" [u]>[value]</label>',
+		label_for	=> '<label for="[name]" [u]>[value]</label>',
 		
-		'progress'		=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
-					'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
+		progress	=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
+				'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
 					
-		'stages'		=> '<td class="stage_gen">[progress_stage]</td>',
+		stages		=> '<td class="stage_gen">[progress_stage]</td>',
 		
-		'free_line'		=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
+		free_line	=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 	};
 }
 
@@ -159,10 +158,10 @@ sub get_tables_controled_by_AutoToken
 # //////////////////////////////////////////////////
 {
 	return {
-		'AutoAppointments' => 'AutoAppID',
-		'AutoAppData' => 'AutoAppDataID',
-		'AutoSchengenAppData' => 'AutoSchengenAppDataID',
-		'AutoSpbAlterAppData' => 'AutoSpbDataID',
+		AutoAppointments => 'AutoAppID',
+		AutoAppData => 'AutoAppDataID',
+		AutoSchengenAppData => 'AutoSchengenAppDataID',
+		AutoSpbAlterAppData => 'AutoSpbDataID',
 	};
 }
 
@@ -207,9 +206,9 @@ sub get_blocked_emails
 {
 	return [
 		{
-			'for_centers' => [ 1 ],
-			'show_truth' => 0,
-			'emails' => [
+			for_centers => [ 1 ],
+			show_truth => 0,
+			emails => [
 				'blocked_mail@mail.com',
 			],
 		},
@@ -251,23 +250,23 @@ sub get_appointment_text
 # //////////////////////////////////////////////////
 {
 	return {
-		'subject' => 'Вы зарегистрированы для подачи документов на визу',
-		'months' => 'января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря',
-		'pers' => 'лично',
-		'by_the_doc' => 'по доверенности на имя',
-		'app_tx' => 'Запись в визовый центр.',
-		'date_tx' => 'Дата и время записи:',
-		'num_tx' => 'Номер записи:',
-		'doc_tx' => 'Документы подаются:',
-		'list_tx' => 'Список заявителей:',
-		'vms_tx' => 'С уважением, VMS',
-		'info_btn' => 'Информация о записи',
-		'resh_btn' => 'Изменить время записи',
-		'canc_btn' => 'Отменить запись',
-		'prnt_btn' => 'Распечатать запись',
-		'branch_tx' => 'Визовый центр Италии',
-		'dis_head' => 'Отказ от ответственности',
-		'dis_tx' => 'Информация в этом сообщении предназначена исключительно для конкретных лиц, которым она адресована. В сообщении может содержаться конфиденциальная информация, которая не может быть раскрыта или использована кем-либо кроме адресатов. Если вы не адресат этого сообщения, то использование, переадресация, копирование или распространение содержания сообщения или его части незаконно и запрещено. Если Вы получили это сообщение ошибочно, пожалуйста, незамедлительно сообщите отправителю об этом и удалите со всем содержимым само сообщение и любые возможные его копии и приложения.',
+		subject => 'Вы зарегистрированы для подачи документов на визу',
+		months => 'января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря',
+		pers => 'лично',
+		by_the_doc => 'по доверенности на имя',
+		app_tx => 'Запись в визовый центр.',
+		date_tx => 'Дата и время записи:',
+		num_tx => 'Номер записи:',
+		doc_tx => 'Документы подаются:',
+		list_tx => 'Список заявителей:',
+		vms_tx => 'С уважением, VMS',
+		info_btn => 'Информация о записи',
+		resh_btn => 'Изменить время записи',
+		canc_btn => 'Отменить запись',
+		prnt_btn => 'Распечатать запись',
+		branch_tx => 'Визовый центр Италии',
+		dis_head => 'Отказ от ответственности',
+		dis_tx => 'Информация в этом сообщении предназначена исключительно для конкретных лиц, которым она адресована. В сообщении может содержаться конфиденциальная информация, которая не может быть раскрыта или использована кем-либо кроме адресатов. Если вы не адресат этого сообщения, то использование, переадресация, копирование или распространение содержания сообщения или его части незаконно и запрещено. Если Вы получили это сообщение ошибочно, пожалуйста, незамедлительно сообщите отправителю об этом и удалите со всем содержимым само сообщение и любые возможные его копии и приложения.',
 	};
 };
 
@@ -275,7 +274,7 @@ sub get_mobile_api_fields
 # //////////////////////////////////////////////////
 {
 	return {
-		'appointments' => [
+		appointments => [
 			'ID',
 			'PersonalDataPermission',
 			'MobilPermission',
@@ -291,7 +290,7 @@ sub get_mobile_api_fields
 			'Duration',
 			'Notes'
 		],
-		'appdata' => [
+		appdata => [
 			'ID',
 			'AppID',
 			'Finished',
@@ -305,7 +304,7 @@ sub get_mobile_api_fields
 	} if ( shift eq 'to_delete');
 	
 	return {
-		'appointments' => [
+		appointments => [
 			'SMS',
 			'CenterID',
 			'FName',
@@ -340,7 +339,7 @@ sub get_mobile_api_fields
 			'Cost',
 			'VType', 
 		],
-		'appdata' => [
+		appdata => [
 			'Citizenship',
 			'ACompanyName',
 			'AnkDate',
@@ -436,7 +435,7 @@ sub get_mobile_api_fields
 			'CountryLive',
 			'PhotoSrv',
 		],
-		'schengen' => [
+		schengen => [
 			'HostDataAddress',
 			'HostDataDateOfBirth',
 			'HostDataName',
