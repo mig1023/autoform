@@ -95,7 +95,7 @@ sub get_infopage
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
-	
+
 	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
 		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname
@@ -124,7 +124,7 @@ sub get_infopage
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
-		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'static'	=> $self->{ af }->{ paths }->{ static },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }

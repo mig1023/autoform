@@ -216,7 +216,7 @@ YMaps.jQuery(function () {
 				
 		$('#apptime').hide();
 		$('#apptime').find('option').remove();
-		$('#apptime').parent().prepend("<img id='tmp_img' src='[% [% static %] %]/images/autoform_wait.gif' />");
+		$('#apptime').parent().prepend("<img id='tmp_img' src='[% static %]/images/autoform_wait.gif' />");
 		
 		var reload_timeslot = $('#apptime').attr('data-timeslot');
 
