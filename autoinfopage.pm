@@ -124,7 +124,7 @@ sub get_infopage
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
-		'static'	=> $self->{ af }->{ paths }->{ static },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }

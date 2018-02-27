@@ -2983,8 +2983,6 @@ sub redirect
 {
 	my ( $self, $target ) = @_;
 	
-	my $addr = $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr };
-	
 	my $token = ( $target eq 'current' ? $self->{ token } : $target );
 		
 	my $param = ( $token ? '?t=' . $token : '' );
@@ -2993,7 +2991,7 @@ sub redirect
 	
 	return $param if $self->{ this_is_self_testing };
 	
-	$self->{ vars }->get_system->redirect( $addr . $param );
+	$self->{ vars }->get_system->redirect( $self->{ autoform }->{ paths }->{ addr } . $param );
 }
 
 sub query
