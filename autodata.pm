@@ -13,6 +13,7 @@ sub get_settings
 		paths => {
 			addr => '/autoform/',
 			addr_vcs => '/vcs/',
+			static => '/vcs/static',
 		},
 		
 		age => {

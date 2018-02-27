@@ -84,6 +84,7 @@ sub autoinfopage_entry
 	my $tvars = {
 		'langreq' 	=> sub { return $self->{ vars }->getLangSesVar(@_) },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'widget_api'	=> $self->{ autoform }->{ captcha }->{ widget_api },
 		'json_options'	=> to_json( { sitekey => $key, theme => 'light' }, $self->{ json_options } || {} ),
 	};
@@ -123,7 +124,7 @@ sub get_infopage
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
-		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -207,7 +208,7 @@ sub reschedule
 		'title' 	=> 2,
 		'appinfo'	=> $appinfo_for_timeslots,
 		'token' 	=> $self->{ token },
-		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'error'		=> $id_or_error,
 	};
@@ -263,7 +264,7 @@ sub cancel
 		'title' 	=> 3,
 		'app_list'	=> $app_list,
 		'token' 	=> $self->{ token },
-		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }

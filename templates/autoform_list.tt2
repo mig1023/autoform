@@ -1,10 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
-<link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
-<link href="/css/autoform.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 

@@ -1,19 +1,19 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
-<link href="/css/autoform.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 [% IF title == 1 %]
 	<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
 [% ELSIF title == 2 %]
-	<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
-	<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
-	<script type="text/javascript" src="/jquery-ui.1.8.min.js"></script>
-	<link href="/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
-	<link href="/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
-	<link href="/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+	<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
+	<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
+	<link href="[% static %]/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
+	<link href="[% static %]/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+	<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 [% END %]
 
@@ -52,7 +52,7 @@
 
 <tr><td colspan="2">
 
-<br><br><img src="/vcs/static/images/logoVMS.png"/><br><br><br></td></tr>
+<br><br><img src="[% static %]/images/logoVMS.png"/><br><br><br></td></tr>
 
 <tr><td colspan="2">
 
@@ -106,7 +106,7 @@ YMaps.jQuery(function () {
 
 [% IF center_msk %]
 	<tr><td colspan="3">
-	<img src="/vcs/static/images/vms_moscow.jpg" width="100%">
+	<img src="[% static %]/images/vms_moscow.jpg" width="100%">
 	</td></tr>
 	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
 [% END %]
@@ -216,7 +216,7 @@ YMaps.jQuery(function () {
 				
 		$('#apptime').hide();
 		$('#apptime').find('option').remove();
-		$('#apptime').parent().prepend("<img id='tmp_img' src='[% vcs_tools %]static/images/autoform_wait.gif' />");
+		$('#apptime').parent().prepend("<img id='tmp_img' src='[% [% static %] %]/images/autoform_wait.gif' />");
 		
 		var reload_timeslot = $('#apptime').attr('data-timeslot');
 
@@ -267,7 +267,7 @@ function mobileScreenCheck() {
 			dateFormat: 'dd.mm.yy',
 			firstDay: 1,
 			showOn: 'both',
-			buttonImage: '/vcs/static/images/1x1.png',
+			buttonImage: '[% static %]/images/1x1.png',
 			buttonImageOnly:true
 		});
 	[% END %]

@@ -1,9 +1,9 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<script type="text/javascript" src="/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="/jscript/jquery.poshytip.min.js"></script>
-<script type="text/javascript" src="/jquery.maskedinput.min.js"></script>
-<link href="/css/autoform.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
+<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
@@ -37,7 +37,7 @@
 
 <tr><td align="center">
 
-<br><br><img src="/vcs/static/images/logoVMS.png"/><br><br><br></td></tr>
+<br><br><img src="[% static %]/images/logoVMS.png"/><br><br><br></td></tr>
 
 <tr><td>
 
