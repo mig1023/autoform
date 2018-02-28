@@ -356,7 +356,7 @@ function crate_datepicker(date_id) {
 				
 		$('#timeslot').hide();
 		$('#timeslot').find('option').remove();
-		$('#timeslot').parent().prepend("<img id='tmp_img' src='[% static %]c/images/autoform_wait.gif' />");
+		$('#timeslot').parent().prepend("<img id='tmp_img' src='[% static %]/images/autoform_wait.gif' />");
 		
 		var reload_timeslot = $('#timeslot').attr('data-timeslot');
 
