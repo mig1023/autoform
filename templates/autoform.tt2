@@ -371,10 +371,17 @@ function crate_datepicker(date_id) {
 				$(xml).find('node').each( function() {
 					var apptimeValue = $(this).find('id').text();
 					var apptimeText = $(this).find('title').text();
-					
+					var defaultOpt = $(this).find('default').text();
+
 					$('#timeslot').append(
 						'<option value="' + apptimeValue + '" ' +
-						( ( ( apptimeValue == "" ) || ( apptimeValue == reload_timeslot ) ) ? 'selected' : '' )
+						( (
+							( apptimeValue == "" )
+							||
+							( apptimeValue == reload_timeslot )
+							||
+							( ( reload_timeslot == "0" ) && ( defaultOpt == "this" ) )
+						) ? 'selected' : '' )
 						+ ' >'+ apptimeText + '</option>'
 					);
 			});
