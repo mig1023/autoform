@@ -33,7 +33,7 @@ sub get_settings
 		},
 		
 		confirm => {
-			tt => '/usr/local/VMS/www/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
+			tt => '/usr/local/www/data/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
 			pers_data => '/usr/local/www/data/htdocs/pers_data_agreement.pdf',
 			link_image => '',
 			link_site => '',
