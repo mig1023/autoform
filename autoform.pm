@@ -2416,19 +2416,19 @@ sub create_new_appointment
 
 	my $ver = $self->get_app_version();
 
-	my ( $center, $person_for_contract ) = $self->query( 'selallkeys', __LINE__, "
+	my $data_for_contract = $self->query( 'selallkeys', __LINE__, "
 		SELECT CenterID, PersonForAgreements
 		FROM AutoToken
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
 	)->[ 0 ];
 	
-	if ( $person_for_contract ) {
+	if ( $data_for_contract->{ PersonForAgreements } ) {
 	
 		$info_for_contract = $self->query( 'selallkeys', __LINE__, "
 			SELECT RLName as LName, RFName as FName, RMName as MName, RPassNum as PassNum, 
 			RPWhen as PassDate, RPWhere as PassWhom, AppPhone as Phone, RAddress as Address 
-			FROM AutoAppData WHERE ID = ?", $person_for_contract
+			FROM AutoAppData WHERE ID = ?", $data_for_contract->{ PersonForAgreements }
 		)->[ 0 ];
 	}
 
@@ -2457,7 +2457,7 @@ sub create_new_appointment
 		);
 		
 		my $appid = $self->create_table(
-			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid, undef, $center
+			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid, undef, $data_for_contract->{ CenterID }
 		);
 		
 		$self->create_table(
@@ -2799,7 +2799,7 @@ sub send_app_confirm
 	my $conf = $self->{ autoform }->{ confirm };
 	
 	my $html = $self->get_file_content( $conf->{ tt } );
-	
+
 	my $data = $self->query( 'selallkeys', __LINE__, "
 		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName
 		FROM Appointments
