@@ -2524,8 +2524,10 @@ sub mod_hash
 		
 		$hash->{ CountryLive } = ( $hash->{ NRes } ? 2 : 1 );
 		
-		$hash->{ PrevVisa }--; 
+		$hash->{ PrevVisa }--;
 		
+		$hash->{ Countries } = 133; 
+
 		if ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
 		
 			my $spb_hash = $self->get_hash_table( 'AutoSpbAlterAppData', 'AppDataID', $hash->{ ID } );
