@@ -1495,21 +1495,20 @@ sub get_html_for_element
 	if ( $type eq 'captcha' ) {
 	
 		my $key = $self->{ autoform }->{ captcha }->{ public_key };
-		my $widget_api = $self->{ autoform }->{ captcha }->{ widget_api };
 		
-		my $json_options = to_json(
-			{ 
-				sitekey => $key, 
-				theme => 'light' 
-			}, 
-			$self->{ json_options } || {}
-		);
+		my $widget_api = $self->{ autoform }->{ captcha }->{ widget_api };
 		
 		my $captch_id = $self->get_captcha_id();
 		
+		my $lang = $self->{ 'lang' } || 'ru';
+		
 		$content =~ s/\[captch_id\]/$captch_id/gi;
-		$content =~ s/\[json_options\]/$json_options/gi;
+		
 		$content =~ s/\[widget_api\]/$widget_api/gi;
+		
+		$content =~ s/\[public_key\]/$key/gi;
+		
+		$content =~ s/\[lang\]/$lang/gi;
 	}
 	
 	
@@ -2103,7 +2102,7 @@ sub check_captcha
 			response  => $response
 		}
 	);
-	
+
 	if ( $result->{ success } ) {
 	
 		return if decode_json( $result->{ content } )->{ success };

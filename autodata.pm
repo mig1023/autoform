@@ -28,7 +28,7 @@ sub get_settings
 		captcha => {
 			public_key => '',
 			private_key => '',
-			widget_api => 'https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit',
+			widget_api => 'https://www.google.com/recaptcha/api.js',
 			verify_api => 'https://www.google.com/recaptcha/api/siteverify',
 		},
 		
@@ -138,9 +138,8 @@ sub get_html_elements
 		
 		checklist	=> '<div id="[name]">[options]</div>',
 		
-		captcha		=> '<div class="captcha_container"><script type="text/javascript">var onloadCallback = function(){' .
-				'grecaptcha.render(' . "'[captch_id]'" . ', [json_options]);};</script><script src="[widget_api]" ' .
-				'type="text/javascript"></script><div id="captha_div"><div id="[captch_id]"></div></div></div>',
+		captcha		=> '<script src="[widget_api]?hl=[lang]" async defer></script><div id="captha_div" class="captcha_container">' .
+				'<div id="[captch_id]" class="g-recaptcha" data-sitekey="[public_key]"></div></div>',
 		
 		label		=> '<label id="[name]" [u]>[value]</label>',
 		
