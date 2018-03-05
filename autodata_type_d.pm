@@ -109,7 +109,7 @@ sub get_content_rules_hash
 			{
 				type => 'checkbox',
 				name => 'pers_info',
-				label_for => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/pers_data_agreement.pdf">условиями</a> обработки персональных данных визовым центром',
+				label_for => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/files/it/pers_data_agreement.pdf">условиями</a> обработки персональных данных визовым центром',
 				check => 'true',
 				db => {
 					table => 'Appointments',
