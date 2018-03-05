@@ -254,7 +254,7 @@ sub cancel
 			UPDATE Appointments SET Status = 2 WHERE ID = ?", {}, $app_id
 		) if $ncount < 1;
 		
-		return $self->{ af }->redirect( 'current' );
+		return $self->{ af }->redirect( ( $ncount < 1 ) ? 'canceled' : 'current' );
 	}
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );

@@ -520,6 +520,8 @@ sub get_token_and_create_new_form_if_need
 	return '02' if $token eq 'no_app';
 	
 	return '03' if $token eq 'no_field';
+	
+	return '05' if $token eq 'canceled';
 
 	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
 	
@@ -606,7 +608,7 @@ sub get_page_error
 	
 	my $error_type = VCS::Site::autodata::get_page_error();
 	
-	my $title = $self->lang( 'ошибка: ' ) . $self->lang( $error_type->[ $error_num ] );
+	my $title = ( $error_num == 5 ? '' : $self->lang( 'ошибка: ' ) ) . $self->lang( $error_type->[ $error_num ] );
 	
 	return ( "<center>$title</center>", undef, 'autoform.tt2' );
 }
@@ -2985,6 +2987,8 @@ sub redirect
 	my ( $self, $target ) = @_;
 	
 	my $token = ( $target eq 'current' ? $self->{ token } : $target );
+	
+	$token = $target if $target eq 'canceled';
 		
 	my $param = ( $token ? '?t=' . $token : '' );
 	
