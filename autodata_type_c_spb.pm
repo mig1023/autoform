@@ -2183,11 +2183,7 @@ sub get_content_rules_hash
 				progress => 14,
 			},
 			{
-				#type => 'captcha',
-				
-				type => 'text',
-				name => 'appdate_text',
-				label => 'Капча отключена на время тестирования',
+				type => 'captcha',
 			},
 		],
 		
