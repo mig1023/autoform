@@ -183,15 +183,6 @@ function mobileScreenCheck() {
 	$(':checkbox, :radio').css( "width", "20px" );
 	
 	$('.mobil_hide').css( "display", 'none' );
-	
-	[% IF special.captcha.0 %]
-	 	var reCaptchaWidth = 304;
-		var containerWidth = $('.captcha_container').width();
-		var captchaScale = containerWidth / reCaptchaWidth;
-		$('#[% special.captcha.0 %]').css('transform', 'scale('+captchaScale+')');
-		$('#[% special.captcha.0 %]').css('transform-origin', '0');
-		$('.captcha_container').width('150px');
-	[% END %]
 
 	$('#app_form').show();
 
@@ -432,6 +423,8 @@ function show_error_tip( last_error_name, last_error_text ) {
 	if ( last_error_name == 'captha_div' ) {
 		error_x = 'inner-left';
 		offset_x = ( mobScreen ? 0 : 20 );
+		error_y = ( mobScreen ? 'top' : 'center' );
+		offset_y = ( mobScreen ? 50 : 0 );
 	}
 	
 	window.scroll( 0,find_pos( document.getElementById( last_error_name ) ) );
