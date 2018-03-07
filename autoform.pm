@@ -561,8 +561,8 @@ sub create_clear_form
 	) || 0;
 	
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET AutoAppID = ?, StartDate = now() WHERE Token = ?", {}, 
-		$app_id, $self->{ token }
+		UPDATE AutoToken SET AutoAppID = ?, StartDate = now(), LastIP = ? WHERE Token = ?", {}, 
+		$app_id, $ENV{ HTTP_X_REAL_IP }, $self->{ token }
 	);
 }
 	
