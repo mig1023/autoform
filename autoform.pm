@@ -809,6 +809,7 @@ sub get_forward
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
 			$step, "$last_error[1] ($last_error[0], step $step)", $self->{ token }
 		);
+		
 	} else {
 		$step++;
 			
@@ -1235,21 +1236,22 @@ sub get_specials_of_element
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	
 	my $page_content = $self->get_content_rules( shift, undef, shift );
 	
 	return if $page_content =~ /^\[/;
 	
 	my $special = {
-		'datepicker' => [],
-		'mask' => [],
-		'nearest_date' => [],
-		'timeslots' => [],
-		'post_index' => [],
-		'with_map' => [],
-		'captcha' => [],
-		'include_in' => [],
-		'include_out' => [],
-		'no_copypast' => [],
+		'datepicker' 	=> [],
+		'mask'		=> [],
+		'nearest_date'	=> [],
+		'timeslots'	=> [],
+		'post_index'	=> [],
+		'with_map'	=> [],
+		'captcha'	=> [],
+		'include_in'	=> [],
+		'include_out'	=> [],
+		'no_copypast'	=> [],
 	};
 
 	my $js_rules = [];
@@ -1378,11 +1380,15 @@ sub get_progressbar
 		
 		$big_element++ if $progress_line->[ $_ ]->{ big };
 	
-		$line .= $self->get_html_for_element( 'progress', $big_element, $progress_line->[ $_ ]->{ name }, 
-				$past_current_future, $add_el, $progress_line->[ $_ ]->{ big } );
+		$line .= $self->get_html_for_element(
+			'progress', $big_element, $progress_line->[ $_ ]->{ name }, $past_current_future,
+			$add_el, $progress_line->[ $_ ]->{ big }
+		);
 				
-		$content .= $self->get_html_for_element( 'stages', undef, $progress_line->[ $_ ]->{ name }, 
-				$past_current_future, undef, $progress_line->[ $_ ]->{ big } );
+		$content .= $self->get_html_for_element(
+			'stages', undef, $progress_line->[ $_ ]->{ name }, $past_current_future,
+			undef, $progress_line->[ $_ ]->{ big }
+		);
 	}
 	
 	return $line . $self->get_html_for_element( 'end_line' ) . $self->get_html_for_element( 'start_line' ) . $content;
@@ -1615,9 +1621,11 @@ sub add_rules_format
 		for ( 1..$#symbols ) {
 			
 			if ( exists $symbols_help->{ $symbols[ $_ ] } ) {
+			
 				$format_add_string .= ' ' . $self->lang( $symbols_help->{ $symbols[ $_ ] } ) . ',';
 			}
 			elsif ( $symbols[ $_ ] ne '' ) {
+			
 				$format_add_string .= " $symbols[ $_ ],"; 
 			}			
 		}		
@@ -1711,6 +1719,7 @@ sub save_data_from_form
 	for my $table ( keys %$request_tables ) {
 		
 		next if !$table_id->{ $table };
+		
 		next if $table eq 'alternative_data_source';
 	
 		my $request = '';
@@ -1770,11 +1779,10 @@ sub check_special_in_rules_for_save
 			) unless $visa_type == 1;
 		}
 		elsif ( $element->{ special } eq 'cach_this_value' ) {
+		
+			my $key = 'autoform_' . $self->{ token } . '_' . $element->{ name };
 
-			$self->cached(
-				'autoform_' . $self->{ token } . '_' . $element->{ name },
-				$self->{ vars }->getparam( $element->{ name } )
-			);
+			$self->cached( $key, $self->{ vars }->getparam( $element->{ name } ) );
 		}
 	}
 }
@@ -1862,7 +1870,9 @@ sub encode_data_for_db
 	$value = $self->get_prepare_line( $value );
 	
 	$value = ( ( $value eq $element_name ) ? 1 : 0 ) if $element->{type} =~ /checkbox|checklist/;
+	
 	$value = $self->{ vars }->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
+	
 	$value = $self->{ vars }->get_system->to_upper_case_first( $value ) if $element->{ format } eq 'capitalized';
 	
 	$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
@@ -1876,8 +1886,6 @@ sub get_element_by_name
 	my ( $self, $step, $element_name ) = @_;
 	
 	my $page_content = $self->get_content_rules( $step );
-	
-	my $element;
 	
 	for my $element_search ( @$page_content ) {
 	
@@ -2157,6 +2165,7 @@ sub check_logic
 	
 			$first_error = $self->text_error(
 				$error, $element, undef, $rule->{ error }, $offset, $rule->{ full_error }
+				
 			) if $error;
 		}
 		
@@ -2166,9 +2175,12 @@ sub check_logic
 
 			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
 			
+			
 			$value = sprintf( "%04d-%02d-%02d",
 				( Date::Calc::Add_Delta_YMD( split( /-/, $value  ), 0, 3, 1 ) )
+				
 			) if $spb;
+			
 			
 			my $datediff = $self->get_datediff( $value, $rule, $tables_id, !$from_now );
 
@@ -2191,8 +2203,15 @@ sub check_logic
 			)->[ 0 ];
 		
 			$first_error = $self->text_error( 21, $element, undef, $rule->{ offset } ) 
-				if ( $self->age( $app->{ birthdate }, $app->{ currentdate } ) >= $rule->{ offset } )
-					and !( ( $element->{ type } eq 'checkbox' ) and ( $value eq '' ) );
+				if ( 
+					( $self->age( $app->{ birthdate }, $app->{ currentdate } ) >= $rule->{ offset } )
+					and
+					!(
+						( $element->{ type } eq 'checkbox' )
+						and
+						( $value eq '' )
+					)
+				);
 		}
 		
 		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
@@ -2270,6 +2289,7 @@ sub get_datediff
 	return $self->query( 'sel1', __LINE__, "
 		SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
 		$value, $tables_id->{ 'Auto'.$rule->{table} }
+		
 	) if $use_date;
 
 	return $self->query( 'sel1', __LINE__, "
@@ -2812,10 +2832,13 @@ sub send_app_confirm
 	
 	$replacer->{ branch_addr } = $self->lang( 'Address-' . $data->{ CenterID } );
 	
+	
 	$replacer->{ branch_addr } = $self->query( 'sel1', __LINE__, "
 		SELECT BAddr FROM Branches WHERE ID = ?", $data->{ CenterID }
+		
 	) if $replacer->{ branch_addr } eq 'Address-' . $data->{ CenterID };
 
+	
 	$replacer->{ branch_addr } = $self->{ vars }->get_system->converttext( $replacer->{ branch_addr } );
 	
 	$replacer->{ branch_addr } =~ s/_?(x005F|x000D)_?//g;
@@ -2880,7 +2903,7 @@ sub get_file_content
 
 	undef $/;
 	
-	open my $file, '<', shift or return;
+	open( my $file, '<', shift ) or return;
 	
 	my $content = <$file>;
 	
@@ -2988,8 +3011,6 @@ sub redirect
 	
 	my $token = ( $target eq 'current' ? $self->{ token } : $target );
 	
-	$token = $target if $target eq 'canceled';
-		
 	my $param = ( $token ? '?t=' . $token : '' );
 	
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
