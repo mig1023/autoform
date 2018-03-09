@@ -77,8 +77,6 @@ sub autoinfopage_entry
 		return $self->{ af }->redirect( 'no_app' );
 	}
 	
-	my $key = $self->{ autoform }->{ captcha }->{ public_key };
-			
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
@@ -86,7 +84,7 @@ sub autoinfopage_entry
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'widget_api'	=> $self->{ autoform }->{ captcha }->{ widget_api },
-		'json_options'	=> to_json( { sitekey => $key, theme => 'light' }, $self->{ json_options } || {} ),
+		'public_key'	=> $self->{ autoform }->{ captcha }->{ public_key },
 	};
 	$template->process( 'autoform_info_entry.tt2', $tvars );
 }

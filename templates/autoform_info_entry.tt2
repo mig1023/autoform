@@ -52,8 +52,7 @@
 <tr class="mobil_hide"><td class="exam_td_gen" align="right"><span class="exam_span_gen">пример: 650000001</span></td><tr>
 
 <tr><td>
-<br><div class="captcha_container">
-<script type="text/javascript">var onloadCallback = function(){grecaptcha.render('info_captcha', [% json_options %]);};</script><script src="[% widget_api %]" type="text/javascript"></script><div id="captha_div"><div id="info_captcha"></div></div></div>			
+<br><script src="[% widget_api %]" async defer></script><div id="captha_div" class="captcha_container"><div class="g-recaptcha" data-sitekey="[% public_key %]"></div></div>	
 </td></tr>
 					
 <tr><td colspan="3"><br>
