@@ -1273,6 +1273,36 @@ sub get_test_list {
 					param => { field_name => '14' },
 					expected => 'field_name|test error message',
 				},
+				35 => { args => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								condition => 'length_strict',
+								length => 11,
+								full_error => 'Неправильный формат телефонного номера',
+							} ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => '123123123123' },
+					expected => 'field_name|Неправильный формат телефонного номера',
+				},
+				36 => { args => [ 
+						{	name => 'field_name',
+							check_logic => [ {
+								condition => 'length_strict',
+								length => 11,
+								full_error => 'Неправильный формат телефонного номера',
+							} ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => '12312312312' },
+					expected => '',
+				},
 			},
 		},
 		
@@ -2268,6 +2298,13 @@ sub get_test_list {
 				},
 				3 => { 	param => { mobile_app => 1 },
 					expected => 'новая форма записи (мобильное приложение)',
+				},
+			},
+		},
+		{ 	func => \&{ VCS::Site::autoform::get_captcha_id },
+			comment => 'get_captcha_id',
+			test => {
+				1 => { 	expected => '^recaptcha_[0-9A-Za-z]{10}$',
 				},
 			},
 		},
