@@ -10,8 +10,11 @@ sub new
 # //////////////////////////////////////////////////
 {
 	my ( $class, $pclass, $vars ) = @_;
+	
 	my $self = bless {}, $pclass;
+	
 	$self->{ 'VCS::Vars' } = $vars;
+	
 	return $self;
 }
 
@@ -23,8 +26,10 @@ sub autoinfopage
 	$self->{ $_ } = $self->{ af }->{ $_ } for ( 'vars', 'token' );
 	
 	$self->{ vars }->{ session }->{ login } = 'website';
+	
+	$self->{ vars }->{ session }->{ langid } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
 		
-	my $_ = $self->{ vars }->getparam( 'action' );
+	$_ = $self->{ vars }->getparam( 'action' );
 	
 	s/[^a-z_]//g;
 	
@@ -32,7 +37,7 @@ sub autoinfopage
 	
 	return $self->print_appdata() if /^print_a$/i;
 	
-	return autoinfopage_entry ( @_ ) if $entry;
+	return autoinfopage_entry( @_ ) if $entry;
 
 	return reschedule( @_ ) if /^reschedule$/i;
 	
@@ -80,7 +85,7 @@ sub autoinfopage_entry
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
-		'langreq' 	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'langreq' 	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'widget_api'	=> $self->{ autoform }->{ captcha }->{ widget_api },
@@ -112,9 +117,9 @@ sub get_infopage
 	$self->{ af }->correct_values( \$app_info );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
+
 	my $tvars = {
-		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 1,
 		'app_info'	=> $app_info,
 		'app_list'	=> $self->get_app_list(),
@@ -202,7 +207,7 @@ sub reschedule
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
-		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 2,
 		'appinfo'	=> $appinfo_for_timeslots,
 		'token' 	=> $self->{ token },
@@ -258,7 +263,7 @@ sub cancel
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
-		'langreq'	=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 3,
 		'app_list'	=> $app_list,
 		'token' 	=> $self->{ token },

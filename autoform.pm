@@ -208,7 +208,7 @@ sub autoform
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
-		'langreq' 		=> sub { return $self->{ vars }->getLangSesVar(@_) },
+		'langreq' 		=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 		=> $title,
 		'content_text' 		=> $page_content,
 		'token' 		=> $self->{ token },
