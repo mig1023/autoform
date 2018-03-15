@@ -1561,11 +1561,11 @@ sub get_content_rules_hash
 					name => 'complex'
 				},
 				param => {
-					mezzi1 => { db => 'Mezzi1', label_for => 'Наличные деньги' },
-					mezzi2 => { db => 'Mezzi2', label_for => 'Оплачиваются все расходы' },
-					mezzi3 => { db => 'Mezzi3', label_for => 'Оплачивается транспорт' },
-					mezzi5 => { db => 'Mezzi4', label_for => 'Оплачивается место проживания' },
-					mezzi6 => { db => 'Mezzi6', label_for => 'Иные' },
+					sponsor_mezzi1 => { db => 'Mezzi1', label_for => 'Наличные деньги' },
+					sponsor_mezzi2 => { db => 'Mezzi2', label_for => 'Оплачиваются все расходы' },
+					sponsor_mezzi3 => { db => 'Mezzi3', label_for => 'Оплачивается транспорт' },
+					sponsor_mezzi5 => { db => 'Mezzi4', label_for => 'Оплачивается место проживания' },
+					sponsor_mezzi6 => { db => 'Mezzi6', label_for => 'Иные' },
 				},
 			},
 		],
