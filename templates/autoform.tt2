@@ -562,7 +562,7 @@ function check_input( field, type, check, label ) {
 
 			var date_reg = new RegExp( check.replace( /(z|D)/g, '' ) );
 
-			if ( !date_reg.test( val ) ) {
+			if ( !date_reg.test( val ) && ! (val == '') ) {
 				
 				return show_error_tip( field, '[% langreq( js_errors.1 ) %]'.replace( /\[name\]/, label ) );
 			}
