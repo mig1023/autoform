@@ -757,6 +757,18 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'services_text',
+				label => 'Страхование ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
+				font => 'bold',
+			},
+			{
+				type => 'free_line',
+			},
+			{
 				type => 'include',
 				place => 'in',
 				template => 'insurance_form.tt2',

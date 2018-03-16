@@ -2089,7 +2089,7 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'services_text',
-				label => 'СМС-оповещение о готовности документов ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
+				label => 'СМС-оповещение о готовности документов ( <a target = "_blank" class = "dotted_link_big" href="/spb-dopolnitelnye-uslugi/">платная услуга</a> )',
 				font => 'bold',
 			},
 			{
@@ -2120,7 +2120,7 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'services_text',
-				label => 'Доставка документов DHL ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
+				label => 'Доставка документов DHL ( <a target = "_blank" class = "dotted_link_big" href="/spb-dopolnitelnye-uslugi/">платная услуга</a> )',
 				font => 'bold',
 			},
 			{
@@ -2169,6 +2169,18 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'ShAddress',
 				},
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'services_text',
+				label => 'Страхование ( <a target = "_blank" class = "dotted_link_big" href="/spb-dopolnitelnye-uslugi/">платная услуга</a> )',
+				font => 'bold',
+			},
+			{
+				type => 'free_line',
 			},
 			{
 				type => 'include',
