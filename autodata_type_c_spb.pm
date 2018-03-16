@@ -1006,7 +1006,7 @@ sub get_content_rules_hash
 				progress => 6,
 				relation => {
 					only_if => {
-						table => 'Appointments',
+						table => 'AppData',
 						name => 'VisaPurpose',
 						value => '7',
 					}
