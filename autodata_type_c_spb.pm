@@ -2225,7 +2225,6 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'CenterID',
 				},
-				special => 'with_map',
 			},
 			{
 				type => 'info',
