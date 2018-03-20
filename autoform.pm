@@ -871,15 +871,7 @@ sub check_mutex_for_creation
 {
 	my ( $self, $step ) = @_;
 	
-	my $app_data = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.PassNum
-		FROM AutoToken
-		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $self->{ token }
-	);
-
-	return ( '', $step ) unless $self->mutex_fail( $app_data );
+	return ( '', $step ) unless $self->mutex_fail();
 	
 	$step = $self->get_step_by_content( 'back_to_appdata' );
 	 
@@ -1038,6 +1030,8 @@ sub check_all_app_finished_and_not_empty
 		WHERE Token = ?", $self->{ token }
 	);
 	
+	my $pass_already = $self->check_passnum_already_in_pending();
+	
 	for ( @$allfinished ) {
 	
 		return 4 unless $_->{ FinishedVType } and $_->{ FinishedCenter };
@@ -1045,6 +1039,8 @@ sub check_all_app_finished_and_not_empty
 		return 19 if $_->{ FinishedVType } != $_->{ VType };
 		
 		return 22 if $_->{ FinishedCenter } != $_->{ CenterID };
+		
+		return 24 if $pass_already;
 	}
 	
 	return 5 if @$allfinished < 1;
@@ -2968,22 +2964,42 @@ sub cached
 	return $self->{ vars }->get_memd->get( $name );
 }
 
-sub mutex_fail
+sub check_passnum_already_in_pending
 # //////////////////////////////////////////////////
 {
-	my ( $self, $app_data ) = @_;
+	my $self = shift;
 	
-	return if $self->{ this_is_self_testing };
-
 	my $pass_list = [];
+
+	my $app_data = $self->query( 'selallkeys', __LINE__, "
+		SELECT AutoAppData.PassNum
+		FROM AutoToken
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
+		WHERE Token = ?", $self->{ token }
+	);
 	
 	push( @$pass_list, $_->{ PassNum } ) for @$app_data;
 
 	my $pass_line = join( "','", @$pass_list );
-
-	return 1 if $self->query( 'sel1', __LINE__, "
+	
+	my $pass_already = $self->query( 'sel1', __LINE__, "
 		SELECT COUNT(ID) FROM AppData WHERE PassNum IN ('$pass_line') AND Status = 1"
 	);
+	
+	return ( $pass_already, $pass_list );
+}
+
+sub mutex_fail
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	return if $self->{ this_is_self_testing };
+	
+	my ( $pass_already, $pass_list ) = $self->check_passnum_already_in_pending();
+
+	return 1 if $pass_already;
 	
 	for ( @$pass_list ) {
 	
