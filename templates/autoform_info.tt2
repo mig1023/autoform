@@ -158,12 +158,6 @@ YMaps.jQuery(function () {
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
-<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
-<span class="suppl_text">
-[% langreq('Некоторые комментарии по процессу выбора нового времени и даты') %].
-</span>
-</td></tr>
-
 [% ELSIF title == 3 %]
 
 <tr><td colspan="2">
@@ -188,12 +182,6 @@ YMaps.jQuery(function () {
 <input class="small_button" type="button" value="[% langreq('Отменить запись') %] &#9655;" onclick="go_button('cancel');"><br></td></tr>
 
 <tr><td colspan="2">&nbsp;</td></tr>
-
-<tr><td colspan="2" align="justify" id="comment_place" class="grayborder">
-<span class="suppl_text">
-[% langreq('Некоторые комментарии по процессу отмены записи') %].
-</span>
-</td></tr>
 
 [% END %]
 
