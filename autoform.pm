@@ -1030,8 +1030,8 @@ sub check_all_app_finished_and_not_empty
 		WHERE Token = ?", $self->{ token }
 	);
 	
-	my $pass_already = $self->check_passnum_already_in_pending();
-	
+	my ( $pass_already, undef ) = $self->check_passnum_already_in_pending();
+
 	for ( @$allfinished ) {
 	
 		return 4 unless $_->{ FinishedVType } and $_->{ FinishedCenter };
@@ -2982,11 +2982,13 @@ sub check_passnum_already_in_pending
 	push( @$pass_list, $_->{ PassNum } ) for @$app_data;
 
 	my $pass_line = join( "','", @$pass_list );
-	
+
 	my $pass_already = $self->query( 'sel1', __LINE__, "
 		SELECT COUNT(ID) FROM AppData WHERE PassNum IN ('$pass_line') AND Status = 1"
 	);
 	
+	$pass_already = undef unless $pass_already;
+
 	return ( $pass_already, $pass_list );
 }
 
