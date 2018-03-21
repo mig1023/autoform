@@ -2989,6 +2989,8 @@ sub check_passnum_already_in_pending
 	
 	$pass_already = undef unless $pass_already;
 
+	return ( $pass_already ? 1 : 0 ) if $self->{ this_is_self_testing };
+	
 	return ( $pass_already, $pass_list );
 }
 

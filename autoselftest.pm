@@ -1944,7 +1944,20 @@ sub get_test_list {
 					expected => 5,
 				},
 				5 => { 	prepare => \&pre_logic_1,  # <--- fixed num 5
+					expected => 24,
+				},
+				6 => { 	prepare => [ \&pre_logic_1, \&pre_passnum ],  # <--- fixed num 6
 					expected => 0,
+				},
+			},
+		},
+		{ 	func => \&{ VCS::Site::autoform::check_passnum_already_in_pending },
+			comment => 'check_passnum_already_in_pending',
+			test => { 	
+				1 => { 	prepare => \&pre_passnum,
+					expected => 0,
+				},
+				2 => { 	expected => 1,
 				},
 			},
 		},
@@ -2249,7 +2262,7 @@ sub get_test_list {
 					args => [ [ { PassNum => '' } ] ],
 					expected => 1,
 				},
-				2 => { 	prepare => \&pre_show_no_testing,
+				2 => { 	prepare => [ \&pre_show_no_testing, \&pre_passnum ],
 					args => [ [ { PassNum => 'TEST_PASS_UNIQ' } ] ],
 					expected => undef,
 				},
@@ -3224,7 +3237,7 @@ sub pre_logic_1
 	
 		( $vtype, $finished ) = ( 20, 21 ) if $num == 2;
 		
-		( $vtype, $finished ) = ( 13, 1 ) if $num == 5;
+		( $vtype, $finished ) = ( 13, 1 ) if ( $num == 5 or $num == 6 );
 	}
 
 	my @params = ( $type eq 'PREPARE' ? ( $finished, $vtype , 1 ) : ( 0, 0, 0 ) );
@@ -3333,6 +3346,29 @@ sub pre_not_closer
 	
 	$vars->db->query("
 		UPDATE AutoAppData SET FingersDate = '2000-05-01' WHERE ID = ?", {}, $appdataid
+	);
+}
+
+sub pre_passnum
+# //////////////////////////////////////////////////
+{
+	my ( $self, $type, $test, $num, $token, $appid_param, $appdataid, $vars ) = @_;
+	
+	my $new_passnum = "75556565611";
+	
+	if ( $type eq 'PREPARE' ) {
+	
+		$self->{ passnum_save } = $vars->db->sel1("
+			SELECT PassNum FROM AutoAppData WHERE ID = ?", $appdataid
+		);
+	}
+	else {
+		$new_passnum = $self->{ passnum_save };
+	}
+	
+	$vars->db->query("
+		UPDATE AutoAppData SET PassNum = ? WHERE ID = ?", {},
+		$new_passnum, $appdataid
 	);
 }
 
