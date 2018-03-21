@@ -221,7 +221,7 @@ function go_button(where) {
 	document.dataform.submit();
 };
 
-function init_poshytip(cls, fcs, aTo, aX, aY, ofX) {
+function init_poshytip(cls, fcs, aTo, aX, aY, ofX, ofY) {
 
 	$(cls).poshytip({
 		className: 'tip-yellowsimple',
@@ -230,17 +230,22 @@ function init_poshytip(cls, fcs, aTo, aX, aY, ofX) {
 		alignX: aX,
 		alignY: aY,
 		offsetX: ofX,
+		offsetY: ofY,
 		showTimeout: 100
 	});
 }
 
 function init_comm() {
 	$('.input_gen, .select_gen,').poshytip('destroy');
-
-	init_poshytip('.input_gen', 'focus', 'target', 'right', 'center', 5);
-	init_poshytip('.select_gen', 'focus', 'target', 'center', 'top', 5);
-	init_poshytip('label', '', 'target', 'right', 'center', 5);
-	init_poshytip(':radio, :checkbox', '', 'target', 'right', 'center', 200);
+	
+	if ( document.body.clientWidth < 1000 ) {
+		init_poshytip('.input_gen', 'focus', 'target', 'center', 'top', 5, 6);
+	} else {
+		init_poshytip('.input_gen', 'focus', 'target', 'right', 'center', 5, 0);
+	}
+	init_poshytip('.select_gen', 'focus', 'target', 'center', 'top', 5, 6);
+	init_poshytip('label', '', 'target', 'right', 'center', 5, 0);
+	init_poshytip(':radio, :checkbox', '', 'target', 'right', 'center', 200, 0);
 	
 	$('.tip-yellowsimple .tip-inner ').css( "font-size", ( isMobile() ? '35px' : '' ) );
 	$('.tip-yellowsimple .tip-inner ').css( "line-height", ( isMobile() ? '1.2' : '' ) );
