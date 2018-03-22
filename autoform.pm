@@ -573,8 +573,8 @@ sub save_new_token_in_db
 
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoToken (
-		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0, now())", {}, $token
+		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP) 
+		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?)", {}, $token, $ENV{ HTTP_X_REAL_IP }
 	);
 	
 	return $token;
