@@ -594,7 +594,7 @@ sub get_content_rules_hash
 				name => 'family',
 				label => 'Семейное положение',
 				example => 'женат/замужем',
-				check => 'N',
+				check => 'zN',
 				db => {
 					table => 'AppData',
 					name => 'Family',
