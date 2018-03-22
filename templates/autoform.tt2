@@ -621,6 +621,13 @@ function check_input( field, type, check, label ) {
 			return show_error_tip( field, '[% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
 		}
 	}
+	else if ( type == 'select' ) {
+
+		if ( /z/.test( check ) && /^0$|^$/.test( $('select[name=' + field + ']').val() ) ) {
+
+			return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
+		}
+	}
 
 	return 0;
 }
