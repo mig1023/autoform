@@ -804,7 +804,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Подтверждение записи' => [
+		'Подтвердить запись' => [
 			{
 				page_ord => 12,
 				progress => 11,

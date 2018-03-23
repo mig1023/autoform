@@ -1530,7 +1530,7 @@ sub get_content_rules_hash
 				},
 				param => {
 					mezzi1 => { db => 'Mezzi1', label_for => 'Наличные деньги' },
-					mezzi2 => { db => 'Mezzi2', label_for => 'Кредитаня карточка' },
+					mezzi2 => { db => 'Mezzi2', label_for => 'Кредитная карточка' },
 					mezzi3 => { db => 'Mezzi3', label_for => 'Предоплаченный транспорт' },
 					mezzi4 => { db => 'Mezzi4', label_for => 'Дорожные чеки' },
 					mezzi5 => { db => 'Mezzi5', label_for => 'Предоплачено место проживания' },
@@ -2130,7 +2130,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Подтверждение записи' => [
+		'Подтвердить запись' => [
 			{
 				page_ord => 30,
 				progress => 14,
