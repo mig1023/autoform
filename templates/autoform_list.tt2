@@ -39,10 +39,10 @@
 <tr><td align="center">
 <table width="600px" id="app_table">
 
-<tr><td colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
+<tr><td class="left" colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% IF content_text.0.ID == "X" %]
-	<tr><td colspan="5" id = "applist">
+	<tr><td class="left" colspan="5" id = "applist">
 	[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
 	[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Зарегистрировать заявителя"</b>') %]!<br>
 	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих') %].<br><br>
@@ -50,8 +50,8 @@
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
 	<tr>
-	<td>[% i %].</td>
-	<td [% IF i == 1 %]id = "applist"[% END %] width="90%">
+	<td class="left" >[% i %].</td>
+	<td class="left" [% IF i == 1 %]id = "applist"[% END %] width="90%">
 	[% IF person.Finished == 0 %]<b>[[% langreq('черновик') %]]</b>
 	[% ELSIF person.Finished == 2 %]<b>[[% langreq('тип визы') %]]</b>
 	[% ELSIF person.Finished == 3 %]<b>[[% langreq('в.центр') %]]</b>
@@ -62,29 +62,29 @@
 	([% langreq('ФИО пока не указано') %])
 	[% END %]</td>
 	<td>[% IF person.BirthDate != '00.00.0000' %][% person.BirthDate %][% ELSE %]&nbsp;[% END %]</td>
-	<td><input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
-	<td><input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
+	<td class="left" ><input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
+	<td class="left" ><input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
 	</tr>
 	[% END %]
 [% END %]
 
 [% IF i < max_applicants %]
-<tr><td colspan="5">
+<tr><td class="left" colspan="5">
 	<span id="spacer"></span>
 	<input class="action_button" type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');">
 </td></tr>
 [% END %]
 
 [% IF content_text.0.ID == "X" %]
-	<tr><td colspan="5"><br>
+	<tr><td class="left" colspan="5"><br>
 	[% langreq('На указанную вами электронную почту отправлено письмо со ссылкой, перейдя по которой, вы сможете в любой момент продолжить регистрацию данной записи. Если вы не получили его в течение часа, проверьте папку нежелательные сообщения (спам)') %].<br>
 	</td></tr>
 [% END %]
 
-<tr><td colspan="5">&nbsp;
+<tr><td class="left" colspan="5">&nbsp;
 </td></tr>
 
-<tr><td colspan="5">
+<tr><td class="left" colspan="5">
 	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 	<input class="action_button" type="button" value="[% langreq('Оформить запись') %] &#9655;" onclick="go_button('tofinish');">

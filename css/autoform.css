@@ -1,4 +1,8 @@
 
+.left{
+	text-align: left;
+}
+
 .progressbar_gen{
 	display:none;
 	border-collapse:collapse;

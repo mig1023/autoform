@@ -112,7 +112,7 @@ sub get_html_elements
 		
 		end_line	=> '</tr>',
 		
-		start_cell	=> '<td [u]>',
+		start_cell	=> '<td class="left" [u]>',
 		
 		end_cell	=> '</td>',
 		
@@ -130,9 +130,9 @@ sub get_html_elements
 					
 		radiolist	=> '<div id="[name]">[options]</div>',
 		
-		text		=> '<td colspan="3" [u]>[value]</td>',
+		text		=> '<td class="left" colspan="3" [u]>[value]</td>',
 		
-		example		=> '<tr [u]><td class="exam_td_gen">' .
+		example		=> '<tr [u]><td class="exam_td_gen left">' .
 				'<span class="exam_span_gen">[example]: [value]</span></td></tr>',
 
 		info		=> '<label class="info" title="[comment]" id="[name]" [u]>[text]</label>',

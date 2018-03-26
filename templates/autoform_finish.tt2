@@ -32,21 +32,23 @@
 
 <table width="100%">
 
-<tr class="mobil_hide"><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br></td></tr>
+<tr class="mobil_hide"><td class="left">
+<table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br>
+</td></tr>
 
 <tr><td align="center">
 <table width="450px" id="app_table">
 
-<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
+<tr><td class="left" colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
-<tr><td>
+<tr><td class="left" >
 	[% langreq('Вернуться к списку и добавить ещё одного заявителя или перейти к завершению записи?') %]
 </td></tr>
 
 <tr><td>&nbsp;
 </td></tr>
 
-<tr><td>
+<tr><td class="left" >
 	<input class="action_button" type="button" value="&#9665; [% langreq('Вернуться к списку') %]" onclick="back_button();">
 	&nbsp;
 	<input class="action_button" type="button" value="[% langreq('Перейти к завершению') %] &#9655;" onclick="finish_button();">

@@ -66,7 +66,7 @@
 <tr><td align="center">
 <table width="590px" id="app_table">
 
-<tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
+<tr><td class="left" colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% content_text %]
 
@@ -89,7 +89,7 @@ YMaps.jQuery(function () {
 	[% INCLUDE $include_name %]
 [% END %]
 
-<tr><td colspan="3"><br>
+<tr><td class="left" colspan="3"><br>
 [% IF ( step > min_step ) && ( step != max_step ) %]
 	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
@@ -106,7 +106,7 @@ YMaps.jQuery(function () {
 	[% END %]
 [% END %]
 [% IF step == 1 %]
-	</td></tr><tr><td colspan="3">
+	</td></tr><tr><td class="left"  colspan="3">
 	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
 	<tr><td colspan="3">
 [% END %]
