@@ -458,7 +458,7 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
 				example => 'info@italyvms.ru',
-				check => 'zWN\@\s\-\.',
+				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
 						condition => 'email_not_blocked',
