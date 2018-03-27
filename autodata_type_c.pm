@@ -502,6 +502,19 @@ sub get_content_rules_hash
 				type => 'free_line',
 			},
 			{
+				type => 'input',
+				name => 'rulname',
+				label => 'Фамилия при рождении / предыдущие фамилии',
+				comment => 'Введите все предыдущие фамилии. При перечисление нескольких фамилий используйте запятую. Если фамилия не менялась, то оставьте поле пустым',
+				example => 'Ivanov, Petrov, Sidorov',
+				check => 'W\s\,',
+				db => {
+					table => 'AppData',
+					name => 'PrevLNames',
+				},
+				format => 'capitalized'
+			},
+			{
 				type => 'select',
 				name => 'brhcountry',
 				label => 'Страна рождения',
