@@ -1261,7 +1261,7 @@ sub get_content_rules_hash
 					only_if => {
 						table => 'AppData',
 						name => 'VisaPurpose',
-						value => '14',
+						value => '1',
 					}
 				},
 			},
