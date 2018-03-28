@@ -312,7 +312,10 @@ function crate_datepicker(date_id) {
 		var restore_el = 0;
 		
 		$('#vtype').hide();
-		$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% static %]/images/autoform_wait.gif' />");
+		
+		if ( ! ( $('#tmp_vtype_img').length > 0 ) ) {
+			$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% static %]/images/autoform_wait.gif' />");
+		}
 
 		if ( mobScreen ) {
 			$("#tmp_vtype_img").css('height', '38px');
