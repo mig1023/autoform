@@ -71,18 +71,20 @@
 [% content_text %]
 
 [% IF (special.with_map.0) %]
-<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
-<tr class="ymap"><td colspan="3"><div id="YMapsID" class="yandex_map"></div></td></tr>
-<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
 
-<script type="text/javascript">
-YMaps.jQuery(function () {
-	var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
-	map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
-	map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
-	map.addControl(new YMaps.Zoom());
-});
-</script>
+	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+	<tr class="ymap"><td colspan="3"><div id="YMapsID" class="yandex_map"></div></td></tr>
+	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+
+	<script type="text/javascript">
+		YMaps.jQuery(function () {
+			var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+			map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
+			map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
+			map.addControl(new YMaps.Zoom());
+		});
+	</script>
+
 [% END %]
 
 [% FOREACH include_name IN special.include_in %]
@@ -94,17 +96,20 @@ YMaps.jQuery(function () {
 	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 [% END %]
+
 [% IF ( step < max_step ) && ( step > 0 ) %]
 	<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
 [% END %]
 
 [% IF ( step == max_step ) %]
+
 	[% IF mobile_app %]
 		<input class="action_button" type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] &#9655;" onclick="go_button('mobile_app');">
 	[% ELSE %]
 		<input class="action_button" type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('app');">
 	[% END %]
 [% END %]
+
 [% IF step == 1 %]
 	</td></tr><tr><td class="left"  colspan="3">
 	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
@@ -135,6 +140,7 @@ function mobileScreenCheck() {
 	if ( !mobilScreen ) {
 		
 		init_comm();
+		
 		$('#progressbar').css( "display", 'table' );
 		$('#app_form').css( "margin", '50px' );
 		$('#ui-datepicker-div').css( "font-size", "12" );
@@ -194,6 +200,7 @@ function mobileScreenCheck() {
 function go_button(where) {
 
 	[% IF ( step == max_step ) %]
+	
 		if (where == 'app') {
 			location.replace('[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
 			return;
@@ -201,13 +208,16 @@ function go_button(where) {
 	[% END %]
 	
 	[% IF mobile_app %]
+	
 		if (where == 'mobile_app') {
+		
 			location.replace('[% addr %]mobile_end.htm');
 			return;
 		}
 	[% END %]
 	
 	if (where == 'forward') {
+	
 		[% IF ( ( step + 1 ) == max_step ) %]
 			$('#next_button').prop('disabled', true);
 		[% END %]
@@ -218,6 +228,7 @@ function go_button(where) {
 	}
 	
 	$('#action').val(where);
+	
 	document.dataform.submit();
 };
 
@@ -236,6 +247,7 @@ function init_poshytip(cls, fcs, aTo, aX, aY, ofX, ofY) {
 }
 
 function init_comm() {
+
 	$('.input_gen, .select_gen,').poshytip('destroy');
 	
 	if ( document.body.clientWidth < 1000 ) {
@@ -243,17 +255,19 @@ function init_comm() {
 	} else {
 		init_poshytip('.input_gen', 'focus', 'target', 'right', 'center', 5, 0);
 	}
+	
 	init_poshytip('.select_gen', 'focus', 'target', 'center', 'top', 5, 6);
 	init_poshytip('label', '', 'target', 'right', 'center', 5, 0);
 	init_poshytip(':radio, :checkbox', '', 'target', 'right', 'center', 200, 0);
 	
-	$('.tip-yellowsimple .tip-inner ').css( "font-size", ( isMobile() ? '35px' : '' ) );
-	$('.tip-yellowsimple .tip-inner ').css( "line-height", ( isMobile() ? '1.2' : '' ) );
+	$('.tip-yellowsimple, .tip-inner ').css( "font-size", ( mobilScreen ? '35px' : '' ) );
+	$('.tip-yellowsimple, .tip-inner ').css( "line-height", ( mobilScreen ? '1.2' : '' ) );
 }
 
 [% IF ( special.datepicker.0 || special.mask.0 ) %]
 
 function crate_datepicker(date_id) {
+
 	$('#'+date_id).datepicker({
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
@@ -265,39 +279,44 @@ function crate_datepicker(date_id) {
 [% END %]
 
 [% FOREACH mask IN special.mask %]
+
 	$("#[% mask %]").mask("99.99.9999");
 
-	if (mobilScreen) {
+	if ( mobilScreen ) {
 		crate_datepicker("[% mask %]");
 	};
+	
 [% END %]
 
 [% FOREACH picker IN special.datepicker %]
+
 	crate_datepicker("[% picker %]");
+	
 [% END %]
 
 [% FOREACH no_copy IN special.no_copypast %]
+
 	$('#[% no_copy %]').live("keydown", function(e){
+	
 		var e = e || event, k = e.which || e.button;
-		if(e.ctrlKey && k == 86) return false;
+		
+		if ( e.ctrlKey && k == 86 ) return false;
 	});
+	
 	$('#[% no_copy %]').bind("contextmenu", function(e) {
+	
 		e.preventDefault();
 	});
+	
 [% END %]
 
 [% FOREACH near IN special.nearest_date %]
+
 	update_nearest_date_[% near %]();
 			
 	function update_nearest_date_[% near %]()
 	{	
-		var mobScreen = isMobile();
-
 		$("#[% near %]").html("<div id='tmp_near_img'><img src='[% static %]/images/autoform_wait.gif' /></div>");
-
-		if ( mobScreen ) {
-			$("#tmp_near_img").css('height', '38px');
-		}
 
 		$.get("[% vcs_tools %]get_nearest.htm", {
 			'center': $('#center').val(), 
@@ -317,13 +336,13 @@ function crate_datepicker(date_id) {
 			$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% static %]/images/autoform_wait.gif' />");
 		}
 
-		if ( mobScreen ) {
-			$("#tmp_vtype_img").css('height', '38px');
+		if ( mobilScreen ) {
+			$("#tmp_vtype_img, #tmp_near_img").css('height', '38px');
 		}
 
 		$('#vtype').find('option').remove();
 		
-		$.get("[% vcs_tools %]get_vtypes.htm", 
+		$.get("[% vcs_tools %]get_vtypes.htm",
 			{ 'center': $('#center').val() }, 
 			function(xml) {
 				$(xml).find('node').each( function() {
@@ -354,20 +373,29 @@ function crate_datepicker(date_id) {
 	function update_timeslots(date_change) {
 				
 		$('#timeslot').hide();
+		
 		$('#timeslot').find('option').remove();
+		
 		$('#timeslot').parent().prepend("<img id='tmp_img' src='[% static %]/images/autoform_wait.gif' />");
 		
 		var reload_timeslot = $('#timeslot').attr('data-timeslot');
+		
 
 		$.get("[% vcs_tools %]get_times.htm", {
+		
 			'center': '[% appinfo.center %]', 
+			
 			'persons': '[% appinfo.persons %]', 
+			
 			'appdate':$('#app_date').val(),
+			
 			'fdate': '[% appinfo.fdate %]', 
+			
 			'lang': 'ru',
 			
 			}, function(xml) {
 				$(xml).find('node').each( function() {
+				
 					var apptimeValue = $(this).find('id').text();
 					var apptimeText = $(this).find('title').text();
 					var defaultOpt = $(this).find('default').text();
@@ -389,7 +417,9 @@ function crate_datepicker(date_id) {
 			$('#timeslot').show();
 			
 			[% IF last_error_name == 'timeslot' %]
+			
 				if ( !date_change ) {
+				
 					$(document).ready(function() {
 						show_error_tip( 'timeslot', '[% langreq(last_error_text) %]' );
 					});
@@ -399,7 +429,9 @@ function crate_datepicker(date_id) {
 			[% END %]
 			
 			var al = $(xml).find('urgent_flag');
+			
 			if (al.text() != '') {
+			
 				var alertText = al.text();
 				alert(alertText);
 			}
@@ -413,26 +445,29 @@ function find_pos( obj ) {
 	var curtop = 0;
 
 	if ( obj.offsetParent ) {
+	
 		do {
 			curtop += obj.offsetTop;
+			
 		} while ( obj = obj.offsetParent );
+		
 		return [ curtop ];
 	}
 }
 
 function show_error_tip( last_error_name, last_error_text ) {
 
-	var mobScreen = isMobile();
-	var error_x = ( mobScreen ? 'inner-left' : 'left' );
-	var error_y = ( mobScreen ? 'bottom' : 'center' );
-	var offset_x = ( mobScreen ? 0 : 5 );
-	var offset_y = ( mobScreen ? 5 : 0 );
+	var error_x = ( mobilScreen ? 'inner-left' : 'left' );
+	var error_y = ( mobilScreen ? 'bottom' : 'center' );
+	var offset_x = ( mobilScreen ? 0 : 5 );
+	var offset_y = ( mobilScreen ? 5 : 0 );
 	
 	if ( last_error_name == 'captha_div' ) {
+	
 		error_x = 'inner-left';
-		offset_x = ( mobScreen ? 0 : 20 );
-		error_y = ( mobScreen ? 'top' : 'center' );
-		offset_y = ( mobScreen ? 50 : 0 );
+		offset_x = ( mobilScreen ? 0 : 20 );
+		error_y = ( mobilScreen ? 'top' : 'center' );
+		offset_y = ( mobilScreen ? 50 : 0 );
 	}
 	
 	window.scroll( 0,find_pos( document.getElementById( last_error_name ) ) );
@@ -449,21 +484,26 @@ function show_error_tip( last_error_name, last_error_text ) {
 	});
 	
 	$( '#' + last_error_name ).bind({
+	
 		click: function( e ) {
+		
 			$('#' + last_error_name ).poshytip( 'hide' );
 		}
 	});
 	
 	$( '#' + last_error_name ).poshytip( 'show' );
 	
-	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( isMobile() ? '20px' : '' ) );
-	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( isMobile() ? '1.2' : '' ) );
+	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( mobilScreen ? '20px' : '' ) );
+	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( mobilScreen ? '1.2' : '' ) );
 	
 	if ( last_error_name == 'captha_div' ) {
+	
 		$( '.tip-redsimple' ).each( function() {
+		
 			$( this ).css( 'top', ( parseFloat( $( this ).css( 'top' ) ) + 38 ) );
 		});
 	} else {
+	
 		$( '#' + last_error_name ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
 	}
 
@@ -473,27 +513,39 @@ function show_error_tip( last_error_name, last_error_text ) {
 [% FOREACH post_index IN special.post_index %]
 
 	$('#[% post_index %]').autocomplete({
+	
 		source:function( request, response ) {
+		
 			$('#[% post_index %]').hide();
+			
 			$('#[% post_index %]').parent().append(
 				'<span id="[% post_index %]_replacer">' + $('#[% post_index %]').val() + 
 				' <img src="[% static %]/images/autoform_wait.gif" /></span>'
 			);
-			$('#[% post_index %]_replacer').css( "font-size", ( isMobile() ? '1.5em' : '' ) );
+			
+			$('#[% post_index %]_replacer').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
 			
 			$.ajax({
 				url: "/autoform/findpcode.htm",
+				
 				dataType: "jsonp",
+				
 				data: {
 					maxRows: 8,
 					name_startsWith: request.term,
 					center: [% appinfo.center %], 
 				},
+				
 				success: function( data ) {
+				
 					$('#[% post_index %]').poshytip('hide');
+					
 					$('#[% post_index %]_replacer').remove();
+					
 					$('#[% post_index %]').show();
+					
 					response( $.map( data.cmps, function( item ) {
+					
 						return {
 							value: item.pcode,
 							desc: item.cname,
@@ -504,17 +556,24 @@ function show_error_tip( last_error_name, last_error_text ) {
 				}
 			});
 		},
+		
 		delay:10,
 		minLength:3,
+		
 		select: function( event, ui ) {
+		
 			$('#[% post_index %]').val( ui.item.value + ', ' + ui.item.desc );
+			
 			return false;
 		},
+		
 		open: function(event, ui) {
-			//$('#[% post_index %]').val( '' );
+		
+			// $('#[% post_index %]').val( '' );
 		}		
 	})
 	.data( "autocomplete" )._renderItem = function( ul, item ) {
+	
 		return $( "<li></li>" )
 			.data( "item.autocomplete", item )
 			.append( "<a>" + item.value + '<br><span class="post_index">' + item.desc + "</span></a>" )

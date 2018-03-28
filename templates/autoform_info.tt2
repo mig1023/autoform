@@ -216,7 +216,9 @@ YMaps.jQuery(function () {
 			'lang': 'ru',
 			
 			}, function(xml) {
+			
 				$(xml).find('node').each( function() {
+				
 					var apptimeValue = $(this).find('id').text();
 					var apptimeText = $(this).find('title').text();
 					
@@ -231,7 +233,9 @@ YMaps.jQuery(function () {
 			$('#apptime').show();
 			
 			[% IF error %]
+			
 				if (!error_already_displayed) {
+				
 					showErrorTip();
 					error_already_displayed = 1;
 				}
@@ -240,6 +244,7 @@ YMaps.jQuery(function () {
 			var al = $(xml).find('urgent_flag');
 			
 			if (al.text() != '') {
+			
 				alert(al.text());
 			}
 	    }, 'xml');
@@ -251,6 +256,7 @@ $(document).ready( mobileScreenCheck() );
 function mobileScreenCheck() {
 
 	[% IF title == 2 %]
+	
 		$('#appdate').datepicker({
 			dateFormat: 'dd.mm.yy',
 			firstDay: 1,
@@ -258,6 +264,7 @@ function mobileScreenCheck() {
 			buttonImage: '[% static %]/images/1x1.png',
 			buttonImageOnly:true
 		});
+		
 	[% END %]
 
 	if ( !mobilScreen ) {
@@ -293,7 +300,9 @@ function mobileScreenCheck() {
 	
 	[% IF title != 3 %]
 		$("#app_table").each(function(){
+		
 			$("td",this).each(function(){
+			
 				$(this).css( "display", 'block' );
 				$(this).css( "float", 'left' );
 				$(this).css( "width", '100%' );
@@ -320,38 +329,37 @@ function mobileScreenCheck() {
 
 [% IF ( title == 2 ) && error %]
 
-function showErrorTip() {
+	function showErrorTip() {
 
-	var mobScreen = isMobile();
-	var error_x = ( mobScreen ? 'inner-left' : 'left' );
-	var error_y = ( mobScreen ? 'bottom' : 'center' );
-	var offset_x = ( mobScreen ? 0 : 5 );
-	var offset_y = ( mobScreen ? 5 : 0 );
-	
-	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( isMobile() ? '20px' : '' ) );
-	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( isMobile() ? '1.2' : '' ) );
-	
-	$( '#appdate' ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
-	
-	$( '#appdate' ).poshytip({
-		className: 'tip-redsimple',
-		content: '[% error %]',
-		showOn: 'none',
-		alignTo: 'target',
-		alignX: error_x,
-		alignY: error_y,
-		offsetX: offset_x,
-		offsetY: offset_y,
-	});
-	
-	$( '#appdate' ).bind({
-		click: function( e ) {
-			$( '#appdate' ).poshytip( 'hide' );
-		}
-	});
-	
-	$( '#appdate' ).poshytip( 'show' );
-}
+		var error_x = ( mobilScreen ? 'inner-left' : 'left' );
+		var error_y = ( mobilScreen ? 'bottom' : 'center' );
+		var offset_x = ( mobilScreen ? 0 : 5 );
+		var offset_y = ( mobilScreen ? 5 : 0 );
+		
+		$( '.tip-redsimple .tip-inner' ).css( "font-size", ( mobilScreen ? '20px' : '' ) );
+		$( '.tip-redsimple .tip-inner' ).css( "line-height", ( mobilScreen ? '1.2' : '' ) );
+		
+		$( '#appdate' ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
+		
+		$( '#appdate' ).poshytip({
+			className: 'tip-redsimple',
+			content: '[% error %]',
+			showOn: 'none',
+			alignTo: 'target',
+			alignX: error_x,
+			alignY: error_y,
+			offsetX: offset_x,
+			offsetY: offset_y,
+		});
+		
+		$( '#appdate' ).bind({
+			click: function( e ) {
+				$( '#appdate' ).poshytip( 'hide' );
+			}
+		});
+		
+		$( '#appdate' ).poshytip( 'show' );
+	}
 
 [% END %]
 
