@@ -1543,11 +1543,11 @@ sub get_content_rules_hash
 				},
 				param => {
 					mezzi1 => { db => 'Mezzi1', label_for => 'Наличные деньги' },
-					mezzi2 => { db => 'Mezzi2', label_for => 'Кредитная карточка' },
-					mezzi3 => { db => 'Mezzi3', label_for => 'Предоплаченный транспорт' },
-					mezzi4 => { db => 'Mezzi4', label_for => 'Дорожные чеки' },
-					mezzi5 => { db => 'Mezzi5', label_for => 'Предоплачено место проживания' },
-					mezzi6 => { db => 'Mezzi6', label_for => 'Иные' },
+					mezzi2 => { db => 'Mezzi2', label_for => 'Дорожные чеки' },
+					mezzi3 => { db => 'Mezzi3', label_for => 'Кредитная карточка' },
+					mezzi4 => { db => 'Mezzi4', label_for => 'Предоплачено место проживания' },
+					mezzi5 => { db => 'Mezzi5', label_for => 'Предоплаченный транспорт' },
+					mezzi6 => { db => 'Mezzi7', label_for => 'Иные' },
 				},
 			},
 		],
@@ -1575,10 +1575,10 @@ sub get_content_rules_hash
 				},
 				param => {
 					sponsor_mezzi1 => { db => 'Mezzi1', label_for => 'Наличные деньги' },
-					sponsor_mezzi2 => { db => 'Mezzi2', label_for => 'Оплачиваются все расходы' },
-					sponsor_mezzi3 => { db => 'Mezzi3', label_for => 'Оплачивается транспорт' },
-					sponsor_mezzi5 => { db => 'Mezzi4', label_for => 'Оплачивается место проживания' },
-					sponsor_mezzi6 => { db => 'Mezzi6', label_for => 'Иные' },
+					sponsor_mezzi2 => { db => 'Mezzi6', label_for => 'Оплачиваются все расходы' },
+					sponsor_mezzi3 => { db => 'Mezzi5', label_for => 'Оплачивается транспорт' },
+					sponsor_mezzi4 => { db => 'Mezzi4', label_for => 'Оплачивается место проживания' },
+					sponsor_mezzi5 => { db => 'Mezzi7', label_for => 'Иные' },
 				},
 			},
 		],
@@ -1590,7 +1590,7 @@ sub get_content_rules_hash
 				relation => {
 					only_if => {
 						table => 'AppData',
-						name => 'Mezzi6',
+						name => 'Mezzi7',
 						value => '1',
 					}
 				},
