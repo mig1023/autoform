@@ -2539,7 +2539,7 @@ sub mod_hash
 	
 		$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) ;
 		
-		$hash->{ CountryLive } = ( $hash->{ NRes } ? 2 : 1 );
+		$hash->{ CountryLive } = ( $hash->{ NRes } ? 1 : 0 );
 		
 		$hash->{ PrevVisa }--;
 		
