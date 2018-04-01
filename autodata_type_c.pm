@@ -2148,9 +2148,9 @@ sub get_content_rules_hash
 				page_ord => 30,
 				progress => 14,
 			},
-			#{
-			#	type => 'captcha',
-			#},
+			{
+				type => 'captcha',
+			},
 		],
 		
 		'Запись успешно создана!' => [
