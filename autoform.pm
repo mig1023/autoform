@@ -2524,8 +2524,6 @@ sub mod_hash
 	
 	if ( $hash->{ ShIndex } ) {
 	
-		# my ( $postcode_id, $city ) = $self->get_postcode_id( $hash->{ ShIndex } );
-		
 		$hash->{ Shipping } = 1;
 		$hash->{ ShAddress } = $hash->{ ShIndex } . ", " . $hash->{ ShAddress };
 	}
