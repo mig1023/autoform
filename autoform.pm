@@ -2211,12 +2211,23 @@ sub check_logic
 		}
 		
 		if ( $rule->{ condition } =~ /^unique_in_pending$/ ) {
-
-			my $id_in_db = $self->query( 'sel1', __LINE__, "
-				SELECT COUNT(ID) FROM $rule->{table} WHERE Status = 1 AND $rule->{name} = ?", $value
+			
+			my $isChild = $self->query( 'sel1', __LINE__, "
+				SELECT isChild
+				FROM AutoToken
+				JOIN AutoAppData ON AutoToken.AutoAppDataID = AutoAppData.ID
+				WHERE Token = ?", $self->{ token }
 			);
+			
+			if ( !$isChild ) {
+		
+				my $id_in_db = $self->query( 'sel1', __LINE__, "
+					SELECT COUNT(ID) FROM $rule->{table}
+					WHERE Status = 1 AND isChild = 0 AND $rule->{name} = ?", $value
+				);
 
-			$first_error = $self->text_error( 10, $element ) if $id_in_db;
+				$first_error = $self->text_error( 10, $element ) if $id_in_db;
+			}
 		}
 		
 		if ( $rule->{ condition } =~ /^free_only_if(_not)?$/ ) {
@@ -2970,19 +2981,22 @@ sub check_passnum_already_in_pending
 	my $pass_list = [];
 
 	my $app_data = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.PassNum
+		SELECT AutoAppData.PassNum, isChild
 		FROM AutoToken
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $self->{ token }
 	);
-	
-	push( @$pass_list, $_->{ PassNum } ) for @$app_data;
+
+	for ( @$app_data ) {
+		push( @$pass_list, $_->{ PassNum } ) unless $_->{ isChild };
+	}
 
 	my $pass_line = join( "','", @$pass_list );
 
 	my $pass_already = $self->query( 'sel1', __LINE__, "
-		SELECT COUNT(ID) FROM AppData WHERE PassNum IN ('$pass_line') AND Status = 1"
+		SELECT COUNT(ID) FROM AppData
+		WHERE PassNum IN ('$pass_line') AND Status = 1 AND isChild = 0"
 	);
 	
 	$pass_already = undef unless $pass_already;
