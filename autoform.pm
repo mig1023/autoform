@@ -2485,7 +2485,8 @@ sub create_new_appointment
 		);
 		
 		my $appid = $self->create_table(
-			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid, undef, $data_for_contract->{ CenterID }
+			'AutoAppData', 'AppData', $app->{ ID }, $db_rules,
+			$new_appid, $sch_appid, undef, $data_for_contract->{ CenterID }, undef, $app->{ SchengenAppDataID }
 		);
 		
 		$self->create_table(
@@ -2508,11 +2509,11 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver ) = @_;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto ) = @_;
 
 	my $hash = $self->get_hash_table( $autoname, 'ID', $transfered_id );
 
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver );
+	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto );
 	
 	return $self->insert_hash_table( $name, $hash );
 }
@@ -2520,7 +2521,7 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract, $center, $ver ) = @_;
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract, $center, $ver, $sch_auto ) = @_;
 
 	for my $column ( keys %$hash ) {
 
@@ -2546,6 +2547,18 @@ sub mod_hash
 	
 	if ( $table_name eq 'AppData' ) {
 	
+		my $schengen_data = $self->get_hash_table( 'AutoSchengenAppData', 'ID', $sch_auto );
+		
+		if ( $schengen_data->{ HostDataType } eq 'P' ) {
+		
+			$hash->{ Hotels } = $schengen_data->{ HostDataName } . ' ' . $schengen_data->{ HostDataDenomination };
+			
+			$hash->{ HotelAdresses } = $schengen_data->{ HostDataCity } . ' ' .
+				$schengen_data->{ HostDataAddress } . ' ' . $schengen_data->{ HostDataEmail };
+			
+			$hash->{ HotelPhone } = $schengen_data->{ HostDataPhoneNumber };
+		}
+
 		$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) ;
 		
 		$hash->{ CountryLive } = ( $hash->{ NRes } ? 1 : 0 );
