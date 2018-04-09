@@ -2609,7 +2609,7 @@ sub mod_hash
 		}
 	}
 	
-	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'FinishedVType', 'FinishedCenter', 'AppEMail', 'AppDataID' );
+	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'FinishedVType', 'FinishedCenter', 'AppEMail', 'AppDataID', 'PrimetimeAlert' );
 		
 	return $hash;
 }

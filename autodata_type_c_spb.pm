@@ -154,7 +154,7 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'primetime_text',
-				label => 'Вы выбрали запись на центр Primetime, что подразумевает дополнительную оплату услуги Primetime',
+				label => 'Стоимость услуги «Прайм-тайм» составляет: 2100 рублей за каждого заявителя и не включает в себя стоимость сервисного и консульского сборов, а также <a target = "_blank" class = "dotted_link_big" href = "/spb-dopolnitelnye-uslugi/">дополнительных услуг</a>',
 			},
 			{
 				type => 'free_line',
@@ -162,8 +162,12 @@ sub get_content_rules_hash
 			{
 				type => 'checkbox',
 				name => 'pers_info',
-				label_for => 'я осведомлён, что услуга платная',
+				label_for => 'я ознакомлен со стоимостью дополнительных услуг',
 				check => 'true',
+				db => {
+					table => 'Appointments',
+					name => 'PrimetimeAlert',
+				},
 			},
 		],
 		
