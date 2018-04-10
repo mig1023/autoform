@@ -144,14 +144,20 @@ sub get_api_centers
 	my $result = {};
 	
 	my $all_centers = $self->query( 'selallkeys', __LINE__, "
-		SELECT BName, BAddr as address, phone, email, submissionTime, collectionTime
+		SELECT ID, BName, BAddr as address, phone, email, submissionTime, collectionTime
 		FROM Branches
 		WHERE isDeleted = 0 AND Display = 1"
 	);
 	
+	my $geo_data = VCS::Site::autodata::get_geo_branches();
+	
 	for ( @$all_centers ) {
 	
 		$result->{ $_->{ BName } } = $_;
+		
+		$result->{ $_->{ BName } }->{ latitude } = $geo_data->{ $_->{ ID } }->[ 0 ];
+		
+		$result->{ $_->{ BName } }->{ longitude } = $geo_data->{ $_->{ ID } }->[ 1 ];
 		
 		delete $result->{ $_->{ BName } }->{ BName };
 	}
@@ -167,6 +173,8 @@ sub get_doc_status
 	my $result = { 'status' => "0" };
 	
 	my $param = get_all_param( $self, 'docnum', 'birthdate' );
+	
+	$result->{ docnum } = $param->{ docnum };
 
 	return $result if !$param->{ docnum } or !$param->{ birthdate };
 
