@@ -211,9 +211,7 @@ sub get_doc_status
 sub get_advertisment
 # //////////////////////////////////////////////////
 {
-	return [
-		'http://www.italyvms.ru',
-	];
+	return { data => [ '' ] };
 }
 
 sub get_push
