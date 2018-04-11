@@ -48,13 +48,24 @@ sub get_values_for_api
 	
 	my $result = get_api_head( $self, 0 );
 	
-	$result->{ appointments } = $self->query( 'selallkeys', __LINE__, "
+	$result->{ data }->{ appointments } = $self->query( 'selallkeys', __LINE__, "
 		SELECT * FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
 	)->[0];
 	
-	$result->{ date } = $result->{ appointments }->{ AppDate };
+	$result->{ data }->{ date } = $result->{ data }->{ appointments }->{ AppDate };
 	
-	delete $result->{ appointments }->{ $_ } for ( @{ $delete_fields->{ appointments } } );
+	$result->{ data }->{ center } = $self->query( 'sel1', __LINE__, "
+		SELECT BName FROM Branches WHERE ID = ?",
+		$result->{ data }->{ appointments }->{ CenterID }
+	);
+	
+	my $status = $self->query( 'sel1', __LINE__, "
+		SELECT Finished FROM AutoToken WHERE ID = ?", $tables_id->{ AutoToken }
+	);
+	
+	$result->{ data }->{ status } = ( $status ? 'finished' : 'ongoing' );
+	
+	delete $result->{ data }->{ appointments }->{ $_ } for ( @{ $delete_fields->{ appointments } } );
 		
 	my $all_applicants = $self->query( 'selallkeys', __LINE__, "
 		SELECT * FROM AutoAppData WHERE AppID = ?", $tables_id->{ AutoAppointments }
@@ -73,11 +84,11 @@ sub get_values_for_api
 			delete $sch_app->{ ID };
 		}
 		
-		$result->{ schengen }->[ $app ] = $sch_app;
+		$result->{ data }->{ schengen }->[ $app ] = $sch_app;
 	
 		delete $all_applicants->[ $app ]->{ $_ } for ( @{ $delete_fields->{ appdata } } );
 	
-		$result->{ appdata }->[ $app ] = $all_applicants->[ $app ];
+		$result->{ data }->{ appdata }->[ $app ] = $all_applicants->[ $app ];
 	}
 	
 	return $result;
@@ -153,13 +164,13 @@ sub get_api_centers
 	
 	for ( @$all_centers ) {
 	
-		$result->{ $_->{ BName } } = $_;
+		$result->{ data }->{ $_->{ BName } } = $_;
 		
-		$result->{ $_->{ BName } }->{ latitude } = $geo_data->{ $_->{ ID } }->[ 0 ];
+		$result->{ data }->{ $_->{ BName } }->{ latitude } = $geo_data->{ $_->{ ID } }->[ 0 ];
 		
-		$result->{ $_->{ BName } }->{ longitude } = $geo_data->{ $_->{ ID } }->[ 1 ];
+		$result->{ data }->{ $_->{ BName } }->{ longitude } = $geo_data->{ $_->{ ID } }->[ 1 ];
 		
-		delete $result->{ $_->{ BName } }->{ BName };
+		delete $result->{ data }->{ $_->{ BName } }->{ BName };
 	}
 	
 	return $result;
@@ -170,11 +181,15 @@ sub get_doc_status
 {
 	my $self = shift;
 	
-	my $result = { 'status' => "0" };
+	my $result = { 
+		'data' => {
+			'status' => "0"
+		}
+	};
 	
 	my $param = get_all_param( $self, 'docnum', 'birthdate' );
 	
-	$result->{ docnum } = $param->{ docnum };
+	$result->{ data }->{ docnum } = $param->{ docnum };
 
 	return $result if !$param->{ docnum } or !$param->{ birthdate };
 
@@ -198,12 +213,12 @@ sub get_doc_status
 	
 	for ( @$all_status ) {
 	
-		$result->{ status } = $_->{ Status } if $birthdate eq $_->{ BthDate };
+		$result->{ data }->{ status } = $_->{ Status } if $birthdate eq $_->{ BthDate };
 	}
 	
-	$result->{ status } = "0" if $result->{ status } == 7;
+	$result->{ data }->{ status } = "0" if $result->{ data }->{ status } == 7;
 	
-	$result->{ status } = "3" if $result->{ status } > 7;
+	$result->{ data }->{ status } = "3" if $result->{ data }->{ status } > 7;
 	
 	return $result;
 }
@@ -249,7 +264,7 @@ sub get_push
 
 	if ( $swich =~ /on/i ) {
 	
-		$result->{ push } = 'enabled';
+		$result->{ data }->{ push } = 'enabled';
 	
 		if ( !$pushid ) {
 			
@@ -267,7 +282,7 @@ sub get_push
 		}
 	}
 	else {
-		$result->{ push } = 'disabled';
+		$result->{ data }->{ push } = 'disabled';
 	
 		if ( $pushid and $pushstatus == 1 ) {
 		
