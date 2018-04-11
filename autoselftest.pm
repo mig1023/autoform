@@ -387,7 +387,7 @@ sub get_test_list {
 					expected => '</tr>',
 				},
 				3 => { 	args => [ 'start_cell' ],
-					expected => '<td>',
+					expected => '<td class="left">',
 				},
 				4 => { 	args => [ 'end_cell' ],
 					expected => '</td>',
@@ -410,10 +410,10 @@ sub get_test_list {
 						'<div id="element"><input type="radio" name="element" value="1"  title="" id="element1"><label for="element1">first</label><br><input type="radio" name="element" value="2" checked title="" id="element2"><label for="element2">second</label><br><input type="radio" name="element" value="3"  title="" id="element3"><label for="element3">third</label><br></div>',
 				},
 				10 => {	args => [ 'text', undef, 'text' ],
-					expected => '<td colspan="3">text</td>',
+					expected => '<td class="left" colspan="3">text</td>',
 				},
 				11 => {	args => [ 'example', undef, 'text' ],
-					expected => '<tr><td class="exam_td_gen"><span class="exam_span_gen">пример: text</span></td></tr>',
+					expected => '<tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: text</span></td></tr> ',
 				},
 				12 => {	args => [ 'info', 'element', 'text' ],
 					expected => '<label class="info" title="" id="element">text</label>',
@@ -449,7 +449,7 @@ sub get_test_list {
 			comment => 'get_cell',
 			test => { 	
 				1 => { 	args => [ 'test' ],
-					expected => '<td>test</td>',
+					expected => '<td class="left">test</td>',
 				},
 			},
 		},
@@ -470,7 +470,7 @@ sub get_test_list {
 						}
 					],
 					expected => 
-						'<tr><td rowspan=2><label id="text">Email</label></td><td><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr><td class="exam_td_gen"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr>',
+						'<tr><td class="left" rowspan=2><label id="text">Email</label></td><td class="left"><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr>',
 				},
 				2 => { 	args => [
 						{
@@ -493,7 +493,7 @@ sub get_test_list {
 						}
 					],
 					expected => 
-						'<tr><td><label id="text">Средства</label></td><td><div id="test"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">Тест 2</label><br></div></td></tr>',
+						'<tr><td class="left"><label id="text">Средства</label></td><td class="left"><div id="test"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">Тест 2</label><br></div></td></tr>',
 				}
 			},
 		},
