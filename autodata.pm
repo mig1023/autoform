@@ -290,6 +290,7 @@ sub get_mobile_api_fields
 			'PersonalDataPermission',
 			'MobilPermission',
 			'PersonForAgreements',
+			'PrimetimeAlert',
 			'TimeslotID', 
 			'AppDate',
 			'Status',
@@ -304,7 +305,8 @@ sub get_mobile_api_fields
 		appdata => [
 			'ID',
 			'AppID',
-			'Finished',
+			'FinishedVType',
+			'FinishedCenter',
 			'InsurerID',
 			'DListID',
 			'PolicyID',
