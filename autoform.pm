@@ -61,7 +61,6 @@ sub get_content_rules
 	my $content = $self->get_content_rules_hash_opt();
 
 	my $keys_in_current_page = {};
-	
 	my $new_content = {};
 	
 	for my $page ( sort { $content->{ $a }->[ 0 ]->{page_ord} <=> $content->{ $b }->[ 0 ]->{ page_ord } } keys %$content ) {
@@ -172,9 +171,7 @@ sub autoform
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my ( $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules );
-
-	my $step = 0;
+	my ( $step, $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules );
 
 	my $special = {};
 
@@ -203,8 +200,6 @@ sub autoform
 			$self->get_autoform_content();
 	}
 
-	my ( $last_error_name, $last_error_text ) = split( /\|/, $last_error );
-
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
@@ -219,8 +214,6 @@ sub autoform
 		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
 		'addr' 			=> $self->{ autoform }->{ paths }->{ addr },
 		'static'		=> $self->{ autoform }->{ paths }->{ static },
-		'last_error_name' 	=> $last_error_name,
-		'last_error_text' 	=> $last_error_text,
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'progress' 		=> $progress,
@@ -230,6 +223,8 @@ sub autoform
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
+	
+	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
 	$tvars->{ appinfo } = $self->get_same_info_for_timeslots()
 		if ( 
@@ -585,8 +580,8 @@ sub token_generation
 {
 	my $self = shift;
 
-	my $token_existing = 1;
-	my $token = 't';
+	my ( $token_existing, $token ) = ( 1, 't' );
+
 	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 	
 	do {
@@ -618,7 +613,7 @@ sub get_autoform_content
 {
 	my $self = shift;
 	
-	my $last_error = '';
+	my $last_error;
 	my $title;
 	
 	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
@@ -1903,7 +1898,8 @@ sub get_names_db_for_save_or_get
 	my ( $self, $page_content, $save_or_get ) = @_;
 	
 	my $request_tables = {};
-	my $alternative_data_source = {};
+	
+	my $alt_data_source = {};
 
 	return if $page_content =~ /^\[/;
 	
@@ -1942,13 +1938,14 @@ sub get_names_db_for_save_or_get
 			
 			if ( $element->{ load_if_free_field } ) {
 			
-				$alternative_data_source->{ $element->{ name } }->{ table } = $prefix . $element->{ load_if_free_field }->{ table };
-				$alternative_data_source->{ $element->{ name } }->{ field } = $element->{ load_if_free_field }->{ name };
+				$alt_data_source->{ $element->{ name } }->{ table } = $prefix . $element->{ load_if_free_field }->{ table };
+				
+				$alt_data_source->{ $element->{ name } }->{ field } = $element->{ load_if_free_field }->{ name };
 			}
 		}
 	}
 	
-	$request_tables->{ alternative_data_source } = $alternative_data_source;
+	$request_tables->{ alternative_data_source } = $alt_data_source;
 
 	return $request_tables;
 }
@@ -1986,6 +1983,7 @@ sub check_data_from_form
 	my ( $self, $step ) = @_;
 	
 	my $page_content = $self->get_content_rules( $step, undef, 'init' );
+	
 	my $tables_id = $self->get_current_table_id();
 
 	return if $page_content =~ /^\[/;
