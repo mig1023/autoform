@@ -2320,6 +2320,23 @@ sub get_test_list {
 				},
 			},
 		},
+		{ 	func => \&{ VCS::Site::autoform::date_format },
+			comment => 'date_format',
+			test => {
+				1 => { 	args => [ '2011-12-31' ],
+					expected => '31.12.2011',
+				},
+				2 => { 	args => [ '31.12.2011' ],
+					expected => '31.12.2011',
+				},
+				3 => { 	args => [ '31.12.2011', 'to_iso' ],
+					expected => '2011-12-31',
+				},
+				4 => { 	args => [ '2011-12-31', 'to_iso' ],
+					expected => '2011-12-31',
+				},
+			},
+		},
 		{ 	func => \&{ VCS::Site::autoform::get_delete }, # <--- fixed last
 			comment => 'get_delete',
 			test => {
