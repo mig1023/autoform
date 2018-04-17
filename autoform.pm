@@ -311,7 +311,7 @@ sub get_same_info_for_timeslots
 	
 	$app->{ fdate_iso } = $app->{ fdate };
 	
-	$app->{ fdate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	$app->{ fdate } = $self->date_format( $app->{ fdate } );
 
 	return $app;
 }
@@ -410,7 +410,7 @@ sub init_add_param
 
 		for my $person ( @$app_person_in_app ) {
 		
-			$person->{ person } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+			$person->{ person } = $self->date_format( $person->{ person } );
 			
 			next if ( $self->age( $person->{ birthdate }, $person->{ currentdate } ) < 
 					$self->{ autoform }->{ age }->{ age_for_agreements } );
@@ -1154,7 +1154,7 @@ sub correct_values
 			WHERE AutoToken.Token = ?", $self->{ token }
 		);
 
-		$$current_values->{ 'new_app_timedate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+		$$current_values->{ 'new_app_timedate' } = $self->date_format( $$current_values->{ 'new_app_timedate' } );
 	}
 	
 	if ( $$current_values->{ 'new_app_timeslot' } ) {
@@ -1202,8 +1202,8 @@ sub get_list_of_app
 	
 		for my $app ( @$content ) {
 		
-			$app->{ BirthDate } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
-			
+			$app->{ BirthDate } = $self->date_format( $app->{ BirthDate } );	
+
 			$app->{ Finished } = 1;
 			
 			$app->{ Finished } = 3 if $app->{ FinishedCenter } != $app->{ CenterID };
@@ -1844,7 +1844,7 @@ sub decode_data_from_db
 {
 	my ( $self, $step, $element_name, $value ) = @_;
 	
-	$value =~ s/^(\d\d\d\d)\-(\d\d)\-(\d\d)$/$3.$2.$1/;
+	$value = $self->date_format( $value );
 	
 	$value = '' if ( $value eq '00.00.0000' );
 
@@ -1866,7 +1866,7 @@ sub encode_data_for_db
 	
 	$value = $self->{ vars }->get_system->to_upper_case_first( $value ) if $element->{ format } eq 'capitalized';
 	
-	$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
+	$value = $self->date_format( $value, 'to_iso' );
 	
 	return $value;
 }
@@ -2140,7 +2140,7 @@ sub check_logic
 
 		if ( $rule->{ condition } =~ /^(equal|now)_or_(later|earlier)$/ ) {
 		
-			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
+			$value = $self->date_format( $value, 'to_iso' );
 	
 			my $datediff = $self->get_datediff(
 				$value, $rule, $tables_id, ( $rule->{ condition } =~ /^equal/ )
@@ -2167,8 +2167,7 @@ sub check_logic
 		
 			my ( $spb, $from_now ) = ( $1, $2 );
 
-			$value =~ s/^(\d\d)\.(\d\d)\.(\d\d\d\d)$/$3-$2-$1/;
-			
+			$value = $self->date_format( $value, 'to_iso' );
 			
 			$value = sprintf( "%04d-%02d-%02d",
 				( Date::Calc::Add_Delta_YMD( split( /-/, $value  ), 0, 3, 1 ) )
@@ -3046,6 +3045,19 @@ sub time_interval_calculate
 	return tv_interval( $interval_start ) * 1000;
 }
 
+sub date_format
+# //////////////////////////////////////////////////
+{
+	my ( $self, $date, $format ) = @_;
+	
+	$date =~ s/^([0-9]{2})\.([0-9]{2})\.([0-9]{4})$/$3-$2-$1/;
+	
+	return $date if $format eq 'to_iso';
+	
+	$date =~ s/^([0-9]{4})\-([0-9]{2})\-([0-9]{2})$/$3.$2.$1/;
+	
+	return $date;
+}
 
 sub redirect
 # //////////////////////////////////////////////////
