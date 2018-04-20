@@ -1977,6 +1977,16 @@ sub get_current_table_id
 	return $tables_id;
 }
 
+sub check_all_data
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	# get_content_rules	
+	# check_all_data_from_db
+	# return 25 if $error 
+}
+
 sub check_data_from_form
 # //////////////////////////////////////////////////
 {
@@ -1990,16 +2000,16 @@ sub check_data_from_form
 	
 	my $first_error = '';
 	
-	for my $element (@$page_content) {
+	for my $element ( @$page_content ) {
 
 		last if $first_error;
 		
-		$first_error = $self->check_diff_types( $element ) if $element->{check};
+		$first_error = $self->check_diff_types( $element ) if $element->{ check };
 
-		$first_error = $self->check_captcha() if $element->{type} =~ /captcha/;
+		$first_error = $self->check_captcha() if $element->{ type } =~ /captcha/;
 
 		$first_error = $self->check_logic( $element, $tables_id )
-			if !$first_error and $element->{check_logic}
+			if !$first_error and $element->{ check_logic }
 	}
 	
 	return $first_error;
@@ -3023,14 +3033,18 @@ sub mutex_fail
 	
 	return if $self->{ this_is_self_testing };
 	
-	my ( $pass_already, $pass_list ) = $self->check_passnum_already_in_pending();
-
-	return 24 if $pass_already;
-	
 	my $app_status = $self->check_all_app_finished_and_not_empty();
 	
 	return $app_status if $app_status;
 	
+	my $fail_in_data = $self->check_all_data();
+	
+	return 25 if $fail_in_data;
+	
+	my ( $pass_already, $pass_list ) = $self->check_passnum_already_in_pending();
+
+	return 24 if $pass_already;
+		
 	for ( @$pass_list ) {
 	
 		return 24 unless $self->{ vars }->get_memd->add(
