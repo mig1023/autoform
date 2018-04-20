@@ -646,25 +646,9 @@ sub get_autoform_content
 	
 	$step = $self->get_add( $app_id ) if $action eq 'addapp';
 	
-	if ( $action eq 'tofinish' ) {
+	( $step, $last_error ) = $self->check_all_is_prepared( $last_error ) if $action eq 'tofinish';
 	
-		my $app_status = $self->check_all_app_finished_and_not_empty();
-		
-		if ( $app_status == 0 ) {
-		
-			$step = $self->set_step_by_content( '[app_finish]', 'next' );
-		}
-		else {
-			$step = $self->set_step_by_content( '[list_of_applicants]' );
-			
-			$last_error = $self->text_error( $app_status, { 'name' => 'applist' }, undef);
-		}
-	}
-	
-	if ( $action eq 'tolist' ) {
-	
-		$step = $self->set_step_by_content( '[list_of_applicants]' );
-	}
+	$step = $self->set_step_by_content( '[list_of_applicants]' ) if $action eq 'tolist';
 	
 	my $page = $self->get_content_rules( $step, 'full' );
 
@@ -687,6 +671,24 @@ sub get_autoform_content
 	my ( $special, $js_check ) = $self->get_specials_of_element( $step );
 	
 	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check );
+}
+
+sub check_all_is_prepared
+# //////////////////////////////////////////////////
+{
+	my ( $self, $last_error ) = @_;
+	
+	my $app_status = $self->check_all_app_finished_and_not_empty();
+		
+	my ( $pass_already, undef ) = $self->check_passnum_already_in_pending();
+
+	return ( $self->set_step_by_content( '[app_finish]', 'next' ), $last_error ) if !$app_status and !$pass_already;
+
+	my $step = $self->set_step_by_content( '[list_of_applicants]' );
+
+	return ( $step, $self->text_error( $app_status, { 'name' => 'applist' }, undef ) ) if $app_status;
+	
+	return ( $step, $self->text_error( 24, { 'name' => 'applist' }, undef ) );
 }
 
 sub check_relation
@@ -866,11 +868,13 @@ sub check_mutex_for_creation
 {
 	my ( $self, $step ) = @_;
 	
-	return ( '', $step ) unless $self->mutex_fail();
+	my $mutex_error = $self->mutex_fail();
+	
+	return ( '', $step ) unless $mutex_error;
 	
 	$step = $self->get_step_by_content( 'back_to_appdata' );
 	 
-	return ( $self->text_error( 24, { name => 'applist' } ), $step );
+	return ( $self->text_error( $mutex_error, { name => 'applist' } ), $step );
 }
 
 sub check_timeslots_already_full_or_not_actual
@@ -1024,8 +1028,6 @@ sub check_all_app_finished_and_not_empty
 		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 		WHERE Token = ?", $self->{ token }
 	);
-	
-	my ( $pass_already, undef ) = $self->check_passnum_already_in_pending();
 
 	for ( @$allfinished ) {
 	
@@ -1034,8 +1036,6 @@ sub check_all_app_finished_and_not_empty
 		return 19 if $_->{ FinishedVType } != $_->{ VType };
 		
 		return 22 if $_->{ FinishedCenter } != $_->{ CenterID };
-		
-		return 24 if $pass_already;
 	}
 	
 	return 5 if @$allfinished < 1;
@@ -3025,11 +3025,15 @@ sub mutex_fail
 	
 	my ( $pass_already, $pass_list ) = $self->check_passnum_already_in_pending();
 
-	return 1 if $pass_already;
+	return 24 if $pass_already;
+	
+	my $app_status = $self->check_all_app_finished_and_not_empty();
+	
+	return $app_status if $app_status;
 	
 	for ( @$pass_list ) {
 	
-		return 1 unless $self->{ vars }->get_memd->add(
+		return 24 unless $self->{ vars }->get_memd->add(
 			"autoform_pass$_", $_, $self->{ autoform }->{ memcached }->{ mutex_exptime }
 		);
 	}
