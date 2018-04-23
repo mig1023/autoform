@@ -1985,6 +1985,8 @@ sub check_all_data
 	# get_content_rules	
 	# check_all_data_from_db
 	# return 25 if $error 
+	
+	return 0;
 }
 
 sub check_data_from_form
