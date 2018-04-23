@@ -2146,7 +2146,7 @@ sub check_logic
 				$tables_id->{ 'Auto'.$rule->{table} }
 			);
 
-			$first_error = $self->text_error( 25, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
+			$first_error = $self->text_error( 26, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
 				if lc( $related_value ) ne lc( $value );
 		}
 
@@ -2336,7 +2336,7 @@ sub text_error
 	my ( $self, $error_code, $element, $incorrect_symbols, $relation, $offset, $full_error ) = @_;
 	
 	my $text = VCS::Site::autodata::get_text_error();
-	
+
 	if ( !defined($element) ) {
 		return "|" . $self->lang( $text->[$error_code] );
 	}
