@@ -1977,13 +1977,27 @@ sub get_current_table_id
 	return $tables_id;
 }
 
-sub check_all_data
+sub check_data_from_db
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	
+	my $tables_id = $self->get_current_table_id();
 
-	# get_content_rules	
-	# check_all_data_from_db
+	my $page_content = $self->get_content_db_rules( 'check' );
+	
+	warn Dumper($page_content);
+	
+#	for my $page ( 1..$self->get_content_rules( 'length' ) ) {
+	
+#		for my $element ( @{ $page_content->{ $page } } ) {
+#			
+#			next unless ref( $element->{ db } ) eq 'HASH';
+#			
+#			warn "check: " . $element->{ db }->{ table } . "." .  $element->{ db }->{ name }. " --> " . $element->{ check };
+#		}
+#	}
+
 	# return 25 if $error 
 	
 	return 0;
@@ -2660,7 +2674,7 @@ sub mezzi_assembler
 sub get_content_db_rules
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $type ) = @_;
 	
 	my $content = $self->get_content_rules();
 	
@@ -2674,7 +2688,8 @@ sub get_content_db_rules
 		
 			next if ( !defined $element->{db}->{table} or $element->{db}->{name} eq 'complex' );
 			
-			$db_rules->{ $element->{db}->{table} }->{ $element->{db}->{name} } = $element->{db}->{transfer};
+			$db_rules->{ $element->{db}->{table} }->{ $element->{db}->{name} } = 
+				( $type eq 'check' ? $element->{ check } : $element->{db}->{transfer} );
 		}
 	}
 	return $db_rules;
@@ -3039,7 +3054,7 @@ sub mutex_fail
 	
 	return $app_status if $app_status;
 	
-	my $fail_in_data = $self->check_all_data();
+	my $fail_in_data = $self->check_data_from_db();
 	
 	return 25 if $fail_in_data;
 	
