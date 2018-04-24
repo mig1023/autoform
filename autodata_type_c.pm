@@ -278,6 +278,7 @@ sub get_content_rules_hash
 				comment => 'Введите дату рождения',
 				example => '31.12.1900',
 				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				complete_check => 'not_empty',
 				check_logic => [
 					{
 						condition => 'now_or_earlier',
@@ -308,6 +309,7 @@ sub get_content_rules_hash
 				comment => 'Введите фамилию на английском языке так, как она указана в загранпаспорте',
 				example => 'Ivanov',
 				check => 'zW\s\-',
+				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
 					name => 'LName',
@@ -321,6 +323,7 @@ sub get_content_rules_hash
 				comment => 'Введите имя на английском языке так, как оно указано в загранпаспорте',
 				example => 'Ivan',
 				check => 'zW\s\-',
+				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
 					name => 'FName',
@@ -334,6 +337,7 @@ sub get_content_rules_hash
 				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				example => '650000001',
 				check => 'zWN',
+				complete_check => 'not_empty',
 				check_logic => [
 					{
 						condition => 'unique_in_pending',
@@ -353,6 +357,7 @@ sub get_content_rules_hash
 				comment => 'Введите дату выдачи, указанную в паспорте',
 				example => '31.12.1900',
 				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				complete_check => 'not_empty',
 				check_logic => [
 					{
 						condition => 'now_or_earlier',
@@ -376,6 +381,7 @@ sub get_content_rules_hash
 				comment => 'Введите дату окончания действия загранпаспорта, указанную в паспорте',
 				example => '31.12.1900',
 				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				complete_check => 'not_empty',
 				check_logic => [
 					{
 						condition => 'now_or_later',
@@ -402,6 +408,7 @@ sub get_content_rules_hash
 				comment => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
 				example => 'FMS 12345',
 				check => 'zWN\s\-\_\.\,\;\'\"',
+				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
 					name => 'PassWhom',
@@ -446,6 +453,7 @@ sub get_content_rules_hash
 				comment => 'Фактический адрес проживания заявителя',
 				example => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
 				check => 'zWN\s\-\_\.\,\;\'\"\/',
+				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
 					name => 'FullAddress',
@@ -630,6 +638,7 @@ sub get_content_rules_hash
 				comment => 'Профессию необходимо указывать на английском или итальянском языках. Если на данный момент Вы не работаете, то укажите unemployed / housewife, для учащихся указывается student / pupil, для пенсионеров – pensioner',
 				example => 'Doctor',
 				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
 					name => 'ProfActivity',

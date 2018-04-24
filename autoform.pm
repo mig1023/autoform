@@ -1982,23 +1982,45 @@ sub check_data_from_db
 {
 	my $self = shift;
 	
-	my $tables_id = $self->get_current_table_id();
+	my $table_id = $self->get_current_table_id();
 
-	my $page_content = $self->get_content_db_rules( 'check' );
+	my $rules = $self->get_content_db_rules( 'check' );
 	
-	warn Dumper($page_content);
-	
-#	for my $page ( 1..$self->get_content_rules( 'length' ) ) {
-	
-#		for my $element ( @{ $page_content->{ $page } } ) {
-#			
-#			next unless ref( $element->{ db } ) eq 'HASH';
-#			
-#			warn "check: " . $element->{ db }->{ table } . "." .  $element->{ db }->{ name }. " --> " . $element->{ check };
-#		}
-#	}
+	for my $table ( keys %$rules ) {
+		
+		my $auto_table = 'Auto' . $table;
+		
+		next if !$table_id->{ $auto_table };
+		
+		for ( keys %{ $rules->{ $table } } ) {
+		
+			delete $rules->{ $table }->{ $_ } unless $rules->{ $table }->{ $_ };
+		}
+		
+		next if !( scalar keys %{ $rules->{ $table } } );
 
-	# return 25 if $error 
+		my $request = join( ',', keys %{ $rules->{ $table } } );
+		
+		my $where_id = "ID = " . $table_id->{ $auto_table };
+		
+		$where_id = "AppID = " . $table_id->{ 'AutoAppointments' } if $auto_table eq 'AutoAppData';
+		
+		my $data = $self->query( 'selallkeys', __LINE__, "
+			SELECT $request FROM $auto_table WHERE $where_id"
+		);
+
+		for my $app ( @$data ) {
+		
+			for my $field ( keys %{ $app } ) {
+		
+				return 25 if (
+					( $rules->{ $table }->{ $field } eq 'not_empty')
+					&&
+					( !$app->{ $field } or $app->{ $field } eq '0000-00-00' )
+				);
+			}
+		}
+	}
 	
 	return 0;
 }
@@ -2689,7 +2711,7 @@ sub get_content_db_rules
 			next if ( !defined $element->{db}->{table} or $element->{db}->{name} eq 'complex' );
 			
 			$db_rules->{ $element->{db}->{table} }->{ $element->{db}->{name} } = 
-				( $type eq 'check' ? $element->{ check } : $element->{db}->{transfer} );
+				( $type eq 'check' ? $element->{ complete_check } : $element->{db}->{transfer} );
 		}
 	}
 	return $db_rules;
