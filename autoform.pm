@@ -2307,6 +2307,12 @@ sub check_logic
 				if length( $value ) != $rule->{ length };
 		}
 		
+		if ( $rule->{ condition } =~ /^this_is_email$/ and $value ) {
+			
+			$first_error = $self->text_error( 16, $element )
+				if $value !~ /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/i;
+		}
+		
 		if ( $rule->{ condition } =~ /^email_not_blocked$/ and $value ) {
 		
 			my ( $center ) = $self->get_app_visa_and_center();

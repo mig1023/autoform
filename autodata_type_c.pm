@@ -80,6 +80,9 @@ sub get_content_rules_hash
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
+						condition => 'this_is_email',
+					},
+					{
 						condition => 'email_not_blocked',
 					},
 				],
@@ -468,6 +471,9 @@ sub get_content_rules_hash
 				example => 'info@italyvms.ru',
 				check => 'zWN\@\-\_\.',
 				check_logic => [
+					{
+						condition => 'this_is_email',
+					},
 					{
 						condition => 'email_not_blocked',
 					},
@@ -1370,6 +1376,11 @@ sub get_content_rules_hash
 				comment => 'Укажите адрес электронной почты',
 				example => 'info@italyvms.ru',
 				check => 'zWN\@\s\-\.',
+				check_logic => [
+					{
+						condition => 'this_is_email',
+					},
+				],
 				db => {
 					table => 'SchengenAppData',
 					name => 'HostDataEmail',

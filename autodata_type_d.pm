@@ -77,6 +77,9 @@ sub get_content_rules_hash
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
+						condition => 'this_is_email',
+					},
+					{
 						condition => 'email_not_blocked',
 					},
 				],
