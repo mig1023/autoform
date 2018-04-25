@@ -1302,6 +1302,73 @@ sub get_test_list {
 					param => { field_name => '12312312312' },
 					expected => '',
 				},
+				
+				37 => { 	args => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'this_is_email' } ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => 'test@mail.com' },
+					expected => '',
+				},
+				38 => { 	args => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'this_is_email' } ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => 'test.test-test@mail-test.info' },
+					expected => '',
+				},
+				39 => { 	args => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'this_is_email' } ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => 'test test-test@mail-test.info' },
+					expected => 'field_name|Вы ввели недопустимый адрес электронной почты',
+				},
+				40 => { 	args => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'this_is_email' } ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => 'test-testmail-test.info' },
+					expected => 'field_name|Вы ввели недопустимый адрес электронной почты',
+				},
+				41 => { 	args => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'this_is_email' } ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => 'test-test@mail-test' },
+					expected => 'field_name|Вы ввели недопустимый адрес электронной почты',
+				},
+				42 => { 	args => [ 
+						{	name => 'field_name',
+							check_logic => [ { condition => 'this_is_email' } ]
+						},
+						{
+							AutoAppointments => '[app_id]',
+						},
+					],
+					param => { field_name => 'test-test@mail-test..info' },
+					expected => 'field_name|Вы ввели недопустимый адрес электронной почты',
+				},
 			},
 		},
 		
@@ -2259,7 +2326,7 @@ sub get_test_list {
 			test => {
 				1 => { 	prepare => \&pre_show_no_testing,
 					args => [ [ { PassNum => '' } ] ],
-					expected => 1,
+					expected => 4,
 				},
 				2 => { 	prepare => [ \&pre_show_no_testing, \&pre_passnum ],
 					args => [ [ { PassNum => 'TEST_PASS_UNIQ' } ] ],
