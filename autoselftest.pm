@@ -2010,9 +2010,6 @@ sub get_test_list {
 					expected => 5,
 				},
 				5 => { 	prepare => \&pre_logic_1,  # <--- fixed num 5
-					expected => 24,
-				},
-				6 => { 	prepare => [ \&pre_logic_1, \&pre_passnum ],  # <--- fixed num 6
 					expected => 0,
 				},
 			},
@@ -2324,17 +2321,17 @@ sub get_test_list {
 		{	func => \&{ VCS::Site::autoform::mutex_fail },
 			comment => 'mutex_fail',
 			test => {
-				1 => { 	prepare => \&pre_show_no_testing,
+				1 => { 	prepare => [ \&pre_show_no_testing ],
 					args => [ [ { PassNum => '' } ] ],
 					expected => 4,
 				},
-				2 => { 	prepare => [ \&pre_show_no_testing, \&pre_passnum ],
+				2 => { 	prepare => [ \&pre_show_no_testing, \&pre_passnum, \&pre_logic_1 ],
 					args => [ [ { PassNum => 'TEST_PASS_UNIQ' } ] ],
-					expected => undef,
+					expected => 25,
 				},
-				3 => { 	prepare => [ \&pre_show_no_testing, \&pre_mutex_fail_cach ],
+				3 => { 	prepare => [ \&pre_show_no_testing, \&pre_mutex_fail_cach, \&pre_logic_1 ],
 					args => [ [ { PassNum => '332211' } ] ],
-					expected => 1,
+					expected => 25,
 				},
 			},
 		},
@@ -2346,11 +2343,7 @@ sub get_test_list {
 				},
 				2 => { 	prepare => [ \&pre_show_no_testing, \&pre_mutex_fail_creation ],
 					args => [ 5 ],
-					expected => [ 'applist|Один из указанных загранпаспортов уже присутствует в активной записи', 3 ],
-				},
-				3 => { 	prepare => [ \&pre_show_no_testing, \&pre_mutex_fail_creation ], # <--- fixed num 3
-					args => [ 5 ],
-					expected => [ '', 5 ],
+					expected => [ 'applist|Вы должны полностью заполнить анкеты или удалить ненужные черновики', 3 ],
 				},
 			},
 		},
@@ -3320,8 +3313,10 @@ sub pre_logic_1
 	
 		( $vtype, $finished ) = ( 20, 21 ) if $num == 2;
 		
-		( $vtype, $finished ) = ( 13, 1 ) if ( $num == 5 or $num == 6 );
+		( $vtype, $finished ) = ( 13, 1 ) if $num == 5;
 	}
+	
+	$finished = 1 if $$test->{ comment } eq "mutex_fail";
 
 	my @params = ( $type eq 'PREPARE' ? ( $finished, $vtype , 1 ) : ( 0, 0, 0 ) );
 	
