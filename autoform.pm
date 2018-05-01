@@ -2204,6 +2204,25 @@ sub check_logic
 			$error = 23 if ( $offset < -1 and $error == 9 );
 			
 			$offset *= -1 if $offset < 0;
+			
+			# //////////////////////////////////
+			# temp/debug
+			
+			if ( $rule->{ condition } =~ /^equal_or_later$/ and $error and $element->{ name } eq 'f_date' ) {
+			
+				my $relation = $self->query( 'sel1', __LINE__, "
+					SELECT $rule->{name} FROM Auto$rule->{table} WHERE ID = ?",
+					$tables_id->{ 'Auto'.$rule->{table} }
+				);
+			
+				$_ = $self->date_format( $_ ) for ( $value, $relation );
+			
+				$rule->{ full_error } =
+					'"' . $element->{label} . '" не может быть раньше, чем "' .
+					$rule->{error} . '"' . " ( $value раньше $relation )";
+			}
+						
+			# //////////////////////////////////
 	
 			$first_error = $self->text_error(
 				$error, $element, undef, $rule->{ error }, $offset, $rule->{ full_error }
