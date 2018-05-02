@@ -197,7 +197,7 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'SDate',
 				},
-				special => 'datepicker, mask',
+				special => 'datepicker, mask, date_relation',
 			},
 			{
 				type => 'input',
