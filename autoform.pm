@@ -1234,7 +1234,6 @@ sub get_specials_of_element
 	
 	my $special = {
 		'datepicker' 	=> [],
-		'date_relation'	=> [],
 		'mask'		=> [],
 		'nearest_date'	=> [],
 		'timeslots'	=> [],
@@ -1244,6 +1243,8 @@ sub get_specials_of_element
 		'include_in'	=> [],
 		'include_out'	=> [],
 		'no_copypast'	=> [],
+		'date_relation'	=> [],
+		'min_date' 	=> [],
 	};
 
 	my $js_rules = [];
@@ -1255,10 +1256,14 @@ sub get_specials_of_element
 			push( @{ $special->{ $spec_type } }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
 		}
 
-		push( @{ $special->{ captcha } }, $self->get_captcha_id() ) if $element->{ type } eq 'captcha';
+		push( @{ $special->{ captcha } }, $self->get_captcha_id() )
+			if $element->{ type } eq 'captcha';
 		
 		push( @{ $special->{ "include_" . $element->{ place } } }, $element->{ template } )
 			if $element->{ type } eq 'include';
+		
+		push( @{ $special->{ date_relation } }, { name => $element->{ name }, relation => $element->{ date_relation } } )
+			if $element->{ date_relation };
 
 		next unless $element->{ check };
 			

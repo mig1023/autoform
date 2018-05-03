@@ -165,7 +165,8 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'SDate',
 				},
-				special => 'datepicker, mask, date_relation',
+				special => 'datepicker, mask, min_date',
+				date_relation => 'f_date',
 			},
 			{
 				type => 'input',
@@ -186,7 +187,7 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'FDate',
 				},
-				special => 'datepicker, mask',
+				special => 'datepicker, mask, min_date',
 			},
 		],
 		

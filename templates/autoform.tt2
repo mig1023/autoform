@@ -264,6 +264,12 @@ function init_comm() {
 	$('.tip-yellowsimple, .tip-inner ').css( "line-height", ( mobilScreen ? '1.2' : '' ) );
 }
 
+[% FOREACH picker IN special.datepicker %]
+
+	create_datepicker("[% picker %]");
+	
+[% END %]
+
 [% IF ( special.datepicker.0 || special.mask.0 ) %]
 
 function create_datepicker(date_id) {
@@ -275,38 +281,34 @@ function create_datepicker(date_id) {
 		buttonImage: '[% static %]/images/1x1.png',
 		buttonImageOnly:true,
 		
-		<!-- temp fix -->
 		[% FOREACH relation IN special.date_relation %]
 			onSelect: function(date){
-				if ( date_id == '[% relation %]') {
+				if ( date_id == '[% relation.name %]') {
 				
-					var date1 = $('#'+date_id).datepicker('getDate');
-					var dateX = new Date( Date.parse( date1 ) );
-					
-					$('#f_date').datepicker('setDate', dateX);
-					$('#f_date').datepicker("option","minDate",dateX);
-					
+					var minDateLine = $('#'+date_id).datepicker('getDate');
+					var minDate = new Date( Date.parse( minDateLine ) );
+					$('#[% relation.relation %]').datepicker("option", "minDate", minDate);
 				}
 			}
 		[% END %]
-		<!-- -------- -->
 	});
 };
 [% END %]
 
-[% FOREACH mask IN special.mask %]
+[% FOREACH min_date IN special.min_date %]
 
-	$("#[% mask %]").mask("99.99.9999");
-
-	if ( mobilScreen ) {
-		create_datepicker("[% mask %]");
-	};
+	datepicker_min_date("[% min_date %]");
 	
 [% END %]
 
-[% FOREACH picker IN special.datepicker %]
 
-	create_datepicker("[% picker %]");
+[% IF special.min_date.0 %]
+
+function datepicker_min_date(date_id) {
+
+	var minDate = new Date();
+	$('#'+date_id).datepicker("option", "minDate", minDate);
+}
 	
 [% END %]
 
