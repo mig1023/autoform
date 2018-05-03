@@ -281,35 +281,43 @@ function create_datepicker(date_id) {
 		buttonImage: '[% static %]/images/1x1.png',
 		buttonImageOnly:true,
 		
-		[% FOREACH relation IN special.date_relation %]
-			onSelect: function(date){
-				if ( date_id == '[% relation.name %]') {
-				
-					var minDateLine = $('#'+date_id).datepicker('getDate');
-					var minDate = new Date( Date.parse( minDateLine ) );
-					$('#[% relation.relation %]').datepicker("option", "minDate", minDate);
+		[% FOREACH relation IN special.min_date %]
+			[% IF (relation.min != 'current') %]
+			
+				onSelect: function(date){
+					if ( date_id == '[% relation.min %]') {
+					
+						var minDate = get_date_from(date_id);
+						$('#[% relation.name %]').datepicker("option", "minDate", minDate);
+					}
 				}
-			}
+			[% END %]
 		[% END %]
 	});
 };
 [% END %]
 
-[% FOREACH min_date IN special.min_date %]
+[% FOREACH minimal_date IN special.min_date %]
 
-	datepicker_min_date("[% min_date %]");
+	[% IF (minimal_date.min == 'current') %]
+		var minDate = new Date();
+	[% ELSE %]
+		var minDate = get_date_from('[% minimal_date.min %]');
+	[% END %]
 	
+	$('#[% minimal_date.name %]').datepicker("option", "minDate", minDate);
+
 [% END %]
 
+[% IF (special.min_date.0) %]
 
-[% IF special.min_date.0 %]
+function get_date_from(date_id) {
 
-function datepicker_min_date(date_id) {
-
-	var minDate = new Date();
-	$('#'+date_id).datepicker("option", "minDate", minDate);
-}
+	var minDateLine = $('#'+date_id).datepicker('getDate');
+	var minDate = new Date( Date.parse( minDateLine ) );
 	
+	return minDate;
+}
 [% END %]
 
 [% FOREACH no_copy IN special.no_copypast %]

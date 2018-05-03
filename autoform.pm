@@ -1243,7 +1243,6 @@ sub get_specials_of_element
 		'include_in'	=> [],
 		'include_out'	=> [],
 		'no_copypast'	=> [],
-		'date_relation'	=> [],
 		'min_date' 	=> [],
 	};
 
@@ -1262,8 +1261,8 @@ sub get_specials_of_element
 		push( @{ $special->{ "include_" . $element->{ place } } }, $element->{ template } )
 			if $element->{ type } eq 'include';
 		
-		push( @{ $special->{ date_relation } }, { name => $element->{ name }, relation => $element->{ date_relation } } )
-			if $element->{ date_relation };
+		push( @{ $special->{ min_date } }, { name => $element->{ name }, min => $element->{ minimal_date } } )
+			if $element->{ minimal_date };
 
 		next unless $element->{ check };
 			
