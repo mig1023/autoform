@@ -861,6 +861,7 @@ sub get_content_rules_hash
 					name => 'SDate',
 				},
 				special => 'datepicker, mask',
+				minimal_date => 'current',
 			},
 			{
 				type => 'input',
@@ -893,6 +894,7 @@ sub get_content_rules_hash
 					name => 'FDate',
 				},
 				special => 'datepicker, mask',
+				minimal_date => 'apps_date',
 			},
 			{
 				type => 'input',
