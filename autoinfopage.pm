@@ -2,6 +2,8 @@ package VCS::Site::autoinfopage;
 use strict;
 
 use VCS::Vars;
+use VCS::Site::autodata;
+
 use Data::Dumper;
 use Date::Calc;
 use JSON;
@@ -108,7 +110,17 @@ sub get_infopage
 		WHERE Token = ?", $self->{ token }
 	)->[0];
 
-	$app_info->{ new_app_date } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/;
+	my $week = VCS::Site::autodata::get_week_days();
+	
+	my @new_date = split( /\-/, $app_info->{ new_app_date } );
+	
+	my $day_of_week = Date::Calc::Day_of_Week( @new_date );
+	
+	$app_info->{ day_of_week } = $week->{ $day_of_week };
+	
+	my $months = VCS::Site::autodata::get_months();
+	
+	$app_info->{ new_app_date } = [ $new_date[2], $months->{ $new_date[1] }, $new_date[0] ];
 	
 	$app_info->{ new_app_num } =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
 
@@ -334,7 +346,6 @@ sub set_new_appdate
 # //////////////////////////////////////////////////
 {
 	my ( $self, $new ) = @_;
-
 
 	my $appid = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
