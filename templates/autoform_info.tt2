@@ -66,7 +66,7 @@
 <td class="m_left"></span><span class="m_info">[% app_info.new_app_num %]</span></td>
 </tr><tr>
 <td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
-<td class="m_left"></span><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %], [% langreq(app_info.day_of_week) %]</span></td>
+<td class="m_left"></span><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
 </tr><tr>
 <td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
 <td class="m_left"></span><span class="m_info">[% app_info.new_app_timeslot %]</span></td>

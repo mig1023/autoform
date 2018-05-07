@@ -110,13 +110,9 @@ sub get_infopage
 		WHERE Token = ?", $self->{ token }
 	)->[0];
 
-	my $week = VCS::Site::autodata::get_week_days();
-	
 	my @new_date = split( /\-/, $app_info->{ new_app_date } );
 	
 	my $day_of_week = Date::Calc::Day_of_Week( @new_date );
-	
-	$app_info->{ day_of_week } = $week->{ $day_of_week };
 	
 	my $months = VCS::Site::autodata::get_months();
 	
