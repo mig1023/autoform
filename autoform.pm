@@ -2924,10 +2924,10 @@ sub send_app_confirm
 		
 	my @date_sp = split( /\-/, $data->{ AppDate } );
 
-	my @months = split( /\|/, $lang_local->{ months } );
+	my $months = VCS::Site::autodata::get_months();
 
 	$replacer->{ date_time } = 
-		$date_sp[ 2 ] . ' ' . $months[ $date_sp[ 1 ] - 1 ] . ' ' . $date_sp[ 0 ] . ', ' . 
+		$date_sp[ 2 ] . ' ' . $months->{ $date_sp[ 1 ] } . ' ' . $date_sp[ 0 ] . ', ' . 
 		$self->{ vars }->get_system->time_to_str( $tstart ) . ' - ' .
 		$self->{ vars }->get_system->time_to_str( $tend );
 	
