@@ -2208,9 +2208,6 @@ sub get_content_rules_hash
 						table => 'Appointments',
 						name => 'ShAddress',
 						error => 'Адрес доставки',
-					},
-					{
-						condition => 'existing_postcode',
 					}
 				],
 				db => {
