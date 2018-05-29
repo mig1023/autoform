@@ -1457,7 +1457,9 @@ sub get_html_for_element
 
 		for my $opt ( $self->resort_with_first_elements( $param, $first_elements ) ) {
 			my $selected = ( $value_original == $opt ? 'selected' : '' );
-			$list .= '<option ' . $selected . ' value="' . $opt . '">' . $param->{ $opt } . '</option>'; 
+			$list .= '<option ' . $selected . ' value="' . $opt . '">' . 
+			( $param->{ $opt } ? $param->{ $opt } : '--- ' . $self->lang( "выберите" ) . ' ---' ) .
+			'</option>'; 
 		}
 
 		$content =~ s/\[u\]\>/data-timeslot="$value_original">/i if $name eq 'timeslot';
@@ -1546,7 +1548,7 @@ sub get_html_for_element
 	
 	if ( $type eq 'info' ) {
 	
-		$value = '(' . $self->lang( 'не указано' ) . ')' if !$value;
+		$value = '—' if !$value;
 		$content =~ s/\[text\]/$value/;
 	}
 	

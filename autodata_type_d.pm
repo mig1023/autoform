@@ -44,7 +44,7 @@ sub get_content_rules_hash
 				},
 				param => '[centers_from_db]',
 				uniq_code => 'onchange="update_nearest_date_free_date();"',
-				first_elements => '1',
+				first_elements => 'default_free, 1',
 				special => 'cach_this_value',
 			},
 			{

@@ -351,16 +351,20 @@ function get_date_from(date_id) {
 			
 	function update_nearest_date_[% near %]()
 	{	
-		$("#[% near %]").html("<div id='tmp_near_img'><img src='[% static %]/images/autoform_wait.gif' /></div>");
+		
 
-		$.get("[% vcs_tools %]get_nearest.htm", {
-			'center': $('#center').val(), 
-			'persons': 1, 
-			'urgent':0 }, 
-			function(data) {
-				$("#[% near %]").html(data);
-			}
-		);
+		if ($('#center').val() != 0) {
+			$("#[% near %]").html("<div id='tmp_near_img'><img src='[% static %]/images/autoform_wait.gif' /></div>");
+		
+			$.get("[% vcs_tools %]get_nearest.htm", {
+				'center': $('#center').val(), 
+				'persons': 1, 
+				'urgent':0 }, 
+				function(data) {
+					$("#[% near %]").html(data);
+				}
+			);
+		}
 		
 		var selected_el = $('#vtype').val();
 		var restore_el = 0;
@@ -419,13 +423,9 @@ function get_date_from(date_id) {
 		$.get("[% vcs_tools %]get_times.htm", {
 		
 			'center': '[% appinfo.center %]', 
-			
 			'persons': '[% appinfo.persons %]', 
-			
 			'appdate':$('#app_date').val(),
-			
 			'fdate': '[% appinfo.fdate %]', 
-			
 			'lang': 'ru',
 			
 			}, function(xml) {
