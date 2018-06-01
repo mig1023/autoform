@@ -220,7 +220,14 @@ sub get_blocked_emails
 {
 	return [
 		{
-			for_centers => [ 1 ],
+			for_centers => [ 1, 2, 3 ],
+			show_truth => 1,
+			emails => [
+				'blocked_mail@mail.com',
+			],
+		},
+		{
+			for_centers => [],
 			show_truth => 0,
 			emails => [
 				'blocked_mail@mail.com',

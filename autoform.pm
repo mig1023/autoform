@@ -2332,9 +2332,9 @@ sub check_logic
 				
 				my %check = map { $_ => 1 } @{ $m->{ emails } };
 				next unless exists $check{ $value };
-
+				
 				%check = map { $_ => 1 } @{ $m->{ for_centers } };
-				next unless exists $check{ $center };
+				next unless exists $check{ $center } or @{ $m->{ for_centers } } == 0;
 				
 				$first_error = $self->text_error( 16 + ( $m->{ show_truth } ? 1 : 0 ) , $element ); 
 			};
