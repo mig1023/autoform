@@ -606,17 +606,15 @@ sub get_content_rules_hash
 				type => 'free_line',
 			},
 			{
-				type => 'select',
+				type => 'radiolist',
 				name => 'family',
 				label => 'Семейное положение',
-				example => 'женат/замужем',
 				check => 'zN',
 				db => {
 					table => 'AppData',
 					name => 'Family',
 				},
 				param => {
-					0 => 'не указано',
 					1 => 'холост/не замужем',
 					2 => 'женат/замужем',
 					3 => 'не проживает с супругом',
@@ -624,7 +622,9 @@ sub get_content_rules_hash
 					5 => 'вдовец/вдова',
 					6 => 'иное'
 				},
-				first_elements => '0, 1, 2, 4, 3, 5, 6',
+			},
+			{
+				type => 'free_line',
 			},
 			{
 				type => 'input',
