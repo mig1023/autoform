@@ -112,8 +112,6 @@ sub get_infopage
 
 	my @new_date = split( /\-/, $app_info->{ new_app_date } );
 	
-	my $day_of_week = Date::Calc::Day_of_Week( @new_date );
-	
 	my $months = VCS::Site::autodata::get_months();
 	
 	$app_info->{ new_app_date } = [ $new_date[2], $months->{ $new_date[1] }, $new_date[0] ];
