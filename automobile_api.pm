@@ -54,6 +54,16 @@ sub get_values_for_api
 	
 	$result->{ data }->{ date } = $result->{ data }->{ appointments }->{ AppDate };
 	
+	
+	my ( $start, $end ) = $self->query( 'sel1', __LINE__, "
+		SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $result->{ data }->{ appointments }->{ TimeslotID }
+	);
+		
+	$_ = $self->{ vars }->get_system->time_to_str( $_ ) for ( $start, $end );
+	
+	$result->{ data }->{ time } = "$start - $end";	
+	
+	
 	$result->{ data }->{ center } = $self->query( 'sel1', __LINE__, "
 		SELECT BName FROM Branches WHERE ID = ?",
 		$result->{ data }->{ appointments }->{ CenterID }
@@ -332,7 +342,7 @@ sub get_all_param
 	
 		$param->{ $_ } = $self->{ vars }->getparam( $_ ) || '';
 		
-		$param->{ $_ } =~ s/[^0-9]//g;
+		$param->{ $_ } =~ s/[^0-9]//g unless $_ eq 'mid';
 	}
 	
 	return $param;
