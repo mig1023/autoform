@@ -111,9 +111,10 @@
 [% END %]
 
 [% IF step == 1 %]
-	</td></tr><tr><td class="left"  colspan="3">
-	<br><a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br></td></tr>
-	<tr><td colspan="3">
+	</td></tr><tr><td class="left" colspan="3"><br>
+	<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
+	<a class="dotted_link" href="/vcs/new.htm">[% langreq('Воспользуйтесь старой формой записи, если это необходимо') %]</a>
+	<br><br></td></tr><tr><td colspan="3">
 [% END %]
 
 [% FOREACH include_name IN special.include_out %]
