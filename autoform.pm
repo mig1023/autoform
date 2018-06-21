@@ -677,14 +677,17 @@ sub check_all_is_prepared
 # //////////////////////////////////////////////////
 {
 	my ( $self, $last_error ) = @_;
-	
-	my $app_status = $self->check_all_app_finished_and_not_empty();
-		
-	my ( $pass_already, undef ) = $self->check_passnum_already_in_pending();
 
-	return ( $self->set_step_by_content( '[app_finish]', 'next' ), $last_error ) if !$app_status and !$pass_already;
+	my $app_status = $self->check_all_app_finished_and_not_empty();
+
+	my ( $pass_already, undef, $pass_double ) = $self->check_passnum_already_in_pending();
+
+	return ( $self->set_step_by_content( '[app_finish]', 'next' ), $last_error )
+		if !$app_status and !$pass_already and !$pass_double;
 
 	my $step = $self->set_step_by_content( '[list_of_applicants]' );
+	
+	return ( $step, $self->text_error( 27, { 'name' => 'applist' }, undef, $pass_double ) ) if $pass_double;
 
 	return ( $step, $self->text_error( $app_status, { 'name' => 'applist' }, undef ) ) if $app_status;
 	
@@ -3051,6 +3054,10 @@ sub check_passnum_already_in_pending
 	my $self = shift;
 	
 	my $pass_list = [];
+	
+	my $pass_double = undef;
+	
+	my $pass_doubles = {};
 
 	my $app_data = $self->query( 'selallkeys', __LINE__, "
 		SELECT AutoAppData.PassNum, isChild
@@ -3061,21 +3068,29 @@ sub check_passnum_already_in_pending
 	);
 
 	for ( @$app_data ) {
+	
 		push( @$pass_list, $_->{ PassNum } ) unless $_->{ isChild };
+		
+		$pass_doubles->{ $_->{ PassNum } } += 1;
 	}
-
+	
+	for ( keys %$pass_doubles ) {
+			
+		$pass_double = $_ if $pass_doubles->{ $_ } > 1;
+	}
+	
 	my $pass_line = join( "','", @$pass_list );
 
 	my $pass_already = $self->query( 'sel1', __LINE__, "
 		SELECT COUNT(ID) FROM AppData
 		WHERE PassNum IN ('$pass_line') AND Status = 1 AND isChild = 0"
 	);
-	
+
 	$pass_already = undef unless $pass_already;
 
 	return ( $pass_already ? 1 : 0 ) if $self->{ this_is_self_testing };
 	
-	return ( $pass_already, $pass_list );
+	return ( $pass_already, $pass_list, $pass_double );
 }
 
 sub mutex_fail
@@ -3093,8 +3108,10 @@ sub mutex_fail
 	
 	return 25 if $fail_in_data;
 	
-	my ( $pass_already, $pass_list ) = $self->check_passnum_already_in_pending();
+	my ( $pass_already, $pass_list, $pass_double ) = $self->check_passnum_already_in_pending();
 
+	return 27 if $pass_double;
+	
 	return 24 if $pass_already;
 		
 	for ( @$pass_list ) {
