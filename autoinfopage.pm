@@ -59,7 +59,7 @@ sub autoinfopage_entry
 	
 		$param->{ $_ } = $self->{ vars }->getparam( $_ ) || undef;
 		
-		$param->{ $_ } =~ s/[^0-9]//g;
+		$param->{ $_ } =~ s/[^A-Za-z0-9]//g;
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
@@ -77,8 +77,10 @@ sub autoinfopage_entry
 		);
 
 		for my $app ( @$appdata ) {
+		
+			my $passnum = $app->{ passnum };
 
-			return $self->{ af }->redirect( $app->{ Token } ) if $app->{ passnum } eq $param->{ passnum };
+			return $self->{ af }->redirect( $app->{ Token } ) if $param->{ passnum } =~ /^$passnum$/i;
 		}
 			
 		return $self->{ af }->redirect( 'no_app' );
