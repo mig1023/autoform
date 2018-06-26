@@ -418,7 +418,7 @@ sub init_add_param
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		};
 			
-		push( @{ $info_from_db->{ '[persons_in_app]' } }, [ 0, $self->lang('на доверенное лицо') ] );
+		push( @{ $info_from_db->{ '[persons_in_app]' } }, [ -1, $self->lang('на доверенное лицо') ] );
 	}
 	
 	if ( $self->{ token } and $keys->{ ussr_or_rf_first } ) {
@@ -1731,7 +1731,7 @@ sub save_data_from_form
 			$request .=  "$row = ?, ";
 			
 			my $value = $self->{ vars }->getparam( $request_tables->{ $table }->{ $row } );
-			
+		
 			push ( @values, $self->encode_data_for_db( $step, $request_tables->{ $table }->{ $row }, $value ) );
 			
 			$self->change_current_appdata( $value, $table_id ) if $row eq 'PersonForAgreements';

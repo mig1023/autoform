@@ -1738,6 +1738,7 @@ sub get_content_rules_hash
 					transfer => 'nope',
 				},
 				param => '[persons_in_app]',
+				first_elements => 'default_free',
 			},
 		],
 		
@@ -1749,7 +1750,7 @@ sub get_content_rules_hash
 					only_if_not => {
 						table => 'Appointments',
 						name => 'PersonForAgreements',
-						value => '0',
+						value => '-1',
 					}
 				},
 			},
@@ -1868,7 +1869,7 @@ sub get_content_rules_hash
 					only_if => {
 						table => 'Appointments',
 						name => 'PersonForAgreements',
-						value => '0',
+						value => '-1',
 					}
 				},
 			},

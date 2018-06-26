@@ -378,13 +378,14 @@ sub get_content_rules_hash
 				type => 'select',
 				name => 'visa_text',
 				label => 'Выберите на кого оформляется',
-				check => 'N',
+				check => 'zN-',
 				db => {
 					table => 'Appointments',
 					name => 'PersonForAgreements',
 					transfer => 'nope',
 				},
 				param => '[persons_in_app]',
+				first_elements => 'default_free',
 			},
 		],
 		
@@ -396,7 +397,7 @@ sub get_content_rules_hash
 					only_if_not => {
 						table => 'Appointments',
 						name => 'PersonForAgreements',
-						value => '0',
+						value => '-1',
 					}
 				},
 			},
@@ -494,12 +495,12 @@ sub get_content_rules_hash
 				},
 			},
 			{
-				type => 'free_line',
-			},
-			{
-				type => 'info',
+				type => 'input',
 				name => 'info_phone',
 				label => 'Телефон',
+				comment => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				example => '79XXXXXXXXX',
+				check => 'zN',
 				db => {
 					table => 'AppData',
 					name => 'AppPhone',
@@ -515,7 +516,7 @@ sub get_content_rules_hash
 					only_if => {
 						table => 'Appointments',
 						name => 'PersonForAgreements',
-						value => '0',
+						value => '-1',
 					}
 				},
 			},
