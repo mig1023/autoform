@@ -61,19 +61,29 @@ sub get_values_for_api
 		
 	$_ = $self->{ vars }->get_system->time_to_str( $_ ) for ( $start, $end );
 	
-	$result->{ data }->{ time } = "$start - $end";	
-	
+	$result->{ data }->{ time } = "$start - $end";
 	
 	$result->{ data }->{ center } = $self->query( 'sel1', __LINE__, "
 		SELECT BName FROM Branches WHERE ID = ?",
 		$result->{ data }->{ appointments }->{ CenterID }
 	);
 	
-	my $status = $self->query( 'sel1', __LINE__, "
-		SELECT Finished FROM AutoToken WHERE ID = ?", $tables_id->{ AutoToken }
+	my ( $status, $appid ) = $self->query( 'sel1', __LINE__, "
+		SELECT Finished, CreatedApp FROM AutoToken WHERE ID = ?", $tables_id->{ AutoToken }
 	);
 	
 	$result->{ data }->{ status } = ( $status ? 'finished' : 'ongoing' );
+	
+	if ( $status) {
+	
+		my $appnum = $self->query( 'sel1', __LINE__, "
+			SELECT AppNum FROM Appointments WHERE ID = ?", $appid
+		);
+		
+		$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
+		
+		$result->{ data }->{ appnum } = $appnum;
+	}
 	
 	delete $result->{ data }->{ appointments }->{ $_ } for ( @{ $delete_fields->{ appointments } } );
 		
@@ -247,7 +257,7 @@ sub get_push
 	my $result = get_api_head( $self, 2, 'without_token' );
 	
 	my $param = get_all_param( $self, 'docnum', 'mid', 'birthdate' );
-	
+
 	return $result if !$param->{ docnum } or !$param->{ mid } or !$param->{ birthdate };
 	
 	return $result unless $param->{ birthdate } =~ /^([0-9]{2})([0-9]{2})([0-9]{4})$/;
