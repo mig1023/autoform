@@ -673,19 +673,6 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
-				name => 'kinderdata',
-				label => 'Для несовершеннолетних',
-				comment => 'Фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей или законного представителя',
-				example => 'Ivanov Ivan, The Russian Federation',
-				check => 'WN\s\-\,\.\;\_\\\/\'\"',
-				db => {
-					table => 'AppData',
-					name => 'KinderData',
-				},
-				format => 'capslock'
-			},
-			{
-				type => 'input',
 				name => 'workdata',
 				label => 'Профессиональная деятельность',
 				comment => 'Профессию необходимо указывать на английском или итальянском языках. Если на данный момент Вы не работаете, то укажите unemployed / housewife, для учащихся указывается student / pupil, для пенсионеров – pensioner',
@@ -777,9 +764,36 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Уточнение по семейному положению' => [
+		'Информация о родителе / законном представителе' => [
 			{
 				page_ord => 7,
+				progress => 5,
+				relation => {
+					only_if_younger => {
+						table => 'AppData',
+						name => 'BirthDate',
+						value => '18',
+					}
+				},
+			},
+			{
+				type => 'input',
+				name => 'kinderdata',
+				label => 'Для несовершеннолетних: фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей / законного представителя',
+				comment => 'Фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей или законного представителя',
+				example => 'Ivanov Ivan, The Russian Federation',
+				check => 'zWN\s\-\,\.\;\_\\\/\'\"',
+				db => {
+					table => 'AppData',
+					name => 'KinderData',
+				},
+				format => 'capslock'
+			},
+		],
+		
+		'Уточнение по семейному положению' => [
+			{
+				page_ord => 8,
 				progress => 5,
 				relation => {
 					only_if => {
@@ -805,7 +819,7 @@ sub get_content_rules_hash
 		
 		'Основания для пребывания в Российской Федерации' => [
 			{
-				page_ord => 8,
+				page_ord => 9,
 				progress => 5,
 				relation => {
 					only_if_not => {
@@ -844,7 +858,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по цели посещения' => [
 			{
-				page_ord => 9,
+				page_ord => 10,
 				progress => 5,
 				relation => {
 					only_if => {
@@ -870,7 +884,7 @@ sub get_content_rules_hash
 		
 		'Данные о поездке' => [
 			{
-				page_ord => 10,
+				page_ord => 11,
 				progress => 6,
 				param => 1,
 			},
@@ -1066,7 +1080,7 @@ sub get_content_rules_hash
 		
 		'Разрешение на въезд, если необходимо' => [
 			{
-				page_ord => 11,
+				page_ord => 12,
 				progress => 6,
 				relation => {
 					only_if => {
@@ -1119,7 +1133,7 @@ sub get_content_rules_hash
 		
 		'Сроки действия последней визы' => [
 			{
-				page_ord => 12,
+				page_ord => 13,
 				progress => 6,
 				relation => {
 					only_if => {
@@ -1172,7 +1186,7 @@ sub get_content_rules_hash
 		
 		'Дата сдачи отпечатков' => [
 			{
-				page_ord => 13,
+				page_ord => 14,
 				progress => 6,
 				relation => {
 					only_if => {
@@ -1209,7 +1223,7 @@ sub get_content_rules_hash
 		
 		'Проживание' => [
 			{
-				page_ord => 14,
+				page_ord => 15,
 				progress => 7,
 				relation => {
 					only_if => {
@@ -1237,7 +1251,7 @@ sub get_content_rules_hash
 		
 		'Информация о проживании' => [
 			{
-				page_ord => 15,
+				page_ord => 16,
 				progress => 7,
 				relation => {
 					only_if_not => {
@@ -1319,7 +1333,7 @@ sub get_content_rules_hash
 		
 		'Информация о месте проживания' => [
 			{
-				page_ord => 16,
+				page_ord => 17,
 				progress => 7,
 				relation => {
 					only_if_not => {
@@ -1376,7 +1390,7 @@ sub get_content_rules_hash
 		
 		'Приглашение' => [
 			{
-				page_ord => 17,
+				page_ord => 18,
 				progress => 7,
 				param => 1,
 				relation => {
@@ -1502,7 +1516,7 @@ sub get_content_rules_hash
 	
 		'Приглашение организации' => [
 			{
-				page_ord => 18,
+				page_ord => 19,
 				progress => 7,
 				param => 1,
 				relation => {
@@ -1618,7 +1632,7 @@ sub get_content_rules_hash
 		
 		'Расходы заявителя' => [
 			{
-				page_ord => 19,
+				page_ord => 20,
 				progress => 8,
 			},
 			{
@@ -1640,7 +1654,7 @@ sub get_content_rules_hash
 		
 		'Уточните спонсора' => [
 			{
-				page_ord => 20,
+				page_ord => 21,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1666,7 +1680,7 @@ sub get_content_rules_hash
 		
 		'Средства заявителя' => [
 			{
-				page_ord => 21,
+				page_ord => 22,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1698,7 +1712,7 @@ sub get_content_rules_hash
 		
 		'Средства спонсора' => [
 			{
-				page_ord => 22,
+				page_ord => 23,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1729,7 +1743,7 @@ sub get_content_rules_hash
 		
 		'Уточните иные средства' => [
 			{
-				page_ord => 23,
+				page_ord => 24,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1755,7 +1769,7 @@ sub get_content_rules_hash
 				
 		'Данные родственника в ЕС' => [
 			{
-				page_ord => 24,
+				page_ord => 25,
 				progress => 8,
 				param => 1,
 				relation => {
@@ -1835,7 +1849,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				page_ord => 25,
+				page_ord => 26,
 				progress => 9,
 				replacer => '[app_finish]',
 			},
@@ -1843,7 +1857,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				page_ord => 26,
+				page_ord => 27,
 				progress => 10,
 				persons_in_page => 1,
 			},
@@ -1864,7 +1878,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
-				page_ord => 27,
+				page_ord => 28,
 				progress => 11,
 				relation => {
 					only_if_not => {
@@ -1918,7 +1932,7 @@ sub get_content_rules_hash
 				label => '№ паспорта',
 				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				example => '4510ХХХХХХ',
-				check => 'zN',
+				check => 'zNW',
 				db => {
 					table => 'AppData',
 					name => 'RPassNum',
@@ -1983,7 +1997,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные доверенного лица' => [
 			{
-				page_ord => 28,
+				page_ord => 29,
 				progress => 11,
 				relation => {
 					only_if => {
@@ -2035,7 +2049,7 @@ sub get_content_rules_hash
 				label => '№ паспорта',
 				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				example => '4510ХХХХХХ',
-				check => 'zN',
+				check => 'zNW',
 				db => {
 					table => 'Appointments',
 					name => 'PassNum',
@@ -2099,7 +2113,7 @@ sub get_content_rules_hash
 		
 		'Оформление записи' => [
 			{
-				page_ord => 29,
+				page_ord => 30,
 				progress => 12,
 				persons_in_page => 1,
 				goto_link => 'back_to_appdate',
@@ -2258,7 +2272,7 @@ sub get_content_rules_hash
 		
 		'Подтвердить запись' => [
 			{
-				page_ord => 30,
+				page_ord => 31,
 				progress => 14,
 			},
 			{
@@ -2268,7 +2282,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				page_ord => 31,
+				page_ord => 32,
 				progress => 15,
 			},
 			{

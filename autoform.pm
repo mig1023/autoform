@@ -13,6 +13,7 @@ use VCS::Site::autoselftest;
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
 use Time::HiRes qw[gettimeofday tv_interval];
+use Time::Piece;
 use POSIX;
 use JSON;
 use HTTP::Tiny;
@@ -763,10 +764,12 @@ sub skip_by_condition
 
 	my %relation = map { $_ => 1 } split( /,\s?/, $relation );
 
+	return 1 if $condition =~ /^only_if_younger(_\d+)?$/ and ( $self->age( $value, localtime->ymd ) >= $relation );
+
 	return 1 if $condition =~ /^only_if_not(_\d+)?$/ and exists $relation{ $value };
 	
 	return 1 if $condition =~ /^only_if(_\d+)?$/ and !exists $relation{ $value };
-
+	
 	return 0;
 }
 
