@@ -373,6 +373,11 @@ sub init_add_param
 				$info_from_db->{ $_ } = $self->query( 'selall', __LINE__, $info_from_sql->{ $_ } );
 			}
 			
+			for ( @{ $info_from_db->{ '[centers_from_db]' } } ) {
+				
+				$_->[ 1 ] = 'Moscow (м. Третьяковская)' if $_->[ 0 ] == 1; 
+			}
+			
 			my $add_eu_countries = [
 				[ 37, "BULGARIA" ],
 				[ 47, "CYPRUS" ],
