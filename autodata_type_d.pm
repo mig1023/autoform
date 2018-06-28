@@ -28,7 +28,7 @@ sub get_content_rules_hash
 	
 		'Начало записи' => [
 			{
-				page_ord => 1,
+				page_ord => 100,
 				progress => 1,
 				param => 1,
 			},
@@ -141,7 +141,7 @@ sub get_content_rules_hash
 		
 		'Даты поездки' => [
 			{
-				page_ord => 2,
+				page_ord => 200,
 				progress => 2,
 				collect_date => 1,
 			},
@@ -191,7 +191,7 @@ sub get_content_rules_hash
 		
 		'Список заявителей' => [
 			{
-				page_ord => 3,
+				page_ord => 300,
 				progress => 3,
 				goto_link => 'back_to_appdata',
 				replacer => '[list_of_applicants]',
@@ -200,7 +200,7 @@ sub get_content_rules_hash
 		
 		'Данные паспорта' => [
 			{
-				page_ord => 4,
+				page_ord => 400,
 				progress => 4,
 			},
 			{
@@ -287,7 +287,7 @@ sub get_content_rules_hash
 		
 		'Данные загранпаспорта' => [
 			{
-				page_ord => 5,
+				page_ord => 500,
 				progress => 5,
 			},
 			{
@@ -362,7 +362,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				page_ord => 6,
+				page_ord => 600,
 				progress => 6,
 				replacer => '[app_finish]',
 			},
@@ -370,7 +370,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				page_ord => 7,
+				page_ord => 700,
 				progress => 7,
 				persons_in_page => 1,
 			},
@@ -391,7 +391,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
-				page_ord => 8,
+				page_ord => 800,
 				progress => 8,
 				relation => {
 					only_if_not => {
@@ -445,7 +445,7 @@ sub get_content_rules_hash
 				label => '№ паспорта',
 				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				example => '4510ХХХХХХ',
-				check => 'zN',
+				check => 'zNW',
 				db => {
 					table => 'AppData',
 					name => 'RPassNum',
@@ -510,7 +510,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные доверенного лица' => [
 			{
-				page_ord => 9,
+				page_ord => 900,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -562,7 +562,7 @@ sub get_content_rules_hash
 				label => '№ паспорта',
 				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				example => '4510ХХХХХХ',
-				check => 'zN',
+				check => 'zNW',
 				db => {
 					table => 'Appointments',
 					name => 'PassNum',
@@ -626,7 +626,7 @@ sub get_content_rules_hash
 		
 		'Оформление записи' => [
 			{
-				page_ord => 10,
+				page_ord => 1000,
 				progress => 9,
 				persons_in_page => 1,
 			},
@@ -784,7 +784,7 @@ sub get_content_rules_hash
 		
 		'Предпочтительный офис получения готовых документов' => [
 			{
-				page_ord => 11,
+				page_ord => 1100,
 				progress => 10,
 				relation => {
 					only_if => {
@@ -813,7 +813,7 @@ sub get_content_rules_hash
 		
 		'Подтвердить запись' => [
 			{
-				page_ord => 12,
+				page_ord => 1200,
 				progress => 11,
 			},
 			{
@@ -823,7 +823,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				page_ord => 13,
+				page_ord => 1300,
 				progress => 12,
 			},
 			{

@@ -64,9 +64,11 @@ sub get_content_rules
 	my $keys_in_current_page = {};
 	my $new_content = {};
 	
+	my $page_order = 0;
+	
 	for my $page ( sort { $content->{ $a }->[ 0 ]->{page_ord} <=> $content->{ $b }->[ 0 ]->{ page_ord } } keys %$content ) {
 		
-		my $page_ord = $content->{$page}->[ 0 ]->{ page_ord };
+		my $page_ord = ++$page_order; # $content->{$page}->[ 0 ]->{ page_ord };
 		
 		$new_content->{ $page_ord } = $content->{ $page };
 		

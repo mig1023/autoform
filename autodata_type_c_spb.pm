@@ -31,7 +31,7 @@ sub get_content_rules_hash
 	
 		'Начало записи' => [
 			{
-				page_ord => 1,
+				page_ord => 100,
 				progress => 1,
 				param => 1,
 			},
@@ -144,7 +144,7 @@ sub get_content_rules_hash
 				
 		'Услуга Primetime' => [
 			{
-				page_ord => 2,
+				page_ord => 200,
 				progress => 2,
 				relation => {
 					only_if => {
@@ -176,7 +176,7 @@ sub get_content_rules_hash
 		
 		'Даты поездки' => [
 			{
-				page_ord => 3,
+				page_ord => 300,
 				progress => 2,
 				collect_date => 1,
 			},
@@ -226,7 +226,7 @@ sub get_content_rules_hash
 		
 		'Список заявителей' => [
 			{
-				page_ord => 4,
+				page_ord => 400,
 				progress => 3,
 				goto_link => 'back_to_appdata',
 				replacer => '[list_of_applicants]',
@@ -235,7 +235,7 @@ sub get_content_rules_hash
 		
 		'Данные паспортов' => [
 			{
-				page_ord => 5,
+				page_ord => 500,
 				progress => 4,
 			},
 			{
@@ -548,7 +548,7 @@ sub get_content_rules_hash
 		
 		'Дополнительные данные' => [
 			{
-				page_ord => 6,
+				page_ord => 600,
 				progress => 5,
 				param => 1,
 				ussr_or_rf_first => 1,
@@ -766,7 +766,7 @@ sub get_content_rules_hash
 		
 		'Информация о родителе / законном представителе' => [
 			{
-				page_ord => 7,
+				page_ord => 700,
 				progress => 5,
 				relation => {
 					only_if_younger => {
@@ -793,7 +793,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по семейному положению' => [
 			{
-				page_ord => 8,
+				page_ord => 800,
 				progress => 5,
 				relation => {
 					only_if => {
@@ -819,7 +819,7 @@ sub get_content_rules_hash
 		
 		'Основания для пребывания в Российской Федерации' => [
 			{
-				page_ord => 9,
+				page_ord => 900,
 				progress => 5,
 				relation => {
 					only_if_not => {
@@ -858,7 +858,7 @@ sub get_content_rules_hash
 		
 		'Уточнение по цели посещения' => [
 			{
-				page_ord => 10,
+				page_ord => 1000,
 				progress => 5,
 				relation => {
 					only_if => {
@@ -884,7 +884,7 @@ sub get_content_rules_hash
 		
 		'Данные о поездке' => [
 			{
-				page_ord => 11,
+				page_ord => 1100,
 				progress => 6,
 				param => 1,
 			},
@@ -1080,7 +1080,7 @@ sub get_content_rules_hash
 		
 		'Разрешение на въезд, если необходимо' => [
 			{
-				page_ord => 12,
+				page_ord => 1200,
 				progress => 6,
 				relation => {
 					only_if => {
@@ -1133,7 +1133,7 @@ sub get_content_rules_hash
 		
 		'Сроки действия последней визы' => [
 			{
-				page_ord => 13,
+				page_ord => 1300,
 				progress => 6,
 				relation => {
 					only_if => {
@@ -1186,7 +1186,7 @@ sub get_content_rules_hash
 		
 		'Дата сдачи отпечатков' => [
 			{
-				page_ord => 14,
+				page_ord => 1400,
 				progress => 6,
 				relation => {
 					only_if => {
@@ -1223,7 +1223,7 @@ sub get_content_rules_hash
 		
 		'Проживание' => [
 			{
-				page_ord => 15,
+				page_ord => 1500,
 				progress => 7,
 				relation => {
 					only_if => {
@@ -1251,7 +1251,7 @@ sub get_content_rules_hash
 		
 		'Информация о проживании' => [
 			{
-				page_ord => 16,
+				page_ord => 1600,
 				progress => 7,
 				relation => {
 					only_if_not => {
@@ -1333,7 +1333,7 @@ sub get_content_rules_hash
 		
 		'Информация о месте проживания' => [
 			{
-				page_ord => 17,
+				page_ord => 1700,
 				progress => 7,
 				relation => {
 					only_if_not => {
@@ -1390,7 +1390,7 @@ sub get_content_rules_hash
 		
 		'Приглашение' => [
 			{
-				page_ord => 18,
+				page_ord => 1800,
 				progress => 7,
 				param => 1,
 				relation => {
@@ -1516,7 +1516,7 @@ sub get_content_rules_hash
 	
 		'Приглашение организации' => [
 			{
-				page_ord => 19,
+				page_ord => 1900,
 				progress => 7,
 				param => 1,
 				relation => {
@@ -1632,7 +1632,7 @@ sub get_content_rules_hash
 		
 		'Расходы заявителя' => [
 			{
-				page_ord => 20,
+				page_ord => 2000,
 				progress => 8,
 			},
 			{
@@ -1654,7 +1654,7 @@ sub get_content_rules_hash
 		
 		'Уточните спонсора' => [
 			{
-				page_ord => 21,
+				page_ord => 2100,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1680,7 +1680,7 @@ sub get_content_rules_hash
 		
 		'Средства заявителя' => [
 			{
-				page_ord => 22,
+				page_ord => 2200,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1712,7 +1712,7 @@ sub get_content_rules_hash
 		
 		'Средства спонсора' => [
 			{
-				page_ord => 23,
+				page_ord => 2300,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1743,7 +1743,7 @@ sub get_content_rules_hash
 		
 		'Уточните иные средства' => [
 			{
-				page_ord => 24,
+				page_ord => 2400,
 				progress => 8,
 				relation => {
 					only_if => {
@@ -1769,7 +1769,7 @@ sub get_content_rules_hash
 				
 		'Данные родственника в ЕС' => [
 			{
-				page_ord => 25,
+				page_ord => 2500,
 				progress => 8,
 				param => 1,
 				relation => {
@@ -1849,7 +1849,7 @@ sub get_content_rules_hash
 		
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
-				page_ord => 26,
+				page_ord => 2600,
 				progress => 9,
 				replacer => '[app_finish]',
 			},
@@ -1857,7 +1857,7 @@ sub get_content_rules_hash
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
-				page_ord => 27,
+				page_ord => 2700,
 				progress => 10,
 				persons_in_page => 1,
 			},
@@ -1878,7 +1878,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
-				page_ord => 28,
+				page_ord => 2800,
 				progress => 11,
 				relation => {
 					only_if_not => {
@@ -1997,7 +1997,7 @@ sub get_content_rules_hash
 		
 		'Укажите данные доверенного лица' => [
 			{
-				page_ord => 29,
+				page_ord => 2900,
 				progress => 11,
 				relation => {
 					only_if => {
@@ -2113,7 +2113,7 @@ sub get_content_rules_hash
 		
 		'Оформление записи' => [
 			{
-				page_ord => 30,
+				page_ord => 3000,
 				progress => 12,
 				persons_in_page => 1,
 				goto_link => 'back_to_appdate',
@@ -2272,7 +2272,7 @@ sub get_content_rules_hash
 		
 		'Подтвердить запись' => [
 			{
-				page_ord => 31,
+				page_ord => 3100,
 				progress => 14,
 			},
 			{
@@ -2282,7 +2282,7 @@ sub get_content_rules_hash
 		
 		'Запись успешно создана!' => [
 			{
-				page_ord => 32,
+				page_ord => 3200,
 				progress => 15,
 			},
 			{
