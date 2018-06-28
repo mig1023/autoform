@@ -42,16 +42,23 @@
 <tr><td class="left" colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 <tr><td class="left" >
-	[% langreq('Вернуться к списку и добавить ещё одного заявителя или перейти к завершению записи?') %]
+	[% langreq('Вернуться к списку, добавить ещё одного заявителя или перейти к завершению записи?') %]
 </td></tr>
 
 <tr><td>&nbsp;
 </td></tr>
 
 <tr><td class="left" >
-	<input class="action_button" type="button" value="&#9665; [% langreq('Вернуться к списку') %]" onclick="back_button();">
+	
+	<input class="action_button" type="button" value="[% langreq('Добавить ещё одного заявителя') %]" onclick="go_button('addapp');">
+	<br><br>
+	<span id="mobile_order_bottom">
+	<input class="action_button" type="button" value="&#9665; [% langreq('Вернуться к списку') %]" onclick="go_button('tolist');">
+	</span>
 	&nbsp;
-	<input class="action_button" type="button" value="[% langreq('Перейти к завершению') %] &#9655;" onclick="finish_button();">
+	<span id="mobile_order_top">
+	<input class="action_button" type="button" value="[% langreq('Перейти к завершению') %] &#9655;" onclick="go_button('tofinish');">
+	</span>
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
 </table>
@@ -60,13 +67,9 @@
 
 <script>
 
-function finish_button(id) {
-	$('#action').val('tofinish');
-	document.dataform.submit();
-};
+function go_button(where) {
 
-function back_button() {
-	$('#action').val('tolist');
+	$('#action').val(where);
 	document.dataform.submit();
 };
 
@@ -86,6 +89,10 @@ function mobileScreenCheck() {
 	
 	$('h2').css( "font-size", '20px' );
 	$('h2, .bold_text').css( "color", '#FF6666' );
+		
+	var temp_span_content = $('#mobile_order_bottom').html();
+	$('#mobile_order_bottom').html($('#mobile_order_top').html());
+	$('#mobile_order_top').html(temp_span_content);
 	
 	$('.action_button').css( "height", '60px' );
 	$('.action_button').css( "width", '100%' );

@@ -92,14 +92,18 @@
 [% END %]
 
 <tr><td class="left" colspan="3"><br>
+<span id="mobile_order_bottom">
 [% IF ( step > min_step ) && ( step != max_step ) %]
 	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
 [% END %]
-
+</span>
+<span id="mobile_order_top">
 [% IF ( step < max_step ) && ( step > 0 ) %]
 	<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
+	&nbsp;
 [% END %]
+</span>
 
 [% IF ( step == max_step ) %]
 
@@ -167,6 +171,10 @@ function mobileScreenCheck() {
 
 	$('#app_table').attr( "cellspacing", '10' );
 	$('#app_table').attr( "width", '100%' );
+	
+	var temp_span_content = $('#mobile_order_bottom').html();
+	$('#mobile_order_bottom').html($('#mobile_order_top').html());
+	$('#mobile_order_top').html(temp_span_content);
 	
 	$("#app_table").each(function(){
 		$("td",this).each(function(){

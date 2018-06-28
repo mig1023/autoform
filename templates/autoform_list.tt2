@@ -45,7 +45,7 @@
 	<tr><td class="left" colspan="5" id = "applist">
 	[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
 	[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Зарегистрировать заявителя"</b>') %]!<br><br>
-	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех завяителей, которым необходима виза') %].<br><br>
+	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза') %].<br><br>
 	</td></tr>
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
@@ -62,15 +62,17 @@
 	([% langreq('ФИО пока не указано') %])
 	[% END %]</td>
 	<td>[% IF person.BirthDate != '00.00.0000' %][% person.BirthDate %][% ELSE %]&nbsp;[% END %]</td>
-	<td class="left" ><input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
-	<td class="left" ><input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
+	<td class="left" >
+	<input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
+	<td class="left" >
+	<input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
 	</tr>
 	[% END %]
 [% END %]
 
 [% IF i < max_applicants %]
 <tr><td class="left" colspan="5">
-	<span id="spacer"></span>
+	<span id="spacer"></span><br>
 	<input class="action_button" type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');">
 </td></tr>
 [% END %]
@@ -85,9 +87,13 @@
 </td></tr>
 
 <tr><td class="left" colspan="5">
+	<span id="mobile_order_bottom">
 	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
+	</span>
 	&nbsp;
+	<span id="mobile_order_top">
 	<input class="action_button" type="button" value="[% langreq('Оформить запись') %] &#9655;" onclick="go_button('tofinish');">
+	</span>
 	
 </td></tr>
 <tr><td colspan="5">&nbsp;</td></tr>
@@ -143,8 +149,6 @@ $(document).ready(mobileScreenCheck);
 
 function mobileScreenCheck() {
 
-	
-	
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
 	$('#app_table').attr( "width", ( mobilScreen ? '100%' : '600px' ) );
 	$('#app_list_div').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
@@ -157,6 +161,10 @@ function mobileScreenCheck() {
 
 		return;
 	}
+	
+	var temp_span_content = $('#mobile_order_bottom').html();
+	$('#mobile_order_bottom').html($('#mobile_order_top').html());
+	$('#mobile_order_top').html(temp_span_content);
 
 	$('#app_table').attr( "cellspacing", '10' );
 	$('.action_button').css( "height", '60px' );
