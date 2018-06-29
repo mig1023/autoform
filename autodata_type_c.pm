@@ -954,6 +954,9 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				type => 'free_line',
+			},
+			{
 				type => 'radiolist',
 				name => 'fingers',
 				label => 'Отпечатки предоставлены за последние 5 лет',
@@ -1745,7 +1748,7 @@ sub get_content_rules_hash
 				type => 'select',
 				name => 'visa_text',
 				label => 'Выберите на кого оформляется',
-				check => 'N',
+				check => 'zN-',
 				db => {
 					table => 'Appointments',
 					name => 'PersonForAgreements',
