@@ -68,7 +68,7 @@ sub get_content_rules
 	
 	for my $page ( sort { $content->{ $a }->[ 0 ]->{page_ord} <=> $content->{ $b }->[ 0 ]->{ page_ord } } keys %$content ) {
 		
-		my $page_ord = ++$page_order; # $content->{$page}->[ 0 ]->{ page_ord };
+		my $page_ord = ++$page_order;
 		
 		$new_content->{ $page_ord } = $content->{ $page };
 		
@@ -1338,7 +1338,7 @@ sub get_html_line
 				$element->{ uniq_code }, $element->{ first_elements },
 				$self->check_comments_alter_version( $element->{ comment } ),
 				$element->{ check },
-			) . $label_for_need
+			) . $label_for_need, undef, ( $element->{ type } eq 'input' ? 'bottom' : undef )
 		);
 	
 	$content .= $self->get_html_for_element( 'end_line' );
@@ -1354,10 +1354,10 @@ sub get_html_line
 sub get_cell
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element, $rowspan ) = @_;
+	my ( $self, $element, $rowspan, $bottom ) = @_;
 	
 	my $start_cell = ( ( $rowspan eq '' ) ?
-		$self->get_html_for_element( 'start_cell' ) :
+		$self->get_html_for_element( 'start_cell', undef, undef, undef, $bottom ) :
 		$self->get_html_for_element( 'start_cell', undef, undef, undef, 'rowspan=2' )
 	);
 	
@@ -1568,6 +1568,11 @@ sub get_html_for_element
 	if ( $uniq_code ) {
 	
 		$content = $self->add_css_class( $content, 'bold_text') if $uniq_code eq 'bold';
+			
+		$content = $self->add_css_class( $content, 'bottom') if $uniq_code eq 'bottom';
+		
+		$uniq_code = '' if $uniq_code =~ /^(bold|bottom)$/;
+		
 		$content =~ s/\[u\]/$uniq_code/gi;
 	}
 	else {

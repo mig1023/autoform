@@ -3,6 +3,10 @@
 	text-align: left;
 }
 
+.bottom{
+	vertical-align: bottom;
+}
+
 .progressbar_gen{
 	display:none;
 	border-collapse:collapse;
