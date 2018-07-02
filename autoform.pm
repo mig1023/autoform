@@ -1539,6 +1539,8 @@ sub get_html_for_element
 	
 	if ( $type eq 'captcha' ) {
 	
+		return undef if $self->this_is_inner_ip();
+	
 		my $key = $self->{ autoform }->{ captcha }->{ public_key };
 		
 		my $widget_api = $self->{ autoform }->{ captcha }->{ widget_api };
@@ -2193,6 +2195,8 @@ sub check_captcha
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	
+	return undef if $self->this_is_inner_ip();
 	
 	my $response = $self->{ vars }->getparam( 'g-recaptcha-response' ) || '';
 	
@@ -3134,6 +3138,21 @@ sub check_passnum_already_in_pending
 	return ( $pass_already, $pass_list, $pass_double );
 }
 
+sub this_is_inner_ip
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $inner_ip_list = VCS::Site::autodata::get_inner_ip();
+	
+	for ( @$inner_ip_list ) {
+	
+		return 1 if $_ eq $ENV{ HTTP_X_REAL_IP };
+	}
+	
+	return 0;
+}	
+	
 sub mutex_fail
 # //////////////////////////////////////////////////
 {

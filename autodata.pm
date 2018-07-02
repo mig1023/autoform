@@ -170,6 +170,12 @@ sub get_tables_controled_by_AutoToken
 	};
 }
 
+sub get_inner_ip
+# //////////////////////////////////////////////////
+{
+	return [];
+};
+
 sub get_geo_branches
 # //////////////////////////////////////////////////
 {
@@ -221,7 +227,7 @@ sub get_blocked_emails
 {
 	return [
 		{
-			for_centers => [ 1, 2, 3 ],
+			for_centers => [],
 			show_truth => 1,
 			emails => [
 				'blocked_mail@mail.com',
