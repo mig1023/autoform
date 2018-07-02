@@ -74,7 +74,7 @@ sub get_content_rules
 		
 		if ( $current_page == $page_ord ) {
 
-			for ( 'persons_in_page', 'collect_date', 'param', 'ussr_or_rf_first' ) {
+			for ( 'persons_in_page', 'collect_date', 'param', 'ussr_or_rf_first', 'primetime_spb_price' ) {
 			
 				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[ 0 ]->{ $_ } ? 1 : 0 );
 			}
@@ -356,6 +356,7 @@ sub init_add_param
 	
 	my $info_from_db = undef;
 	my $ussr_first = 0;
+	my $primetime_price = 0;
 	
 	if ( $keys->{ param } ) {
 	
@@ -440,8 +441,28 @@ sub init_add_param
 	
 		$ussr_first = 1 if $birthdate < 0;
 	}
-
-	if ( $keys->{ param } or $keys->{ collect_date } or $keys->{ persons_in_page } or $keys->{ ussr_or_rf_first } ) {
+	
+	if ( $keys->{ primetime_spb_price } ) {
+	
+		$primetime_price = $self->query( 'sel1', __LINE__, "
+			SELECT Price FROM PriceRate
+			JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
+			WHERE BranchID = 43 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = 3
+			ORDER by PriceRate.ID DESC LIMIT 1"
+		);
+	}
+	
+	if (
+		$keys->{ param }
+		or
+		$keys->{ collect_date }
+		or
+		$keys->{ persons_in_page }
+		or
+		$keys->{ ussr_or_rf_first }
+		or
+		$keys->{ primetime_spb_price }
+	) {
 	
 		for my $page ( keys %$content_rules ) {
 		
@@ -470,6 +491,11 @@ sub init_add_param
 				if ( $element->{ name } =~ /^(brhcountry|prev_сitizenship)$/ ) {
 				
 					$element->{ first_elements } = '272, 70' if $ussr_first;
+				}
+				
+				if ( $keys->{ primetime_spb_price } and $element->{ label } =~ /\[primetime_price\]/ ) {
+				
+					$element->{ label } =~ s/\[primetime_price\]/$primetime_price/;
 				}
 			}
 		}

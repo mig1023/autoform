@@ -146,6 +146,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 200,
 				progress => 2,
+				primetime_spb_price => 1,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -157,7 +158,7 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'primetime_text',
-				label => 'Стоимость услуги «Прайм-тайм» составляет: 2300 рублей за каждого заявителя и не включает в себя стоимость сервисного и консульского сборов, а также <a target = "_blank" class = "dotted_link_big" href = "/spb-dopolnitelnye-uslugi/">дополнительных услуг</a>',
+				label => 'Стоимость услуги «Прайм-тайм» составляет: [primetime_price] рублей за каждого заявителя и не включает в себя стоимость сервисного и консульского сборов, а также <a target = "_blank" class = "dotted_link_big" href = "/spb-dopolnitelnye-uslugi/">дополнительных услуг</a>',
 			},
 			{
 				type => 'free_line',
