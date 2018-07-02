@@ -1341,7 +1341,7 @@ sub get_html_line
 	}	
 	
 	my $label_for_need = ( $element->{ label_for } ? 
-		$self->get_html_for_element( 'label_for', $element->{ name }, $element->{ label_for } ) : '' );
+		$self->get_html_for_element( 'label_for', $element->{ name }, '&nbsp;' . $element->{ label_for } ) : '' );
 	
 	my $current_value = $values->{ $element->{name} };
 
@@ -1532,7 +1532,7 @@ sub get_html_for_element
 			
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt .
 				'" title="' . $comment . '" id="' . $opt . '" ' . $checked . '>'.
-				'<label for="' . $opt . '">' . $param->{ $opt }->{ label_for } . '</label><br>';
+				'<label for="' . $opt . '">&nbsp;' . $param->{ $opt }->{ label_for } . '</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
 	}
