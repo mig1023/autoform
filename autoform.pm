@@ -56,7 +56,7 @@ sub get_content_rules
 # //////////////////////////////////////////////////
 {
 	my ( $self, $current_page, $full, $need_to_init ) = @_;
-	
+
 	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
 	my $content = $self->get_content_rules_hash_opt();
@@ -66,7 +66,7 @@ sub get_content_rules
 	
 	my $page_order = 0;
 	
-	for my $page ( sort { $content->{ $a }->[ 0 ]->{page_ord} <=> $content->{ $b }->[ 0 ]->{ page_ord } } keys %$content ) {
+	for my $page ( sort { $content->{ $a }->[ 0 ]->{ page_ord } <=> $content->{ $b }->[ 0 ]->{ page_ord } } keys %$content ) {
 		
 		my $page_ord = ++$page_order;
 		
@@ -1272,17 +1272,17 @@ sub get_specials_of_element
 	return if $page_content =~ /^\[/;
 	
 	my $special = {
-		'datepicker' 	=> [],
-		'mask'		=> [],
-		'nearest_date'	=> [],
-		'timeslots'	=> [],
-		'post_index'	=> [],
-		'with_map'	=> [],
-		'captcha'	=> [],
-		'include_in'	=> [],
-		'include_out'	=> [],
-		'no_copypast'	=> [],
-		'min_date' 	=> [],
+		datepicker 	=> [],
+		mask		=> [],
+		nearest_date	=> [],
+		timeslots	=> [],
+		post_index	=> [],
+		with_map	=> [],
+		captcha		=> [],
+		include_in	=> [],
+		include_out	=> [],
+		no_copypast	=> [],
+		min_date 	=> [],
 	};
 
 	my $js_rules = [];

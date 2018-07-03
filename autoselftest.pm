@@ -87,6 +87,7 @@ sub get_test_list {
 							include_in => [],
 							include_out => [],
 							no_copypast => [],
+							min_date => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -157,6 +158,7 @@ sub get_test_list {
 							include_in => [],
 							include_out => [],
 							no_copypast => [],
+							min_date => [],
 						},
 						'[progress_bar_2]',
 						undef,
@@ -195,6 +197,7 @@ sub get_test_list {
 							include_in => [],
 							include_out => [],
 							no_copypast => [],
+							min_date => [],
 						},
 						'[progress_bar]',
 						undef,
@@ -428,7 +431,7 @@ sub get_test_list {
 						test2 => { db => 'test2', label_for => 'Тест 2' },
 					} ],
 					expected =>
-						'<div id="element"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">Тест 2</label><br></div>',
+						'<div id="element"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">&nbsp;Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">&nbsp;Тест 2</label><br></div>',
 				},
 				16 => {	args => [ 'progress', 'test', undef, 'past', 0 ],
 					expected =>
@@ -469,7 +472,7 @@ sub get_test_list {
 						}
 					],
 					expected => 
-						'<tr><td class="left" rowspan=2><label id="text">Email</label></td><td class="left"><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr>',
+						'<tr><td class="left" rowspan=2><label id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr>',
 				},
 				2 => { 	args => [
 						{
@@ -492,7 +495,7 @@ sub get_test_list {
 						}
 					],
 					expected => 
-						'<tr><td class="left"><label id="text">Средства</label></td><td class="left"><div id="test"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">Тест 2</label><br></div></td></tr>',
+						'<tr><td class="left"><label id="text">Средства</label></td><td class="left"><div id="test"><input type="checkbox" value="test1" name="test1" title="" id="test1" checked><label for="test1">&nbsp;Тест 1</label><br><input type="checkbox" value="test2" name="test2" title="" id="test2" ><label for="test2">&nbsp;Тест 2</label><br></div></td></tr>',
 				}
 			},
 		},
@@ -536,6 +539,7 @@ sub get_test_list {
 						include_in => [],
 						include_out => [],
 						no_copypast => [],
+						min_date => [],
 					},
 
 				},
@@ -557,6 +561,7 @@ sub get_test_list {
 						include_in => [],
 						include_out => [],
 						no_copypast => [],
+						min_date => [],
 					},
 
 				},
@@ -1497,7 +1502,7 @@ sub get_test_list {
 									name => 'CenterID',
 								},
 								param => {
-									1 => 'Moscow',
+									1 => 'Moscow (м. Третьяковская)',
 								}
 							},
 						]
@@ -1965,7 +1970,7 @@ sub get_test_list {
 				1 => { 	args => [ 2, 'Token' ],
 					expected => 1,
 				},
-				2 => { 	args => [ 6, 'Token' ],
+				2 => { 	args => [ 5, 'Token' ],
 					expected => 3,
 				},
 			},
@@ -2065,8 +2070,8 @@ sub get_test_list {
 		{ 	func => \&{ VCS::Site::autoform::get_all_values },
 			comment => 'get_all_values',
 			test => { 	
-				1 => { 	args => [ 23, '[table_id]' ],
-					expected => { { visa_text => undef } },
+				1 => { 	args => [ 5, '[table_id]' ],
+					expected => { visa_text => undef },
 				},
 				2 => { 	args => [ 1, '[table_id]' ],
 					expected => {
@@ -2422,13 +2427,13 @@ my $progress_bar_2 =
 	'<td align="center" class="pr_size_gen pr_white_red_gen"><div class="big_progr pr_past" title=""><div class="pr_in_gen">1</div></div></td><td align="center" class="pr_size_gen pr_red_gray_gen"><div class="ltl_progr pr_current" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">2</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Паспорта"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Допданные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Поездка"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Проживание"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Расходы"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Ещё?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="На кого?"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Данные"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">3</div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Офис"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_gray_gen"><div class="ltl_progr pr_future" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td align="center" class="pr_size_gen pr_gray_white_gen"><div class="big_progr pr_future" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
 my $first_page = 
-	'<tr><td class="left"><label id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td class="left"><label id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">(не указано)</label></td></tr><tr><td class="left" rowspan=2><label id="text">Email</label></td><td class="left"><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td class="left"><label id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td class="left"><label id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">—</label></td></tr><tr><td class="left" rowspan=2><label id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">&nbsp;я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">&nbsp;я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 
 my $first_page_selected = 
-	'<tr><td class="left"><label id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td class="left"><label id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">(не указано)</label></td></tr><tr><td class="left" rowspan=2><label id="text">Email</label></td><td class="left"><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td class="left"><label id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td class="left"><label id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">—</label></td></tr><tr><td class="left" rowspan=2><label id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info"><label for="pers_info">&nbsp;я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info"><label for="mobil_info">&nbsp;я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 	
 my $second_page = 
-	'<tr><td class="left" rowspan=2><label id="text">Дата начала поездки</label></td><td class="left"><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: 01.01.2025</span></td></tr><tr><td class="left" rowspan=2><label id="text">Дата окончания поездки</label></td><td class="left"><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: 31.12.2025</span></td></tr>';
+	'<tr><td class="left" rowspan=2><label id="text">Дата начала поездки</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: 01.01.2025</span></td></tr><tr><td class="left" rowspan=2><label id="text">Дата окончания поездки</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: 31.12.2025</span></td></tr>';
 
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
