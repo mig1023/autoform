@@ -139,6 +139,25 @@
 
 $(document).ready(mobileScreenCheck);
 
+var ua = window.navigator.userAgent.toLowerCase();
+if ( (/trident/gi).test(ua) || (/msie/gi).test(ua) ) {
+
+	function ie_select_bugfix(field, size) {
+	
+		$(field).attr("size", size);
+		return "select[tabindex='" + (parseInt($(field).attr('tabindex'), 10) + 1) + "']";
+	}
+
+	$(document).ready(function(){
+		$('select').focus(function(){
+			$(ie_select_bugfix(this, 6)).fadeTo(50, 0);
+		});
+		$('select').blur(function(){
+			$(ie_select_bugfix(this, 1)).fadeTo('fast', 1.0); 			
+		});
+	});
+}
+
 function mobileScreenCheck() {
 
 	[% FOREACH post_index IN special.post_index %]	
