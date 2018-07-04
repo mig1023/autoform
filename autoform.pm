@@ -3114,9 +3114,12 @@ sub check_passnum_already_in_pending
 
 	for ( @$app_data ) {
 	
-		push( @$pass_list, $_->{ PassNum } ) unless $_->{ isChild };
+		unless ( $_->{ isChild } ) {
 		
-		$pass_doubles->{ $_->{ PassNum } } += 1;
+			push( @$pass_list, $_->{ PassNum } );
+			
+			$pass_doubles->{ $_->{ PassNum } } += 1;
+		}
 	}
 	
 	for ( keys %$pass_doubles ) {
