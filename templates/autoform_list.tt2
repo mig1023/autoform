@@ -6,6 +6,7 @@
 <link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 <link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMS - [% langreq('Новая запись') %]</title>
 </head>
 
 <font face="arial">

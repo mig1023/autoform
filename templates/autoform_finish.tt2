@@ -4,6 +4,7 @@
 <script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
 <link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMS - [% langreq('Новая запись') %]</title>
 </head>
 
 <font face="arial">

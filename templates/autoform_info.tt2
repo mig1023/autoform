@@ -4,6 +4,7 @@
 <script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
 <link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMS - [% langreq('Информация о записи') %]</title>
 
 [% IF title == 1 %]
 	<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
@@ -56,7 +57,7 @@
 
 <tr><td colspan="2">
 
-<h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
+<h2>[% langreq('Информация о записи') %]</h2></td></tr>
 
 <tr><td>
 
@@ -91,6 +92,22 @@
 
 </td></tr>
 
+<tr><td colspan="2">&nbsp;<br></td></tr>
+
+<tr><td colspan="2"><h2>[% langreq('Список заявителей') %]</h2></td></tr>
+
+<tr><td colspan="2">
+<table width="100%">
+[% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
+	<tr>
+	<td class="info_list"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
+	<td class="m_right"><span class="mobil_hide">[% person.BirthDate %]&nbsp;</span>
+	<input class="small_button" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');"></td>
+	</tr>
+[% END %]
+</table>
+</td></tr>
+
 <tr class="ymap"><td colspan="3">&nbsp;</td></tr>
 <tr class="ymap"><td colspan="3"><div id="YMapsID" class="yandex_map"></div></td></tr>
 <tr class="ymap"><td colspan="3">&nbsp;</td></tr>
@@ -110,22 +127,6 @@ YMaps.jQuery(function () {
 	</td></tr>
 	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
 [% END %]
-
-<tr><td colspan="2"><h2>[% langreq('Список заявителей') %]</h2><br></td></tr>
-
-<tr><td colspan="2">
-<table width="100%">
-[% SET i = 0 %][% FOREACH person IN app_list %][% SET i = i + 1 %]
-	<tr>
-	<td class="info_list"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
-	<td class="m_right"><span class="mobil_hide">[% person.BirthDate %]&nbsp;</span>
-	<input class="small_button" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');"></td>
-	</tr>
-[% END %]
-</table>
-</td></tr>
-
-<tr><td colspan="2">&nbsp;</td></tr>
 
 <tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
 <span class="suppl_text">

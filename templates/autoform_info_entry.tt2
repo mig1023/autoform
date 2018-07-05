@@ -5,6 +5,7 @@
 <script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
 <link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMS - [% langreq('Информация о записи') %]</title>
 </head>
 
 <font face="arial">
