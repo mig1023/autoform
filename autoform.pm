@@ -182,13 +182,17 @@ sub autoform
 
 	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
 	
-	( $self->{ token }, my $finished ) = $self->get_token_and_create_new_form_if_need();
+	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
 
 	return $self->get_mobile_api() if $self->{ vars }->getparam( 'mobile_api' );
 	
-	return $self->autoinfopage( $task, $id, $template ) if $finished and $self->{ token } !~ /^\d\d$/;
+	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 
-	if ( $self->{ token } =~ /^\d\d$/ ) {
+	if ( $finished and $doc_status and $self->{ token } !~ /^\d\d$/ ) {
+	
+		( $title, $page_content, $template_file ) = $self->doc_status( $self->{ token } );
+	}
+	elsif ( $self->{ token } =~ /^\d\d$/ ) {
 	
 		( $title, $page_content, $template_file ) = $self->get_page_error( $self->{ token } );
 	}
@@ -572,6 +576,8 @@ sub get_token_and_create_new_form_if_need
 		SELECT Status FROM Appointments WHERE ID = ?", $app
 	);
 	
+	return ( $token, $finished, 'docstatus' ) if $status == 4;
+	
 	return ( ( $status == 1 ? $token : '02' ), $finished );
 }
 
@@ -628,6 +634,36 @@ sub token_generation
 	} while ( $token_existing );
 	
 	return $token;
+}
+
+sub doc_status
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+	
+	my $status = $self->query( 'sel1', __LINE__, "
+		SELECT PStatus
+		FROM AutoToken
+		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
+		JOIN DocPack ON DocPack.ID = Appointments.PacketID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $doc_status = {
+		1  => 'wait_for_payment',
+		2  => 'payed',
+		3  => 'in_consulate',
+		4  => 'doc_ready',
+		5  => 'delivering',
+		6  => 'complete',
+		7  => 'deleted',
+		8  => 'returned_to_consulate',
+		9  => 'received',
+	};
+	
+	my $title = $self->lang( 'статус ваших документов: ' ) . $self->lang( $doc_status->{ $status } );
+	
+	return ( "<center>$title</center>", undef, 'autoform.tt2' );
 }
 
 sub get_page_error
