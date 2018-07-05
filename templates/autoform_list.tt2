@@ -68,11 +68,14 @@
 	<input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
 	</tr>
 	[% END %]
+	<tr><td colspan="5">
+		<div style="height:18px; overflow:hidden;">&nbsp;</div>
+	</td></tr>
 [% END %]
 
 [% IF i < max_applicants %]
 <tr><td class="left" colspan="5">
-	<span id="spacer"></span><br>
+	<span id="spacer"></span>
 	<input class="action_button" type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');">
 </td></tr>
 [% END %]
@@ -83,8 +86,11 @@
 	</td></tr>
 [% END %]
 
-<tr><td class="left" colspan="5">&nbsp;
+[% IF i < max_applicants %]
+<tr><td class="left" colspan="5">
+	<div style="height:10px; overflow:hidden;">&nbsp;</div>
 </td></tr>
+[% END %]
 
 <tr><td class="left" colspan="5">
 	<span id="mobile_order_bottom">
