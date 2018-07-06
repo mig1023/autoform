@@ -29,7 +29,7 @@
 <div id="app_form" class="margin_big">
 
 <table width="100%"><tr><td align="center">
-<br>[% langreq('Статус рассмотрения Ваших документов') %]:
+<br><span id="headtext">[% langreq('Статус рассмотрения Ваших документов') %]:</span>
 <br><br><br></td></tr></table>
 
 <table  width="100%" id="progressbar" class="progressbar_gen"><tr>
@@ -95,6 +95,7 @@
 		$(".pr_in_gen").css( "font-size", '40px' );
 		$(".pr_in_gen").css( "line-height", '70px' );
 		$(".stage_gen").css( "font-size", '24px' );
+		$("#headtext").css( "font-size", '20px' );
 	}
 	
 </script>
