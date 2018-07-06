@@ -173,7 +173,9 @@ sub get_tables_controled_by_AutoToken
 sub get_inner_ip
 # //////////////////////////////////////////////////
 {
-	return [];
+	return [
+		'127.0.0.1',
+	];
 };
 
 sub get_geo_branches
@@ -280,6 +282,19 @@ sub get_symbols_help
 		'\\' => 'обратной дроби',
 	};
 };
+
+sub get_docstatus_progress
+# //////////////////////////////////////////////////
+{
+	return [ '',
+		{ big => 1, name => 'оформлен', },
+		{ big => 1, name => 'оплачен', },
+		{ big => 1, name => 'в консульстве', },
+		{ big => 1, name => 'готов к выдаче', },
+		{ big => 1, name => 'в доставке', },
+		{ big => 1, name => 'выдан', },
+	];
+}
 
 sub get_link_text
 # //////////////////////////////////////////////////

@@ -641,29 +641,30 @@ sub doc_status
 {
 	my ( $self, $token ) = @_;
 	
-	my $status = $self->query( 'sel1', __LINE__, "
-		SELECT PStatus
+	my ( $status, $shipping ) = $self->query( 'sel1', __LINE__, "
+		SELECT PStatus, DocPack.Shipping
 		FROM AutoToken
 		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
 		JOIN DocPack ON DocPack.ID = Appointments.PacketID
 		WHERE Token = ?", $self->{ token }
 	);
 	
-	my $doc_status = {
-		1  => 'wait_for_payment',
-		2  => 'payed',
-		3  => 'in_consulate',
-		4  => 'doc_ready',
-		5  => 'delivering',
-		6  => 'complete',
-		7  => 'deleted',
-		8  => 'returned_to_consulate',
-		9  => 'received',
-	};
+	$status = 0 if $status == 7;
 	
-	my $title = $self->lang( 'статус ваших документов: ' ) . $self->lang( $doc_status->{ $status } );
+	$status = 3 if $status > 7;
 	
-	return ( "<center>$title</center>", undef, 'autoform.tt2' );
+	my $doc_progressbar = VCS::Site::autodata::get_docstatus_progress();
+	
+	if ( !$shipping ) {
+	
+		splice $doc_progressbar, 5, 1;
+		
+		$status -= 1 if $status > 4;
+	}
+	
+	my $progress = $self->get_progressbar( $status, $doc_progressbar );
+	
+	return ( undef, $progress, 'autoform_docstatus.tt2' );
 }
 
 sub get_page_error
@@ -736,7 +737,7 @@ sub get_autoform_content
 
 	my ( $content, $template ) = $self->get_html_page( $step, $appnum );
 
-	my $progress = $self->get_progressbar( $page );
+	my $progress = $self->get_progressbar( $page->[ 0 ]->{ progress }, $self->get_progressbar_hash_opt() );
 	
 	my ( $special, $js_check ) = $self->get_specials_of_element( $step );
 	
@@ -1429,15 +1430,15 @@ sub get_cell
 sub get_progressbar
 # //////////////////////////////////////////////////
 {
-	my ( $self, $page ) = @_;
+	my ( $self, $current_progress, $progress_line ) = @_;
 	
 	my ( $line, $content );
 	
-	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
+	#my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
-	my $progress_line = $self->get_progressbar_hash_opt();
+	#my $progress_line = $self->get_progressbar_hash_opt();
 	
-	my $current_progress = $page->[ 0 ]->{ progress };
+	#my $current_progress = $page->[ 0 ]->{ progress };
 	
 	my $big_element = 0;
 	

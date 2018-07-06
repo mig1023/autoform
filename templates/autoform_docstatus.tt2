@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<link href="[% static %]/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width; initial-scale=1">
+<title>VMS - [% langreq('Статус документов') %]</title>
+
+</head>
+
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+	
+	var mobilScreen = isMobile();
+
+</script>
+
+<font face="arial">
+
+<center>
+
+<div id="app_form" class="margin_big">
+
+<table width="100%"><tr><td align="center">
+<br>[% langreq('Статус рассмотрения Ваших документов') %]:
+<br><br><br></td></tr></table>
+
+<table  width="100%" id="progressbar" class="progressbar_gen"><tr>
+[% content_text %]
+<tr></table><br><br><br>
+
+</div>
+
+<script>
+
+	$(document).ready(mobileScreenCheck);
+
+	function mobileScreenCheck() {
+	
+		$('#progressbar').css( "display", 'table' );
+		
+		if ( !mobilScreen ) {
+		
+			return;
+		}
+		
+		var progressarr = [];
+		
+		var progressindex = 0;
+		
+		$("#progressbar tr").each(function(){
+			$("td",this).each(function(){
+				progressarr[progressindex] = $(this)[0].outerHTML;
+				progressindex++;
+			});
+		});
+		
+		progresslen = progressindex/2;
+		
+		var progressarr_new = [];
+		
+		for(var a = 0; a < progresslen; a++) {
+			progressarr_new.push(progressarr[a]);
+			progressarr_new.push(progressarr[a+progresslen]);
+		}
+		
+		progressindex = 0;
+		
+		$("#progressbar").each(function(){
+			$("td",this).each(function(){
+				$(this)[0].outerHTML = progressarr_new[progressindex];
+				progressindex++;
+			});
+		});
+		
+		$("#progressbar").each(function(){
+			$("td",this).each(function(){
+				$(this).css( "display", 'block' );
+				$(this).css( "float", 'left' );
+				$(this).css( "width", '100%' );
+				$(this).css( "background-image", 'none' );
+			});
+		});
+		
+		$(".big_progr").css( "width", '70px' );
+		$(".big_progr").css( "height", '70px' );
+		$(".big_progr").css( "border-radius", '35px' );
+		$(".pr_in_gen").css( "font-size", '40px' );
+		$(".pr_in_gen").css( "line-height", '70px' );
+		$(".stage_gen").css( "font-size", '24px' );
+	}
+	
+</script>
