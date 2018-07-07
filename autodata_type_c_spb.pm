@@ -1332,7 +1332,19 @@ sub get_content_rules_hash
 					table => 'SpbAlterAppData',
 					name => 'HotelHouse',
 				},
-			}
+			},
+			{
+				type => 'input',
+				name => 'hotelphon',
+				label => 'Телефон',
+				comment => 'Укажите контактный телефон гостиницы',
+				example => '39XXXXXXXX',
+				check => 'zN',
+				db => {
+					table => 'AppData',
+					name => 'HotelPhone',
+				},
+			},
 		],
 		
 		'Информация о месте проживания' => [

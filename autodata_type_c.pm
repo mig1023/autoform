@@ -1262,7 +1262,7 @@ sub get_content_rules_hash
 				label => 'Адрес места пребывания',
 				comment => 'Укажите адрес гостиницы',
 				example => 'Via Esempio 1, Rome',
-				check => 'WN\s\-\_\.\,\;\'\"',
+				check => 'WN\s\-\_\.\,\;\'\"\@',
 				db => {
 					table => 'AppData',
 					name => 'HotelAdresses',
@@ -1371,7 +1371,7 @@ sub get_content_rules_hash
 				label => 'Адрес',
 				comment => 'Укажите адрес без названия города',
 				example => 'Via Esempio 1',
-				check => 'zWN\s\-\_\.\,\;\'\"',
+				check => 'zWN\s\-\_\.\,\;\'\"\@',
 				db => {
 					table => 'SchengenAppData',
 					name => 'HostDataAddress',
