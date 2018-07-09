@@ -28,6 +28,11 @@
 
 <div id="app_form" class="margin_big">
 
+<tr><td colspan="2">
+<span id="headspace"><br><br></span>
+<img src="[% static %]/images/logoVMS.png"/><br>
+<span id="imgspace"></span></td></tr>
+
 <table width="100%"><tr><td align="center">
 <br><span id="headtext">[% langreq('Статус рассмотрения Ваших документов') %]:</span>
 <br><br><br></td></tr></table>
@@ -96,6 +101,9 @@
 		$(".pr_in_gen").css( "line-height", '70px' );
 		$(".stage_gen").css( "font-size", '24px' );
 		$("#headtext").css( "font-size", '20px' );
+		$("#headspace").html('');
+		$("#imgspace").html('<br>');
+		
 	}
 	
 </script>
