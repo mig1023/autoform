@@ -641,8 +641,8 @@ sub doc_status
 {
 	my ( $self, $token ) = @_;
 	
-	my ( $status, $shipping ) = $self->query( 'sel1', __LINE__, "
-		SELECT PStatus, DocPack.Shipping
+	my ( $doc_id, $status, $shipping ) = $self->query( 'sel1', __LINE__, "
+		SELECT DocPack.ID, PStatus, DocPack.Shipping
 		FROM AutoToken
 		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
 		JOIN DocPack ON DocPack.ID = Appointments.PacketID
@@ -657,11 +657,18 @@ sub doc_status
 	
 	if ( !$shipping ) {
 	
-		splice $doc_progressbar, 5, 1;
+		splice( @$doc_progressbar, 5, 1 );
 		
 		$status -= 1 if $status > 4;
 	}
-	
+
+	# ////////////////////////// temp
+	$self->query( 'query', __LINE__, "
+		INSERT INTO DocStatusTEMP (DocPackID, DocInfoCheck, DocInfoStatus)
+		VALUES (?, now(), ?)", {}, $doc_id, $status
+	);
+	# //////////////////////////
+
 	my $progress = $self->get_progressbar( $status, $doc_progressbar );
 	
 	return ( undef, $progress, 'autoform_docstatus.tt2' );
@@ -1125,7 +1132,7 @@ sub get_add
 	my ( $self, $app_id ) = @_;
 	
 	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL);"
+		INSERT INTO AutoSchengenAppData (HostDataCity) VALUES (NULL)"
 	);
 		
 	my $sch_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
