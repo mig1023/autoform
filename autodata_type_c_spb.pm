@@ -1475,6 +1475,18 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
+				name => 'p_index',
+				label => 'Индекс',
+				comment => 'Укажите почтовый индекс',
+				example => '12345',
+				check => 'zN',
+				db => {
+					table => 'SchengenAppData',
+					name => 'HostDataPostalCode',
+				},
+			},
+			{
+				type => 'input',
 				name => 'p_city',
 				label => 'Город',
 				comment => 'Укажите название города',
