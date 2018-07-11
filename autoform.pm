@@ -2732,8 +2732,8 @@ sub mod_hash
 			$hash->{ HotelAdresses } = join( ', ', (
 				$spb_hash->{ HotelPostCode }, $spb_hash->{ HotelCity }, $spb_hash->{ HotelStreet }, $spb_hash->{ HotelHouse }
 			) );
-			
-			$hash->{ Hotels } = $spb_hash->{ HotelName };
+		
+			$hash->{ Hotels } = $spb_hash->{ HotelName } unless $hash->{ Hotels };
 		}
 		else {
 			$hash->{ FullAddress } .= ' ' . $hash->{ AppEMail };
