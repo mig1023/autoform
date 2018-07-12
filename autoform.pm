@@ -2702,9 +2702,10 @@ sub mod_hash
 		if ( $schengen_data->{ HostDataType } eq 'P' ) {
 		
 			$hash->{ Hotels } = $schengen_data->{ HostDataName } . ' ' . $schengen_data->{ HostDataDenomination };
-			
-			$hash->{ HotelAdresses } = $schengen_data->{ HostDataCity } . ' ' .
-				$schengen_data->{ HostDataAddress } . ' ' . $schengen_data->{ HostDataEmail };
+	
+			$hash->{ HotelAdresses } = join( ', ', ($schengen_data->{ HostDataCity },
+				$schengen_data->{ HostDataAddress }, $schengen_data->{ HostDataEmail }
+			) );
 			
 			$hash->{ HotelPhone } = $schengen_data->{ HostDataPhoneNumber };
 		}
@@ -2731,7 +2732,7 @@ sub mod_hash
 					
 			$hash->{ HotelAdresses } = join( ', ', (
 				$spb_hash->{ HotelPostCode }, $spb_hash->{ HotelCity }, $spb_hash->{ HotelStreet }, $spb_hash->{ HotelHouse }
-			) );
+			) ) unless $hash->{ HotelAdresses };
 		
 			$hash->{ Hotels } = $spb_hash->{ HotelName } unless $hash->{ Hotels };
 		}
