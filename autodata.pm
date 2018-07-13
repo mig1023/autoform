@@ -32,6 +32,14 @@ sub get_settings
 			verify_api => 'https://www.google.com/recaptcha/api/siteverify',
 		},
 		
+		'qrcode' => {
+			file_folder => '/usr/local/www/data/htdocs/files/',
+			link => {
+				Android => '',
+				iPhone =>  '',
+			},
+		},
+		
 		confirm => {
 			tt => '/usr/local/www/data/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
 			pers_data => '/usr/local/www/data/htdocs/pers_data_agreement.pdf',
