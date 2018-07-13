@@ -53,18 +53,7 @@
 
 <tr><td colspan="2">
 
-<br><br>
-<table width="100%"><tr>
-<td valign="top"><img src="[% static %]/images/logoVMS.png"/></td>
-
-<td><table width="100%"><tr>
-<td align="center" colspan="2"><font size="1">[% langreq('Воспользуйтесь мобильным приложением<br>для записи и отслеживания своих документов') %]</font></td>
-</tr><tr>
-[% FOREACH code IN qrcodes %]
-<td align="center" width="90px"><img src="[% code.value %]"><br>[% code.key %]</td>
-[% END %]
-</tr></table>
-<br></td></tr>
+<br><br><img src="[% static %]/images/logoVMS.png"/><br><br><br></td></tr>
 
 <tr><td colspan="2">
 

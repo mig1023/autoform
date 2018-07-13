@@ -7,7 +7,6 @@ use VCS::Site::autodata;
 use Data::Dumper;
 use Date::Calc;
 use JSON;
-use Imager::QRCode;
 
 sub new
 # //////////////////////////////////////////////////
@@ -124,35 +123,6 @@ sub get_infopage
 	my $center_msk = ( $app_info->{ new_app_branch } == 1 ? 1 : 0 );
 
 	$self->{ af }->correct_values( \$app_info );
-	
-	my $qr_settings = $self->{ autoform }->{ qrcode };
-	
-	my $qr_codes = {};
-	
-	for ( keys %{ $qr_settings->{ link } } ) {
-	
-		my $qrcode_filename = "qrcode$_.png";
-		
-		my $qrcode_file = $qr_settings->{ file_folder } . $qrcode_filename;
-		
-		$qr_codes->{ $_ } = $self->{ vars }->getform('fullhost') . '/files/' . $qrcode_filename;
-		
-		## next if -e $qrcode_file;
-	
-		my $qrcode = Imager::QRCode->new(
-			size          => 3,
-			margin        => 2,
-			version       => 1,
-			level         => 'M',
-			casesensitive => 1,
-			lightcolor    => Imager::Color->new( 255, 255, 255 ),
-			darkcolor     => Imager::Color->new( 0, 0, 0 ),
-		);
-
-		my $qrcode_img = $qrcode->plot( $qr_settings->{ link }->{ $_ } );
-			
-		$qrcode_img->write( file => $qrcode_file );
-	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
@@ -166,7 +136,6 @@ sub get_infopage
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
-		'qrcodes'	=> $qr_codes,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
