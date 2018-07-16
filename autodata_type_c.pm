@@ -142,6 +142,39 @@ sub get_content_rules_hash
 			},
 		],
 		
+		'Услуга Primetime' => [
+			{
+				page_ord => 150,
+				progress => 2,
+				primetime_price => 1,
+				relation => {
+					only_if => {
+						table => 'Appointments',
+						name => 'CenterID',
+						value => '41',
+					}
+				},
+			},
+			{
+				type => 'text',
+				name => 'primetime_text',
+				label => 'Стоимость услуги «Прайм-тайм» составляет: [primetime_price] рублей за каждого заявителя и не включает в себя стоимость сервисного и консульского сборов, а также <a target = "_blank" class = "dotted_link_big" href = "/dopolnitelnye-uslugi/">дополнительных услуг</a>',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'checkbox',
+				name => 'pers_info',
+				label_for => 'я ознакомлен со стоимостью дополнительных услуг',
+				check => 'true',
+				db => {
+					table => 'Appointments',
+					name => 'PrimetimeAlert',
+				},
+			},
+		],
+		
 		'Даты поездки' => [
 			{
 				page_ord => 200,
