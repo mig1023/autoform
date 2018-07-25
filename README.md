@@ -8,3 +8,5 @@ Appointment system for VMS CRM
 ### Mobile version
 
 ![](https://s8.hostingkartinok.com/uploads/images/2018/07/78f268d1bdfd7a58809119f6dc7cc39f.png)
+
+### Infopage
