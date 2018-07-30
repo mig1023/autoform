@@ -199,12 +199,14 @@ YMaps.jQuery(function () {
 <tr>
 <td class="checklist_td" class="info_list">[% langreq(doc.title) %]</td>
 <td class="checklist_td m_right">
+<span id="forUpload_[% doc.id %]">
 [% IF doc.stat == 1 %]
 <font color="green">[% langreq('загружено') %]</font>
 [% ELSE %]
 <span style = "background-color:red;"><font color="white"><b>&nbsp;[% langreq('не загружено') %]&nbsp;</b></font></span>
 [% END %]
-&nbsp;<input type="file" id="updocfile_[% doc.id %]" name="updocfile_[% doc.id %]" style="display: none;" accept="image/*" capture="camera"/>
+</span>
+&nbsp;<input type="file" id="updocfile_[% doc.id %]" name="updocfile_[% doc.id %]" style="display: none;" accept="image/*" capture="camera" onchange="span_chng('forUpload_[% doc.id %]')"/>
 <input type="button" value="Загрузить" onclick="document.getElementById('updocfile_[% doc.id %]').click();" /></td>
 
 </tr>
@@ -401,6 +403,10 @@ function go_button(where, who) {
 	$('#action').val(where);
 	$('#appdata').val(who);
 	document.dataform.submit();
+};
+
+function span_chng(span_id) {
+	document.getElementById(span_id).innerHTML=[% langreq('к загрузке') %];
 };
 
 </script>

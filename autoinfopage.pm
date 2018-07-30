@@ -303,10 +303,10 @@ sub upload_doc
 	my $all_docs = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT DocType FROM DocUploaded WHERE AppDataID = ?", $appdata_id
 	) if $appdata_id;
-	
-	for my $doc ( @$all_docs ) {
-		for my $type ( @$doc_list ) {
-			$type->{ stat } = 1 if $type->{ stat } == $doc->{ DocType };
+
+	for my $type ( @$doc_list ) {
+		for my $doc ( @$all_docs ) {
+			$type->{ stat } = 1 if $type->{ id } == $doc->{ DocType };
 		}
 	}
 	
@@ -329,6 +329,10 @@ sub upload_doc
 				INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate) VALUES (?, ?, ?, now())",
 				{}, $appdata_id, $doc->{ id }, $md5
 			);
+			
+			for my $type ( @$doc_list ) {
+				$type->{ stat } = 1 if $type->{ id } == $doc->{ id };
+			}
 		}
 	}
 	
