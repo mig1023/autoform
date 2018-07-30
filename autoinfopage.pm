@@ -7,6 +7,7 @@ use VCS::Site::autodata;
 use Data::Dumper;
 use Date::Calc;
 use JSON;
+use Digest::MD5;
 
 sub new
 # //////////////////////////////////////////////////
@@ -44,6 +45,8 @@ sub autoinfopage
 	return reschedule( @_ ) if /^reschedule$/i;
 	
 	return cancel( @_ ) if /^cancel$/i;
+	
+	return upload_doc( @_ ) if /^upload_doc$/i;
 	
 	return get_infopage( @_ );
 }
@@ -278,6 +281,83 @@ sub cancel
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub upload_doc
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $doc_list = [
+		{ id => 1, title => 'Загранпаспорт' },
+		{ id => 2, title => 'Авиабилет' },
+		{ id => 3, title => 'Подтверждение проживания' },
+		{ id => 4, title => 'Медицинская страховка' },
+		{ id => 5, title => 'Подтверждение занятости' },
+		{ id => 6, title => 'Финансовая гарантия' },
+	];
+	
+	my $conf = $self->{ vars }->getConfig('general');
+	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
+	
+	my $all_docs = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT DocType FROM DocUploaded WHERE AppDataID = ?", $appdata_id
+	) if $appdata_id;
+	
+	for my $doc ( @$all_docs ) {
+		for my $type ( @$doc_list ) {
+			$type->{ stat } = 1 if $type->{ stat } == $doc->{ DocType };
+		}
+	}
+	
+	for my $doc ( @$doc_list ) {
+	
+		my $file = $self->{ vars }->getparam( 'updocfile_' . $doc->{ id } );
+		
+		if ( $file ) {
+			
+			my $name = $conf->{ tmp_folder } . $appdata_id . '_updocfile_' . $doc->{ id };
+			
+			open FILE, '>', $name;
+			binmode FILE;
+			print FILE while( <$file> );
+			close FILE;
+			
+			my $md5 = $self->md5_file( $name );
+			
+			$self->{ af }->query( 'query', __LINE__, "
+				INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate) VALUES (?, ?, ?, now())",
+				{}, $appdata_id, $doc->{ id }, $md5
+			);
+		}
+	}
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'title' 	=> 4,
+		'app_id'	=> $appdata_id,
+		'doc_list'	=> $doc_list,
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub md5_file {
+
+	my $self = shift;
+
+	open my $file, '<', shift;
+	
+	binmode $file;
+	
+	my $md5_result = Digest::MD5->new->addfile($file)->hexdigest;
+	
+	close $file ;
+	
+	return $md5_result;
 }
 
 sub get_same_info_for_timeslots_from_app
