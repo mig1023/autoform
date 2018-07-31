@@ -210,7 +210,7 @@ YMaps.jQuery(function () {
 		<img src="/autoform/?t=[% token %]&action=download_file&appdata=[% IF doc.stat == 1 %][% app_id %][% ELSE %]simple[% END %]&type=[% doc.id %]&preview=1">
 		<br>[% langreq(doc.title) %]<br>
 		<input type="file" id="upfile_[% doc.id %]" name="upfile_[% doc.id %]" style="display: none;" accept="image/*" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" /><br><br></td>
+		<input class="small_button" type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" /><br><br></td>
 	[% END %]
 	</tr></table></td></tr>
 
