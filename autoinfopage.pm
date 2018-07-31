@@ -7,7 +7,8 @@ use VCS::Site::autodata;
 use Data::Dumper;
 use Date::Calc;
 use JSON;
-use Digest::MD5;
+use Image::Resize;
+use Digest::MD5 qw( md5_hex );
 
 sub new
 # //////////////////////////////////////////////////
@@ -47,6 +48,10 @@ sub autoinfopage
 	return cancel( @_ ) if /^cancel$/i;
 	
 	return upload_doc( @_ ) if /^upload_doc$/i;
+	
+	return upload_file( @_ ) if /^upload_file$/i;
+	
+	return download_file( @_ ) if /^download_file$/i;
 	
 	return get_infopage( @_ );
 }
@@ -288,14 +293,7 @@ sub upload_doc
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $doc_list = [
-		{ id => 1, title => 'Загранпаспорт' },
-		{ id => 2, title => 'Авиабилет' },
-		{ id => 3, title => 'Подтверждение проживания' },
-		{ id => 4, title => 'Медицинская страховка' },
-		{ id => 5, title => 'Подтверждение занятости' },
-		{ id => 6, title => 'Финансовая гарантия' },
-	];
+	my $doc_list = VCS::Site::autodata::get_doc_list();
 	
 	my $conf = $self->{ vars }->getConfig('general');
 	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
@@ -309,33 +307,7 @@ sub upload_doc
 			$type->{ stat } = 1 if $type->{ id } == $doc->{ DocType };
 		}
 	}
-	
-	for my $doc ( @$doc_list ) {
-	
-		my $file = $self->{ vars }->getparam( 'updocfile_' . $doc->{ id } );
-		
-		if ( $file ) {
-			
-			my $name = $conf->{ tmp_folder } . $appdata_id . '_updocfile_' . $doc->{ id };
-			
-			open FILE, '>', $name;
-			binmode FILE;
-			print FILE while( <$file> );
-			close FILE;
-			
-			my $md5 = $self->md5_file( $name );
-			
-			$self->{ af }->query( 'query', __LINE__, "
-				INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate) VALUES (?, ?, ?, now())",
-				{}, $appdata_id, $doc->{ id }, $md5
-			);
-			
-			for my $type ( @$doc_list ) {
-				$type->{ stat } = 1 if $type->{ id } == $doc->{ id };
-			}
-		}
-	}
-	
+
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
@@ -349,19 +321,71 @@ sub upload_doc
 	$template->process( 'autoform_info.tt2', $tvars );
 }
 
-sub md5_file {
+sub upload_file
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $file_content;
 
+	my $conf = $self->{ vars }->getConfig('general');
+	
+	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
+	
+	my $doc_type = $self->{ vars }->getparam( 'type' );
+	
+	$_ =~ s/[^0-9]//g for ( $appdata_id, $doc_type );
+	
+	my $file = $self->{ vars }->getparam( 'file' );
+	
+	my $filename = $self->{ vars }->getparam( 'filename' );
+	
+	$filename =~ s/[^A-Za-z0-9_\-\.]//g;
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+
+	return print 'error' if ( !$file or !$appdata_id or !$doc_type );
+	
+	my $file_name = $conf->{ tmp_folder } . 'doc/' . $appdata_id . '_' . $doc_type; # . '_' . $filename;
+	
+	$file_content .= $_ while ( <$file> );
+	
+	return print 'error' unless $self->set_file_content( $file_name, $file_content );
+	
+	my $image = Image::Resize->new( $file_name );
+	my $preview = $image->resize( 200, 200 );
+	 
+	return print 'error' unless $self->set_file_content( $file_name . '_preview.jpg', $preview->jpeg() ); 
+		
+	$self->{ af }->query( 'query', __LINE__, "
+		INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate) VALUES (?, ?, ?, now())",
+		{}, $appdata_id, $doc_type, md5_hex( $file_content )
+	);
+
+	return print 'ok';
+}
+
+sub download_file
+# //////////////////////////////////////////////////
+{
 	my $self = shift;
-
-	open my $file, '<', shift;
 	
-	binmode $file;
+	my $conf = $self->{ vars }->getConfig('general');
 	
-	my $md5_result = Digest::MD5->new->addfile($file)->hexdigest;
+	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
 	
-	close $file ;
+	my $doc_type = $self->{ vars }->getparam( 'type' );
 	
-	return $md5_result;
+	$_ =~ s/[^a-z0-9]//g for ( $appdata_id, $doc_type );
+	
+	my $file_name = $conf->{ tmp_folder } . 'doc/' . $appdata_id . '_' . $doc_type .
+		( $self->{ vars }->getparam( 'preview' ) ? '_preview.jpg' : '' );
+	
+	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"preview.jpg\"\nContent-Disposition: attachment; filename=\"preview.jpg\"\n\n";
+	
+	my $file_content = $self->{ af }->get_file_content( $file_name );
+	
+	print $file_content;
 }
 
 sub get_same_info_for_timeslots_from_app
@@ -467,6 +491,26 @@ sub check_existing_id_in_token
 	}
 	
 	return $exist;
+}
+
+sub set_file_content
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $name = shift;
+	
+	my $content = shift;
+	
+	open( my $file, '>', $name ) or return undef;
+	
+	binmode $file;
+	
+	print $file $content;
+	
+	close $file;
+	
+	return 1;
 }
 	
 1;

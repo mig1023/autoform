@@ -187,37 +187,37 @@ YMaps.jQuery(function () {
 
 [% ELSIF title == 4 %]
 
-<tr><td colspan="2">
-<br><br>
-<h2>[% langreq('Загрузить документы') %]</h2><br></td></tr>
+	<tr><td colspan="2">
+	<br><br>
+	<h2>[% langreq('Загрузить документы') %]</h2><br></td></tr>
 
-<tr><td>
-<table width="100%">
+	<tr><td>
+	<table width="100%">
 
-<tr><td colspan="2"><table width="100%">
-[% SET i = 0 %][% FOREACH doc IN doc_list %][% SET i = i + 1 %]
-<tr>
-<td class="checklist_td" class="info_list">[% langreq(doc.title) %]</td>
-<td class="checklist_td m_right">
-<span id="forUpload_[% doc.id %]">
-[% IF doc.stat == 1 %]
-<font color="green">[% langreq('загружено') %]</font>
-[% ELSE %]
-<span style = "background-color:red;"><font color="white"><b>&nbsp;[% langreq('не загружено') %]&nbsp;</b></font></span>
-[% END %]
-</span>
-&nbsp;<input type="file" id="updocfile_[% doc.id %]" name="updocfile_[% doc.id %]" style="display: none;" accept="image/*" capture="camera" onchange="span_chng('forUpload_[% doc.id %]')"/>
-<input type="button" value="Загрузить" onclick="document.getElementById('updocfile_[% doc.id %]').click();" /></td>
+	<tr><td colspan="2"><table width="100%">
+	[% SET i = 0 %]
+	<tr>
+	[% FOREACH doc IN doc_list %]
+	
+		[% SET i = i + 1 %]
+		[% IF i == 3 %]
+			</tr>
+			<tr>
+			[% SET i = 1 %]
+		[% END %]
+	
+		<td class="checklist_td" class="info_list">
+		<img src="/autoform/?t=[% token %]&action=download_file&appdata=[% IF doc.stat == 1 %][% app_id %][% ELSE %]simple[% END %]&type=[% doc.id %]&preview=1">
+		<br>[% langreq(doc.title) %]<br>
+		<input type="file" id="upfile_[% doc.id %]" name="upfile_[% doc.id %]" style="display: none;" accept="image/*" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
+		<input type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" /><br><br></td>
+	[% END %]
+	</tr></table></td></tr>
 
-</tr>
-[% END %]
-</table></td></tr>
+	<tr><td colspan="2"><br>
+	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
 
-<tr><td colspan="2"><br>
-<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-<input class="small_button" type="button" value="[% langreq('Сохранить') %] &#9655;" onclick="go_button('upload_doc', '[% app_id %]');"><br></td></tr>
-
-<tr><td colspan="2">&nbsp;</td></tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
 
 [% END %]
 
@@ -405,8 +405,30 @@ function go_button(where, who) {
 	document.dataform.submit();
 };
 
-function span_chng(span_id) {
-	document.getElementById(span_id).innerHTML=[% langreq('к загрузке') %];
+function upload( doc_id, upfile_field ) {
+	
+	var file = document.getElementById(upfile_field).files[0];
+	var addr = '?t=[% token %]&action=upload_file&filename='+file.name+'&appdata=[% app_id %]&type=' + doc_id;
+	
+	var ajaxData = new FormData();
+	ajaxData.append('file', file);
+	
+	$.ajax({
+		url: '/autoform/' + addr,
+		type: 'POST',
+		data: ajaxData,
+		encoding: 'utf8',
+		contentType: false,
+		processData: false,
+		success: function(data) {
+			if (data.indexOf('ok')+1) {
+				window.location = '/autoform/?t=[% token %]&action=upload_doc&appdata=[% app_id %]';
+			}
+			else {
+				alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно файл в неправильном формате.') %]' );
+			}
+		}
+	});
 };
 
 </script>
