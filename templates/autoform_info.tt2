@@ -401,6 +401,7 @@ function mobileScreenCheck() {
 [% END %]
 
 function go_button(where, who) {
+
 	$('#action').val(where);
 	$('#appdata').val(who);
 	document.dataform.submit();
@@ -418,16 +419,18 @@ function upload( doc_id, upfile_field ) {
 	
 	var file = document.getElementById(upfile_field).files[0];
 	
-	if ( file.size > [% max_size %] ) {
-	
-		var max_size_kb = [% max_size %] / 1024;
+	[% IF max_size %]
+		if ( file.size > [% max_size %] ) {
+		
+			var max_size_kb = [% max_size %] / 1024;
 
-		alert( '[% langreq('Размер загружаемого файла превышает максимально допустимый размер в') %]' + ' ' + max_size_kb + ' KB' );
-		
-		show_hide( doc_id, 'img_span_', 'tmp_span_' );
-		
-		return;
-	}
+			alert( '[% langreq('Размер загружаемого файла превышает максимально допустимый размер в') %]' + ' ' + max_size_kb + ' KB' );
+			
+			show_hide( doc_id, 'img_span_', 'tmp_span_' );
+			
+			return;
+		}
+	[% END %]
 	
 	var addr = '?t=[% token %]&action=upload_file&filename='+file.name+'&appdata=[% app_id %]&type=' + doc_id;
 	var ajaxData = new FormData();
@@ -448,9 +451,9 @@ function upload( doc_id, upfile_field ) {
 			}
 			else {
 				alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно, файл в неправильном формате.') %]' );
+				
+				show_hide( doc_id, 'img_span_', 'tmp_span_' );
 			}
-			
-			show_hide( doc_id, 'img_span_', 'tmp_span_' );
 		}
 	});
 };

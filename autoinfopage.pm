@@ -331,8 +331,6 @@ sub upload_file
 	
 	my $file_content;
 
-	my $conf = $self->{ vars }->getConfig('general');
-	
 	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
 	
 	my $doc_type = $self->{ vars }->getparam( 'type' );
@@ -349,7 +347,9 @@ sub upload_file
 
 	return print 'error' if ( !$file or !$appdata_id or !$doc_type );
 	
-	my $file_name = $conf->{ tmp_folder } . 'doc/' . $appdata_id . '_' . $doc_type;;
+	my ( $path_name, $date_name ) = $self->get_folder_name();
+	
+	my $file_name = $path_name . $appdata_id . '_' . $doc_type;;
 	
 	$file_content .= $_ while ( <$file> );
 	
@@ -368,8 +368,8 @@ sub upload_file
 	return print 'error' unless $self->set_file_content( $file_name . '_preview.jpg', $preview->jpeg() ); 
 		
 	$self->{ af }->query( 'query', __LINE__, "
-		INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate) VALUES (?, ?, ?, now())",
-		{}, $appdata_id, $doc_type, md5_hex( $file_content )
+		INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate, Folder) VALUES (?, ?, ?, now(), ?)",
+		{}, $appdata_id, $doc_type, md5_hex( $file_content ), $date_name
 	);
 
 	return print 'ok';
@@ -380,6 +380,8 @@ sub download_file
 {
 	my $self = shift;
 	
+	my $preview = ( $self->{ vars }->getparam( 'preview' ) ? 1 : 0 );
+	
 	my $conf = $self->{ vars }->getConfig('general');
 	
 	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
@@ -388,8 +390,12 @@ sub download_file
 	
 	$_ =~ s/[^a-z0-9]//g for ( $appdata_id, $doc_type );
 	
-	my $file_name = $conf->{ tmp_folder } . 'doc/' . $appdata_id . '_' . $doc_type .
-		( $self->{ vars }->getparam( 'preview' ) ? '_preview.jpg' : '' );
+	my $folder = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT Folder FROM DocUploaded
+		WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+	) . '/' unless $appdata_id eq 'simple';
+	
+	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $appdata_id . '_' . $doc_type . ( $preview ? '_preview.jpg' : '' );
 	
 	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"preview.jpg\"\nContent-Disposition: attachment; filename=\"preview.jpg\"\n\n";
 	
@@ -521,6 +527,31 @@ sub set_file_content
 	close $file;
 	
 	return 1;
+}
+
+sub get_folder_name
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $conf = $self->{ vars }->getConfig('general');
+
+	my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime( time );
+	
+	$year += 1900;
+	
+	$mon++;
+	
+	for ( $mday, $mon, $year ) {
+		
+		$_ = "0$_" if $_ < 10;
+	};
+	
+	my $folder_name = $conf->{ tmp_folder } . "doc/$year-$mon-$mday/";
+	
+	mkdir $folder_name unless -d $folder_name;
+	
+	return ( $folder_name, "$year-$mon-$mday" );
 }
 	
 1;
