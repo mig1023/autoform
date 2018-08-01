@@ -207,7 +207,8 @@ YMaps.jQuery(function () {
 		[% END %]
 	
 		<td class="checklist_td" class="info_list">
-		<img src="/autoform/?t=[% token %]&action=download_file&appdata=[% IF doc.stat == 1 %][% app_id %][% ELSE %]simple[% END %]&type=[% doc.id %]&preview=1">
+		<span id="tmp_span_[% doc.id %]" style="display:none;"><img src="/vcs/static/images/autoform_wait.gif"></span>
+		<span id="img_span_[% doc.id %]"><img src="/autoform/?t=[% token %]&action=download_file&appdata=[% IF doc.stat == 1 %][% app_id %][% ELSE %]simple[% END %]&type=[% doc.id %]&preview=1"></span>
 		<br>[% langreq(doc.title) %]<br>
 		<input type="file" id="upfile_[% doc.id %]" name="upfile_[% doc.id %]" style="display: none;" accept="image/*" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
 		<input class="small_button" type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" /><br><br></td>
@@ -405,11 +406,30 @@ function go_button(where, who) {
 	document.dataform.submit();
 };
 
+function show_hide( doc_id, show, hide ) {
+	
+	$('#' + hide + doc_id).hide();
+	$('#' + show + doc_id).show();
+}
+
 function upload( doc_id, upfile_field ) {
+
+	show_hide( doc_id, 'tmp_span_', 'img_span_' );
 	
 	var file = document.getElementById(upfile_field).files[0];
-	var addr = '?t=[% token %]&action=upload_file&filename='+file.name+'&appdata=[% app_id %]&type=' + doc_id;
 	
+	if ( file.size > [% max_size %] ) {
+	
+		var max_size_kb = [% max_size %] / 1024;
+
+		alert( '[% langreq('Размер загружаемого файла превышает максимально допустимый размер в') %]' + ' ' + max_size_kb + ' KB' );
+		
+		show_hide( doc_id, 'img_span_', 'tmp_span_' );
+		
+		return;
+	}
+	
+	var addr = '?t=[% token %]&action=upload_file&filename='+file.name+'&appdata=[% app_id %]&type=' + doc_id;
 	var ajaxData = new FormData();
 	ajaxData.append('file', file);
 	
@@ -421,12 +441,16 @@ function upload( doc_id, upfile_field ) {
 		contentType: false,
 		processData: false,
 		success: function(data) {
+		
 			if (data.indexOf('ok')+1) {
+			
 				window.location = '/autoform/?t=[% token %]&action=upload_doc&appdata=[% app_id %]';
 			}
 			else {
-				alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно файл в неправильном формате.') %]' );
+				alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно, файл в неправильном формате.') %]' );
 			}
+			
+			show_hide( doc_id, 'img_span_', 'tmp_span_' );
 		}
 	});
 };

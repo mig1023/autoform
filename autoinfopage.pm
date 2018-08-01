@@ -29,6 +29,8 @@ sub autoinfopage
 		
 	$self->{ $_ } = $self->{ af }->{ $_ } for ( 'vars', 'token' );
 	
+	$self->{ autodata } = VCS::Site::autodata::get_settings();
+	
 	$self->{ vars }->{ session }->{ login } = 'website';
 	
 	$self->{ vars }->{ session }->{ langid } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
@@ -315,6 +317,7 @@ sub upload_doc
 		'title' 	=> 4,
 		'app_id'	=> $appdata_id,
 		'doc_list'	=> $doc_list,
+		'max_size'	=> $self->{ autodata }->{ general }->{ max_file_upload_size },
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};
@@ -346,11 +349,18 @@ sub upload_file
 
 	return print 'error' if ( !$file or !$appdata_id or !$doc_type );
 	
-	my $file_name = $conf->{ tmp_folder } . 'doc/' . $appdata_id . '_' . $doc_type; # . '_' . $filename;
+	my $file_name = $conf->{ tmp_folder } . 'doc/' . $appdata_id . '_' . $doc_type;;
 	
 	$file_content .= $_ while ( <$file> );
 	
 	return print 'error' unless $self->set_file_content( $file_name, $file_content );
+	
+	if ( -s $file_name > $self->{ autodata }->{ general }->{ max_file_upload_size } ) {
+	
+		unlink $file_name;
+		
+		return print 'error';
+	}
 	
 	my $image = Image::Resize->new( $file_name );
 	my $preview = $image->resize( 200, 200 );

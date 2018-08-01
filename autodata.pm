@@ -8,6 +8,7 @@ sub get_settings
 	return {
 		general => {
 			max_applicants => 10,
+			max_file_upload_size => 1_073_741_824, # 1 mb
 		},
 	
 		paths => {
@@ -21,7 +22,7 @@ sub get_settings
 		},
 		
 		memcached => {
-			memcached_exptime => 43200, # <--- 12*3600 sec
+			memcached_exptime => 43_200, # <--- 12*3600 sec
 			mutex_exptime => 30,
 		},
 		
@@ -303,7 +304,7 @@ sub get_doc_list
 	return [ 
 		{ 
 			id => 1,
-			title => 'Загранпаспорт'
+			title => 'Загранпаспорт',
 		},
 		{ 
 			id => 2,
