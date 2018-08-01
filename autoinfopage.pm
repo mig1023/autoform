@@ -294,19 +294,34 @@ sub upload_doc
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
-
-	my $doc_list = VCS::Site::autodata::get_doc_list();
 	
 	my $conf = $self->{ vars }->getConfig('general');
 	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
+
+	my $doc_list = VCS::Site::autodata::get_doc_list();
+	
+	my $visa_type = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT VType FROM Appointments JOIN AppData ON AppData.AppID = Appointments.ID WHERE AppData.ID = ?", $appdata_id
+	);
 	
 	my $all_docs = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT DocType FROM DocUploaded WHERE AppDataID = ?", $appdata_id
 	) if $appdata_id;
+	
+	my $index = 0;
+	
+	for ( my $index = $#$doc_list; $index >= 0; --$index ) {
+	
+		my %visas = map { $_ => 1 } split /,\s?/, $doc_list->[ $index ]->{ visa };
 
-	for my $type ( @$doc_list ) {
-		for my $doc ( @$all_docs ) {
-			$type->{ stat } = 1 if $type->{ id } == $doc->{ DocType };
+		unless ( exists $visas{ $visa_type } ) {
+
+			splice( @$doc_list, $index, 1 );
+		}
+		else {
+			for my $doc ( @$all_docs ) {
+				$doc_list->[ $index ]->{ stat } = 1 if $doc_list->[ $index ]->{ id } == $doc->{ DocType };
+			}
 		}
 	}
 
