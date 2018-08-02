@@ -333,6 +333,7 @@ sub upload_doc
 		'app_id'	=> $appdata_id,
 		'doc_list'	=> $doc_list,
 		'max_size'	=> $self->{ autodata }->{ general }->{ max_file_upload_size },
+		'max_size_mb'	=> ( $self->{ autodata }->{ general }->{ max_file_upload_size } / ( 1024 * 1024 ) ),
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};
