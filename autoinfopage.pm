@@ -7,7 +7,6 @@ use VCS::Site::autodata;
 use Data::Dumper;
 use Date::Calc;
 use JSON;
-use Image::Resize;
 use Digest::MD5 qw( md5_hex );
 
 sub new
@@ -305,9 +304,9 @@ sub upload_doc
 	);
 	
 	my $all_docs = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT DocType FROM DocUploaded WHERE AppDataID = ?", $appdata_id
+		SELECT DocType, UploadDate FROM DocUploaded WHERE AppDataID = ?", $appdata_id
 	) if $appdata_id;
-	
+
 	my $index = 0;
 	
 	for ( my $index = $#$doc_list; $index >= 0; --$index ) {
@@ -320,7 +319,8 @@ sub upload_doc
 		}
 		else {
 			for my $doc ( @$all_docs ) {
-				$doc_list->[ $index ]->{ stat } = 1 if $doc_list->[ $index ]->{ id } == $doc->{ DocType };
+				$doc_list->[ $index ]->{ date } = $doc->{ UploadDate }
+					if $doc_list->[ $index ]->{ id } == $doc->{ DocType };
 			}
 		}
 	}
@@ -355,9 +355,11 @@ sub upload_file
 	
 	my $file = $self->{ vars }->getparam( 'file' );
 	
-	my $filename = $self->{ vars }->getparam( 'filename' );
-	
-	$filename =~ s/[^A-Za-z0-9_\-\.]//g;
+	$self->{ vars }->getparam( 'filename' ) =~ /\.([^\.]+)$/;
+
+	my $ext = $1;
+
+	$ext =~ s/[^A-Za-z0-9_\-\.]//g;
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
@@ -377,15 +379,11 @@ sub upload_file
 		
 		return print 'error';
 	}
-	
-	my $image = Image::Resize->new( $file_name );
-	my $preview = $image->resize( 200, 200 );
-	 
-	return print 'error' unless $self->set_file_content( $file_name . '_preview.jpg', $preview->jpeg() ); 
 		
 	$self->{ af }->query( 'query', __LINE__, "
-		INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate, Folder) VALUES (?, ?, ?, now(), ?)",
-		{}, $appdata_id, $doc_type, md5_hex( $file_content ), $date_name
+		INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate, Folder, OriginalNameExt)
+		VALUES (?, ?, ?, now(), ?, ?)",
+		{}, $appdata_id, $doc_type, md5_hex( $file_content ), $date_name, $ext
 	);
 
 	return print 'ok';
@@ -395,8 +393,6 @@ sub download_file
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	
-	my $preview = ( $self->{ vars }->getparam( 'preview' ) ? 1 : 0 );
 	
 	my $conf = $self->{ vars }->getConfig('general');
 	
@@ -411,7 +407,7 @@ sub download_file
 		WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
 	) . '/' unless $appdata_id eq 'simple';
 	
-	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $appdata_id . '_' . $doc_type . ( $preview ? '_preview.jpg' : '' );
+	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $appdata_id . '_' . $doc_type;
 	
 	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"preview.jpg\"\nContent-Disposition: attachment; filename=\"preview.jpg\"\n\n";
 	

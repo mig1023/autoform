@@ -190,6 +190,7 @@
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 
+
 [% ELSIF title == 4 %]
 
 	<tr><td colspan="2">
@@ -201,34 +202,26 @@
 	[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %].
 	<br><br>[% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %].
 	<br>[% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %].	
-	<br><br>[% langreq('Допустимы к загрузки изображения формата в формате JPEG, PNG') %].
+	<br><br>[% langreq('Допустимы к загрузки изображения формата в формате JPEG, PNG, а также файлы PDF') %].
 	<br>[% langreq('Максимально допустимый размер загружаемого файла ') %] [% max_size_mb %] [% langreq('МБ') %].
 	<br><br><br>
 	</span></td></tr>
 
-	<tr><td>
-	<table width="100%">
-
-	<tr><td colspan="2"><table width="100%">
-	[% SET i = 0 %]
-	<tr>
+	<tr><td><table width="100%">
 	[% FOREACH doc IN doc_list %]
-	
-		[% SET i = i + 1 %]
-		[% IF i == 3 %]
-			</tr>
-			<tr>
-			[% SET i = 1 %]
-		[% END %]
-	
-		<td class="checklist_td" class="info_list">
+	<tr>
+		<td>[% langreq(doc.title) %]</td>
+		<td>
 		<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
-		<span id="img_span_[% doc.id %]"><img src="/autoform/?t=[% token %]&action=download_file&appdata=[% IF doc.stat == 1 %][% app_id %][% ELSE %]simple[% END %]&type=[% doc.id %]&preview=1"></span>
-		<br>[% langreq(doc.title) %]<br>
+		<span id="img_span_[% doc.id %]">[% doc.date %]</span>
+		</td>
+		<td>		
 		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept="image/*" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input class="small_button" type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" /><br><br></td>
+		<input class="small_button" type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
+		</td>
+	</tr>
 	[% END %]
-	</tr></table></td></tr>
+	</table></td></tr>
 
 	<tr><td colspan="2"><br>
 	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
