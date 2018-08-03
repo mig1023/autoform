@@ -142,6 +142,25 @@ sub get_content_rules_hash
 			},
 		],
 		
+		'Обращаем Ваше внимание' => [
+			{
+				page_ord => 140,
+				progress => 2,
+				relation => {
+					only_if => {
+						table => 'Appointments',
+						name => 'CenterID',
+						value => '3, 6, 14',
+					}
+				},
+			},
+			{
+				type => 'text',
+				name => 'booking_warning',
+				label => 'Заявителям, запрашивающим шенгенскую визу впервые, необходимо предоставить предоплаченное/полностью оплаченное подтверждение проживания.',
+			},
+		],
+		
 		'Услуга Primetime' => [
 			{
 				page_ord => 150,
