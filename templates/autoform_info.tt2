@@ -100,14 +100,11 @@
 	<table width="100%">
 	[% SET i = 0 %]
 	[% FOREACH person IN app_list %]
-	
 		[% SET i = i + 1 %]
-		
 		<tr>
 		<td class="info_list"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
-		<td class="m_right">
-		<input class="small_button" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');">
-		<input class="small_button" type="button" value="[% langreq('Загрузить документы') %]" onclick="go_button('upload_doc', '[% person.ID %]');"></td>
+		<td class="m_right"><span class="mobil_hide">[% person.BirthDate %]&nbsp;</span>
+		<input class="small_button" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');"></td>
 		</tr>
 	[% END %]
 	</table>
@@ -175,7 +172,6 @@
 
 	<tr><td colspan="2"><table width="100%">
 	[% FOREACH person IN app_list %]
-	
 		<tr>
 		<td class="checklist_td width_small"><input type="checkbox" value="1" name="cancel[% person.ID %]" id="cancel[% person.ID %]"></td>
 		<td class="checklist_td" class="info_list"><nobr><span class="spacer">&nbsp;&nbsp;</span><label for="cancel[% person.ID %]">[% person.FName %] [% person.LName %]</label></nobr></td>
@@ -187,44 +183,6 @@
 	<tr><td colspan="2"><br>
 	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 	<input class="small_button" type="button" value="[% langreq('Отменить запись') %] &#9655;" onclick="go_button('cancel');"><br></td></tr>
-
-	<tr><td colspan="2">&nbsp;</td></tr>
-
-
-[% ELSIF title == 4 %]
-
-	<tr><td colspan="2">
-	<br><br>
-	<h2>[% langreq('Загрузить документы') %]</h2><br></td></tr>
-	
-	<tr><td colspan="2" align ="justify">
-	<span class="suppl_text">
-	[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %].
-	<br><br>[% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %].
-	<br>[% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %].	
-	<br><br>[% langreq('Допустимы к загрузки изображения формата в формате JPEG, PNG, а также файлы PDF') %].
-	<br>[% langreq('Максимально допустимый размер загружаемого файла ') %] [% max_size_mb %] [% langreq('МБ') %].
-	<br><br><br>
-	</span></td></tr>
-
-	<tr><td><table width="100%">
-	[% FOREACH doc IN doc_list %]
-	<tr>
-		<td>[% langreq(doc.title) %]</td>
-		<td>
-		<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
-		<span id="img_span_[% doc.id %]">[% doc.date %]</span>
-		</td>
-		<td>		
-		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept="image/*" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input class="small_button" type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
-		</td>
-	</tr>
-	[% END %]
-	</table></td></tr>
-
-	<tr><td colspan="2"><br>
-	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 
@@ -409,79 +367,10 @@ function mobileScreenCheck() {
 [% END %]
 
 function go_button(where, who) {
-
 	$('#action').val(where);
 	$('#appdata').val(who);
 	document.dataform.submit();
 };
-
-[% IF title == 4 %]
-
-function show_hide( doc_id, show, hide ) {
-	
-	$('#' + hide + doc_id).hide();
-	$('#' + show + doc_id).show();
-}
-
-function error_upload( line, doc_id ) {
-
-	alert( line );
-	
-	show_hide( doc_id, 'img_span_', 'tmp_span_' );
-}
-
-function upload( doc_id, upfile_field ) {
-
-	show_hide( doc_id, 'tmp_span_', 'img_span_' );
-	
-	var file = document.getElementById(upfile_field).files[0];
-	
-	if ( file.size > [% max_size %] ) {
-
-		return error_upload( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]', doc_id );
-	}
-	
-	var parts = file.name.split('.');
-	
-	if ( parts.length <= 1 ) {
-
-		return error_upload( '[% langreq('У файла неверно указан формат') %]', doc_id );
-	}
-	
-	var ext = parts.pop().toLowerCase();
-	
-	if ( ( ext != 'jpg' ) && ( ext != 'jpeg' ) && ( ext !='png' ) ) {
-	
-		return error_upload( '[% langreq('У файла недопустимый графический формат') %]', doc_id );
-	}
-	
-	var addr = '?t=[% token %]&action=upload_file&filename='+file.name+'&appdata=[% app_id %]&type=' + doc_id;
-	var ajaxData = new FormData();
-	ajaxData.append('file', file);
-	
-	$.ajax({
-		url: '/autoform/' + addr,
-		type: 'POST',
-		data: ajaxData,
-		encoding: 'utf8',
-		contentType: false,
-		processData: false,
-		success: function(data) {
-		
-			if (data.indexOf('ok')+1) {
-			
-				window.location = '/autoform/?t=[% token %]&action=upload_doc&appdata=[% app_id %]';
-			}
-			else {
-				alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно, файл в неправильном формате.') %]' );
-				
-				show_hide( doc_id, 'img_span_', 'tmp_span_' );
-			}
-		}
-	});
-};
-
-[% END %]
 
 </script>
 
