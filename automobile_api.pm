@@ -190,6 +190,8 @@ sub get_api_centers
 		
 		$result->{ data }->{ $_->{ BName } }->{ longitude } = $geo_data->{ $_->{ ID } }->[ 1 ];
 		
+		utf8::decode( $result->{ data }->{ $_->{ BName } }->{ address } );
+		
 		delete $result->{ data }->{ $_->{ BName } }->{ BName };
 	}
 	
