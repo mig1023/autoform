@@ -657,8 +657,8 @@ sub doc_status
 {
 	my ( $self, $token ) = @_;
 	
-	my ( $doc_id, $status, $shipping ) = $self->query( 'sel1', __LINE__, "
-		SELECT DocPack.ID, PStatus, DocPack.Shipping
+	my ( $status, $shipping ) = $self->query( 'sel1', __LINE__, "
+		SELECT PStatus, DocPack.Shipping
 		FROM AutoToken
 		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
 		JOIN DocPack ON DocPack.ID = Appointments.PacketID
@@ -677,13 +677,6 @@ sub doc_status
 		
 		$status -= 1 if $status > 4;
 	}
-
-	# ////////////////////////// temp
-	$self->query( 'query', __LINE__, "
-		INSERT INTO DocStatusTEMP (DocPackID, DocInfoCheck, DocInfoStatus)
-		VALUES (?, now(), ?)", {}, $doc_id, $status
-	);
-	# //////////////////////////
 
 	my $progress = $self->get_progressbar( $status, $doc_progressbar );
 	
@@ -1458,12 +1451,6 @@ sub get_progressbar
 	my ( $self, $current_progress, $progress_line ) = @_;
 	
 	my ( $line, $content );
-	
-	#my ( $center, $visa_category ) = $self->get_app_visa_and_center();
-		
-	#my $progress_line = $self->get_progressbar_hash_opt();
-	
-	#my $current_progress = $page->[ 0 ]->{ progress };
 	
 	my $big_element = 0;
 	
