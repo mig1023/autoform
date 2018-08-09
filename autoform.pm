@@ -227,7 +227,7 @@ sub autoform
 		'progress' 		=> $progress,
 		'lang_in_link' 		=> $self->{ lang },
 		'js_rules'		=> $js_rules,
-		'js_errors'		=> VCS::Site::autodata::get_text_error(),
+		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
@@ -1370,6 +1370,8 @@ sub get_specials_of_element
 		$js_rule->{ $_ } = $element->{ $_ } for ( 'name', 'type', 'label', 'check' );
 		
 		$js_rule->{ label } = $element->{ label_for } unless $element->{ label };
+		
+		$js_rule->{ label } = $self->lang( $element->{ label } );
 		
 		$js_rule->{ check } =~ s/\\/\\\\/g;
 
@@ -3040,7 +3042,7 @@ sub send_app_confirm
 	my $months = VCS::Site::autodata::get_months();
 
 	$replacer->{ date_time } = 
-		$date_sp[ 2 ] . ' ' . $months->{ $date_sp[ 1 ] } . ' ' . $date_sp[ 0 ] . ', ' . 
+		$date_sp[ 2 ] . ' ' . $self->lang( $months->{ $date_sp[ 1 ] } ) . ' ' . $date_sp[ 0 ] . ', ' . 
 		$self->{ vars }->get_system->time_to_str( $tstart ) . ' - ' .
 		$self->{ vars }->get_system->time_to_str( $tend );
 	
