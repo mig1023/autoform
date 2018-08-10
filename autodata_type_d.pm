@@ -202,6 +202,24 @@ sub get_content_rules_hash
 			{
 				page_ord => 400,
 				progress => 4,
+				param => 1,
+			},
+			{
+				type => 'select',
+				name => 'сitizenship',
+				label => 'Гражданство в настоящее время',
+				comment => 'Если у вас два гражданства, то укажите гражданство по паспорту той страны, который подаёте на визу',
+				example => 'The Russian Federation',
+				check => 'zN',
+				db => {
+					table => 'AppData',
+					name => 'Citizenship',
+				},
+				param => '[citizenship_countries]',
+				first_elements => '70',
+			},
+			{
+				type => 'free_line',
 			},
 			{
 				type => 'input',
@@ -209,7 +227,13 @@ sub get_content_rules_hash
 				label => 'Фамилия',
 				comment => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
 				example => 'Иванов',
-				check => 'zЁ\s\-',
+				check => 'zWЁ\s\-',
+				check_logic => [
+					{
+						condition => 'english_only_for_not_rf_citizen',
+						full_error => 'Для граждан РФ фамилию необходимо вводить на русском языке',
+					},
+				],
 				db => {
 					table => 'AppData',
 					name => 'RLName',
@@ -222,7 +246,13 @@ sub get_content_rules_hash
 				label => 'Имя',
 				comment => 'Введите имя на русском языке так, как оно указано во внутреннем паспорте',
 				example => 'Иван',
-				check => 'zЁ\s\-',
+				check => 'zWЁ\s\-',
+				check_logic => [
+					{
+						condition => 'english_only_for_not_rf_citizen',
+						full_error => 'Для граждан РФ имя необходимо вводить на русском языке',
+					},
+				],
 				db => {
 					table => 'AppData',
 					name => 'RFName',
@@ -235,8 +265,12 @@ sub get_content_rules_hash
 				label => 'Отчество',
 				comment => 'Введите отчество на русском языке так, как оно указано во внутреннем паспорте',
 				example => 'Иванович',
-				check => 'Ё\s\-',
+				check => 'WЁ\s\-',
 				check_logic => [
+					{
+						condition => 'english_only_for_not_rf_citizen',
+						full_error => 'Для граждан РФ отч необходимо вводить на русском языке',
+					},
 					{
 						condition => 'free_only_if',
 						table => 'AppData',
@@ -475,7 +509,7 @@ sub get_content_rules_hash
 				label => 'Кем выдан',
 				comment => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
 				example => 'ОВД по району Беговой города Москвы',
-				check => 'zЁN\s\-\_\.\,\;\'\"',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'AppData',
 					name => 'RPWhere',
@@ -487,7 +521,7 @@ sub get_content_rules_hash
 				label => 'Адрес регистрации',
 				comment => 'Укажите адрес регистрации',
 				example => 'г.Москва, М.Толмачевский пер., д. 6, стр.1',
-				check => 'zЁN\s\-\_\.\,\;\'\"',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'AppData',
 					name => 'RAddress',
@@ -526,7 +560,7 @@ sub get_content_rules_hash
 				label => 'Фамилия',
 				comment => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
 				example => 'Иванов',
-				check => 'zЁ\s\-',
+				check => 'zWЁ\s\-',
 				db => {
 					table => 'Appointments',
 					name => 'LName',
@@ -538,7 +572,7 @@ sub get_content_rules_hash
 				label => 'Имя',
 				comment => 'Введите имя на русском языке так, как оно указана во внутреннем паспорте',
 				example => 'Иван',
-				check => 'zЁ\s\-',
+				check => 'zWЁ\s\-',
 				db => {
 					table => 'Appointments',
 					name => 'FName',
@@ -550,7 +584,7 @@ sub get_content_rules_hash
 				label => 'Отчество',
 				comment => 'Введите отчество на русском языке так, как оно указана во внутреннем паспорте',
 				example => 'Иванович',
-				check => 'zЁ\s\-',
+				check => 'zWЁ\s\-',
 				db => {
 					table => 'Appointments',
 					name => 'MName',
@@ -592,7 +626,7 @@ sub get_content_rules_hash
 				label => 'Кем выдан',
 				comment => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
 				example => 'ОВД по району Беговой города Москвы',
-				check => 'zЁN\s\-\_\.\,\;\'\"',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'Appointments',
 					name => 'PassWhom',
@@ -604,7 +638,7 @@ sub get_content_rules_hash
 				label => 'Адрес',
 				comment => 'Полный адрес, включая индекс',
 				example => '119017, г.Москва, М.Толмачевский пер., д. 6, стр.1',
-				check => 'zЁN\s\-\_\.\,\;\'\"',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'Appointments',
 					name => 'Address',

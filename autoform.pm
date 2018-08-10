@@ -2437,6 +2437,17 @@ sub check_logic
 			};
 		}
 		
+		if ( $rule->{ condition } =~ /^english_only_for_not_rf_citizen$/ and $value ) {
+			
+			my $citizenship = $self->query( 'sel1', __LINE__, "
+				SELECT Citizenship FROM AutoAppData WHERE ID = ?", 
+				$tables_id->{ 'AutoAppData' }
+			);
+
+			$first_error = $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
+				if ( $citizenship == 70 ) and $value =~ /[A-Za-z]/i;
+		}
+		
 		last if $first_error;
 	}
 	
