@@ -2935,9 +2935,8 @@ sub get_pcode
 
 		for my $rk ( @$finded_pcode ) {
 		
-			$rk->{ CName } = ( $rk->{ RName } ne '' ? 
-				$self->{ vars }->get_system->converttext( $rk->{ RName } ) : 
-				$self->{ vars }->get_system->converttext( $rk->{ CName } ) 
+			$rk->{ CName } = $self->{ vars }->get_system->converttext(
+				$rk->{ RName } ne '' ?  $rk->{ RName } : $rk->{ CName } 
 			);
 		}
 	}
@@ -3209,12 +3208,9 @@ sub this_is_inner_ip
 {
 	my $self = shift;
 	
-	my $inner_ip_list = VCS::Site::autodata::get_inner_ip();
-	
-	for ( @$inner_ip_list ) {
-	
-		return 1 if $_ eq $ENV{ HTTP_X_REAL_IP };
-	}
+	my %inner_ip_list_h = map { $_ => 1 } @{ VCS::Site::autodata::get_inner_ip() };
+
+	return 1 if $inner_ip_list_h{ $ENV{ HTTP_X_REAL_IP } }; 
 	
 	return 0;
 }	
