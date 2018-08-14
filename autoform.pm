@@ -2725,7 +2725,7 @@ sub mod_hash
 			
 			$hash->{ HotelPhone } = $schengen_data->{ HostDataPhoneNumber };
 		}
-
+		
 		$hash->{ NRes } = ( $hash->{ Citizenship } == 70 ? 0 : 1 ) ;
 		
 		$hash->{ CountryLive } = ( $hash->{ NRes } ? 1 : 0 );
@@ -2750,7 +2750,10 @@ sub mod_hash
 				$spb_hash->{ HotelPostCode }, $spb_hash->{ HotelCity }, $spb_hash->{ HotelStreet }, $spb_hash->{ HotelHouse }
 			) ) unless $hash->{ HotelAdresses };
 		
-			$hash->{ Hotels } = $spb_hash->{ HotelName } unless $hash->{ Hotels };
+			unless ( $hash->{ Hotels } ) {
+			
+				$hash->{ Hotels } = $spb_hash->{ HotelName } || '';
+			}
 		}
 		else {
 			$hash->{ FullAddress } .= ' ' . $hash->{ AppEMail };
