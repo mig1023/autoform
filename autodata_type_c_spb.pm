@@ -1550,7 +1550,7 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Укажите адрес электронной почты',
 				example => 'info@italyvms.ru',
-				check => 'zWN\@\s\-\.',
+				check => 'zWN\@\s\-\_\.',
 				check_logic => [
 					{
 						condition => 'this_is_email',
