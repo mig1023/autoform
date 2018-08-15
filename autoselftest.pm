@@ -113,14 +113,13 @@ sub get_test_list {
 							{
 								check => 'true',
 								name => 'pers_info',
-								label => 'я согласен на обработку персональных данных',
+								label => '',
 								type => 'checkbox'
 							},
 							{
 								check => 'true',
 								name => 'mobil_info',
-								label => 'я согласен на условия работы с мобильными'.
-									' телефона на территории визового центра',
+								label => '',
 								type => 'checkbox'
 							}
 						],
@@ -223,14 +222,13 @@ sub get_test_list {
 							{
 								check => 'true',
 								name => 'pers_info',
-								label => 'я согласен на обработку персональных данных',
+								label => '',
 								type => 'checkbox'
 							},
 							{
 								check => 'true',
 								name => 'mobil_info',
-								label => 'я согласен на условия работы с мобильными'.
-									' телефона на территории визового центра',
+								label => '',
 								type => 'checkbox'
 							}
 						],
@@ -510,7 +508,7 @@ sub get_test_list {
 		{ 	func => \&{ VCS::Site::autoform::get_progressbar },
 			comment => 'get_progressbar',
 			test => { 	
-				1 => { 	args => [ '[page1]' ],
+				1 => { 	args => [ '[progress1]', '[progressbar_hash]' ],
 					expected => '[progress_bar]',
 				},
 			},
@@ -1750,6 +1748,15 @@ sub get_test_list {
 				5 => { 	args => [ '2018-01-01', '2017-06-15' ],
 					expected => '0',
 				},
+				6 => { 	args => [ undef, '2017-06-15' ],
+					expected => '99',
+				},
+				7 => { 	args => [ '2016-06-14', undef ],
+					expected => '99',
+				},
+				8 => { 	args => [ undef, undef ],
+					expected => '99',
+				},
 			},
 		},
 		{ 	func => \&{ VCS::Site::autoform::lang },
@@ -2347,8 +2354,12 @@ sub get_test_list {
 					expected => [ '', 2 ],
 				},
 				2 => { 	prepare => [ \&pre_show_no_testing, \&pre_mutex_fail_creation ],
-					args => [ 5 ],
-					expected => [ 'applist|Вы должны полностью заполнить анкеты или удалить ненужные черновики', 3 ],
+					args => [ 7 ],
+					expected => [ 'applist|Вы должны полностью заполнить анкеты или удалить ненужные черновики', 5 ],
+				},
+				3 => { 	prepare => [ \&pre_mutex_fail_creation ],
+					args => [ 7 ],
+					expected => [ '', 7 ],
 				},
 			},
 		},
@@ -2579,8 +2590,8 @@ sub get_content_rules_hash
 		
 		'Страница окончания записи' => [
 			{
-				page_ord => 5,
-				progress => 5,
+				page_ord => 6,
+				progress => 6,
 				replacer => '[app_finish]',
 			},
 		],
@@ -2608,8 +2619,9 @@ sub get_content_rules_hash
 		],
 		'Список заявителей' => [
 			{
-				page_ord => 3,
+				page_ord => 5,
 				progress => 3,
+				goto_link => 'back_to_appdata',
 				replacer => '[list_of_applicants]',
 			},
 		],
@@ -2873,6 +2885,8 @@ sub replace_var
 	
 	$_ = $table_id if /\[table_id\]/;
 	
+	$_ = $self->get_progressbar_hash_opt() if /\[progressbar_hash\]/;
+	
 	s/\[token\]/$test_token/g;
 	s/\[token_id\]/$token_id/g;
 	s/\[app_id\]/$test_appid/g;
@@ -2893,6 +2907,10 @@ sub replace_var
 	
 	if ( /\[page(\d+)\]/ ) {
 		$_ = $self->get_content_rules( $1, 'full' );
+	}
+	
+	if ( /\[progress(\d+)\]/ ) {
+		$_ = $self->get_content_rules( $1, 'full' )->[0]->{ progress };
 	}
 	
 	return $_;
@@ -3520,8 +3538,6 @@ sub pre_mutex_fail_creation
 	$vars->db->query("
 		UPDATE AutoAppData SET PassNum = ? WHERE ID = ?", {}, $new_passnum, $appdataid
 	);
-
-	$new_passnum = '' if ( $$test->{ comment } eq "check_mutex_for_creation" ) and ( $num == 3 );
 
 	$vars->db->query("
 		UPDATE AppData SET PassNum = ? ORDER BY ID LIMIT 1", {}, $new_passnum
