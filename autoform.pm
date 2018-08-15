@@ -2346,8 +2346,6 @@ sub check_logic
 				FROM AutoAppData WHERE ID = ?", $tables_id->{ AutoAppData }
 			)->[ 0 ];
 			
-			
-		
 			return $self->text_error( 21, $element, undef, $rule->{ offset } ) 
 				if ( 
 					( $self->age( $app->{ birthdate }, $app->{ currentdate } ) >= $rule->{ offset } )
@@ -3102,13 +3100,19 @@ sub get_file_content
 sub age
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $birth_date, $current_date ) = @_; 
+	
+	return 99 if ( 
+		$birth_date !~ /^\d{4}\-\d{2}\-\d{2}$/
+		or 
+		$current_date !~ /^\d{4}\-\d{2}\-\d{2}$/
+	);
 	
 	my $age_free_days = $self->{ vars }->getConfig( 'general' )->{ age_free_days } + 0;
 
-	my ( $birth_year, $birth_month, $birth_day ) = split( /\-/, shift ); 
+	my ( $birth_year, $birth_month, $birth_day ) = split( /\-/, $birth_date ); 
 	
-	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, shift ), $age_free_days );
+	my ( $year, $month, $day ) = Add_Delta_Days( split( /\-/, $current_date ), $age_free_days );
 	
 	my $age = $year - $birth_year;
 	
