@@ -2272,7 +2272,6 @@ sub check_logic
 	my ( $self, $element, $tables_id ) = @_;
 
 	my $value = $self->{ vars }->getparam( $element->{ name } );
-	my $first_error = '';
 	my $error = 0;
 	
 	$value =~ s/^\s+|\s+$//g;
@@ -2286,7 +2285,7 @@ sub check_logic
 				$tables_id->{ 'Auto'.$rule->{table} }
 			);
 
-			$first_error = $self->text_error( 26, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
+			return $self->text_error( 26, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
 				if lc( $related_value ) ne lc( $value );
 		}
 
@@ -2309,7 +2308,7 @@ sub check_logic
 			
 			$offset *= -1 if $offset < 0;
 
-			$first_error = $self->text_error(
+			return $self->text_error(
 				$error, $element, undef, $rule->{ error }, $offset, $rule->{ full_error }
 				
 			) if $error;
@@ -2329,7 +2328,7 @@ sub check_logic
 			
 			my $datediff = $self->get_datediff( $value, $rule, $tables_id, !$from_now );
 
-			$first_error = $self->text_error(
+			return $self->text_error(
 				23, $element, undef, $rule->{ error }, $rule->{ offset }, $rule->{ full_error }
 			) if (
 				( ( $datediff < $rule->{ offset } ) and ( $rule->{ offset } >= 0  ) and !$spb )
@@ -2346,8 +2345,10 @@ sub check_logic
 				SELECT birthdate, CURRENT_DATE() as currentdate
 				FROM AutoAppData WHERE ID = ?", $tables_id->{ AutoAppData }
 			)->[ 0 ];
+			
+			
 		
-			$first_error = $self->text_error( 21, $element, undef, $rule->{ offset } ) 
+			return $self->text_error( 21, $element, undef, $rule->{ offset } ) 
 				if ( 
 					( $self->age( $app->{ birthdate }, $app->{ currentdate } ) >= $rule->{ offset } )
 					and
@@ -2375,7 +2376,7 @@ sub check_logic
 					WHERE Status = 1 AND isChild = 0 AND $rule->{name} = ?", $value
 				);
 
-				$first_error = $self->text_error( 10, $element ) if $id_in_db;
+				return $self->text_error( 10, $element ) if $id_in_db;
 			}
 		}
 		
@@ -2389,11 +2390,11 @@ sub check_logic
 			);
 
 			if ( $not ) {
-				$first_error = $self->text_error( 14, $element, undef, $rule->{error} ) 
+				return $self->text_error( 14, $element, undef, $rule->{error} ) 
 					if ( $field_in_db and !$value );
 			}
 			else {
-				$first_error = $self->text_error( 13, $element, undef, $rule->{error} ) 
+				return $self->text_error( 13, $element, undef, $rule->{error} ) 
 					unless ( $field_in_db or $value );
 			}
 		}
@@ -2402,18 +2403,18 @@ sub check_logic
 			
 			my ( $postcode_id, undef ) = $self->get_postcode_id( $value );
 			
-			$first_error = $self->text_error( 15, $element ) unless ( $postcode_id );
+			return $self->text_error( 15, $element ) unless ( $postcode_id );
 		}
 
 		if ( $rule->{ condition } =~ /^length_strict$/ and $value ) {
 			
-			$first_error = $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
+			return $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
 				if length( $value ) != $rule->{ length };
 		}
 		
 		if ( $rule->{ condition } =~ /^this_is_email$/ and $value ) {
 			
-			$first_error = $self->text_error( 16, $element )
+			return $self->text_error( 16, $element )
 				if $value !~ /^([a-z0-9_-]+\.)*[a-z0-9_-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/i;
 		}
 		
@@ -2433,7 +2434,7 @@ sub check_logic
 				%check = map { $_ => 1 } @{ $m->{ for_centers } };
 				next unless exists $check{ $center } or @{ $m->{ for_centers } } == 0;
 				
-				$first_error = $self->text_error( 16 + ( $m->{ show_truth } ? 1 : 0 ) , $element ); 
+				return $self->text_error( 16 + ( $m->{ show_truth } ? 1 : 0 ) , $element ); 
 			};
 		}
 		
@@ -2444,14 +2445,10 @@ sub check_logic
 				$tables_id->{ 'AutoAppData' }
 			);
 
-			$first_error = $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
+			return $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
 				if ( $citizenship == 70 ) and $value =~ /[A-Za-z]/i;
 		}
-		
-		last if $first_error;
 	}
-	
-	return $first_error;	
 }
 
 sub get_datediff
