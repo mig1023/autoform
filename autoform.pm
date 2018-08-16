@@ -1169,9 +1169,97 @@ sub get_add
 		$step, $appdata_id, $sch_id, $spb_id, $self->{ token }
 	);
 	
+	my $copy_ids = {
+		'AppData' => { target => $appdata_id },
+		'SpbAlterAppData' => { target => $spb_id },
+		'SchengenAppData' => { target => $sch_id },
+	};	
+	
+	$self->copy_unpersonal_information( $self->find_source( $copy_ids, $app_id ) );
+	
 	$self->mod_last_change_date();
 	
 	return $step;
+}
+
+sub find_source
+# //////////////////////////////////////////////////
+{
+	my ( $self, $tables_id, $app_id ) = @_;
+
+	my $all_applicants = $self->query( 'selallkeys', __LINE__, "
+		SELECT ID, SchengenAppDataID FROM AutoAppData
+		WHERE AppID = ? AND ID <> ? ORDER BY ID", $app_id, $tables_id->{ AppData }->{ target }
+	);
+
+	if ( @$all_applicants > 0 ) {
+
+		$tables_id->{ AppData }->{ source } = $all_applicants->[ 0 ]->{ ID };
+	
+		$tables_id->{ SchengenAppData }->{ source } = $all_applicants->[ 0 ]->{ SchengenAppDataID };
+	}
+	
+	
+	my $all_spb = $self->query( 'selallkeys', __LINE__, "
+		SELECT ID FROM AutoAppData WHERE AppID = ? ORDER BY ID", $all_applicants->[ 0 ]->{ ID }
+	);
+
+	$tables_id->{ SpbAlterAppData }->{ source } = $all_spb->[ 0 ]->{ ID } if @$all_spb > 0;	
+
+	return $tables_id;
+}
+
+sub copy_unpersonal_information
+# //////////////////////////////////////////////////
+{
+	my ( $self, $tables_id ) = @_;
+	
+	my $all_elements = $self->get_content_rules();
+	
+	my $copy_tables = {};
+
+	for my $page ( keys %$all_elements ) {
+	
+		my $elements = $all_elements->{ $page };
+		
+		next if $elements =~ /\[/;
+		
+		for my $element ( @$elements ) {
+	
+			next unless $element->{ special } eq 'copy_from_other_applicants';
+			
+			my $table = $element->{ db }->{ table };
+			
+			$copy_tables->{ $table } = {} unless ref( $copy_tables->{ $table } ) eq 'HASH';
+			
+			$copy_tables->{ $table }->{ $element->{ db }->{ name } } = 1;
+		}
+	}
+	
+	for my $table ( keys %$copy_tables ) {
+
+		next if !$tables_id->{ $table }->{ target } or !$tables_id->{ $table }->{ source };
+
+		my $request = '';
+		
+		my $send = '';
+	
+		for my $row ( keys %{ $copy_tables->{ $table } } ) {
+		
+			$request .= "$row, ";
+			
+			$send .=  "$row = ?, ";
+		}
+		$_ =~ s/,\s$// for ( $request, $send );
+
+		my @values = $self->query( 'sel1', __LINE__, "
+			SELECT $request FROM Auto$table WHERE ID = ?", $tables_id->{ $table }->{ source }
+		);
+
+		$self->query( 'query', __LINE__, "
+			UPDATE Auto$table SET $send WHERE ID = ?", {}, @values, $tables_id->{ $table }->{ target }
+		);
+	}
 }
 
 sub get_back
