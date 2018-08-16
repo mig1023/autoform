@@ -1238,6 +1238,7 @@ sub get_content_rules_hash
 					H => 'гостиница/аренда/собственность', 
 					P => 'приглашение',
 				},
+				special => 'copy_from_other_applicants',
 			},
 		],
 		
@@ -1270,6 +1271,7 @@ sub get_content_rules_hash
 					name => 'Hotels',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1283,6 +1285,7 @@ sub get_content_rules_hash
 					name => 'HotelAdresses',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1295,6 +1298,7 @@ sub get_content_rules_hash
 					table => 'AppData',
 					name => 'HotelPhone',
 				},
+				special => 'copy_from_other_applicants',
 			},
 		],
 		
@@ -1327,6 +1331,7 @@ sub get_content_rules_hash
 					name => 'Hotels',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1340,6 +1345,7 @@ sub get_content_rules_hash
 					name => 'HotelAdresses',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1352,6 +1358,7 @@ sub get_content_rules_hash
 					table => 'AppData',
 					name => 'HotelPhone',
 				},
+				special => 'copy_from_other_applicants',
 			},
 		],
 		
@@ -1385,6 +1392,7 @@ sub get_content_rules_hash
 					name => 'HostDataName',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1398,6 +1406,7 @@ sub get_content_rules_hash
 					name => 'HostDataDenomination',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1410,7 +1419,7 @@ sub get_content_rules_hash
 					table => 'SchengenAppData',
 					name => 'HostDataDateOfBirth',
 				},
-				special => 'mask',
+				special => 'mask, copy_from_other_applicants',
 			},
 			{
 				type => 'select',
@@ -1423,6 +1432,7 @@ sub get_content_rules_hash
 				},
 				param => '[schengen_provincies]',
 				first_elements => 'default_free',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1436,6 +1446,7 @@ sub get_content_rules_hash
 					name => 'HostDataCity',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1449,6 +1460,7 @@ sub get_content_rules_hash
 					name => 'HostDataAddress',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1461,6 +1473,7 @@ sub get_content_rules_hash
 					table => 'SchengenAppData',
 					name => 'HostDataPhoneNumber',
 				},
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1478,6 +1491,7 @@ sub get_content_rules_hash
 					table => 'SchengenAppData',
 					name => 'HostDataEmail',
 				},
+				special => 'copy_from_other_applicants',
 			},
 		],
 	
@@ -1506,6 +1520,7 @@ sub get_content_rules_hash
 				},
 				param => '[schengen_provincies]',
 				first_elements => 'default_free',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1519,6 +1534,7 @@ sub get_content_rules_hash
 					name => 'HostDataCity',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1532,6 +1548,7 @@ sub get_content_rules_hash
 					name => 'ACompanyName',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1545,6 +1562,7 @@ sub get_content_rules_hash
 					name => 'ACompanyAddress',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1557,6 +1575,7 @@ sub get_content_rules_hash
 					table => 'AppData',
 					name => 'ACompanyPhone',
 				},
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1569,6 +1588,7 @@ sub get_content_rules_hash
 					table => 'AppData',
 					name => 'ACompanyFax',
 				},
+				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
@@ -1582,6 +1602,7 @@ sub get_content_rules_hash
 					name => 'ACopmanyPerson',
 				},
 				format => 'capslock',
+				special => 'copy_from_other_applicants',
 			},
 		],
 		

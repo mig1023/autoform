@@ -1201,7 +1201,8 @@ sub find_source
 	
 	
 	my $all_spb = $self->query( 'selallkeys', __LINE__, "
-		SELECT ID FROM AutoAppData WHERE AppID = ? ORDER BY ID", $all_applicants->[ 0 ]->{ ID }
+		SELECT ID FROM AutoSpbAlterAppData
+		WHERE AppDataID = ? ORDER BY ID", $all_applicants->[ 0 ]->{ ID }
 	);
 
 	$tables_id->{ SpbAlterAppData }->{ source } = $all_spb->[ 0 ]->{ ID } if @$all_spb > 0;	
@@ -1226,7 +1227,7 @@ sub copy_unpersonal_information
 		
 		for my $element ( @$elements ) {
 	
-			next unless $element->{ special } eq 'copy_from_other_applicants';
+			next unless $element->{ special } =~ /copy_from_other_applicants/;
 			
 			my $table = $element->{ db }->{ table };
 			
@@ -1947,7 +1948,7 @@ sub check_special_in_rules_for_save
 	
 	for my $element ( @$elements ) {
 	
-		if ( $element->{ special } eq 'save_info_about_hastdatatype' ) {
+		if ( $element->{ special } =~ /save_info_about_hastdatatype/ ) {
 			
 			my $visa_type = $self->query( 'sel1', __LINE__, "
 				SELECT VisaPurpose FROM AutoAppData WHERE ID = ?", $table_id->{ AutoAppData }
@@ -1959,7 +1960,7 @@ sub check_special_in_rules_for_save
 				
 			) unless $visa_type == 1;
 		}
-		elsif ( $element->{ special } eq 'cach_this_value' ) {
+		elsif ( $element->{ special } =~ /cach_this_value/ ) {
 		
 			my $key = 'autoform_' . $self->{ token } . '_' . $element->{ name };
 
