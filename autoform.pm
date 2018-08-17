@@ -209,7 +209,7 @@ sub autoform
 	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
+
 	my $tvars = {
 		'langreq' 		=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 		=> $title,
@@ -1452,7 +1452,7 @@ sub get_specials_of_element
 	my $js_rules = [];
 	
 	for my $element ( @$page_content ) {
-	
+
 		for my $spec_type ( keys %$special ) {
 		
 			push( @{ $special->{ $spec_type } }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
@@ -1472,11 +1472,11 @@ sub get_specials_of_element
 		my $js_rule = {};
 		
 		$js_rule->{ $_ } = $element->{ $_ } for ( 'name', 'type', 'label', 'check' );
-		
+
 		$js_rule->{ label } = $element->{ label_for } unless $element->{ label };
-		
-		$js_rule->{ label } = $self->lang( $element->{ label } );
-		
+
+		$js_rule->{ label } = $self->lang( $js_rule->{ label } );
+	
 		$js_rule->{ check } =~ s/\\/\\\\/g;
 
 		$js_rule->{ check } =~ s/'/\\'/g;
@@ -2606,7 +2606,7 @@ sub text_error
 	
 	my $name_of_element = (	$element->{label} ? $element->{label} : ( 
 				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
-	
+
 	my $current_error = $self->lang( $full_error ? $full_error : $text->[ $error_code ] );
 	
 	$current_error =~ s/\[name\]/$name_of_element/;
