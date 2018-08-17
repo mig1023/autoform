@@ -757,6 +757,8 @@ sub get_content_rules_hash
 			{
 				page_ord => 600,
 				progress => 5,
+				copy_from_other_applicants => 'now',
+				
 				relation => {
 					only_if_younger => {
 						table => 'AppData',
@@ -876,6 +878,7 @@ sub get_content_rules_hash
 				page_ord => 1000,
 				progress => 6,
 				param => 1,
+				
 			},
 			{
 				type => 'text',

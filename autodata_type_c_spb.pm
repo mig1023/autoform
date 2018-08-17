@@ -790,6 +790,8 @@ sub get_content_rules_hash
 			{
 				page_ord => 700,
 				progress => 5,
+				copy_from_other_applicants => 'now',
+				
 				relation => {
 					only_if_younger => {
 						table => 'AppData',
@@ -1492,8 +1494,7 @@ sub get_content_rules_hash
 					table => 'SchengenAppData',
 					name => 'HostDataDateOfBirth',
 				},
-				special => 'mask',
-				special => 'copy_from_other_applicants',
+				special => 'mask, copy_from_other_applicants',
 			},
 			{
 				type => 'select',

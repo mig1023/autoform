@@ -738,7 +738,9 @@ sub get_autoform_content
 	$step = $self->set_step_by_content( '[list_of_applicants]' ) if $action eq 'tolist';
 	
 	my $page = $self->get_content_rules( $step, 'full' );
-
+	
+	$self->copy_unpersonal_information() if $page->[ 0 ]->{ copy_from_other_applicants };
+	
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
 	if ( !$last_error and ( exists $page->[ 0 ]->{ relation } ) ) {
@@ -807,7 +809,7 @@ sub check_relation
 			$step += ( $moonwalk ? -1 : 1 );
 			
 			$page = $self->get_content_rules( $step, 'full' );
-			
+
 			my $current_table_id = $self->get_current_table_id(); 
 			
 			if ( $step == $self->get_step_by_content('[app_finish]') ) {
@@ -1169,52 +1171,68 @@ sub get_add
 		$step, $appdata_id, $sch_id, $spb_id, $self->{ token }
 	);
 	
-	my $copy_ids = {
-		'AppData' => { target => $appdata_id },
-		'SpbAlterAppData' => { target => $spb_id },
-		'SchengenAppData' => { target => $sch_id },
-	};	
-	
-	$self->copy_unpersonal_information( $self->find_source( $copy_ids, $app_id ) );
-	
 	$self->mod_last_change_date();
 	
 	return $step;
 }
 
+sub copy_unpersonal_information
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $app = $self->query( 'selallkeys', __LINE__, "
+		SELECT AutoAppID, AutoAppData.ID, SchengenAppDataID,
+		AutoSpbAlterAppData.ID as SpbID, Copypasta, VisaPurpose
+		FROM AutoToken
+		JOIN AutoAppData ON AutoToken.AutoAppDataID = AutoAppData.ID
+		JOIN AutoSpbAlterAppData ON AppDataID = AutoAppData.ID
+		WHERE Token = ?", $self->{ token }
+	)->[ 0 ];
+
+	return if $app->{ Copypasta };
+
+	my $copy_ids = {
+		'AppData' => { target => $app->{ ID } },
+		'SchengenAppData' => { target => $app->{ SchengenAppDataID } },
+		'SpbAlterAppData' => { target => $app->{ SpbID } },
+	};	
+	
+	$self->copy_information( $self->find_source( $copy_ids, $app->{ AutoAppID }, $app->{ VisaPurpose } ) );
+}
+
 sub find_source
 # //////////////////////////////////////////////////
 {
-	my ( $self, $tables_id, $app_id ) = @_;
+	my ( $self, $tables_id, $app_id, $visa_purpose ) = @_;
 
 	my $all_applicants = $self->query( 'selallkeys', __LINE__, "
-		SELECT ID, SchengenAppDataID FROM AutoAppData
-		WHERE AppID = ? AND ID <> ? ORDER BY ID", $app_id, $tables_id->{ AppData }->{ target }
-	);
+		SELECT AutoAppData.ID, SchengenAppDataID, AutoSpbAlterAppData.ID as SpbID
+		FROM AutoAppData
+		JOIN AutoSpbAlterAppData ON AppDataID = AutoAppData.ID
+		WHERE AppID = ? AND AutoAppData.ID <> ? AND VisaPurpose = ?
+		ORDER BY AutoAppData.ID",
+		$app_id, $tables_id->{ AppData }->{ target }, $visa_purpose
+	)->[ 0 ];
 
-	if ( @$all_applicants > 0 ) {
+	return undef unless $all_applicants->{ ID }; 
+	
+	$tables_id->{ AppData }->{ source } = $all_applicants->{ ID };
 
-		$tables_id->{ AppData }->{ source } = $all_applicants->[ 0 ]->{ ID };
+	$tables_id->{ SchengenAppData }->{ source } = $all_applicants->{ SchengenAppDataID };
 	
-		$tables_id->{ SchengenAppData }->{ source } = $all_applicants->[ 0 ]->{ SchengenAppDataID };
-	}
-	
-	
-	my $all_spb = $self->query( 'selallkeys', __LINE__, "
-		SELECT ID FROM AutoSpbAlterAppData
-		WHERE AppDataID = ? ORDER BY ID", $all_applicants->[ 0 ]->{ ID }
-	);
-
-	$tables_id->{ SpbAlterAppData }->{ source } = $all_spb->[ 0 ]->{ ID } if @$all_spb > 0;	
+	$tables_id->{ SpbAlterAppData }->{ source } = $all_applicants->{ SpbID };	
 
 	return $tables_id;
 }
 
-sub copy_unpersonal_information
+sub copy_information
 # //////////////////////////////////////////////////
 {
 	my ( $self, $tables_id ) = @_;
-	
+
+	return unless $tables_id;
+
 	my $all_elements = $self->get_content_rules();
 	
 	my $copy_tables = {};
@@ -1261,6 +1279,10 @@ sub copy_unpersonal_information
 			UPDATE Auto$table SET $send WHERE ID = ?", {}, @values, $tables_id->{ $table }->{ target }
 		);
 	}
+	
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoAppData SET Copypasta = 1 WHERE ID = ?", {}, $tables_id->{ AppData }->{ target }
+	);
 }
 
 sub get_back
@@ -2071,11 +2093,11 @@ sub get_element_by_name
 	
 	for my $element_search ( @$page_content ) {
 	
-		return $element_search if $element_search->{name} eq $element_name;
+		return $element_search if $element_search->{ name } eq $element_name;
 		
-		if ( $element_search->{db}->{name} eq 'complex' ) {
+		if ( $element_search->{ db }->{ name } eq 'complex' ) {
 		
-			for my $sub_element ( keys %{ $element_search->{param} } ) {
+			for my $sub_element ( keys %{ $element_search->{ param } } ) {
 			
 				return $element_search if $sub_element eq $element_name;
 			}
@@ -2865,7 +2887,8 @@ sub mod_hash
 		}
 	}
 	
-	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'FinishedVType', 'FinishedCenter', 'AppEMail', 'AppDataID', 'PrimetimeAlert' );
+	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'FinishedVType', 'FinishedCenter', 'AppEMail',
+		'AppDataID', 'PrimetimeAlert', 'Copypasta' );
 		
 	return $hash;
 }
