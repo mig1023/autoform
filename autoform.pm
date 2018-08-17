@@ -207,6 +207,15 @@ sub autoform
 		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $js_rules ) = 
 			$self->get_autoform_content();
 	}
+	
+	my $symbols_error = VCS::Site::autodata::get_symbols_error();
+	
+	for ( "'", "\\" ) {
+	
+		$symbols_error->{ "\\$_" } = $symbols_error->{ "$_" };
+		
+		delete $symbols_error->{ "$_" };
+	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
@@ -227,6 +236,7 @@ sub autoform
 		'progress' 		=> $progress,
 		'lang_in_link' 		=> $self->{ lang },
 		'js_rules'		=> $js_rules,
+		'js_symbols'		=> $symbols_error,
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
@@ -812,7 +822,7 @@ sub check_relation
 
 			my $current_table_id = $self->get_current_table_id(); 
 			
-			if ( $step == $self->get_step_by_content('[app_finish]') ) {
+			if ( $step == $self->get_step_by_content( '[app_finish]' ) ) {
 			
 				$self->set_current_app_finished( $current_table_id );
 			}
@@ -868,7 +878,7 @@ sub get_forward
 	
 	my $current_table_id = $self->get_current_table_id();
 	
-	if ( !$current_table_id->{AutoAppointments} ) {
+	if ( !$current_table_id->{ AutoAppointments } ) {
 	
 		$self->create_clear_form( $self->{ vars }->getparam( 'center' ) );
 		
@@ -2593,6 +2603,30 @@ sub get_postcode_id
 	return ( $postcode_in_db, $city );
 }
 
+sub split_and_clarify
+# //////////////////////////////////////////////////
+{
+	my ( $self, $symbols ) = @_;
+	
+	my $symbol_err = VCS::Site::autodata::get_symbols_error();
+		
+	$symbol_err->{ '\\\\' } = $symbol_err->{ '\\' };
+	
+	my %symbols = map { $_ => 1 } split( //, $symbols );
+	
+	my $symbols_clear = {};
+
+	$symbols_clear->{ $symbol_err->{ $_ } || $_ } = 1 for ( keys %symbols );
+	
+	$symbols = join( ', ', keys %$symbols_clear );
+	
+	$symbols =~ s/,\s$//;
+	
+	$symbols =~ s/'/\\'/g ;
+	
+	return $symbols;
+}
+
 sub text_error
 # //////////////////////////////////////////////////
 {
@@ -2617,7 +2651,7 @@ sub text_error
 	
 	$current_error =~ s/\[offset\]/$offset/;
 	
-	$incorrect_symbols =~ s/'/\\'/g if $incorrect_symbols;
+	$incorrect_symbols = $self->split_and_clarify( $incorrect_symbols ) if $incorrect_symbols;
 	
 	my $text_error = "$element->{name}|$current_error";
 	
@@ -2917,6 +2951,7 @@ sub mezzi_assembler
 	my $mezzi = '';
 	
 	for ( 1..7 ) {
+
 		$mezzi .= ( $_ > 1 ? '|' : '' ) . ( $hash->{ 'Mezzi' . $_ } == 1 ? '1' : '0' );
 		
 		delete $hash->{ 'Mezzi' . $_ };

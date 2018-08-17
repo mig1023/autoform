@@ -122,7 +122,7 @@
 [% IF step == 1 %]
 	</td></tr><tr><td class="left" colspan="3"><br>
 	<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
-	<a class="dotted_link" href="/vcs/new.htm">[% langreq('Воспользуйтесь старой формой записи, если это необходимо') %]</a>
+	<a class="dotted_link" href="/vcs/new0.htm">[% langreq('Воспользуйтесь старой формой записи, если это необходимо') %]</a>
 	<br><br></td></tr><tr><td colspan="3">
 [% END %]
 
@@ -659,7 +659,7 @@ function check_all_inputs_errors() {
 			[% END %]
 			},
 		[% END %]
-	]
+	];
 
 	var errors_num = 0;
 
@@ -676,6 +676,32 @@ function check_all_inputs_errors() {
 	});
 
 	return errors_num;
+}
+
+function split_and_clarify( line ) {
+
+	var symbol_err = {
+		[% FOREACH s IN js_symbols %]
+			'[% s.key %]': '[% s.value %]',
+		[% END %]
+	};
+
+	var symbols = line.split("");
+	var new_line_hash = {};
+	
+	symbols.forEach( function(item, i) {
+		new_line_hash[ symbol_err[ symbols[i] ] || symbols[i] ] = 1;
+	});
+	
+	var new_line_full = '';
+	
+	for (var s in new_line_hash) {
+		new_line_full += s + ', ';
+	}
+	
+	var new_line = new_line_full.replace(/,\s$/, '');
+	
+	return new_line;
 }
 
 function check_input( field, type, check, label ) {
@@ -723,7 +749,7 @@ function check_input( field, type, check, label ) {
 
 			if ( input_reg.test( val ) && ( val != '' ) ) {
 
-				var symbols_incorrect = val.replace( reverse_reg, '' );
+				var symbols_incorrect = split_and_clarify( val.replace( reverse_reg, '' ) );
 	
 				return show_error_tip( field, '[% langreq( js_errors.2 ) %]'.replace( /\[name\]/, label ) +
 					': ' + symbols_incorrect );
