@@ -586,15 +586,13 @@ sub get_token_and_create_new_form_if_need
 	
 	return $self->save_new_token_in_db( $self->token_generation() ) if $token eq '';
 	
-	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
-		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
+	my ( $token_exist, $finished, $app ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, Finished, CreatedApp FROM AutoToken WHERE Token = ?", $token
 	);
 
 	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 	
 	return '02' unless $token_exist;
-
-	return '04' if $deleted;
 	
 	return $token unless $finished;
 	
