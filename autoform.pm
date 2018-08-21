@@ -181,7 +181,10 @@ sub autoform
 
 	my $javascript_check = 'need_to_check';
 
-	$self->{ lang } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
+	if ( $self->{ vars }->getparam( 'lang' ) =~ /^(en|it)$/i ) {
+	
+		$self->{ lang } = lc( $1 );
+	}
 	
 	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
 
@@ -220,7 +223,7 @@ sub autoform
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
 	my $tvars = {
-		'langreq' 		=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'langreq' 		=> sub { return $self->lang( @_ ) },
 		'title' 		=> $title,
 		'content_text' 		=> $page_content,
 		'token' 		=> $self->{ token },
@@ -1515,7 +1518,7 @@ sub get_html_line
 	}	
 	
 	my $label_for_need = ( $element->{ label_for } ? 
-		$self->get_html_for_element( 'label_for', $element->{ name }, '&nbsp;' . $element->{ label_for } ) : '' );
+		$self->get_html_for_element( 'label_for', $element->{ name }, $element->{ label_for } ) : '' );
 	
 	my $current_value = $values->{ $element->{name} };
 
@@ -1617,7 +1620,7 @@ sub get_html_for_element
 # //////////////////////////////////////////////////
 {
 	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment, $check ) = @_;
-	
+
 	my $value = $self->lang( $value_original );
 	my $param = $self->lang( $param );
 	my $comment = $self->lang( $comment );
@@ -1698,9 +1701,11 @@ sub get_html_for_element
 		
 			my $checked = ( $value->{ $opt } ? 'checked' : '' );
 			
+			my $text = $self->lang( $param->{ $opt }->{ label_for } );
+			
 			$list .= '<input type="checkbox" value="' . $opt . '" name="' . $opt .
 				'" title="' . $comment . '" id="' . $opt . '" ' . $checked . '>'.
-				'<label for="' . $opt . '">&nbsp;' . $param->{ $opt }->{ label_for } . '</label><br>';
+				'<label for="' . $opt . '">&nbsp;' . $text . '</label><br>';
 		}
 		$content =~ s/\[options\]/$list/gi;
 	}
@@ -3274,12 +3279,13 @@ sub lang
 	my ( $self, $text, $lang_param ) = @_;
 	
 	return if !$text;
-	
+
 	my $vocabulary = $self->{ vars }->{ 'VCS::Resources' }->{ 'list' };
 
 	my $lang = ( $lang_param ? $lang_param : $self->{ 'lang' } );
 	
 	if ( ref( $text ) ne 'HASH' ) {
+
 		return $vocabulary->{ $text }->{ $lang } || $text;
 	}
 	

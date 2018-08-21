@@ -149,7 +149,7 @@ sub get_html_elements
 		
 		label		=> '<label id="[name]" [u]>[value]</label>',
 		
-		label_for	=> '<label for="[name]" [u]>[value]</label>',
+		label_for	=> '&nbsp;<label for="[name]" [u]>[value]</label>',
 		
 		progress	=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
 				'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
