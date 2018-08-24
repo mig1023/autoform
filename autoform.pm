@@ -2643,9 +2643,14 @@ sub text_error
 		return "|" . $self->lang( $text->[$error_code] );
 	}
 	
-	my $name_of_element = (	$element->{label} ? $element->{label} : ( 
-				$element->{label_for} ? $element->{label_for } : $element->{name} ) );
+	my $name_of_element = $self->lang(
+		$element->{label} ? $element->{label} : ( 
+			$element->{label_for} ? $element->{label_for } : $element->{name}
+		)
+	);
 
+	$relation = $self->lang( $relation );
+	
 	my $current_error = $self->lang( $full_error ? $full_error : $text->[ $error_code ] );
 	
 	$current_error =~ s/\[name\]/$name_of_element/;

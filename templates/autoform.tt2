@@ -459,7 +459,7 @@ function get_date_from(date_id) {
 			'persons': '[% appinfo.persons %]', 
 			'appdate':$('#app_date').val(),
 			'fdate': '[% appinfo.fdate %]', 
-			'lang': 'ru',
+			'lang': '[% lang_in_link %]',
 			
 			}, function(xml) {
 				$(xml).find('node').each( function() {
