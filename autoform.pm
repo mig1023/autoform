@@ -1054,13 +1054,17 @@ sub get_edit
 		
 		$step = $self->get_step_by_content( '[list_of_applicants]', 'next');
 		
-		my $sch_id = $self->query( 'sel1', __LINE__, "
-			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
+		my ( $sch_id, $spb_id ) = $self->query( 'sel1', __LINE__, "
+			SELECT SchengenAppDataID, AutoSpbAlterAppData.ID
+			FROM AutoAppData
+			JOIN AutoSpbAlterAppData ON AutoSpbAlterAppData.AppDataID = AutoAppData.ID
+			WHERE AutoAppData.ID = ?", $appdata_id
 		);
 		
 		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ? WHERE Token = ?", {}, 
-			$step, $appdata_id, $sch_id, $self->{ token }
+			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSpbDataID = ?, AutoSchengenAppDataID = ?
+			WHERE Token = ?", {}, 
+			$step, $appdata_id, $spb_id, $sch_id, $self->{ token }
 		);
 		
 		$self->query( 'query', __LINE__, "
@@ -2755,7 +2759,7 @@ sub create_new_appointment
 	my $info_for_contract = "from_db";
 	
 	my $tables_transfered_id = $self->get_current_table_id();
-	
+
 	my $db_rules = $self->get_content_db_rules();
 
 	my $ver = $self->get_app_version();
@@ -2790,7 +2794,10 @@ sub create_new_appointment
 	);
 	
 	my $allapp = $self->query( 'selallkeys', __LINE__, "
-		SELECT ID, SchengenAppDataID FROM AutoAppData WHERE AppID = ?", 
+		SELECT AutoAppData.ID, SchengenAppDataID, AutoSpbAlterAppData.ID as SpbID
+		FROM AutoAppData
+		JOIN AutoSpbAlterAppData ON AutoSpbAlterAppData.AppDataID = AutoAppData.ID
+		WHERE AppID = ?", 
 		$tables_transfered_id->{ 'AutoAppointments' }
 	);
 	
@@ -2806,7 +2813,7 @@ sub create_new_appointment
 		);
 		
 		$self->create_table(
-			'AutoSpbAlterAppData', 'SpbAlterAppData', $tables_transfered_id->{ 'AutoSpbAlterAppData' }, $db_rules
+			'AutoSpbAlterAppData', 'SpbAlterAppData', $app->{ SpbID }, $db_rules, $appid
 		);
 	}
 	
@@ -2830,7 +2837,7 @@ sub create_table
 	my $hash = $self->get_hash_table( $autoname, 'ID', $transfered_id );
 
 	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto );
-	
+
 	return $self->insert_hash_table( $name, $hash );
 }
 
