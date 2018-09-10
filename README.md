@@ -11,4 +11,4 @@ Appointment system for VMS CRM
 
 ### Appinfo page
 
-![](https://s8.hostingkartinok.com/uploads/images/2018/09/831aae33069b551141e9fd8d58ef8208.png)
+![](http://s8.hostingkartinok.com/uploads/images/2018/09/831aae33069b551141e9fd8d58ef8208.png)
