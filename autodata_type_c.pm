@@ -5,6 +5,8 @@ sub get_progressline
 # //////////////////////////////////////////////////
 {
 	return [ '',
+		{ big => 1, name => 'Регистрация', },
+		{ big => 0, name => 'Список записей', },
 		{ big => 1, name => 'Начало', },
 		{ big => 0, name => 'Даты поездки', },
 		{ big => 1, name => 'Заявители', },
@@ -32,7 +34,7 @@ sub get_content_rules_hash
 		'Начало записи' => [
 			{
 				page_ord => 100,
-				progress => 1,
+				progress => 3,
 				param => 1,
 			},
 			{
@@ -145,7 +147,7 @@ sub get_content_rules_hash
 		'Обращаем Ваше внимание' => [
 			{
 				page_ord => 140,
-				progress => 2,
+				progress => 4,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -164,7 +166,7 @@ sub get_content_rules_hash
 		'Услуга Primetime' => [
 			{
 				page_ord => 150,
-				progress => 2,
+				progress => 4,
 				primetime_price => 1,
 				relation => {
 					only_if => {
@@ -197,7 +199,7 @@ sub get_content_rules_hash
 		'Даты поездки' => [
 			{
 				page_ord => 200,
-				progress => 2,
+				progress => 4,
 				collect_date => 1,
 			},
 			{
@@ -247,7 +249,7 @@ sub get_content_rules_hash
 		'Список заявителей' => [
 			{
 				page_ord => 300,
-				progress => 3,
+				progress => 5,
 				goto_link => 'back_to_appdata',
 				replacer => '[list_of_applicants]',
 			},
@@ -256,7 +258,7 @@ sub get_content_rules_hash
 		'Данные паспортов' => [
 			{
 				page_ord => 400,
-				progress => 4,
+				progress => 6,
 				param => 1,
 			},
 			{
@@ -498,7 +500,7 @@ sub get_content_rules_hash
 				label => 'Кем выдан',
 				comment => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
 				example => 'FMS 12345',
-				check => 'zWN\s\-\_\.\,\;\'\"',
+				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
@@ -590,7 +592,7 @@ sub get_content_rules_hash
 		'Дополнительные данные' => [
 			{
 				page_ord => 500,
-				progress => 5,
+				progress => 7,
 				param => 1,
 				ussr_or_rf_first => 1,
 			},
@@ -756,7 +758,7 @@ sub get_content_rules_hash
 		'Информация о родителе / законном представителе' => [
 			{
 				page_ord => 600,
-				progress => 5,
+				progress => 7,
 				copy_from_other_applicants => 'now',
 				
 				relation => {
@@ -785,7 +787,7 @@ sub get_content_rules_hash
 		'Уточнение по семейному положению' => [
 			{
 				page_ord => 700,
-				progress => 5,
+				progress => 7,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -811,7 +813,7 @@ sub get_content_rules_hash
 		'Основания для пребывания в Российской Федерации' => [
 			{
 				page_ord => 800,
-				progress => 5,
+				progress => 7,
 				relation => {
 					only_if_not => {
 						table => 'AppData',
@@ -850,7 +852,7 @@ sub get_content_rules_hash
 		'Уточнение по цели посещения' => [
 			{
 				page_ord => 900,
-				progress => 5,
+				progress => 7,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -876,7 +878,7 @@ sub get_content_rules_hash
 		'Данные о поездке' => [
 			{
 				page_ord => 1000,
-				progress => 6,
+				progress => 8,
 				param => 1,
 				
 			},
@@ -1076,7 +1078,7 @@ sub get_content_rules_hash
 		'Разрешение на въезд, если необходимо' => [
 			{
 				page_ord => 1100,
-				progress => 6,
+				progress => 8,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1129,7 +1131,7 @@ sub get_content_rules_hash
 		'Сроки действия последней визы' => [
 			{
 				page_ord => 1200,
-				progress => 6,
+				progress => 8,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1182,7 +1184,7 @@ sub get_content_rules_hash
 		'Дата сдачи отпечатков' => [
 			{
 				page_ord => 1300,
-				progress => 6,
+				progress => 8,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1219,7 +1221,7 @@ sub get_content_rules_hash
 		'Проживание' => [
 			{
 				page_ord => 1400,
-				progress => 7,
+				progress => 9,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1248,7 +1250,7 @@ sub get_content_rules_hash
 		'Информация о проживании' => [
 			{
 				page_ord => 1500,
-				progress => 7,
+				progress => 9,
 				relation => {
 					only_if_not => {
 						table => 'SchengenAppData',
@@ -1308,7 +1310,7 @@ sub get_content_rules_hash
 		'Информация о месте проживания' => [
 			{
 				page_ord => 1600,
-				progress => 7,
+				progress => 9,
 				relation => {
 					only_if_not => {
 						table => 'SchengenAppData',
@@ -1368,7 +1370,7 @@ sub get_content_rules_hash
 		'Приглашение' => [
 			{
 				page_ord => 1700,
-				progress => 7,
+				progress => 9,
 				param => 1,
 				relation => {
 					only_if_not => {
@@ -1501,7 +1503,7 @@ sub get_content_rules_hash
 		'Приглашение организации' => [
 			{
 				page_ord => 1800,
-				progress => 7,
+				progress => 9,
 				param => 1,
 				relation => {
 					only_if_not => {
@@ -1612,7 +1614,7 @@ sub get_content_rules_hash
 		'Расходы заявителя' => [
 			{
 				page_ord => 1900,
-				progress => 8,
+				progress => 9,
 			},
 			{
 				type => 'radiolist',
@@ -1634,7 +1636,7 @@ sub get_content_rules_hash
 		'Уточните спонсора' => [
 			{
 				page_ord => 2000,
-				progress => 8,
+				progress => 9,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1660,7 +1662,7 @@ sub get_content_rules_hash
 		'Средства заявителя' => [
 			{
 				page_ord => 2100,
-				progress => 8,
+				progress => 9,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1692,7 +1694,7 @@ sub get_content_rules_hash
 		'Средства спонсора' => [
 			{
 				page_ord => 2200,
-				progress => 8,
+				progress => 10,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1723,7 +1725,7 @@ sub get_content_rules_hash
 		'Уточните иные средства' => [
 			{
 				page_ord => 2300,
-				progress => 8,
+				progress => 10,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1749,7 +1751,7 @@ sub get_content_rules_hash
 		'Данные родственника в ЕС' => [
 			{
 				page_ord => 2400,
-				progress => 8,
+				progress => 10,
 				param => 1,
 				relation => {
 					only_if_not => {
@@ -1829,7 +1831,7 @@ sub get_content_rules_hash
 		'Вы успешно добавили заявителя. Что теперь?' => [	
 			{
 				page_ord => 2500,
-				progress => 9,
+				progress => 11,
 				replacer => '[app_finish]',
 			},
 		],
@@ -1837,7 +1839,7 @@ sub get_content_rules_hash
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
 				page_ord => 2600,
-				progress => 10,
+				progress => 12,
 				persons_in_page => 1,
 			},
 			{
@@ -1858,7 +1860,7 @@ sub get_content_rules_hash
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
 				page_ord => 2700,
-				progress => 11,
+				progress => 13,
 				relation => {
 					only_if_not => {
 						table => 'Appointments',
@@ -1977,7 +1979,7 @@ sub get_content_rules_hash
 		'Укажите данные доверенного лица' => [
 			{
 				page_ord => 2800,
-				progress => 11,
+				progress => 13,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -2093,7 +2095,7 @@ sub get_content_rules_hash
 		'Оформление записи' => [
 			{
 				page_ord => 2900,
-				progress => 12,
+				progress => 14,
 				persons_in_page => 1,
 				goto_link => 'back_to_appdate',
 			},
@@ -2252,7 +2254,7 @@ sub get_content_rules_hash
 		'Предпочтительный офис получения готовых документов' => [
 			{
 				page_ord => 3000,
-				progress => 13,
+				progress => 15,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -2281,7 +2283,7 @@ sub get_content_rules_hash
 		'Подтвердить запись' => [
 			{
 				page_ord => 3100,
-				progress => 14,
+				progress => 16,
 			},
 			{
 				type => 'captcha',
@@ -2291,7 +2293,7 @@ sub get_content_rules_hash
 		'Запись успешно создана!' => [
 			{
 				page_ord => 3200,
-				progress => 15,
+				progress => 17,
 			},
 			{
 				type => 'text',

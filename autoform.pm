@@ -8,6 +8,7 @@ use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
+use VCS::Site::autologin;
 use VCS::Site::autoselftest;
 
 use Data::Dumper;
@@ -41,8 +42,10 @@ sub getContent
 
 	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
 	
-	return autoform( @_ ) if /^index$/i;
+	return autologin( @_ ) if /^login$/i;
 	
+	return autoform( @_ ) if /^index$/i;
+
 	return get_pcode( @_ ) if /^findpcode$/i;
 	
 	return autoinfopage( @_, 'entry' ) if /^info$/i;
@@ -119,6 +122,21 @@ sub get_content_rules_hash_opt
 	return VCS::Site::autodata_type_c_spb::get_content_rules_hash() if VCS::Site::autodata::this_is_spb_center( $center );
 
 	return VCS::Site::autodata_type_c::get_content_rules_hash();
+}
+
+sub autologin
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+	
+	my $autologin = VCS::Site::autologin->new('VCS::Site::autologin', $vars);
+	
+	$autologin->{ autoform } = VCS::Site::autodata::get_settings();
+	$autologin->{ af } = $self;
+	
+	$autologin->login( $task, $id, $template );
 }
 
 sub get_app_visa_and_center
@@ -633,12 +651,12 @@ sub create_clear_form
 sub save_new_token_in_db
 # //////////////////////////////////////////////////
 {	
-	my ( $self, $token ) = @_;
+	my ( $self, $token, $autologin ) = @_;
 
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoToken (
-		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?)", {}, $token, $ENV{ HTTP_X_REAL_IP }
+		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP, Login) 
+		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?, ?)", {}, $token, $ENV{ HTTP_X_REAL_IP }, $autologin
 	);
 	
 	return $token;
