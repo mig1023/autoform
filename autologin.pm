@@ -33,12 +33,10 @@ sub login
 		
 		$self->{ af }->create_clear_form( $token );
 		
-		$vars->get_system->redirect( 
+		return $vars->get_system->redirect( 
 			$vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr } . 
 			'?t=' . $token
 		);
-			
-		return;
 	}
 	
 	if ( $type eq 'workflow' ) {
@@ -136,6 +134,7 @@ sub get_session_from_memcached
 }
 
 sub update_in_memcached
+# //////////////////////////////////////////////////
 {
 	my ( $self, $login, $login_id, $session_id ) = @_;
 	
@@ -148,6 +147,7 @@ sub update_in_memcached
 }
 
 sub update_in_cookies
+# //////////////////////////////////////////////////
 {
 	my ( $self, $session_id, $login ) = @_;
 	

@@ -78,7 +78,7 @@
 <tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass" id="pass" title="Введите пароль"></td></tr>
 
 <tr><td colspan="3"><br>
-	<input type="button" value="[% langreq('Войти') %] ▷" onclick="go_button('forward');">
+	<input type="button" class="action_button" value="[% langreq('Войти') %] ▷" onclick="go_button('forward');">
 </td></tr><tr><td colspan="3">&nbsp;</td></tr>
 
 <tr><td colspan="3"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
@@ -95,11 +95,11 @@
 
 [% FOREACH autoapp IN auto_appointments %]
 [% n = n + 1 %]
-<tr><td>[% n %]</td><td>[% autoapp.StartDate %]</td><td><input type="button" value="[% langreq('Дооформить') %] ▷" onclick="window.location.href='/autoform/?t=[% autoapp.Token %]'">
-&nbsp;<input type="button" value="X" onclick="go_button('del_app');">
+<tr><td>[% n %].</td><td>[% autoapp.StartDate %]</td><td><input class="action_button" type="button" value="[% langreq('Дооформить') %] ▷" onclick="window.location.href='/autoform/?t=[% autoapp.Token %]'">
+&nbsp;<input class="action_button" type="button" value="X" onclick="go_button('del_app');">
 </td></tr>
 [% END %]
-<tr><td colspan="3"><input type="button" value="[% langreq('Создать новую ноту') %]" onclick="go_button('new_app');"></td></tr>
+<tr><td colspan="3"><input class="action_button" type="button" value="[% langreq('Создать новую запись') %]" onclick="go_button('new_app');"></td></tr>
 
 [% n = 0 %]
 
@@ -143,7 +143,7 @@ function mobileScreenCheck() {
 		
 		init_comm( 'right', 'center' );
 		
-		$('#or_field').html('------------------------------------------------ или ------------------------------------------------');
+		$('#or_field').html( Array(52).join("-") + ' [% langreq('или') %] ' + Array(52).join("-"));
 		
 		$('#progressbar').css( "display", 'table' );
 		$('#app_form').css( "margin", '50px' );
@@ -153,6 +153,8 @@ function mobileScreenCheck() {
 		return;
 	}
 	
+	$('*').css( "font-size", '15px' );
+	
 	$("#app_table").each(function(){
 		$("td",this).each(function(){
 			$(this).css( "display", 'block' );
@@ -161,7 +163,7 @@ function mobileScreenCheck() {
 		});
 	});
 	
-	$('#or_field').html('-------- или --------');
+	$('#or_field').html( Array(8).join("-") + ' [% langreq('или') %] ' + Array(8).join("-") );
 	
 	$('#progressbar').css( "display", 'none' );
 	$('#app_form').css( "margin", '0px' );

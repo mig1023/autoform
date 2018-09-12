@@ -52,6 +52,8 @@ sub getContent
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
 	
+	return docstatus( @_ ) if /^docstatus$/i;
+	
 	return $self->redirect();
 }
 
@@ -139,6 +141,32 @@ sub autologin
 	$autologin->login( $task, $id, $template );
 }
 
+sub docstatus
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $vars = $self->{ 'VCS::Vars' };
+
+	my $app = $vars->getparam('app') || '';
+	
+	$app =~ s/[^0-9]//g;
+
+	my $status = 0;
+
+	if ( $app ne '' ) {
+	
+		$status = $vars->db->sel1("
+			SELECT PStatus FROM DocPack JOIN Appointments ON Appointments.PacketID = DocPack.ID 
+			WHERE Appointments.ID = ? ORDER BY Appointments.ID DESC LIMIT 1", $app
+		) || 0;
+	}
+	
+	$vars->get_system->pheader($vars);
+	
+	print $status;
+}
+
 sub get_app_visa_and_center
 # //////////////////////////////////////////////////
 {
@@ -193,7 +221,7 @@ sub autoform
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my ( $step, $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules );
+	my ( $step, $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules, $login );
 
 	my $special = {};
 
@@ -225,7 +253,7 @@ sub autoform
 		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
 	}
 	else {
-		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $js_rules ) = 
+		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $js_rules, $login ) = 
 			$self->get_autoform_content();
 	}
 	
@@ -239,7 +267,9 @@ sub autoform
 	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
-
+	
+	$login = 0 unless $login;
+	
 	my $tvars = {
 		'langreq' 		=> sub { return $self->lang( @_ ) },
 		'title' 		=> $title,
@@ -254,6 +284,7 @@ sub autoform
 		'static'		=> $self->{ autoform }->{ paths }->{ static },
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'login_link'		=> $self->{ autoform }->{ paths }->{ login },
 		'progress' 		=> $progress,
 		'lang_in_link' 		=> $self->{ lang },
 		'js_rules'		=> $js_rules,
@@ -261,6 +292,7 @@ sub autoform
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
+		'login'			=> $login, 
 	};
 	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
@@ -734,8 +766,8 @@ sub get_autoform_content
 	my $last_error;
 	my $title;
 	
-	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
+	my ( $step, $app_id, $login ) = $self->query( 'sel1', __LINE__, "
+		SELECT Step, AutoAppID, Login FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	my $action = lc( $self->{ vars }->getparam('action') );
@@ -790,7 +822,7 @@ sub get_autoform_content
 	
 	my ( $special, $js_check ) = $self->get_specials_of_element( $step );
 	
-	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check );
+	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check, $login );
 }
 
 sub check_all_is_prepared

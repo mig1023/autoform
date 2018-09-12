@@ -101,6 +101,9 @@
 [% IF ( step > min_step ) && ( step != max_step ) %]
 	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
 	&nbsp;
+[% ELSIF ( step == min_step ) && ( login != 0 ) %]
+	<input class="action_button" type="button" value="◁ [% langreq('Вернуться к списку') %]" onclick="go_button('back_to_main');">
+	&nbsp;
 [% END %]
 </span>
 <span id="mobile_order_top">
@@ -231,6 +234,13 @@ function mobileScreenCheck() {
 }
 
 function go_button(where) {
+
+	[% IF ( step == min_step ) && ( login != 0 ) %]
+		if (where == 'back_to_main') {
+			location.replace('[% login_link %][% IF lang_in_link %]?lang=[% lang_in_link %][% END %]');
+			return;
+		}
+	[% END %]
 
 	[% IF ( step == max_step ) %]
 	
