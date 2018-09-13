@@ -60,10 +60,10 @@
 [% ELSIF !login %]
 
 <tr><td colspan="3"><span>[% langreq('Уважаемые заявители!<br><br>
-Для записи в Визовый центр необходимо зарегистрироваться в системе. Регистрация займёт не более минуты. Вам необходимо указать свой адрес электронной почты. Будьте внимательны и не ошибитесь в его написании') %]<br><br></span>
+Для записи в Визовый центр необходимо зарегистрироваться в системе. Регистрация займёт не более пары минут.<br><br>Вам необходимо указать свой адрес электронной почты. Будьте внимательны и не ошибитесь в его написании.') %]<br><br></span>
 </td></tr>
 
-<tr><td colspan="3"><span>[% langreq('Если Вы уже зарегистрированы в системе, то введите адрес электронной почты, на который осуществлялась регистрация и придуманный ранее пароль') %]<br><br></span>
+<tr><td colspan="3"><span>[% langreq('Если Вы уже зарегистрированы в системе, то введите адрес электронной почты, на который ранее осуществлялась регистрация') %]<br><br><br></span>
 </td></tr>
 
 <tr><td><label id="text">Email</label></td><td class="left bottom"><input class="input_width input_gen" type="text" value="" name="loginField" id="loginField" title="Введите логин"></td></tr>
@@ -77,10 +77,10 @@
 
 [% ELSIF ( login && login_found && !login_done ) %]
 
-<tr><td colspan="3"><span>[% langreq('Ваш адрес электронной почты найден в системе. Пожалуйста введите пароль') %]<br><br></span>
+<tr><td colspan="3"><span>[% langreq('Ваш адрес электронной почты найден в системе.<br><br>Пожалуйста введите пароль, который вводили при регистрации') %]<br><br></span>
 </td></tr>
 
-<tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass" id="pass" title="Введите пароль"></td></tr>
+<tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass" id="pass" title="Пароль регистрозависим!"></td></tr>
 
 <tr><td colspan="3"><br>
 	<input type="button" class="action_button" value="[% langreq('Войти') %] ▷" onclick="go_button('forward');">
@@ -88,7 +88,7 @@
 
 [% ELSIF ( login && !login_found ) %]
 
-<tr><td colspan="3"><span>[% langreq('Ваш адрес электронной почты не найден в системе. Если вы ещё не регистрировались в нашей системе, то сейчас самое время! Пожалуйста введите пароль и подтвердите его правильность.') %]<br><br></span>
+<tr><td colspan="3"><span>[% langreq('Ваш адрес электронной почты не найден в системе.<br><br>Если вы ещё не регистрировались в нашей системе, то сейчас самое время! Пожалуйста введите пароль и подтвердите его правильность.<br><br>Если регистрацию вы уже проходили, то возможно вы ошиблись при вводе, либо вы слишком долго не пользовались своей учётной записью') %]<br><br><br></span>
 </td></tr>
 
 <tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass_reg1" id="pass_reg1" title="Введите пароль"></td></tr>
