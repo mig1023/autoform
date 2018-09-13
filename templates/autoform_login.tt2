@@ -8,6 +8,9 @@
 </head>
 
 <script>
+	[% IF login_error %]
+		alert('[% langreq('Вы ввели неправильный пароль!') %]');
+	[% END %]
 
 	function isMobile() {
 		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
@@ -34,15 +37,11 @@
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "[% login %]" name = "login" id = "action">
 
-[% IF !login_error %]
 <table width="100%" id="progressbar" class="progressbar_gen mobil_hide"><tr>[% progress %]</tr></table>
-[% END %]
 
 <table width="100%">
 
-[% IF !login_error %]
 <tr class="mobil_hide"><td><br><br><br><br></td></tr>
-[% END %]
 
 <tr><td align="center">
 
@@ -50,9 +49,8 @@
 
 <tr><td colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
 
-[% IF login_error %]
 
-[% ELSIF stage == 'reg_done' %]
+[% IF stage == 'reg_done' %]
 
 <tr><td colspan="3"><span>[% langreq('Регистрация прошла успешно. Вам на почту выслано письмо...') %]<br><br></span>
 </td></tr>
@@ -119,19 +117,23 @@
 [% n = 0 %]
 
 <tr><td colspan="3">&nbsp;</td></tr>
-<tr><td colspan="3"><b>[% langreq('Уже поданные документы') %]</b>
+<tr><td colspan="3"><b>[% langreq('Уже оформленные записи') %]</b>
 <tr><td colspan="3">&nbsp;</td></tr>
 
-[% FOREACH app IN appointments %]
-[% n = n + 1 %]
-<tr><td>[% n %].</td><td>[% app.AppNum %]</td><td>
-[% IF app.Status == 1 %][% langreq('запись оформлена') %]
-[% ELSIF app.Status == 2 %][% langreq('запись отменена') %]
-[% ELSIF app.Status == 3 %][% langreq('запись скрыта') %]
-[% ELSIF app.Status == 4 %]<div id="[% app.ID %]" class="docstatus"><img src='/vcs/static/images/autoform_wait.gif'></div>
-[% ELSIF app.Status == 5 %][% langreq('повторное посещение') %]
-[% ELSE %][% langreq('ошибка') %][% END %]
-</td></tr>
+[% IF appointments_length > 0 %]
+	[% FOREACH app IN appointments %]
+	[% n = n + 1 %]
+	<tr><td>[% n %].</td><td>[% app.AppNum %]</td><td>
+	[% IF app.Status == 1 %][% langreq('запись оформлена') %]
+	[% ELSIF app.Status == 2 %][% langreq('запись отменена') %]
+	[% ELSIF app.Status == 3 %][% langreq('запись скрыта') %]
+	[% ELSIF app.Status == 4 %]<div id="[% app.ID %]" class="docstatus"><img src='/vcs/static/images/autoform_wait.gif'></div>
+	[% ELSIF app.Status == 5 %][% langreq('повторное посещение') %]
+	[% ELSE %][% langreq('ошибка') %][% END %]
+	</td></tr>
+	[% END %]
+[% ELSE %]
+	<tr><td colspan="3">[% langreq('Вы не сделали пока ещё ни одной записи') %]</td></tr>
 [% END %]
 
 <tr><td colspan="3">&nbsp;</td></tr>
@@ -162,7 +164,7 @@ function mobileScreenCheck() {
 		
 		$('#progressbar').css( "display", 'table' );
 		$('#app_form').css( "margin", '50px' );
-		$('#app_table').attr( "width", '[% IF login_error %]800[% ELSE %]590[% END %]px' );
+		$('#app_table').attr( "width", '590px' );
 		$('.input_width').css( "width", '20em' );
 		
 		return;
@@ -248,8 +250,6 @@ function check_docstatus() {
 
 	});
 }
-
-//check_docstatus();
 
 </script>
 

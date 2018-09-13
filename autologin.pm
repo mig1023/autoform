@@ -47,8 +47,8 @@ sub login
 	}
 	
 	( $appointments, $auto_appointments, $title ) = $self->get_login_main( $login_id ) if $type eq 'workflow';
-	
-	#( $title, undef, $login_error ) = $self->{ af }->get_page_error( 6 ) if $type eq 'login_pass_error';
+
+	$login_error = 1 if $type eq 'login_pass_error';
 	
 	$vars->get_system->pheader( $vars );
 	
@@ -59,6 +59,7 @@ sub login
 		'title' => $title,
 		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ login },
 		'appointments' => $appointments,
+		'appointments_length' => scalar @$appointments,
 		'auto_appointments' => $auto_appointments,
 		'login' => $login || $vars->getparam( 'loginField'),
 		'login_found' => ( $type ne 'login_pass_error' ? 1 : 0 ),
@@ -228,7 +229,7 @@ sub reg_login
 	
 	my $pass_param = $vars->getparam( 'pass_reg1' ) || '';
 	
-	my $activation = $self->key_generation(10);
+	my $activation = $self->key_generation( 10 );
 	
 	$self->{ af}->query( 'query', __LINE__, "
 		INSERT INTO AutoLogin (Login, Pass, Activation, RegDate) VALUES (?, PASSWORD(?), ?, now())", {}, 
