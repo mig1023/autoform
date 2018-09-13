@@ -27,6 +27,8 @@ sub login
 
 	my ( $login, $login_id, $type ) = $self->get_login_session();
 	
+	my $stage = 'login';
+
 	if ( lc( $vars->getparam( 'action' ) ) eq "new_app" ) {
 	
 		my $token = $self->{ af }->save_new_token_in_db( $self->{ af }->token_generation(), $login_id );
@@ -39,14 +41,14 @@ sub login
 		);
 	}
 	
-	if ( $type eq 'workflow' ) {
+	if ( lc( $vars->getparam( 'action' ) ) eq "new_reg" ) {
 	
-		$title = '';
-		
-		( $appointments, $auto_appointments ) = $self->get_login_main( $login_id );
+		$stage = $self->reg_login( $vars );
 	}
 	
-	( $title, undef, $login_error ) = $self->{ af }->get_page_error( 6 ) if $type eq 'login_pass_error';
+	( $appointments, $auto_appointments, $title ) = $self->get_login_main( $login_id ) if $type eq 'workflow';
+	
+	#( $title, undef, $login_error ) = $self->{ af }->get_page_error( 6 ) if $type eq 'login_pass_error';
 	
 	$vars->get_system->pheader( $vars );
 	
@@ -58,10 +60,14 @@ sub login
 		'addr' => $vars->getform('fullhost') . $self->{ autoform }->{ paths }->{ login },
 		'appointments' => $appointments,
 		'auto_appointments' => $auto_appointments,
-		'login' => $login,
+		'login' => $login || $vars->getparam( 'loginField'),
+		'login_found' => ( $type ne 'login_pass_error' ? 1 : 0 ),
+		'login_done' => ( $type eq 'workflow' ? 1 : 0 ),
 		'login_error' => $login_error,
+		'stage' => $stage,
 		'progress' => $progress,
 	};
+
 	$template->process( 'autoform_login.tt2', $tvars );
 }
 
@@ -73,6 +79,8 @@ sub get_login_session
 	my $vars = $self->{ 'VCS::Vars' };
 
 	my ( $login, $login_id, $session ) = $self->get_session_from_memcached( $self->get_session_from_cookies() );
+	
+	my $login_status = 'login_form';
 
 	if ( $login ) {
 
@@ -83,7 +91,7 @@ sub get_login_session
 
 	if ( $vars->getparam( 'login' ) ) {
 	
-		( $login, $login_id ) = $self->check_login_from_param();
+		( $login, $login_id ) = $self->check_pass_from_param();
 		
 		if ( $login ) {
 
@@ -94,10 +102,24 @@ sub get_login_session
 			return;
 		}
 		else {
-			return ( undef, undef, 'login_pass_error' );
+			$login_status = 'login_pass_error';
 		}
 	}
-	return ( undef, undef, 'login_form' );
+	
+	if ( $vars->getparam( 'loginField' ) ) {
+	
+		$login = $self->check_login_from_param();
+		
+		if ( $login ) {
+		
+			$login_status = 'login_form';
+		}
+		else {
+			$login_status = 'login_pass_error';
+		}
+	}
+	
+	return ( undef, undef, $login_status );
 }
 
 sub get_session_from_cookies
@@ -162,7 +184,7 @@ sub update_in_cookies
 	return;
 }
 
-sub session_generation()
+sub session_generation
 # //////////////////////////////////////////////////
 {
 	my ( $self, $login ) = @_;
@@ -173,11 +195,7 @@ sub session_generation()
 	my $session = 's';
 	
 	do {
-		my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
-		
-		for ( 1..18 ) {
-			$session .= @alph[ int( rand( 35 ) ) ];
-		}
+		$session = 's' . $self->key_generation(18);
 		$session_existing = $vars->get_memd->get( "autologin|$login|$session" );
 			
 	} while ( $session_existing );
@@ -185,7 +203,61 @@ sub session_generation()
 	return $session;
 }
 
+sub key_generation
+# //////////////////////////////////////////////////
+{
+	my ( $self, $len ) = @_;
+	
+	my @alph = split //, '0123456789abcdefghigklmnopqrstuvwxyz';
+		
+	my $key = '';	
+		
+	for ( 1..$len ) {
+		$key .= @alph[ int( rand( 35 ) ) ];
+	}
+	
+	return $key;
+}
+
+sub reg_login
+# //////////////////////////////////////////////////
+{
+	my ( $self, $vars ) = @_;
+	
+	my $login_param = $vars->getparam( 'login' ) || '';
+	
+	my $pass_param = $vars->getparam( 'pass_reg1' ) || '';
+	
+	my $activation = $self->key_generation(10);
+	
+	$self->{ af}->query( 'query', __LINE__, "
+		INSERT INTO AutoLogin (Login, Pass, Activation, RegDate) VALUES (?, PASSWORD(?), ?, now())", {}, 
+		$login_param, $pass_param, $activation
+	);
+
+	return 'reg_done';
+}
+
 sub check_login_from_param
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $vars =$self->{ af }->{ 'VCS::Vars' };
+
+	my $login_param = $vars->getparam( 'loginField' ) || '';
+	
+	$login_param =~ s/[^A-Z0-9\_\.]//gi;
+
+	my ( $login, $login_id ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT Login, ID FROM AutoLogin WHERE Login = ?",
+		$login_param
+	);
+
+	return ( $login, $login_id );
+}
+
+sub check_pass_from_param
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
@@ -234,7 +306,7 @@ sub get_login_main
 	
 	$_->{ StartDate } =~ s/(\d{4})\-(\d{2})\-(\d{2})/$3 $months->[$2] $1/ for @$auto_appointments;
 	
-	return ( $appointments, $auto_appointments );
+	return ( $appointments, $auto_appointments, undef );
 }
 
 1;

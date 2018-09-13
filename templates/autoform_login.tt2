@@ -32,6 +32,7 @@
 
 <form action = "[% addr %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
+<input type = "hidden" value = "[% login %]" name = "login" id = "action">
 
 [% IF !login_error %]
 <table width="100%" id="progressbar" class="progressbar_gen mobil_hide"><tr>[% progress %]</tr></table>
@@ -51,31 +52,21 @@
 
 [% IF login_error %]
 
+[% ELSIF stage == 'reg_done' %]
+
+<tr><td colspan="3"><span>[% langreq('Регистрация прошла успешно. Вам на почту выслано письмо...') %]<br><br></span>
+</td></tr>
+
 [% ELSIF !login %]
 
 <tr><td colspan="3"><span>[% langreq('Уважаемые заявители!<br><br>
-Для записи в Визовый центр необходимо зарегистрироваться в системе. Регистрация займёт не более минуты. Вам необходимо указать свой адрес электронной почты, а также придумать себе пароль, который позднее будет использоваться для вашей авторизации') %]<br><br></span>
+Для записи в Визовый центр необходимо зарегистрироваться в системе. Регистрация займёт не более минуты. Вам необходимо указать свой адрес электронной почты. Будьте внимательны и не ошибитесь в его написании') %]<br><br></span>
 </td></tr>
-
-<tr><td><label id="text">Email</label></td><td class="left bottom"><input class="input_width input_gen" type="text" value="" name="login_reg1" id="login_reg1" title="Введите логин"></td></tr>
-<tr><td>&nbsp;</td><td class="exam_td_gen left"><span class="exam_span_gen">пример: info@italyvms.ru</span></td></tr>
-<tr><td><label id="text">Подтвердите email</label></td><td class="left bottom"><input class="input_width input_gen" type="text" value="" name="login_reg2" id="login_reg2" title="Введите логин"></td></tr>
-<tr><td>&nbsp;</td><td class="exam_td_gen left"><span class="exam_span_gen">пример: info@italyvms.ru</span></td></tr>
-<tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass_reg1" id="pass_reg1" title="Введите пароль"></td></tr>
-<tr><td>&nbsp;</td><td class="exam_td_gen left"><span class="exam_span_gen">придумайте досточно сложный пароль</span></td></tr>
-<tr><td><label id="text">Подтвердите пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass_reg2" id="pass_reg2" title="Введите пароль"></td></tr>
-<tr><td>&nbsp;</td><td class="exam_td_gen left"><span class="exam_span_gen">повторно введите пароль</span></td></tr>
-
-<tr><td colspan="3"><br>
-	<span id="or_field"></span>
-</td></tr><tr><td colspan="3">&nbsp;</td></tr>
 
 <tr><td colspan="3"><span>[% langreq('Если Вы уже зарегистрированы в системе, то введите адрес электронной почты, на который осуществлялась регистрация и придуманный ранее пароль') %]<br><br></span>
 </td></tr>
 
-<tr><td><label id="text">Email</label></td><td class="left bottom"><input class="input_width input_gen" type="text" value="" name="login" id="login" title="Введите логин"></td></tr>
-<tr><td>&nbsp;</td><td class="exam_td_gen left"><span class="exam_span_gen">пример: info@italyvms.ru</span></td></tr>
-<tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass" id="pass" title="Введите пароль"></td></tr>
+<tr><td><label id="text">Email</label></td><td class="left bottom"><input class="input_width input_gen" type="text" value="" name="loginField" id="loginField" title="Введите логин"></td></tr>
 
 <tr><td colspan="3"><br>
 	<input type="button" class="action_button" value="[% langreq('Войти') %] ▷" onclick="go_button('forward');">
@@ -83,6 +74,30 @@
 
 <tr><td colspan="3"><a target="_blank" class="dotted_link" href="">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 </td></tr>
+
+[% ELSIF ( login && login_found && !login_done ) %]
+
+<tr><td colspan="3"><span>[% langreq('Ваш адрес электронной почты найден в системе. Пожалуйста введите пароль') %]<br><br></span>
+</td></tr>
+
+<tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass" id="pass" title="Введите пароль"></td></tr>
+
+<tr><td colspan="3"><br>
+	<input type="button" class="action_button" value="[% langreq('Войти') %] ▷" onclick="go_button('forward');">
+</td></tr><tr><td colspan="3">&nbsp;</td></tr>
+
+[% ELSIF ( login && !login_found ) %]
+
+<tr><td colspan="3"><span>[% langreq('Ваш адрес электронной почты не найден в системе. Если вы ещё не регистрировались в нашей системе, то сейчас самое время! Пожалуйста введите пароль и подтвердите его правильность.') %]<br><br></span>
+</td></tr>
+
+<tr><td><label id="text">Пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass_reg1" id="pass_reg1" title="Введите пароль"></td></tr>
+<tr><td>&nbsp;</td><td class="exam_td_gen left"><span class="exam_span_gen">придумайте достаточно сложный пароль</span></td></tr>
+<tr><td><label id="text">Подтвердите пароль</label></td><td class="left bottom"><input class="input_width input_gen" type="password" value="" name="pass_reg2" id="pass_reg2" title="Введите пароль"></td></tr>
+
+<tr><td colspan="3"><br>
+	<input type="button" class="action_button" value="[% langreq('Регистрация') %] ▷" onclick="go_button('new_reg');">
+</td></tr><tr><td colspan="3">&nbsp;</td></tr>
 
 [% ELSE %]
 
