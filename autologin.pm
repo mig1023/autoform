@@ -48,7 +48,7 @@ sub login
 	
 	( $appointments, $auto_appointments, $title ) = $self->get_login_main( $login_id ) if $type eq 'workflow';
 
-	$login_error = 1 if $type eq 'login_pass_error';
+	$login_error = 1 if $type eq 'login_pass_error' and $vars->getparam( 'pass' );
 	
 	$vars->get_system->pheader( $vars );
 	
