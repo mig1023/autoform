@@ -292,9 +292,8 @@ sub autoform
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
-		'login'			=> $login, 
 	};
-	
+
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
 	$tvars->{ appinfo } = $self->get_same_info_for_timeslots()
@@ -311,6 +310,8 @@ sub autoform
 		$tvars->{ "include_name_$_" } = $special->{ "include_$_" } if $special->{ "include_$_" };
 	}
 	
+	$tvars->{ login } = $login;
+
 	$template->process( $template_file, $tvars );
 }
 
