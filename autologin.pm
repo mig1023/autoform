@@ -286,7 +286,7 @@ sub get_login_main
 	my $vars = $self->{ af }->{ 'VCS::Vars' };
 	
 	my $appointments = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT Appointments.ID, AppNum, Appointments.Status
+		SELECT Appointments.ID, AppNum, Token, Appointments.Status
 		FROM Appointments
 		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
 		WHERE AutoToken.Login = ? 

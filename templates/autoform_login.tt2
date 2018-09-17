@@ -123,7 +123,7 @@
 [% IF appointments_length > 0 %]
 	[% FOREACH app IN appointments %]
 	[% n = n + 1 %]
-	<tr><td>[% n %].</td><td>[% app.AppNum %]</td><td>
+	<tr><td>[% n %].</td><td><a class="dotted_link_big" target="_blank" href="/autoform/?t=[% app.Token %]">[% app.AppNum %]</a></td><td>
 	[% IF app.Status == 1 %][% langreq('запись оформлена') %]
 	[% ELSIF app.Status == 2 %][% langreq('запись отменена') %]
 	[% ELSIF app.Status == 3 %][% langreq('запись скрыта') %]
