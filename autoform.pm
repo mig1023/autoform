@@ -685,11 +685,16 @@ sub save_new_token_in_db
 # //////////////////////////////////////////////////
 {	
 	my ( $self, $token, $autologin ) = @_;
+	
+	my $email = $self->query( 'sel1', __LINE__, "
+		SELECT Login FROM AutoLogin WHERE ID = ?", $autologin
+	);
 
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoToken (
-		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP, Login) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?, ?)", {}, $token, $ENV{ HTTP_X_REAL_IP }, $autologin
+		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP, Login, EMail) 
+		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?, ?, ?)", {},
+		$token, $ENV{ HTTP_X_REAL_IP }, $autologin, $email
 	);
 	
 	return $token;
