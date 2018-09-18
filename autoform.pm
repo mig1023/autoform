@@ -595,9 +595,18 @@ sub get_token_and_create_new_form_if_need
 
 	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 	
-	return '02' unless $token_exist;
+	return '02' if $deleted;
 	
-	return '04' if $deleted && !$app;
+	unless ( $token_exist ) {
+	
+		my $token_expired = $self->query( 'sel1', __LINE__, "
+			SELECT ID FROM AutoToken_expired WHERE Token = ?", $token
+		);
+		
+		return '04' if $token_expired;
+		
+		return '02';
+	}
 	
 	return $token unless $finished;
 	
