@@ -8,7 +8,6 @@ use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
-use VCS::Site::autologin;
 use VCS::Site::autoselftest;
 
 use Data::Dumper;
@@ -42,17 +41,13 @@ sub getContent
 
 	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
 	
-	return autologin( @_ ) if /^login$/i;
-	
 	return autoform( @_ ) if /^index$/i;
-
+	
 	return get_pcode( @_ ) if /^findpcode$/i;
 	
 	return autoinfopage( @_, 'entry' ) if /^info$/i;
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
-	
-	return docstatus( @_ ) if /^docstatus$/i;
 	
 	return $self->redirect();
 }
@@ -126,47 +121,6 @@ sub get_content_rules_hash_opt
 	return VCS::Site::autodata_type_c::get_content_rules_hash();
 }
 
-sub autologin
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $vars = $self->{ 'VCS::Vars' };
-	
-	my $autologin = VCS::Site::autologin->new('VCS::Site::autologin', $vars);
-	
-	$autologin->{ autoform } = VCS::Site::autodata::get_settings();
-	$autologin->{ af } = $self;
-	
-	$autologin->login( $task, $id, $template );
-}
-
-sub docstatus
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $vars = $self->{ 'VCS::Vars' };
-
-	my $app = $vars->getparam('app') || '';
-	
-	$app =~ s/[^0-9]//g;
-
-	my $status = 0;
-
-	if ( $app ne '' ) {
-	
-		$status = $vars->db->sel1("
-			SELECT PStatus FROM DocPack JOIN Appointments ON Appointments.PacketID = DocPack.ID 
-			WHERE Appointments.ID = ? ORDER BY Appointments.ID DESC LIMIT 1", $app
-		) || 0;
-	}
-	
-	$vars->get_system->pheader($vars);
-	
-	print $status;
-}
-
 sub get_app_visa_and_center
 # //////////////////////////////////////////////////
 {
@@ -221,7 +175,7 @@ sub autoform
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my ( $step, $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules, $login );
+	my ( $step, $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules );
 
 	my $special = {};
 
@@ -253,7 +207,7 @@ sub autoform
 		( $title, $page_content, $template_file ) = $self->get_page_error( 0 );
 	}
 	else {
-		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $js_rules, $login ) = 
+		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $js_rules ) = 
 			$self->get_autoform_content();
 	}
 	
@@ -267,9 +221,7 @@ sub autoform
 	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	$login = 0 unless $login;
-	
+
 	my $tvars = {
 		'langreq' 		=> sub { return $self->lang( @_ ) },
 		'title' 		=> $title,
@@ -284,7 +236,6 @@ sub autoform
 		'static'		=> $self->{ autoform }->{ paths }->{ static },
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
-		'login_link'		=> $self->{ autoform }->{ paths }->{ login },
 		'progress' 		=> $progress,
 		'lang_in_link' 		=> $self->{ lang },
 		'js_rules'		=> $js_rules,
@@ -293,7 +244,7 @@ sub autoform
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
 	};
-
+	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
 	$tvars->{ appinfo } = $self->get_same_info_for_timeslots()
@@ -310,8 +261,6 @@ sub autoform
 		$tvars->{ "include_name_$_" } = $special->{ "include_$_" } if $special->{ "include_$_" };
 	}
 	
-	$tvars->{ login } = $login;
-
 	$template->process( $template_file, $tvars );
 }
 
@@ -684,17 +633,12 @@ sub create_clear_form
 sub save_new_token_in_db
 # //////////////////////////////////////////////////
 {	
-	my ( $self, $token, $autologin ) = @_;
-	
-	my $email = $self->query( 'sel1', __LINE__, "
-		SELECT Login FROM AutoLogin WHERE ID = ?", $autologin
-	);
+	my ( $self, $token ) = @_;
 
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoToken (
-		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP, Login, EMail) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?, ?, ?)", {},
-		$token, $ENV{ HTTP_X_REAL_IP }, $autologin, $email
+		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP) 
+		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?)", {}, $token, $ENV{ HTTP_X_REAL_IP }
 	);
 	
 	return $token;
@@ -772,8 +716,8 @@ sub get_autoform_content
 	my $last_error;
 	my $title;
 	
-	my ( $step, $app_id, $login ) = $self->query( 'sel1', __LINE__, "
-		SELECT Step, AutoAppID, Login FROM AutoToken WHERE Token = ?", $self->{ token }
+	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	my $action = lc( $self->{ vars }->getparam('action') );
@@ -828,7 +772,7 @@ sub get_autoform_content
 	
 	my ( $special, $js_check ) = $self->get_specials_of_element( $step );
 	
-	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check, $login );
+	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check );
 }
 
 sub check_all_is_prepared

@@ -15,7 +15,6 @@ sub get_settings
 			addr => '/autoform/',
 			addr_vcs => '/vcs/',
 			static => '/vcs/static',
-			login => '/autoform/login.htm',
 		},
 		
 		age => {
