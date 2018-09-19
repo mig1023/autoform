@@ -17,6 +17,7 @@ use Time::Piece;
 use POSIX;
 use JSON;
 use HTTP::Tiny;
+use Encode qw(decode encode);
 
 sub new
 # //////////////////////////////////////////////////
@@ -39,7 +40,7 @@ sub getContent
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
 
-	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
+	return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
 	
 	return autoform( @_ ) if /^index$/i;
 	
@@ -2625,23 +2626,29 @@ sub split_and_clarify
 # //////////////////////////////////////////////////
 {
 	my ( $self, $symbols ) = @_;
-	
+
+	$symbols = decode( 'utf8', $symbols );
+
 	my $symbol_err = VCS::Site::autodata::get_symbols_error();
 		
 	$symbol_err->{ '\\\\' } = $symbol_err->{ '\\' };
 	
+
 	my %symbols = map { $_ => 1 } split( //, $symbols );
+
 	
 	my $symbols_clear = {};
 
-	$symbols_clear->{ $symbol_err->{ $_ } || $_ } = 1 for ( keys %symbols );
+	$symbols_clear->{ decode( 'utf8', $symbol_err->{ $_ } ) || $_ } = 1 for ( keys %symbols );
 	
-	$symbols = join( ', ', keys %$symbols_clear );
+	$symbols = join( ', ', sort { $a cmp $b } keys %$symbols_clear );
 	
 	$symbols =~ s/,\s$//;
 	
 	$symbols =~ s/'/\\'/g ;
-	
+
+	$symbols = encode( 'utf8', $symbols );
+
 	return $symbols;
 }
 
@@ -2677,7 +2684,7 @@ sub text_error
 	$incorrect_symbols = $self->split_and_clarify( $incorrect_symbols ) if $incorrect_symbols;
 	
 	my $text_error = "$element->{name}|$current_error";
-	
+
 	$text_error .= ": $incorrect_symbols" if $error_code == 2;
 	
 	return $text_error;	
