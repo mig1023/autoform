@@ -40,7 +40,7 @@ sub getContent
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
 
-	return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
+	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
 	
 	return autoform( @_ ) if /^index$/i;
 	
@@ -1738,11 +1738,15 @@ sub get_html_for_element
 		
 		my $lang = $self->{ 'lang' } || 'ru';
 		
+		my $captha_error = $self->lang( $self->{ autoform }->{ captcha }->{ google_access_error } );
+		
 		$content =~ s/\[captch_id\]/$captch_id/gi;
 		
 		$content =~ s/\[widget_api\]/$widget_api/gi;
 		
 		$content =~ s/\[public_key\]/$key/gi;
+		
+		$content =~ s/\[google_access_error\]/$captha_error/gi;
 		
 		$content =~ s/\[lang\]/$lang/gi;
 	}
