@@ -147,7 +147,7 @@ sub get_html_elements
 		checklist	=> '<div id="[name]">[options]</div>',
 		
 		captcha		=> '<script>$' . ".ajax({url:'https://www.google.com/', error:function() { " .
-				'$(' . "'#googleAccessError').show(); }, timeout:4000});</script>" .
+				'$(' . "'#googleAccessError').show(); }, timeout:10000});</script>" .
 				'<script src="[widget_api]?hl=[lang]" async defer></script><div id="captha_div" class="captcha_container">' .
 				'<div id="[captch_id]" class="g-recaptcha" data-sitekey="[public_key]"></div></div>' .
 				'<div id="googleAccessError" style="display:none;">[google_access_error]</div>',
