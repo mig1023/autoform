@@ -1,793 +1,798 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
-<link href="[% static %]/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
-<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
-<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VMS - [% langreq('Новая запись') %]</title>
+	<script src="[% static %]/jquery-1.7.2.min.js"></script>
+	<script src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+	<link href="[% static %]/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+	<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+	<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>VMS - [% langreq('Новая запись') %]</title>
 
-[% IF ( special.with_map.0 ) %]
-<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
-[% END %]
+	[% IF ( special.with_map.0 ) %]
+		<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
+	[% END %]
 
-[% IF ( special.datepicker.0 || special.post_index.0 || special.mask.0 ) %]
-	<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
-	<link href="[% static %]/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
-	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
-[% END %]
+	[% IF ( special.datepicker.0 || special.post_index.0 || special.mask.0 ) %]
+		<script src="[% static %]/jquery-ui.1.8.min.js"></script>
+		<link href="[% static %]/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
+		<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
+	[% END %]
 
-[% IF ( special.mask.0 || (step == 1) ) %]
-	<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
-[% END %]
+	[% IF ( special.mask.0 || (step == 1) ) %]
+		<script src="[% static %]/jquery.maskedinput.min.js"></script>
+	[% END %]
 
-[% IF javascript_check %]
-<noscript>
-	<meta http-equiv="refresh" content="0; url=[% addr %]?t=[% token %]&script=no">
-</noscript>
-[% ELSE %]
-<script>
-	window.location.href = "[% addr %]?t=[% token %]";
-</script>
-[% END %]
-
-</head>
-
-<font face="arial">
-
-<center>
-<div id="app_form" class="margin_big">
-
-<script>
-
-	function isMobile() {
-		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-	}
-	
-	function isIphone() {
-		return (/iPhone|iPad|iPod/i.test(navigator.userAgent));
-	}
-	
-	var mobilScreen = isMobile();
-
-	if ( mobilScreen ) {
-		$('#app_form').hide();
-	}
-
-</script>
-
-<form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
-<input type = "hidden" value = "nothing" name = "action" id = "action">
-<input type = "hidden" value = "0" name = "mobile_ver" id = "mobile_ver">
-<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
-
-<table width="100%">
-
-<tr class="mobil_hide"><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br></td></tr>
-
-<tr><td align="center">
-<table width="590px" id="app_table">
-
-<tr><td class="left" colspan="3"><h2>[% langreq(title) %]</h2><br></td></tr>
-
-[% content_text %]
-
-[% IF (special.with_map.0) %]
-
-	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
-	<tr class="ymap"><td colspan="3"><div id="YMapsID" class="yandex_map"></div></td></tr>
-	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
-
-	<script type="text/javascript">
-		YMaps.jQuery(function () {
-			var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
-			map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
-			map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
-			map.addControl(new YMaps.Zoom());
-		});
-	</script>
-
-[% END %]
-
-[% FOREACH include_name IN special.include_in %]
-	[% INCLUDE $include_name %]
-[% END %]
-
-<tr><td class="left" colspan="3"><br>
-<span id="mobile_order_bottom">
-[% IF ( step > min_step ) && ( step != max_step ) %]
-	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
-	&nbsp;
-[% END %]
-</span>
-<span id="mobile_order_top">
-[% IF ( step < max_step ) && ( step > 0 ) %]
-	<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
-	&nbsp;
-[% END %]
-</span>
-
-[% IF ( step == max_step ) %]
-
-	[% IF mobile_app %]
-		<input class="action_button" type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] &#9655;" onclick="go_button('mobile_app');">
+	[% IF javascript_check %]
+		<noscript>
+			<meta http-equiv="refresh" content="0; url=[% addr %]?t=[% token %]&script=no">
+		</noscript>
 	[% ELSE %]
-		<input class="action_button" type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('app');">
+		<script>
+			window.location.href = "[% addr %]?t=[% token %]";
+		</script>
 	[% END %]
-[% END %]
 
-[% IF step == 1 %]
-	</td></tr><tr><td class="left" colspan="3"><br>
-	<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
-	<a class="dotted_link" href="/vcs/new0.htm">[% langreq('Воспользуйтесь старой формой записи, если это необходимо') %]</a>
-	<br><br></td></tr><tr><td colspan="3">
-[% END %]
+	</head>
+	<body>
+		<div style="font-family: Arial; margin: 0 auto;">
+			<div id="app_form" class="margin_big">
 
-[% FOREACH include_name IN special.include_out %]
-	[% INCLUDE $include_name %]
-[% END %]
+			<script>
 
-</td></tr></table>
-
-</td></tr></table>
-
-</form>
-
-<script>
-
-$(document).ready(mobileScreenCheck);
-
-var ua = window.navigator.userAgent.toLowerCase();
-if ( (/trident/gi).test(ua) || (/msie/gi).test(ua) ) {
-
-	function ie_select_bugfix(field, size) {
-	
-		$(field).attr("size", size);
-		return "select[tabindex='" + (parseInt($(field).attr('tabindex'), 10) + 1) + "']";
-	}
-
-	$(document).ready(function(){
-		$('select').focus(function(){
-			$(ie_select_bugfix(this, 6)).fadeTo(50, 0);
-		});
-		$('select').blur(function(){
-			$(ie_select_bugfix(this, 1)).fadeTo('fast', 1.0); 			
-		});
-	});
-}
-
-function mobileScreenCheck() {
-
-	[% FOREACH post_index IN special.post_index %]	
-		$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
-		$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
-	[% END %]
-	
-	if ( !mobilScreen ) {
-		
-		init_comm();
-		
-		$('#progressbar').css( "display", 'table' );
-		$('#app_form').css( "margin", '50px' );
-		$('#ui-datepicker-div').css( "font-size", "12" );
-		$('#app_table').attr( "width", '590px' );
-		$('.input_width').css( "width", '20em' );
-
-		[% IF (last_error_name && (last_error_name != 'timeslot')) %]
-			show_error_tip( '[% last_error_name %]', '[% langreq(last_error_text) %]' );
-		[% END %]
-
-		return;
-	}
-
-	$('#mobile_ver').val(1); 
-
-	$('#progressbar').css( "display", 'none' );
-	$('#app_form').css( "margin", '0px' );
-	
-	$('.action_button').css( "height", '60px' );
-	$('.action_button').css( "width", '100%' );
-
-	$('.exam_span_gen').css( "float", 'right' );
-
-	$('#app_table').attr( "cellspacing", '10' );
-	$('#app_table').attr( "width", '100%' );
-	
-	var temp_span_content = $('#mobile_order_bottom').html();
-	$('#mobile_order_bottom').html($('#mobile_order_top').html());
-	$('#mobile_order_top').html(temp_span_content);
-	
-	$("#app_table").each(function(){
-		$("td",this).each(function(){
-			$(this).css( "display", 'block' );
-			$(this).css( "float", 'left' );
-			$(this).css( "width", '100%' );
-		});
-	});
-	
-	$('*').css( "font-size", '15px' );
-	
-	$('.input_width').css( "line-height", '40px' );
-	$('.input_width').css( "height", '40px' );
-	$('.input_width, .info').css( "font-size", '30px' );
-	$('.input_width').css( "width", ( isIphone() ? '90%' : '100%' ) );
-	
-	$('h2').css( "font-size", '20px' );
-	$('h2, .bold_text').css( "color", '#FF6666' );
-	
-	$(':checkbox, :radio').css( "height", "20px" );
-	$(':checkbox, :radio').css( "width", "20px" );
-	
-	$('.mobil_hide').css( "display", 'none' );
-
-	$('#app_form').show();
-
-	[% IF (last_error_name && (last_error_name != 'timeslot')) %]
-		show_error_tip( '[% last_error_name %]', '[% langreq(last_error_text) %]' );
-	[% END %]
-}
-
-function go_button(where) {
-
-	[% IF ( step == max_step ) %]
-	
-		if (where == 'app') {
-			location.replace('[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
-			return;
-		}
-	[% END %]
-	
-	[% IF mobile_app %]
-	
-		if (where == 'mobile_app') {
-		
-			location.replace('[% addr %]mobile_end.htm');
-			return;
-		}
-	[% END %]
-	
-	if (where == 'forward') {
-	
-		[% IF ( ( step + 1 ) == max_step ) %]
-			$('#next_button').prop('disabled', true);
-		[% END %]
-		
-		if ( check_all_inputs_errors() > 0 ) {
-			return;
-		}
-	}
-	
-	$('#action').val(where);
-	
-	document.dataform.submit();
-};
-
-function init_poshytip(cls, fcs, aTo, aX, aY, ofX, ofY) {
-
-	$(cls).poshytip({
-		className: 'tip-yellowsimple',
-		showOn: fcs,
-		alignTo: aTo,
-		alignX: aX,
-		alignY: aY,
-		offsetX: ofX,
-		offsetY: ofY,
-		showTimeout: 100
-	});
-}
-
-function init_comm() {
-
-	$('.input_gen, .select_gen,').poshytip('destroy');
-	
-	if ( document.body.clientWidth < 1000 ) {
-		init_poshytip('.input_gen', 'focus', 'target', 'center', 'top', 5, 6);
-	} else {
-		init_poshytip('.input_gen', 'focus', 'target', 'right', 'center', 5, 0);
-	}
-	
-	init_poshytip('.select_gen', 'focus', 'target', 'center', 'top', 5, 6);
-	init_poshytip('label', '', 'target', 'right', 'center', 5, 0);
-	init_poshytip(':radio, :checkbox', '', 'target', 'right', 'center', 200, 0);
-	
-	$('.tip-yellowsimple, .tip-inner ').css( "font-size", ( mobilScreen ? '35px' : '' ) );
-	$('.tip-yellowsimple, .tip-inner ').css( "line-height", ( mobilScreen ? '1.2' : '' ) );
-}
-
-[% FOREACH picker IN special.datepicker %]
-
-	create_datepicker("[% picker %]");
-	
-[% END %]
-
-[% FOREACH mask IN special.mask %]
-
-	$("#[% mask %]").mask("99.99.9999");
-	
-	if ( mobilScreen ) {
-		create_datepicker("[% mask %]");
-	}
-[% END %]
-
-[% IF ( special.datepicker.0 || special.mask.0 ) %]
-
-function create_datepicker(date_id) {
-
-	$('#'+date_id).datepicker({
-		dateFormat: 'dd.mm.yy',
-		firstDay: 1,
-		showOn: 'both',
-		buttonImage: '[% static %]/images/1x1.png',
-		buttonImageOnly:true,
-		
-		[% FOREACH relation IN special.min_date %]
-			[% IF (relation.min != 'current') %]
-			
-				onSelect: function(date){
-					if ( date_id == '[% relation.min %]') {
-					
-						var minDate = get_date_from(date_id);
-						$('#[% relation.name %]').datepicker("option", "minDate", minDate);
-					}
+				function isMobile() {
+					return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 				}
-			[% END %]
-		[% END %]
-	});
-};
-[% END %]
-
-[% FOREACH minimal_date IN special.min_date %]
-
-	[% IF (minimal_date.min == 'current') %]
-		var minDate = new Date();
-	[% ELSE %]
-		var minDate = get_date_from('[% minimal_date.min %]');
-	[% END %]
-	
-	$('#[% minimal_date.name %]').datepicker("option", "minDate", minDate);
-
-[% END %]
-
-[% IF (special.min_date.0) %]
-
-function get_date_from(date_id) {
-
-	var minDateLine = $('#'+date_id).datepicker('getDate');
-	var minDate = new Date( Date.parse( minDateLine ) );
-	
-	return minDate;
-}
-[% END %]
-
-[% FOREACH no_copy IN special.no_copypast %]
-
-	$('#[% no_copy %]').live("keydown", function(e){
-	
-		var e = e || event, k = e.which || e.button;
-		
-		if ( e.ctrlKey && k == 86 ) return false;
-	});
-	
-	$('#[% no_copy %]').bind("contextmenu", function(e) {
-	
-		e.preventDefault();
-	});
-	
-[% END %]
-
-[% FOREACH near IN special.nearest_date %]
-
-	update_nearest_date_[% near %]();
-			
-	function update_nearest_date_[% near %]()
-	{	
-		
-
-		if ($('#center').val() != 0) {
-			$("#[% near %]").html("<div id='tmp_near_img'><img src='[% static %]/images/autoform_wait.gif' /></div>");
-		
-			$.get("[% vcs_tools %]get_nearest.htm", {
-				'center': $('#center').val(), 
-				'persons': 1, 
-				'urgent':0 }, 
-				function(data) {
-					$("#[% near %]").html(data);
-				}
-			);
-		}
-		
-		var selected_el = $('#vtype').val();
-		var restore_el = 0;
-		
-		$('#vtype').hide();
-		
-		if ( ! ( $('#tmp_vtype_img').length > 0 ) ) {
-			$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% static %]/images/autoform_wait.gif' />");
-		}
-
-		if ( mobilScreen ) {
-			$("#tmp_vtype_img, #tmp_near_img").css('height', '38px');
-		}
-
-		$('#vtype').find('option').remove();
-		
-		$.get("[% vcs_tools %]get_vtypes.htm",
-			{ 'center': $('#center').val() }, 
-			function(xml) {
-				$(xml).find('node').each( function() {
-					$('#vtype').append(
-						'<option value="' + $(this).find('id').text() + '"'+
-						(parseInt($(this).find('default').text()) ? ' selected'  : '')+
-						'>'+$(this).find('title').text() + '</option>'
-					);
 				
-					if ($(this).find('id').text() == selected_el) { restore_el = 1; };
+				function isIphone() {
+					return (/iPhone|iPad|iPod/i.test(navigator.userAgent));
+				}
+				
+				var mobilScreen = isMobile();
+
+				if ( mobilScreen ) {
+					$('#app_form').hide();
+				}
+
+			</script>
+
+			<form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
+				<input type = "hidden" value = "nothing" name = "action" id = "action">
+				<input type = "hidden" value = "0" name = "mobile_ver" id = "mobile_ver">
+				<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
+
+				<table style="width: 100%;">
+
+					<tr class="mobil_hide"><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]</tr></table><br><br><br></td></tr>
+
+					<tr><td style="text-align: center;">
+						<table style="width: 590px; margin: 0 auto;" id="app_table">
+
+							<tr><td class="left" colspan="2"><h2>[% langreq(title) %]</h2><br></td></tr>
+
+							[% content_text %]
+
+							[% IF (special.with_map.0) %]
+
+								<tr class="ymap"><td colspan="2">&nbsp;</td></tr>
+								<tr class="ymap"><td colspan="2"><div id="YMapsID" class="yandex_map"></div></td></tr>
+								<tr class="ymap"><td colspan="2">&nbsp;</td></tr>
+
+								<script type="text/javascript">
+									YMaps.jQuery(function () {
+										var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
+										map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
+										map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
+										map.addControl(new YMaps.Zoom());
+									});
+								</script>
+
+							[% END %]
+
+							[% FOREACH include_name IN special.include_in %]
+								[% INCLUDE $include_name %]
+							[% END %]
+
+							<tr><td class="left" colspan="2"><br>
+							<span id="mobile_order_bottom">
+							[% IF ( step > min_step ) && ( step != max_step ) %]
+								<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
+								&nbsp;
+							[% END %]
+							</span>
+							<span id="mobile_order_top">
+							[% IF ( step < max_step ) && ( step > 0 ) %]
+								<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
+								&nbsp;
+							[% END %]
+							</span>
+
+							[% IF ( step == max_step ) %]
+
+								[% IF mobile_app %]
+									<input class="action_button" type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] &#9655;" onclick="go_button('mobile_app');">
+								[% ELSE %]
+									<input class="action_button" type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('app');">
+								[% END %]
+							[% END %]
+
+							[% IF step == 1 %]
+								</td></tr><tr><td class="left" colspan="2"><br>
+								<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
+								<a class="dotted_link" href="/vcs/new0.htm">[% langreq('Воспользуйтесь старой формой записи, если это необходимо') %]</a>
+								<br><br></td></tr>
+								<!-- <tr><td colspan="2"> -->
+							[% END %]
+
+							[% FOREACH include_name IN special.include_out %]
+								[% INCLUDE $include_name %]
+							[% END %]
+
+								<!-- </td></tr> -->
+						</table>
+
+					</td></tr>
+				</table>
+
+			</form>
+
+			<script>
+
+			$(document).ready(mobileScreenCheck);
+
+			var ua = window.navigator.userAgent.toLowerCase();
+			if ( (/trident/gi).test(ua) || (/msie/gi).test(ua) ) {
+
+				function ie_select_bugfix(field, size) {
+				
+					$(field).attr("size", size);
+					return "select[tabindex='" + (parseInt($(field).attr('tabindex'), 10) + 1) + "']";
+				}
+
+				$(document).ready(function(){
+					$('select').focus(function(){
+						$(ie_select_bugfix(this, 6)).fadeTo(50, 0);
+					});
+					$('select').blur(function(){
+						$(ie_select_bugfix(this, 1)).fadeTo('fast', 1.0); 			
+					});
+				});
+			}
+
+			function mobileScreenCheck() {
+
+				[% FOREACH post_index IN special.post_index %]	
+					$('#[% post_index %]').autocomplete("widget").css("width", ( mobilScreen ? 600 : 300 ));
+					$('#[% post_index %]').autocomplete("widget").css({"font-size": ( mobilScreen ? '30px' : '14px' )});
+				[% END %]
+				
+				if ( !mobilScreen ) {
+					
+					init_comm();
+					
+					$('#progressbar').css( "display", 'table' );
+					$('#app_form').css( "margin", '50px' );
+					$('#ui-datepicker-div').css( "font-size", "12" );
+					$('#app_table').attr( "width", '590px' );
+					$('.input_width').css( "width", '20em' );
+
+					[% IF (last_error_name && (last_error_name != 'timeslot')) %]
+						show_error_tip( '[% last_error_name %]', '[% langreq(last_error_text) %]' );
+					[% END %]
+
+					return;
+				}
+
+				$('#mobile_ver').val(1); 
+
+				$('#progressbar').css( "display", 'none' );
+				$('#app_form').css( "margin", '0px' );
+				
+				$('.action_button').css( "height", '60px' );
+				$('.action_button').css( "width", '100%' );
+
+				$('.exam_span_gen').css( "float", 'right' );
+
+				$('#app_table').attr( "cellspacing", '10' );
+				$('#app_table').attr( "width", '100%' );
+				
+				var temp_span_content = $('#mobile_order_bottom').html();
+				$('#mobile_order_bottom').html($('#mobile_order_top').html());
+				$('#mobile_order_top').html(temp_span_content);
+				
+				$("#app_table").each(function(){
+					$("td",this).each(function(){
+						$(this).css( "display", 'block' );
+						$(this).css( "float", 'left' );
+						$(this).css( "width", '100%' );
+					});
 				});
 				
-				if (restore_el) {
-					$('#vtype').val(selected_el);
+				$('*').css( "font-size", '15px' );
+				
+				$('.input_width').css( "line-height", '40px' );
+				$('.input_width').css( "height", '40px' );
+				$('.input_width, .info').css( "font-size", '30px' );
+				$('.input_width').css( "width", ( isIphone() ? '90%' : '100%' ) );
+				
+				$('h2').css( "font-size", '20px' );
+				$('h2, .bold_text').css( "color", '#FF6666' );
+				
+				$(':checkbox, :radio').css( "height", "20px" );
+				$(':checkbox, :radio').css( "width", "20px" );
+				
+				$('.mobil_hide').css( "display", 'none' );
+
+				$('#app_form').show();
+
+				[% IF (last_error_name && (last_error_name != 'timeslot')) %]
+					show_error_tip( '[% last_error_name %]', '[% langreq(last_error_text) %]' );
+				[% END %]
+			}
+
+			function go_button(where) {
+
+				[% IF ( step == max_step ) %]
+				
+					if (where == 'app') {
+						location.replace('[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]');
+						return;
+					}
+				[% END %]
+				
+				[% IF mobile_app %]
+				
+					if (where == 'mobile_app') {
+					
+						location.replace('[% addr %]mobile_end.htm');
+						return;
+					}
+				[% END %]
+				
+				if (where == 'forward') {
+				
+					[% IF ( ( step + 1 ) == max_step ) %]
+						$('#next_button').prop('disabled', true);
+					[% END %]
+					
+					if ( check_all_inputs_errors() > 0 ) {
+						return;
+					}
 				}
-				$('#tmp_vtype_img').remove();
-				$('#vtype').show();
 				
-			}, 
-		'xml');
-	}
-[% END %]
-
-[% FOREACH timeslot IN special.timeslots %]
-
-	update_timeslots();
-
-	function update_timeslots(date_change) {
+				$('#action').val(where);
 				
-		$('#timeslot').hide();
-		
-		$('#timeslot').find('option').remove();
-		
-		$('#timeslot').parent().prepend("<img id='tmp_img' src='[% static %]/images/autoform_wait.gif' />");
-		
-		var reload_timeslot = $('#timeslot').attr('data-timeslot');
-		
+				document.dataform.submit();
+			};
 
-		$.get("[% vcs_tools %]get_times.htm", {
-		
-			'center': '[% appinfo.center %]', 
-			'persons': '[% appinfo.persons %]', 
-			'appdate':$('#app_date').val(),
-			'fdate': '[% appinfo.fdate %]', 
-			'lang': '[% lang_in_link %]',
-			
-			}, function(xml) {
-				$(xml).find('node').each( function() {
-				
-					var apptimeValue = $(this).find('id').text();
-					var apptimeText = $(this).find('title').text();
-					var defaultOpt = $(this).find('default').text();
+			function init_poshytip(cls, fcs, aTo, aX, aY, ofX, ofY) {
 
-					$('#timeslot').append(
-						'<option value="' + apptimeValue + '" ' +
-						( (
-							( apptimeValue == "" )
-							||
-							( apptimeValue == reload_timeslot )
-							||
-							( ( reload_timeslot == "0" ) && ( defaultOpt == "this" ) )
-						) ? 'selected' : '' )
-						+ ' >'+ apptimeText + '</option>'
-					);
-			});
-			
-			$('#tmp_img').remove();
-			$('#timeslot').show();
-			
-			[% IF last_error_name == 'timeslot' %]
-			
-				if ( !date_change ) {
+				$(cls).poshytip({
+					className: 'tip-yellowsimple',
+					showOn: fcs,
+					alignTo: aTo,
+					alignX: aX,
+					alignY: aY,
+					offsetX: ofX,
+					offsetY: ofY,
+					showTimeout: 100
+				});
+			}
+
+			function init_comm() {
+
+				$('.input_gen, .select_gen,').poshytip('destroy');
 				
-					$(document).ready(function() {
-						show_error_tip( 'timeslot', '[% langreq(last_error_text) %]' );
+				if ( document.body.clientWidth < 1000 ) {
+					init_poshytip('.input_gen', 'focus', 'target', 'center', 'top', 5, 6);
+				} else {
+					init_poshytip('.input_gen', 'focus', 'target', 'right', 'center', 5, 0);
+				}
+				
+				init_poshytip('.select_gen', 'focus', 'target', 'center', 'top', 5, 6);
+				init_poshytip('label', '', 'target', 'right', 'center', 5, 0);
+				init_poshytip(':radio, :checkbox', '', 'target', 'right', 'center', 200, 0);
+				
+				$('.tip-yellowsimple, .tip-inner ').css( "font-size", ( mobilScreen ? '35px' : '' ) );
+				$('.tip-yellowsimple, .tip-inner ').css( "line-height", ( mobilScreen ? '1.2' : '' ) );
+			}
+
+			[% FOREACH picker IN special.datepicker %]
+
+				create_datepicker("[% picker %]");
+				
+			[% END %]
+
+			[% FOREACH mask IN special.mask %]
+
+				$("#[% mask %]").mask("99.99.9999");
+				
+				if ( mobilScreen ) {
+					create_datepicker("[% mask %]");
+				}
+			[% END %]
+
+			[% IF ( special.datepicker.0 || special.mask.0 ) %]
+
+			function create_datepicker(date_id) {
+
+				$('#'+date_id).datepicker({
+					dateFormat: 'dd.mm.yy',
+					firstDay: 1,
+					showOn: 'both',
+					buttonImage: '[% static %]/images/1x1.png',
+					buttonImageOnly:true,
+					
+					[% FOREACH relation IN special.min_date %]
+						[% IF (relation.min != 'current') %]
+						
+							onSelect: function(date){
+								if ( date_id == '[% relation.min %]') {
+								
+									var minDate = get_date_from(date_id);
+									$('#[% relation.name %]').datepicker("option", "minDate", minDate);
+								}
+							}
+						[% END %]
+					[% END %]
+				});
+			};
+			[% END %]
+
+			[% FOREACH minimal_date IN special.min_date %]
+
+				[% IF (minimal_date.min == 'current') %]
+					var minDate = new Date();
+				[% ELSE %]
+					var minDate = get_date_from('[% minimal_date.min %]');
+				[% END %]
+				
+				$('#[% minimal_date.name %]').datepicker("option", "minDate", minDate);
+
+			[% END %]
+
+			[% IF (special.min_date.0) %]
+
+			function get_date_from(date_id) {
+
+				var minDateLine = $('#'+date_id).datepicker('getDate');
+				var minDate = new Date( Date.parse( minDateLine ) );
+				
+				return minDate;
+			}
+			[% END %]
+
+			[% FOREACH no_copy IN special.no_copypast %]
+
+				$('#[% no_copy %]').live("keydown", function(e){
+				
+					var e = e || event, k = e.which || e.button;
+					
+					if ( e.ctrlKey && k == 86 ) return false;
+				});
+				
+				$('#[% no_copy %]').bind("contextmenu", function(e) {
+				
+					e.preventDefault();
+				});
+				
+			[% END %]
+
+			[% FOREACH near IN special.nearest_date %]
+
+				update_nearest_date_[% near %]();
+						
+				function update_nearest_date_[% near %]()
+				{	
+					
+
+					if ($('#center').val() != 0) {
+						$("#[% near %]").html("<div id='tmp_near_img'><img src='[% static %]/images/autoform_wait.gif' /></div>");
+					
+						$.get("[% vcs_tools %]get_nearest.htm", {
+							'center': $('#center').val(), 
+							'persons': 1, 
+							'urgent':0 }, 
+							function(data) {
+								$("#[% near %]").html(data);
+							}
+						);
+					}
+					
+					var selected_el = $('#vtype').val();
+					var restore_el = 0;
+					
+					$('#vtype').hide();
+					
+					if ( ! ( $('#tmp_vtype_img').length > 0 ) ) {
+						$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% static %]/images/autoform_wait.gif' />");
+					}
+
+					if ( mobilScreen ) {
+						$("#tmp_vtype_img, #tmp_near_img").css('height', '38px');
+					}
+
+					$('#vtype').find('option').remove();
+					
+					$.get("[% vcs_tools %]get_vtypes.htm",
+						{ 'center': $('#center').val() }, 
+						function(xml) {
+							$(xml).find('node').each( function() {
+								$('#vtype').append(
+									'<option value="' + $(this).find('id').text() + '"'+
+									(parseInt($(this).find('default').text()) ? ' selected'  : '')+
+									'>'+$(this).find('title').text() + '</option>'
+								);
+							
+								if ($(this).find('id').text() == selected_el) { restore_el = 1; };
+							});
+							
+							if (restore_el) {
+								$('#vtype').val(selected_el);
+							}
+							$('#tmp_vtype_img').remove();
+							$('#vtype').show();
+							
+						}, 
+					'xml');
+				}
+			[% END %]
+
+			[% FOREACH timeslot IN special.timeslots %]
+
+				update_timeslots();
+
+				function update_timeslots(date_change) {
+							
+					$('#timeslot').hide();
+					
+					$('#timeslot').find('option').remove();
+					
+					$('#timeslot').parent().prepend("<img id='tmp_img' src='[% static %]/images/autoform_wait.gif' />");
+					
+					var reload_timeslot = $('#timeslot').attr('data-timeslot');
+					
+
+					$.get("[% vcs_tools %]get_times.htm", {
+					
+						'center': '[% appinfo.center %]', 
+						'persons': '[% appinfo.persons %]', 
+						'appdate':$('#app_date').val(),
+						'fdate': '[% appinfo.fdate %]', 
+						'lang': '[% lang_in_link %]',
+						
+						}, function(xml) {
+							$(xml).find('node').each( function() {
+							
+								var apptimeValue = $(this).find('id').text();
+								var apptimeText = $(this).find('title').text();
+								var defaultOpt = $(this).find('default').text();
+
+								$('#timeslot').append(
+									'<option value="' + apptimeValue + '" ' +
+									( (
+										( apptimeValue == "" )
+										||
+										( apptimeValue == reload_timeslot )
+										||
+										( ( reload_timeslot == "0" ) && ( defaultOpt == "this" ) )
+									) ? 'selected' : '' )
+									+ ' >'+ apptimeText + '</option>'
+								);
+						});
+						
+						$('#tmp_img').remove();
+						$('#timeslot').show();
+						
+						[% IF last_error_name == 'timeslot' %]
+						
+							if ( !date_change ) {
+							
+								$(document).ready(function() {
+									show_error_tip( 'timeslot', '[% langreq(last_error_text) %]' );
+								});
+							} else {
+								$('#timeslot').poshytip('destroy');
+							}
+						[% END %]
+						
+						var al = $(xml).find('urgent_flag');
+						
+						if (al.text() != '') {
+						
+							var alertText = al.text();
+							alert(alertText);
+						}
+				    }, 'xml');
+				};
+			[% END %]
+
+
+			function find_pos( obj ) {
+
+				var curtop = 0;
+
+				if ( obj.offsetParent ) {
+				
+					do {
+						curtop += obj.offsetTop;
+						
+					} while ( obj = obj.offsetParent );
+					
+					return [ curtop ];
+				}
+			}
+
+			function show_error_tip( last_error_name, last_error_text ) {
+
+				var error_x = ( mobilScreen ? 'inner-left' : 'left' );
+				var error_y = ( mobilScreen ? 'bottom' : 'center' );
+				var offset_x = ( mobilScreen ? 0 : 5 );
+				var offset_y = ( mobilScreen ? 5 : 0 );
+				
+				if ( last_error_name == 'captha_div' ) {
+				
+					error_x = 'inner-left';
+					offset_x = ( mobilScreen ? 0 : 20 );
+					error_y = ( mobilScreen ? 'top' : 'center' );
+					offset_y = ( mobilScreen ? 50 : 0 );
+				}
+				
+				window.scroll( 0,find_pos( document.getElementById( last_error_name ) ) );
+				
+				$( '#' + last_error_name ).poshytip({
+					className: 'tip-redsimple',
+					content: last_error_text,
+					showOn: 'none',
+					alignTo: 'target',
+					alignX: error_x,
+					alignY: error_y,
+					offsetX: offset_x,
+					offsetY: offset_y,
+				});
+				
+				$( '#' + last_error_name ).bind({
+				
+					click: function( e ) {
+					
+						$('#' + last_error_name ).poshytip( 'hide' );
+					}
+				});
+				
+				$( '#' + last_error_name ).poshytip( 'show' );
+				
+				$( '.tip-redsimple .tip-inner' ).css( "font-size", ( mobilScreen ? '20px' : '' ) );
+				$( '.tip-redsimple .tip-inner' ).css( "line-height", ( mobilScreen ? '1.2' : '' ) );
+				
+				if ( last_error_name == 'captha_div' ) {
+				
+					$( '.tip-redsimple' ).each( function() {
+					
+						$( this ).css( 'top', ( parseFloat( $( this ).css( 'top' ) ) + 38 ) );
 					});
 				} else {
-					$('#timeslot').poshytip('destroy');
+				
+					$( '#' + last_error_name ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
 				}
-			[% END %]
-			
-			var al = $(xml).find('urgent_flag');
-			
-			if (al.text() != '') {
-			
-				var alertText = al.text();
-				alert(alertText);
+
+				return 1;
 			}
-	    }, 'xml');
-	};
-[% END %]
 
+			[% FOREACH post_index IN special.post_index %]
 
-function find_pos( obj ) {
-
-	var curtop = 0;
-
-	if ( obj.offsetParent ) {
-	
-		do {
-			curtop += obj.offsetTop;
-			
-		} while ( obj = obj.offsetParent );
-		
-		return [ curtop ];
-	}
-}
-
-function show_error_tip( last_error_name, last_error_text ) {
-
-	var error_x = ( mobilScreen ? 'inner-left' : 'left' );
-	var error_y = ( mobilScreen ? 'bottom' : 'center' );
-	var offset_x = ( mobilScreen ? 0 : 5 );
-	var offset_y = ( mobilScreen ? 5 : 0 );
-	
-	if ( last_error_name == 'captha_div' ) {
-	
-		error_x = 'inner-left';
-		offset_x = ( mobilScreen ? 0 : 20 );
-		error_y = ( mobilScreen ? 'top' : 'center' );
-		offset_y = ( mobilScreen ? 50 : 0 );
-	}
-	
-	window.scroll( 0,find_pos( document.getElementById( last_error_name ) ) );
-	
-	$( '#' + last_error_name ).poshytip({
-		className: 'tip-redsimple',
-		content: last_error_text,
-		showOn: 'none',
-		alignTo: 'target',
-		alignX: error_x,
-		alignY: error_y,
-		offsetX: offset_x,
-		offsetY: offset_y,
-	});
-	
-	$( '#' + last_error_name ).bind({
-	
-		click: function( e ) {
-		
-			$('#' + last_error_name ).poshytip( 'hide' );
-		}
-	});
-	
-	$( '#' + last_error_name ).poshytip( 'show' );
-	
-	$( '.tip-redsimple .tip-inner' ).css( "font-size", ( mobilScreen ? '20px' : '' ) );
-	$( '.tip-redsimple .tip-inner' ).css( "line-height", ( mobilScreen ? '1.2' : '' ) );
-	
-	if ( last_error_name == 'captha_div' ) {
-	
-		$( '.tip-redsimple' ).each( function() {
-		
-			$( this ).css( 'top', ( parseFloat( $( this ).css( 'top' ) ) + 38 ) );
-		});
-	} else {
-	
-		$( '#' + last_error_name ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
-	}
-
-	return 1;
-}
-
-[% FOREACH post_index IN special.post_index %]
-
-	$('#[% post_index %]').autocomplete({
-	
-		source:function( request, response ) {
-		
-			$('#[% post_index %]').hide();
-			
-			$('#[% post_index %]').parent().append(
-				'<span id="[% post_index %]_replacer">' + $('#[% post_index %]').val() + 
-				' <img src="[% static %]/images/autoform_wait.gif" /></span>'
-			);
-			
-			$('#[% post_index %]_replacer').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
-			
-			$.ajax({
-				url: "/autoform/findpcode.htm",
+				$('#[% post_index %]').autocomplete({
 				
-				dataType: "jsonp",
+					source:function( request, response ) {
+					
+						$('#[% post_index %]').hide();
+						
+						$('#[% post_index %]').parent().append(
+							'<span id="[% post_index %]_replacer">' + $('#[% post_index %]').val() + 
+							' <img src="[% static %]/images/autoform_wait.gif" /></span>'
+						);
+						
+						$('#[% post_index %]_replacer').css( "font-size", ( mobilScreen ? '1.5em' : '' ) );
+						
+						$.ajax({
+							url: "/autoform/findpcode.htm",
+							
+							dataType: "jsonp",
+							
+							data: {
+								maxRows: 8,
+								name_startsWith: request.term,
+								center: [% appinfo.center %], 
+							},
+							
+							success: function( data ) {
+							
+								$('#[% post_index %]').poshytip('hide');
+								
+								$('#[% post_index %]_replacer').remove();
+								
+								$('#[% post_index %]').show();
+								
+								response( $.map( data.cmps, function( item ) {
+								
+									return {
+										value: item.pcode,
+										desc: item.cname,
+										cdefault: item.cdefault,
+										cid: item.cid
+									}
+								}));
+							}
+						});
+					},
+					
+					delay:10,
+					minLength:3,
+					
+					select: function( event, ui ) {
+					
+						$('#[% post_index %]').val( ui.item.value + ', ' + ui.item.desc );
+						
+						return false;
+					},
+					
+					open: function(event, ui) {
+					
+						// $('#[% post_index %]').val( '' );
+					}		
+				})
+				.data( "autocomplete" )._renderItem = function( ul, item ) {
 				
-				data: {
-					maxRows: 8,
-					name_startsWith: request.term,
-					center: [% appinfo.center %], 
-				},
+					return $( "<li></li>" )
+						.data( "item.autocomplete", item )
+						.append( "<a>" + item.value + '<br><span class="post_index">' + item.desc + "</span></a>" )
+						.appendTo( ul );
+				};
+			[% END %]
+
+			function check_all_inputs_errors() {
 				
-				success: function( data ) {
+				var checks = [
+					[% FOREACH rule IN js_rules %]
+						{
+						[% FOREACH param IN rule %]
+							[% param.key %]: '[% param.value %]',
+						[% END %]
+						},
+					[% END %]
+				];
+
+				var errors_num = 0;
+
+				$('.input_gen, .select_gen,').poshytip('hide');
 				
-					$('#[% post_index %]').poshytip('hide');
+				checks.forEach( function( field ) {
 					
-					$('#[% post_index %]_replacer').remove();
+					$( '#' + field.name ).css( { 'background-color' : '' } );
+
+					if ( errors_num == 0 ) {
+
+						errors_num += check_input( field.name, field.type, field.check, field.label ) || 0;
+					}
+				});
+
+				return errors_num;
+			}
+
+			function split_and_clarify( line ) {
+
+				var symbol_err = {
+					[% FOREACH s IN js_symbols %]
+						'[% s.key %]': '[% s.value %]',
+					[% END %]
+				};
+
+				var symbols = line.split("");
+				var new_line_hash = {};
+				
+				symbols.forEach( function(item, i) {
+					new_line_hash[ symbol_err[ symbols[i] ] || symbols[i] ] = 1;
+				});
+				
+				var new_line_full = '';
+				
+				for (var s in new_line_hash) {
+					new_line_full += s + ', ';
+				}
+				
+				var new_line = new_line_full.replace(/,\s$/, '');
+				
+				return new_line;
+			}
+
+			function check_input( field, type, check, label ) {
+
+				if ( ( field == '' ) || ( check == '' ) ) {
+					return 0;
+				}
+
+				var val = $( '#' + field ).val().replace(/^\s+|\s+$/g, '');
+
+				if ( type == 'input' ) {
 					
-					$('#[% post_index %]').show();
-					
-					response( $.map( data.cmps, function( item ) {
-					
-						return {
-							value: item.pcode,
-							desc: item.cname,
-							cdefault: item.cdefault,
-							cid: item.cid
+					if ( /z/.test( check ) && ( val == '' ) ) {
+
+						return show_error_tip( field, '[% langreq( js_errors.0 ) %]'.replace( /\[name\]/, label ) );
+					}
+
+					if ( /D/.test( check ) ) {
+
+						var date_reg = new RegExp( check.replace( /(z|D)/g, '' ) );
+
+						if ( !date_reg.test( val ) && ! (val == '') ) {
+							
+							return show_error_tip( field, '[% langreq( js_errors.1 ) %]'.replace( /\[name\]/, label ) );
 						}
-					}));
-				}
-			});
-		},
-		
-		delay:10,
-		minLength:3,
-		
-		select: function( event, ui ) {
-		
-			$('#[% post_index %]').val( ui.item.value + ', ' + ui.item.desc );
-			
-			return false;
-		},
-		
-		open: function(event, ui) {
-		
-			// $('#[% post_index %]').val( '' );
-		}		
-	})
-	.data( "autocomplete" )._renderItem = function( ul, item ) {
-	
-		return $( "<li></li>" )
-			.data( "item.autocomplete", item )
-			.append( "<a>" + item.value + '<br><span class="post_index">' + item.desc + "</span></a>" )
-			.appendTo( ul );
-	};
-[% END %]
+					}
+					else {
+						var regexp = '';
 
-function check_all_inputs_errors() {
-	
-	var checks = [
-		[% FOREACH rule IN js_rules %]
-			{
-			[% FOREACH param IN rule %]
-				[% param.key %]: '[% param.value %]',
-			[% END %]
-			},
-		[% END %]
-	];
+						if ( /W/.test( check ) ) {
+							regexp += 'A-Za-z';
+						}
+						if ( /Ё/.test( check ) ) {
+							regexp += 'А-ЯЁа-яё';
+						}
+						if ( /N/.test( check ) ) {
+							regexp += '0-9';
+						}
 
-	var errors_num = 0;
+						var regexp_add = check.replace( /(z|W|Ё|N)/g, '' );
 
-	$('.input_gen, .select_gen,').poshytip('hide');
-	
-	checks.forEach( function( field ) {
-		
-		$( '#' + field.name ).css( { 'background-color' : '' } );
+						var input_reg = new RegExp( '[^' + regexp + regexp_add + ']' );
 
-		if ( errors_num == 0 ) {
+						var reverse_reg = new RegExp( '[' + regexp + regexp_add + ']', "g" );
 
-			errors_num += check_input( field.name, field.type, field.check, field.label ) || 0;
-		}
-	});
+						if ( input_reg.test( val ) && ( val != '' ) ) {
 
-	return errors_num;
-}
-
-function split_and_clarify( line ) {
-
-	var symbol_err = {
-		[% FOREACH s IN js_symbols %]
-			'[% s.key %]': '[% s.value %]',
-		[% END %]
-	};
-
-	var symbols = line.split("");
-	var new_line_hash = {};
-	
-	symbols.forEach( function(item, i) {
-		new_line_hash[ symbol_err[ symbols[i] ] || symbols[i] ] = 1;
-	});
-	
-	var new_line_full = '';
-	
-	for (var s in new_line_hash) {
-		new_line_full += s + ', ';
-	}
-	
-	var new_line = new_line_full.replace(/,\s$/, '');
-	
-	return new_line;
-}
-
-function check_input( field, type, check, label ) {
-
-	if ( ( field == '' ) || ( check == '' ) ) {
-		return 0;
-	}
-
-	var val = $( '#' + field ).val().replace(/^\s+|\s+$/g, '');
-
-	if ( type == 'input' ) {
-		
-		if ( /z/.test( check ) && ( val == '' ) ) {
-
-			return show_error_tip( field, '[% langreq( js_errors.0 ) %]'.replace( /\[name\]/, label ) );
-		}
-
-		if ( /D/.test( check ) ) {
-
-			var date_reg = new RegExp( check.replace( /(z|D)/g, '' ) );
-
-			if ( !date_reg.test( val ) && ! (val == '') ) {
+							var symbols_incorrect = split_and_clarify( val.replace( reverse_reg, '' ) );
 				
-				return show_error_tip( field, '[% langreq( js_errors.1 ) %]'.replace( /\[name\]/, label ) );
+							return show_error_tip( field, '[% langreq( js_errors.2 ) %]'.replace( /\[name\]/, label ) +
+								': ' + symbols_incorrect );
+						}
+					}
+				}
+				else if ( type == 'checkbox' ) {
+
+					if ( ( check == 'true' ) && ( !$( '#' + field ).is( ':checked' ) ) ) {
+
+						return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
+					}
+				}
+				else if ( type == 'checklist' ) {
+
+					if ( ( check == 'at_least_one' ) && ( !$( 'input[name^=' + field + ']' ).is( ':checked' ) ) ) {
+
+						return show_error_tip( field, '[% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
+					}
+				}
+				else if ( type == 'radiolist' ) {
+
+					if ( /z/.test( check ) && ( !$( 'input[name=' + field + ']' ).is( ':checked' ) ) ) {
+
+						return show_error_tip( field, '[% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
+					}
+				}
+				else if ( type == 'select' ) {
+
+					if ( /z/.test( check ) && /^0$|^$/.test( $('select[name=' + field + ']').val() ) ) {
+
+						return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
+					}
+				}
+
+				return 0;
 			}
-		}
-		else {
-			var regexp = '';
 
-			if ( /W/.test( check ) ) {
-				regexp += 'A-Za-z';
-			}
-			if ( /Ё/.test( check ) ) {
-				regexp += 'А-ЯЁа-яё';
-			}
-			if ( /N/.test( check ) ) {
-				regexp += '0-9';
-			}
+			</script>
 
-			var regexp_add = check.replace( /(z|W|Ё|N)/g, '' );
-
-			var input_reg = new RegExp( '[^' + regexp + regexp_add + ']' );
-
-			var reverse_reg = new RegExp( '[' + regexp + regexp_add + ']', "g" );
-
-			if ( input_reg.test( val ) && ( val != '' ) ) {
-
-				var symbols_incorrect = split_and_clarify( val.replace( reverse_reg, '' ) );
-	
-				return show_error_tip( field, '[% langreq( js_errors.2 ) %]'.replace( /\[name\]/, label ) +
-					': ' + symbols_incorrect );
-			}
-		}
-	}
-	else if ( type == 'checkbox' ) {
-
-		if ( ( check == 'true' ) && ( !$( '#' + field ).is( ':checked' ) ) ) {
-
-			return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
-		}
-	}
-	else if ( type == 'checklist' ) {
-
-		if ( ( check == 'at_least_one' ) && ( !$( 'input[name^=' + field + ']' ).is( ':checked' ) ) ) {
-
-			return show_error_tip( field, '[% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
-		}
-	}
-	else if ( type == 'radiolist' ) {
-
-		if ( /z/.test( check ) && ( !$( 'input[name=' + field + ']' ).is( ':checked' ) ) ) {
-
-			return show_error_tip( field, '[% langreq( js_errors.11 ) %]'.replace( /\[name\]/, label ) );
-		}
-	}
-	else if ( type == 'select' ) {
-
-		if ( /z/.test( check ) && /^0$|^$/.test( $('select[name=' + field + ']').val() ) ) {
-
-			return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
-		}
-	}
-
-	return 0;
-}
-
-</script>
-
-</div>
+			</div>
+		</div>
+	</body>
+</html>

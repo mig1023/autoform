@@ -152,11 +152,11 @@ sub get_html_elements
 				'<div id="[captch_id]" class="g-recaptcha" data-sitekey="[public_key]"></div></div>' .
 				'<div id="googleAccessError" style="display:none;">[google_access_error]</div>',
 		
-		label		=> '<label id="[name]" [u]>[value]</label>',
+		label		=> '<label data-id="[name]" [u]>[value]</label>',
 		
 		label_for	=> '&nbsp;<label for="[name]" [u]>[value]</label>',
 		
-		progress	=> '<td align="center" class="pr_size_gen pr_[file]_gen"><div class="[format]" ' .
+		progress	=> '<td class="pr_size_gen pr_[file]_gen center"><div class="[format] centered" ' .
 				'title="[title]"><div class="pr_in_gen">[name]</div></div></td>',
 					
 		stages		=> '<td class="stage_gen">[progress_stage]</td>',

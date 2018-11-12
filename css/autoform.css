@@ -3,6 +3,14 @@
 	text-align: left;
 }
 
+.center {
+	text-align: center;
+}
+
+.centered {
+	margin: 0 auto;
+}
+
 .bottom{
 	vertical-align: bottom;
 }
@@ -165,8 +173,4 @@
 	border-collapse:collapse;
 	border:1px solid #D3D3D3;
 	padding:10px;
-}
-
-.hidden {
-	display:none;
 }
