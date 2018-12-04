@@ -120,7 +120,15 @@
 
 							[% IF step == 1 %]
 								</td></tr><tr><td class="left" colspan="2"><br>
-								<a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
+								<a target="_blank" class="dotted_link"
+								[% IF lang_in_link == 'it' %]								
+									href="/informativa-sulle-condizioni-di-fornitura-dei-servizi-e-sulla-politica-di-privacy/"
+								[% ELSIF lang_in_link == 'en' %]
+									href="/disclaimer/"
+								[% ELSE %]
+									href="/otkaz-ot-otvetstvennosti/"
+								[% END %]
+								>[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
 								<a class="dotted_link" href="/vcs/new0.htm">[% langreq('Воспользуйтесь старой формой записи, если это необходимо') %]</a>
 								<br><br></td></tr>
 								<!-- <tr><td colspan="2"> -->
