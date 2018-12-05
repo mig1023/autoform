@@ -187,6 +187,8 @@ sub autoform
 		$self->{ lang } = lc( $1 );
 	}
 	
+	$self->{ scanner } = ( $self->{ vars }->getparam( 'scanner' ) eq 'yes' ? 'yes' : 'no' );
+	
 	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
 
 	return $self->get_mobile_api() if $self->{ vars }->getparam( 'mobile_api' );
@@ -211,8 +213,10 @@ sub autoform
 		( $step, $title, $page_content, $last_error, $template_file, $special, $progress, $appid, $js_rules ) = 
 			$self->get_autoform_content();
 	}
-	
+
 	my $symbols_error = VCS::Site::autodata::get_symbols_error();
+	
+	$symbols_error->{ $_ } = $self->lang( $symbols_error->{ $_ } ) for keys %$symbols_error;
 	
 	for ( "'", "\\" ) {
 	
@@ -244,6 +248,7 @@ sub autoform
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
+		'scanner'		=> $self->{ scanner },
 	};
 	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
@@ -1521,6 +1526,9 @@ sub get_html_line
 
 	return $self->get_html_for_element( 'free_line' ) if $element->{ type } eq 'free_line';
 	
+	return $self->get_html_for_element( 'free_line' )
+		if ( $element->{ type } eq 'biometric_data' ) and $self->{ scanner } ne 'yes';
+	
 	my $content = $self->get_html_for_element( 'start_line' );
 	
 	if ( $element->{ type } eq 'text' ) {
@@ -1531,7 +1539,7 @@ sub get_html_line
 		$content .= $self->get_html_for_element( 'end_line' );
 	
 		return $content;
-	}	
+	}
 	
 	my $label_for_need = ( $element->{ label_for } ? 
 		$self->get_html_for_element( 'label_for', $element->{ name }, $element->{ label_for } ) : '' );
@@ -1709,10 +1717,10 @@ sub get_html_for_element
 		
 	}
 	
-	if ($type eq 'checklist') {
+	if ( $type eq 'checklist' ) {
 
 		my $list = '';
-
+		
 		for my $opt ( sort { $a cmp $b } keys %$param ) {
 		
 			my $checked = ( $value->{ $opt } ? 'checked' : '' );
@@ -1738,15 +1746,11 @@ sub get_html_for_element
 		
 		my $lang = $self->{ 'lang' } || 'ru';
 		
-		my $captha_error = $self->lang( $self->{ autoform }->{ captcha }->{ google_access_error } );
-		
 		$content =~ s/\[captch_id\]/$captch_id/gi;
 		
 		$content =~ s/\[widget_api\]/$widget_api/gi;
 		
 		$content =~ s/\[public_key\]/$key/gi;
-		
-		$content =~ s/\[google_access_error\]/$captha_error/gi;
 		
 		$content =~ s/\[lang\]/$lang/gi;
 	}
@@ -1784,6 +1788,11 @@ sub get_html_for_element
 	
 		$value = '—' if !$value;
 		$content =~ s/\[text\]/$value/;
+	}
+	
+	if ( $type eq 'biometric_data' ) {
+	
+		$content =~ s/\[text\]/$comment/;
 	}
 	
 	if ( $uniq_code ) {
@@ -2634,13 +2643,13 @@ sub split_and_clarify
 	$symbols = decode( 'utf8', $symbols );
 
 	my $symbol_err = VCS::Site::autodata::get_symbols_error();
+	
+	$symbol_err->{ $_ } = $self->lang( $symbol_err->{ $_ } ) for keys %$symbol_err;
 		
 	$symbol_err->{ '\\\\' } = $symbol_err->{ '\\' };
-	
 
 	my %symbols = map { $_ => 1 } split( //, $symbols );
 
-	
 	my $symbols_clear = {};
 
 	$symbols_clear->{ decode( 'utf8', $symbol_err->{ $_ } ) || $_ } = 1 for ( keys %symbols );
@@ -3311,7 +3320,7 @@ sub lang
 # //////////////////////////////////////////////////
 {
 	my ( $self, $text, $lang_param ) = @_;
-	
+
 	return if !$text;
 
 	my $vocabulary = $self->{ vars }->{ 'VCS::Resources' }->{ 'list' };
@@ -3319,11 +3328,14 @@ sub lang
 	my $lang = ( $lang_param ? $lang_param : $self->{ 'lang' } );
 	
 	if ( ref( $text ) ne 'HASH' ) {
-
+	
 		return $vocabulary->{ $text }->{ $lang } || $text;
 	}
 	
 	for ( keys %$text ) {
+
+		next if !$text->{ $_ };
+	
 		$text->{ $_ } = $vocabulary->{ $text->{ $_ } }->{ $lang } || $text->{ $_ };
 	}
 	

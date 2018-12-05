@@ -31,8 +31,6 @@ sub get_settings
 			private_key => '',
 			widget_api => 'https://www.google.com/recaptcha/api.js',
 			verify_api => 'https://www.google.com/recaptcha/api/siteverify',
-			google_access_error => 'Возможно, на компьютере закрыт доступ к ресурсам google.com<br>' .
-				'Это препятствует нормальной работе формы записи',
 		},
 		
 		confirm => {
@@ -146,11 +144,8 @@ sub get_html_elements
 		
 		checklist	=> '<div id="[name]">[options]</div>',
 		
-		captcha		=> '<script>$' . ".ajax({url:'https://www.google.com/', error:function() { " .
-				'$(' . "'#googleAccessError').show(); }, timeout:10000});</script>" .
-				'<script src="[widget_api]?hl=[lang]" async defer></script><div id="captha_div" class="captcha_container">' .
-				'<div id="[captch_id]" class="g-recaptcha" data-sitekey="[public_key]"></div></div>' .
-				'<div id="googleAccessError" style="display:none;">[google_access_error]</div>',
+		captcha		=> '<script src="[widget_api]?hl=[lang]" async defer></script><div id="captha_div" class="captcha_container">' .
+				'<div id="[captch_id]" class="g-recaptcha" data-sitekey="[public_key]"></div></div>',
 		
 		label		=> '<label data-id="[name]" [u]>[value]</label>',
 		
@@ -162,7 +157,11 @@ sub get_html_elements
 		stages		=> '<td class="stage_gen">[progress_stage]</td>',
 		
 		free_line	=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
-	};
+		
+		biometric_data	=> '<div class="biometric_box"><div class="biometric_left">'.
+				'<img src="/vcs/static/images/biometric_pass.png">&nbsp;&nbsp;</div>'.
+				'<div class="biometric_right"><a href="/autoform/scan/" class="nfc_link">[text]</a></div></div><br>',
+	}
 }
 
 sub get_tables_controled_by_AutoToken

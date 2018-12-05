@@ -62,6 +62,7 @@
 				<input type = "hidden" value = "nothing" name = "action" id = "action">
 				<input type = "hidden" value = "0" name = "mobile_ver" id = "mobile_ver">
 				<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
+				<input type = "hidden" value = "[% scanner %]" name = "scanner" id = "scanner">
 
 				<table style="width: 100%;">
 
