@@ -129,8 +129,7 @@
 									href="/otkaz-ot-otvetstvennosti/"
 								[% END %]
 								>[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
-								<a class="dotted_link" href="/vcs/new0.htm">[% langreq('Воспользуйтесь старой формой записи, если это необходимо') %]</a>
-								<br><br></td></tr>
+								</td></tr>
 								<!-- <tr><td colspan="2"> -->
 							[% END %]
 
