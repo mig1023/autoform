@@ -181,14 +181,15 @@
 }
 
 .biometric_box{
-	padding:10px;
+	padding-top:10px;
+	padding-bottom:5px;
 	border-bottom-width:1px;
 	border-bottom-color:red;
 	border-bottom-style:solid;	
 	border-top-width:1px;
 	border-top-color:red;
 	border-top-style:solid;
-}
+}							
 
 .biometric_right {
 	font-size:15px;
@@ -199,4 +200,12 @@
 
 .biometric_left {
 	display: inline;
+	height:37px;
+}
+
+.biometric_left_inner {
+	height:37px;
+	display: table-cell;
+	vertical-align: middle;
+	text-align: center;
 }

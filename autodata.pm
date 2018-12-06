@@ -158,8 +158,8 @@ sub get_html_elements
 		
 		free_line	=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 		
-		biometric_data	=> '<div class="biometric_box"><div class="biometric_left">'.
-				'<img src="/vcs/static/images/biometric_pass.png">&nbsp;&nbsp;</div>'.
+		biometric_data	=> '<div class="biometric_box"><div class="biometric_left"><div class="biometric_left_inner">'.
+				'<img src="/vcs/static/images/biometric_pass.png">&nbsp;&nbsp;</div></div>'.
 				'<div class="biometric_right"><a href="/autoform/scan/" class="nfc_link">[text]</a></div></div><br>',
 	}
 }
