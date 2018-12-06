@@ -181,12 +181,11 @@ sub autoform
 	my $special = {};
 
 	my $javascript_check = 'need_to_check';
+	
+	my $lang = lc( $self->{ vars }->getparam( 'lang' ) );
+	
+	$self->{ lang } = ( $lang =~ /^(en|it)$/i ? $lang : 'ru' );
 
-	if ( $self->{ vars }->getparam( 'lang' ) =~ /^(en|it)$/i ) {
-	
-		$self->{ lang } = lc( $1 );
-	}
-	
 	for ( 'scanner', 'biometric_data' ) {
 	
 		$self->{ biometric_data } = 'yes' if lc( $self->{ vars }->getparam( $_ ) ) eq 'yes';
@@ -405,7 +404,9 @@ sub init_add_param
 			
 			for ( @{ $info_from_db->{ '[centers_from_db]' } } ) {
 				
-				$_->[ 1 ] = 'Moscow (м. Третьяковская)' if $_->[ 0 ] == 1; 
+				my $center_name = $self->lang( 'mobname' . $_->[ 0 ] );
+				
+				$_->[ 1 ] = $center_name unless $center_name =~ /^mobname/;
 			}
 			
 			my $add_eu_countries = [
@@ -3326,7 +3327,7 @@ sub lang
 	my $vocabulary = $self->{ vars }->{ 'VCS::Resources' }->{ 'list' };
 
 	my $lang = ( $lang_param ? $lang_param : $self->{ 'lang' } );
-	
+
 	if ( ref( $text ) ne 'HASH' ) {
 	
 		return $vocabulary->{ $text }->{ $lang } || $text;
