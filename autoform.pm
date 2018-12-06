@@ -187,8 +187,11 @@ sub autoform
 		$self->{ lang } = lc( $1 );
 	}
 	
-	$self->{ scanner } = ( $self->{ vars }->getparam( 'scanner' ) eq 'yes' ? 'yes' : 'no' );
+	for ( 'scanner', 'biometric_data' ) {
 	
+		$self->{ biometric_data } = 'yes' if lc( $self->{ vars }->getparam( $_ ) ) eq 'yes';
+	}
+
 	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
 
 	return $self->get_mobile_api() if $self->{ vars }->getparam( 'mobile_api' );
@@ -242,13 +245,13 @@ sub autoform
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'progress' 		=> $progress,
+		'biometric_data'	=> ( $self->{ biometric_data } ? 'yes' : '' ),
 		'lang_in_link' 		=> $self->{ lang },
 		'js_rules'		=> $js_rules,
 		'js_symbols'		=> $symbols_error,
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
-		'scanner'		=> $self->{ scanner },
 	};
 	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
@@ -1527,7 +1530,7 @@ sub get_html_line
 	return $self->get_html_for_element( 'free_line' ) if $element->{ type } eq 'free_line';
 	
 	return $self->get_html_for_element( 'free_line' )
-		if ( $element->{ type } eq 'biometric_data' ) and $self->{ scanner } ne 'yes';
+		if ( $element->{ type } eq 'biometric_data' ) and $self->{ biometric_data } ne 'yes';
 	
 	my $content = $self->get_html_for_element( 'start_line' );
 	
@@ -1790,10 +1793,7 @@ sub get_html_for_element
 		$content =~ s/\[text\]/$value/;
 	}
 	
-	if ( $type eq 'biometric_data' ) {
-	
-		$content =~ s/\[text\]/$comment/;
-	}
+	$content =~ s/\[text\]/$comment/ if $type eq 'biometric_data';
 	
 	if ( $uniq_code ) {
 	

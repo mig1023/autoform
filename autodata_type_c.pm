@@ -385,6 +385,24 @@ sub get_content_rules_hash
 				type => 'free_line',
 			},
 			{
+				type => 'radiolist',
+				name => 'gender',
+				label => 'Пол',
+				check => 'zN',
+				complete_check => 'not_empty',
+				db => {
+					table => 'AppData',
+					name => 'Gender',
+				},
+				param => { 
+					1 => 'мужской', 
+					2 => 'женский', 
+				},
+			},
+			{
+				type => 'free_line',
+			},
+			{
 				type => 'text',
 				name => 'rupass_text',
 				label => 'Данные загранпаспорта',
@@ -657,23 +675,6 @@ sub get_content_rules_hash
 				},
 				param => '[prevcitizenship_countries]',
 				first_elements => '70, 272', # <--- chng in init_add_param
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'radiolist',
-				name => 'gender',
-				label => 'Пол',
-				check => 'zN',
-				db => {
-					table => 'AppData',
-					name => 'Gender',
-				},
-				param => { 
-					1 => 'мужской', 
-					2 => 'женский', 
-				},
 			},
 			{
 				type => 'free_line',

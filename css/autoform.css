@@ -96,6 +96,11 @@
 	text-decoration:none;
 }
 
+.nfc_link{
+	text-decoration:none;
+	color:#666666;
+}
+
 .optional_field{
 	background-color:#F5F5F5;
 	border-width:1px;
@@ -173,4 +178,25 @@
 	border-collapse:collapse;
 	border:1px solid #D3D3D3;
 	padding:10px;
+}
+
+.biometric_box{
+	padding:10px;
+	border-bottom-width:1px;
+	border-bottom-color:red;
+	border-bottom-style:solid;	
+	border-top-width:1px;
+	border-top-color:red;
+	border-top-style:solid;
+}
+
+.biometric_right {
+	font-size:15px;
+	color:#666666;
+	padding: 0px;
+	display: inline-block;
+}
+
+.biometric_left {
+	display: inline;
 }

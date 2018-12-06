@@ -366,6 +366,24 @@ sub get_content_rules_hash
 				type => 'free_line',
 			},
 			{
+				type => 'radiolist',
+				name => 'gender',
+				label => 'Пол',
+				check => 'zN',
+				complete_check => 'not_empty',
+				db => {
+					table => 'AppData',
+					name => 'Gender',
+				},
+				param => { 
+					1 => 'мужской', 
+					2 => 'женский', 
+				},
+			},
+			{
+				type => 'free_line',
+			},
+			{
 				type => 'text',
 				name => 'rupass_text',
 				label => 'Данные загранпаспорта',
@@ -479,7 +497,7 @@ sub get_content_rules_hash
 				label => 'Кем выдан',
 				comment => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
 				example => 'FMS 12345',
-				check => 'zWN\s\-\_\.\,\;\'\"',
+				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
@@ -657,23 +675,6 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'radiolist',
-				name => 'gender',
-				label => 'Пол',
-				check => 'zN',
-				db => {
-					table => 'AppData',
-					name => 'Gender',
-				},
-				param => { 
-					1 => 'мужской', 
-					2 => 'женский', 
-				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'radiolist',
 				name => 'family',
 				label => 'Семейное положение',
 				check => 'zN',
@@ -752,7 +753,7 @@ sub get_content_rules_hash
 				label => 'Контактный телефон компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
 				example => '12345',
-				check => 'zN',
+				check => 'zN\-',
 				db => {
 					table => 'SpbAlterAppData',
 					name => 'JobPhone',
