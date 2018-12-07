@@ -19,6 +19,8 @@ use VCS::SQL;
 
 	my ( $clear, $first_step ) = ( 0, 0 );
 	
+	# ///////////////
+	
 	$first_step = $vars->db->sel1("
 		SELECT count(ID) FROM AutoToken
 		WHERE LinkSended IS NULL AND CreatedApp IS NULL AND Finished = 0
@@ -31,12 +33,26 @@ use VCS::SQL;
 		AND DATEDIFF(now(), StartDate) > 1"
 	);
 	
+	# ///////////////
+	
 	my $alltokens = $vars->db->selallkeys("
 		SELECT ID, StartDate, LastChange, EMail, LastIP, Token, AutoAppID
 		FROM AutoToken
 		WHERE CreatedApp IS NULL AND Finished = 0
 		AND DATEDIFF(now(), StartDate) > 14 AND DATEDIFF(now(), LastChange) > 3"
 	);
+	
+	# ///////////////
+	
+	my $completed_tokens = $vars->db->selallkeys("
+		SELECT AutoToken.ID, StartDate, LastChange, AutoToken.EMail, LastIP, Token, AutoAppID
+		FROM AutoToken
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE CreatedApp IS NOT NULL AND Finished = 1
+		AND DATEDIFF(now(), AppDate) > 90"
+	);
+	
+	# ( ... )
 
 	for my $token ( @$alltokens ) {
 	
