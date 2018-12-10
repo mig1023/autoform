@@ -42,6 +42,8 @@ use VCS::SQL;
 		AND DATEDIFF(now(), StartDate) > 14 AND DATEDIFF(now(), LastChange) > 3"
 	);
 	
+	my $alltokens_count = scalar( @$alltokens );
+	
 	# ///////////////
 	
 	my $completed_tokens = $vars->db->selallkeys("
@@ -52,9 +54,9 @@ use VCS::SQL;
 		AND DATEDIFF(now(), AppDate) > 90"
 	);
 	
-	# ( ... )
-
-	for my $token ( @$alltokens ) {
+	my $completed_tokens_count = scalar( @$completed_tokens );
+	
+	for my $token ( @$alltokens, @$completed_tokens ) {
 	
 		$vars->db->query("
 			INSERT INTO AutoToken_expired (Token, LastIP, EMail, StartDate, LastChange, RemovedDate) VALUES (?, ?, ?, ?, ?, now())", {},
@@ -94,7 +96,7 @@ use VCS::SQL;
 		}
 	}
 	
-	log_file( "всего однодневок удалено: $first_step очищено: $clear" );
+	log_file( "всего однодневок удалено: $first_step очищено: $clear (незаконченных $alltokens_count / законченных $completed_tokens_count)" );
 	log_file( "скрипт завершился" );
 	
 	
