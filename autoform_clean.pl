@@ -36,7 +36,7 @@ use VCS::SQL;
 	# ///////////////
 	
 	my $alltokens = $vars->db->selallkeys("
-		SELECT ID, StartDate, LastChange, EMail, LastIP, Token, AutoAppID
+		SELECT ID, StartDate, LastChange, EMail, LastIP, Token, AutoAppID, Finished
 		FROM AutoToken
 		WHERE CreatedApp IS NULL AND Finished = 0
 		AND DATEDIFF(now(), StartDate) > 14 AND DATEDIFF(now(), LastChange) > 3"
@@ -47,10 +47,10 @@ use VCS::SQL;
 	# ///////////////
 	
 	my $completed_tokens = $vars->db->selallkeys("
-		SELECT AutoToken.ID, StartDate, LastChange, AutoToken.EMail, LastIP, Token, AutoAppID
+		SELECT AutoToken.ID, StartDate, LastChange, AutoToken.EMail, LastIP, Token, AutoAppID, Finished
 		FROM AutoToken
-		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		WHERE CreatedApp IS NOT NULL AND Finished = 1
+		JOIN Appointments ON CreatedApp = Appointments.ID
+		WHERE Finished = 1
 		AND DATEDIFF(now(), AppDate) > 90"
 	);
 	
@@ -58,14 +58,17 @@ use VCS::SQL;
 	
 	for my $token ( @$alltokens, @$completed_tokens ) {
 	
-		$vars->db->query("
-			INSERT INTO AutoToken_expired (Token, LastIP, EMail, StartDate, LastChange, RemovedDate) VALUES (?, ?, ?, ?, ?, now())", {},
-			$token->{ Token }, $token->{ LastIP }, $token->{ EMail }, $token->{ StartDate }, $token->{ LastChange }
-		);
+		if ( !$token->{ Finished } ) {
 		
-		$vars->db->query("
-			DELETE FROM AutoToken WHERE ID = ?", {}, $token->{ ID }
-		);
+			$vars->db->query("
+				INSERT INTO AutoToken_expired (Token, LastIP, EMail, StartDate, LastChange, RemovedDate) VALUES (?, ?, ?, ?, ?, now())", {},
+				$token->{ Token }, $token->{ LastIP }, $token->{ EMail }, $token->{ StartDate }, $token->{ LastChange }
+			);
+			
+			$vars->db->query("
+				DELETE FROM AutoToken WHERE ID = ?", {}, $token->{ ID }
+			);
+		}
 		
 		$clear += 1;
 		
