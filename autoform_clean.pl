@@ -7,6 +7,7 @@ use lib '/usr/local/www/data/htdocs/vcs/lib';
 use VCS::Config;
 use VCS::Vars;
 use VCS::SQL;
+use Data::Dumper;
 
 
 	log_file();
@@ -50,10 +51,10 @@ use VCS::SQL;
 		SELECT AutoToken.ID, StartDate, LastChange, AutoToken.EMail, LastIP, Token, AutoAppID, Finished
 		FROM AutoToken
 		JOIN Appointments ON CreatedApp = Appointments.ID
-		WHERE Finished = 1
+		WHERE Finished = 1 AND AutoAppID IS NOT NULL
 		AND DATEDIFF(now(), AppDate) > 90"
 	);
-	
+
 	my $completed_tokens_count = scalar( @$completed_tokens );
 	
 	for my $token ( @$alltokens, @$completed_tokens ) {
@@ -72,7 +73,13 @@ use VCS::SQL;
 		
 		$clear += 1;
 		
-		next if $token->{ AutoAppID } == 0;
+		next if $token->{ AutoAppID } == 0 or !defined( $token->{ AutoAppID } );
+	
+		$vars->db->query("
+			UPDATE AutoToken SET AutoAppID = NULL, AutoAppDataID = NULL, AutoSchengenAppDataID = NULL, AutoSpbDataID = NULL
+			WHERE Token = ?", {}, $token->{ Token }
+			
+		) if $token->{ Finished };
 		
 		$vars->db->query("
 			DELETE FROM AutoAppointments WHERE ID = ?", {}, $token->{ AutoAppID }
