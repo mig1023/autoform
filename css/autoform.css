@@ -189,23 +189,31 @@
 	border-top-width:1px;
 	border-top-color:red;
 	border-top-style:solid;
-}							
+}
 
 .biometric_right {
 	font-size:15px;
 	color:#666666;
-	padding: 0px;
-	display: inline-block;
+	padding:0px;
+	display:inline-block;
 }
 
 .biometric_left {
-	display: inline;
+	display:inline;
 	height:37px;
 }
 
 .biometric_left_inner {
 	height:37px;
-	display: table-cell;
-	vertical-align: middle;
-	text-align: center;
+	display:table-cell;
+	vertical-align:middle;
+	text-align:center;
+}
+
+.disclaimer {
+	border:1px solid black;
+	display:none;
+	padding:15px;
+	font-size:9px;
+	text-align:justify;
 }

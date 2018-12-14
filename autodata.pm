@@ -130,6 +130,11 @@ sub get_html_elements
 					
 		checkbox 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		
+		disclaimer	=> '<div id="disc" class="disclaimer"><br>[comment]<br></div>' .
+				'<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>' .
+				'<script>function openDisclaimer() { if ( $("#disc").css("display") == "none" )' .
+				'{ $("#disc").show(); } else { $("#disc").hide(); } }</script>',
+		
 		select		=> '<select class="input_width select_gen" size = "1" ' .
 				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 					

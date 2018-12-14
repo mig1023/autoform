@@ -131,14 +131,11 @@
 								[% END %]
 								>[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
 								</td></tr>
-								<!-- <tr><td colspan="2"> -->
 							[% END %]
 
 							[% FOREACH include_name IN special.include_out %]
 								[% INCLUDE $include_name %]
 							[% END %]
-
-								<!-- </td></tr> -->
 						</table>
 
 					</td></tr>

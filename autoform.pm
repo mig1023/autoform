@@ -1683,7 +1683,7 @@ sub get_html_for_element
 	$content =~ s/\[comment\]/$comment/gi;
 	$content =~ s/\[example\]/$example/gi;
 	
-	if ( $type eq 'checkbox' ) {
+	if ( ( $type eq 'checkbox' ) or ( $type eq 'disclaimer' ) ) {
 	
 		$content =~ s/\[checked\]/checked/gi if $value_original;
 		$content =~ s/\s\[checked\]//gi;
@@ -2116,7 +2116,7 @@ sub encode_data_for_db
 	
 	$value = $self->get_prepare_line( $value );
 	
-	$value = ( ( $value eq $element_name ) ? 1 : 0 ) if $element->{type} =~ /checkbox|checklist/;
+	$value = ( ( $value eq $element_name ) ? 1 : 0 ) if $element->{type} =~ /checkbox|disclaimer|checklist/;
 	
 	$value = $self->{ vars }->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
 	
@@ -2314,7 +2314,7 @@ sub check_diff_types
 {
 	my ( $self, $element ) = @_;
 	
-	return $self->check_chkbox( $element ) if $element->{type} =~ /checkbox/;
+	return $self->check_chkbox( $element ) if $element->{type} =~ /checkbox|disclaimer/;
 
 	return $self->check_checklist( $element ) if $element->{type} =~ /checklist/;
 
