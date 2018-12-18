@@ -1687,6 +1687,10 @@ sub get_html_for_element
 	
 		$content =~ s/\[checked\]/checked/gi if $value_original;
 		$content =~ s/\s\[checked\]//gi;
+
+		my $close = $self->lang( 'закрыть' );
+		
+		$content =~ s/\[close\]/$close/gi;
 	}
 	
 	if ( $type eq 'select' ) {

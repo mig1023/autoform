@@ -110,9 +110,10 @@ sub get_content_rules_hash
 				special => 'no_copypast',
 			},
 			{
-				type => 'checkbox',
+				type => 'disclaimer',
 				name => 'pers_info',
-				label_for => 'я согласен с <a target = "_blank" class = "dotted_link_big" href = "/files/it/pers_data_agreement.pdf">условиями</a> обработки персональных данных визовым центром',
+				label_for => 'я согласен с <a class = "dotted_link_big" href = "javascript:openDisclaimer()">условиями</a> обработки персональных данных визовым центром',
+				comment => 'disclaimer_text',
 				check => 'true',
 				db => {
 					table => 'Appointments',
