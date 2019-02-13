@@ -2905,7 +2905,7 @@ sub tester_func
 sub replace_var
 # //////////////////////////////////////////////////
 {
-	my $_ = shift;
+	local $_ = shift;
 	
 	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id, $test_spb_id ) = @_;
 
