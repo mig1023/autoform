@@ -655,7 +655,10 @@ sub get_content_rules_hash
 				name => 'brhplace',
 				label => 'Место рождения',
 				comment => 'Укажите место рождения латинскими буквами в соответствии с информацией в загранпаспорте, населенный пункт должен быть указан обязательно',
-				example => 'Pushkino, Moscowskaya',
+				example => [
+					'Pushkino, Moscowskaya',
+					'Moscow',
+				],
 				check => 'zWN\s\-\,\;',
 				db => {
 					table => 'AppData',

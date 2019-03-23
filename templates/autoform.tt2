@@ -198,8 +198,6 @@
 				$('.action_button').css( "height", '60px' );
 				$('.action_button').css( "width", '100%' );
 
-				$('.exam_span_gen').css( "float", 'right' );
-
 				$('#app_table').attr( "cellspacing", '10' );
 				$('#app_table').attr( "width", '100%' );
 				
@@ -209,9 +207,11 @@
 				
 				$("#app_table").each(function(){
 					$("td",this).each(function(){
-						$(this).css( "display", 'block' );
-						$(this).css( "float", 'left' );
-						$(this).css( "width", '100%' );
+						if (!$(this).hasClass("no_mobile_transform")) {
+							$(this).css( "display", 'block' );
+							$(this).css( "float", 'left' );
+							$(this).css( "width", '100%' );
+						}
 					});
 				});
 				

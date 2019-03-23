@@ -1659,9 +1659,18 @@ sub get_html_for_element
 	my $elements = VCS::Site::autodata::get_html_elements();
 	
 	my $content = $elements->{ $type };
+
+	if ( ref( $value ) eq 'ARRAY' ) {
+	
+		my $value_line = '';
+		
+		$value_line .= "$_<br>" for @$value;
+		
+		$value = $value_line;
+	}
 	
 	$value =~ s/"/&quot;/g unless $type =~ /^(label_for|text)$/;
-
+	
 	$comment .= $self->add_rules_format( $check ) if $type =~ /^input$/;
 	
 	if ( ( $type eq 'progress' ) and ( !$first_elements ) ) {

@@ -144,7 +144,7 @@ sub get_html_elements
 		text		=> '<td class="left" colspan="3" [u]>[value]</td>',
 		
 		example		=> '<tr [u]><td class="exam_td_gen left">' .
-				'<span class="exam_span_gen">[example]: [value]</span></td></tr>',
+				'<span class="exam_span_gen"><table class="no_border"><tr><td class="no_mobile_transform exam_td_gen">[example]:</td><td class="no_mobile_transform">[value]</td></tr></table></span></td></tr>',
 
 		info		=> '<label class="info" title="[comment]" id="[name]" [u]>[text]</label>',
 		

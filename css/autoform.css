@@ -217,3 +217,9 @@
 	font-size:9px;
 	text-align:justify;
 }
+
+.no_border {
+	border: none;
+	border-spacing: 0;
+	border-collanse: collapse;
+}
