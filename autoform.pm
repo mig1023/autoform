@@ -34,9 +34,7 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
-	my ( $self ) = @_;
-	
-	local $_ = $$_[2];
+	( my $self, undef, local $_ ) = @_;
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 	
