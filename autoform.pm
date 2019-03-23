@@ -1574,10 +1574,8 @@ sub get_html_line
 	
 	$content .= $self->get_html_for_element( 'end_line' );
 	
-	if ( $element->{ example } ne '' ) {
-	
-		$content .= $self->get_html_for_element( 'example', $element->{name}, $element->{example} );
-	}
+	$content .= $self->get_html_for_element( 'example', $element->{name}, $element->{example} )
+		if $element->{ example } ne '';
 
 	return $content;
 }
@@ -1587,9 +1585,8 @@ sub get_cell
 {
 	my ( $self, $element, $rowspan, $bottom ) = @_;
 	
-	my $start_cell = ( ( $rowspan eq '' ) ?
-		$self->get_html_for_element( 'start_cell', undef, undef, undef, $bottom ) :
-		$self->get_html_for_element( 'start_cell', undef, undef, undef, 'rowspan=2' )
+	my $start_cell = $self->get_html_for_element(
+		'start_cell', undef, undef, undef, ( $rowspan eq '' ? $bottom : 'rowspan=2 valign=top' )
 	);
 	
 	return $start_cell . $element . $self->get_html_for_element( 'end_cell' );
