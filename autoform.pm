@@ -375,6 +375,18 @@ sub get_geo_info
 	return $branches->{ $center };
 }
 
+sub get_lang_if_exist
+# //////////////////////////////////////////////////
+{
+	my ( $self, $line, $static_key, $dynamic_key ) = @_;
+	
+	my $lang_version = $self->lang( $static_key . $dynamic_key ) || $line;
+	
+	$line = $lang_version unless $lang_version =~ /^$static_key/;
+	
+	return $line;
+}
+
 sub init_add_param
 # //////////////////////////////////////////////////
 {
@@ -402,12 +414,12 @@ sub init_add_param
 				$info_from_db->{ $_ } = $self->query( 'selall', __LINE__, $info_from_sql->{ $_ } );
 			}
 			
-			for ( @{ $info_from_db->{ '[centers_from_db]' } } ) {
-				
-				my $center_name = $self->lang( 'mobname' . $_->[ 0 ] );
-				
-				$_->[ 1 ] = $center_name unless $center_name =~ /^mobname/;
-			}
+			
+			$_->[ 1 ] = $self->get_lang_if_exist( $_->[ 1 ], 'mobname', $_->[ 0 ] )
+				for @{ $info_from_db->{ '[centers_from_db]' } };
+			
+			$_->[ 1 ] = $self->get_lang_if_exist( $_->[ 1 ], 'visaname', $_->[ 0 ] )
+				for @{ $info_from_db->{ '[visas_from_db]' } };
 			
 			my $add_eu_countries = [
 				[ 37, "BULGARIA" ],
