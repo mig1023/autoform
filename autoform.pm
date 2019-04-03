@@ -683,14 +683,22 @@ sub token_generation
 	my ( $token_existing, $token ) = ( 1, 't' );
 
 	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
+
+	( undef, my $ms ) = split( /\./, gettimeofday() );
+	
+	$ms = substr( $ms, 0, 3 ) if length( $ms ) > 3;
+
+	srand( $ms );
 	
 	do {
+		$token = 't';
+	
 		$token .= @alph[ int( rand( 36 ) ) ] for ( 1..63 );
 		
 		$token_existing = $self->query( 'sel1', __LINE__, "
 			SELECT ID FROM AutoToken WHERE Token = ?", $token
 		) || 0;
-			
+				
 	} while ( $token_existing );
 	
 	return $token;
