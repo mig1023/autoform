@@ -658,6 +658,7 @@ sub get_content_rules_hash
 				example => [
 					'Pushkino, Moscowskaya',
 					'Moscow',
+					'Belgorod, Belgorodskaya',
 				],
 				check => 'zWN\s\-\,\;',
 				db => {
@@ -1002,7 +1003,7 @@ sub get_content_rules_hash
 						'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
 				},
 				example => '14',
-				check => 'zN\+',
+				check => 'zWN\s\+',
 				db => {
 					table => 'AppData',
 					name => 'CalcDuration',
