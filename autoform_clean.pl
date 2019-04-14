@@ -106,7 +106,10 @@ use Data::Dumper;
 		}
 	}
 	
-	log_file( "всего однодневок удалено: $first_step очищено: $clear (незаконченных $alltokens_count / законченных $completed_tokens_count)" );
+	log_file( "всего однодневок удалено: $first_step" );
+	log_file( "всего старых очищено: $clear" );
+	log_file( "- из них незаконченных через 14 дней: $alltokens_count" );
+	log_file( "- из них законченных через 90 дней: $completed_tokens_count" );
 	log_file( "скрипт завершился" );
 	
 	
