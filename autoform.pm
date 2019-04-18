@@ -37,9 +37,11 @@ sub getContent
 
 	( my $self, undef, local $_ ) = @_;
 	
-	$self->{ autoform } = VCS::Site::autodata::get_settings();
-	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
+	
+	return if $self->{ vars }->af->softban_block( $self->{ vars }, $ENV{ HTTP_X_REAL_IP }, 'only_ban_test' );
+	
+	$self->{ autoform } = VCS::Site::autodata::get_settings();
 
 	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
 	

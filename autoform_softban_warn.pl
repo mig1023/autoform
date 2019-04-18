@@ -16,41 +16,39 @@ use VCS::Memcache;
 use VCS::AdminFunc;
 use Date::Calc;
 
-		my $log_name = '/var/log/autoform_ddos_warn.log';
+	# лог для контроля
+		my $log_name = '/var/log/autoform_softban_warn.log';
 		
-		my $warn_connection = 100;
-	
+	# список рассылки
 		my @addresses = (
 			'mail@mail.com',
 		);
 	
+	# подпись письма
 		my $signature = 
-			'Скрипт проверки подозрительной активности в форме записи';
+			'Скрипт отчёта о подозрительной активности';
 	
 	log_file();
-	log_file("Включение скрипта проверки подозрительной активности");	
-	log_file("////////////////////////////////////////////////////");
+	log_file("Включение скрипта проверки заблокированной активности");	
+	log_file("/////////////////////////////////////////////////////");
 
 	my $vars = new VCS::Vars(qw( VCS::Config VCS::SQL VCS::System VCS::Memcache VCS::AdminFunc ));
 		
 	$vars->db->db_connect($vars);
 
 	my $connections = $vars->db->selallkeys("
-		SELECT LastIP AS IP, count(ID) AS ConnectionNumber, MIN(StartDate) AS Start, MAX(StartDate) AS End
-		FROM AutoToken
-		WHERE DATE(StartDate) = (CURDATE() - INTERVAL 1 DAY) AND Email IS NULL
-		GROUP BY LastIP ORDER BY ConnectionNumber DESC;
+		SELECT IP, BanDate FROM SoftBan WHERE DATE(BanDate) = (CURDATE() - INTERVAL 1 DAY) ORDER BY BanDate
 	");
 	
 	my $table = create_table( $connections );
 	
 	unless ( defined $table ) {
 	
-		log_file( "Ничего подозрительного НЕ обнаружено" );
+		log_file( "Ничего подозрительного НЕ было" );
 	}
 	else {
-		my $subject = 'Отчёт о подозрительной активности в форме записи';
-		my $body = $table . "<br>Данные за прошедшие сутки<br>Отбираются многочисленные запросы без заполнения анкеты<br><br>" . $signature;
+		my $subject = 'Отчёт о подавлении подозрительной внешней активности';
+		my $body = $table . "<br>Данные за прошедшие сутки<br>Все указанные адреса заблокированы<br><br>" . $signature;
 		
 		for ( @addresses ) {
 			$vars->get_system->send_mail( $vars, $_, $subject, $body );
@@ -88,7 +86,7 @@ sub create_table {
 	
 	$_->{ N } = ++$n for @$connections;  
 	
-	my @heads = ( 'N', 'IP', 'ConnectionNumber', 'Start', 'End' );
+	my @heads = ( 'N', 'IP', 'BanDate' );
 	
 	$table .= "<td $tdheadstyle>$_ </td>" for ( @heads );
 	
@@ -98,13 +96,9 @@ sub create_table {
 	
 	for my $row ( @$connections ) {
 	
-		next if $row->{ ConnectionNumber } < $warn_connection;
-		
-		next if $row->{ IP } eq '127.0.0.1';
-		
 		$line += 1;
 		
-		log_file( $row->{ IP } . " --> " . $row->{ ConnectionNumber } );
+		log_file( $row->{ IP } );
 	
 		$table .= "<tr>";
 		
