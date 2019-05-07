@@ -3188,11 +3188,11 @@ sub send_link
 	
 	my $body;
 	
-	my $token = $self->{ token };
+	my $token_with_lang = $self->{ token } . '&lang=' . ( $self->{ 'lang' } || 'ru' );
 	
 	for my $html ( sort { $a <=> $b } keys %$htmls ) {
 		
-		$htmls->{ $html } =~ s/\[token\]/$token/;
+		$htmls->{ $html } =~ s/\[token\]/$token_with_lang/;
 		
 		$body .= $self->lang( $htmls->{ $html } );
 	}
