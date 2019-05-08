@@ -621,16 +621,13 @@ sub get_token_and_create_new_form_if_need
 	
 	return '02' if $deleted;
 	
-	unless ( $token_exist ) {
+	my $token_expired = $self->query( 'sel1', __LINE__, "
+		SELECT ID FROM AutoToken_expired WHERE Token = ?", $token
+	);
 	
-		my $token_expired = $self->query( 'sel1', __LINE__, "
-			SELECT ID FROM AutoToken_expired WHERE Token = ?", $token
-		);
-		
-		return '04' if $token_expired;
-		
-		return '02';
-	}
+	return '04' if $token_expired;
+
+	return '02' unless $token_exist;
 	
 	return $token unless $finished;
 	
@@ -682,7 +679,7 @@ sub token_generation
 {
 	my $self = shift;
 
-	my ( $token_existing, $token ) = ( 1, 't' );
+	my ( $token_existing, $token_existed_before, $token ) = ( 1, 't' );
 
 	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 
@@ -700,8 +697,12 @@ sub token_generation
 		$token_existing = $self->query( 'sel1', __LINE__, "
 			SELECT ID FROM AutoToken WHERE Token = ?", $token
 		) || 0;
+		
+		$token_existed_before = $self->query( 'sel1', __LINE__, "
+			SELECT ID FROM AutoToken_expired WHERE Token = ?", $token
+		) || 0;
 				
-	} while ( $token_existing );
+	} while ( $token_existing || $token_existed_before );
 	
 	return $token;
 }
