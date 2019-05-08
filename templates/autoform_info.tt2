@@ -7,7 +7,7 @@
 <title>VMS - [% langreq('Информация о записи') %]</title>
 
 [% IF title == 1 %]
-	<script src="https://api-maps.yandex.ru/1.1/index.xml" type="text/javascript"></script>
+	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=KEY" type="text/javascript"></script>
 [% ELSIF title == 2 %]
 	<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
@@ -64,19 +64,19 @@
 	<table width="100%">
 	<tr>
 	<td><span class="spacer2"></span>[% langreq('Номер записи') %]</td>
-	<td class="m_left"></span><span class="m_info">[% app_info.new_app_num %]</span></td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_num %]</span></td>
 	</tr><tr>
 	<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
-	<td class="m_left"></span><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
 	</tr><tr>
 	<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
-	<td class="m_left"></span><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
 	</tr><tr>
 	<td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
-	<td class="m_left"></span><span class="m_info">[% app_info.new_app_branch %]</span></td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_branch %]</span></td>
 	</tr><tr>
 	<td><span class="spacer2"></span>[% langreq('Тип визы') %]</td>
-	<td class="m_left"></span><span class="m_info">[% app_info.new_app_vname %]</span></td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_vname %]</span></td>
 	</tr>
 	</table>
 
@@ -110,24 +110,32 @@
 	</table>
 	</td></tr>
 
-	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
-	<tr class="ymap"><td colspan="3"><div id="YMapsID" class="yandex_map"></div></td></tr>
-	<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr class="ymap"><td colspan="3"><div id="map" class="yandex_map"></div></td></tr>
+	
+	<tr><td colspan="3">&nbsp;</td></tr>
 
 	<script type="text/javascript">
-	YMaps.jQuery(function () {
-		var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
-		map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
-		map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
-		map.addControl(new YMaps.Zoom());
-	});
-	</script>
+	
+		var myMap;
 
+		ymaps.ready(init);
+
+		function init () {
+			myMap = new ymaps.Map('map', {
+				center: [[% map_in_page.0 %], [% map_in_page.1 %]],
+				zoom: 16
+			});
+			
+			myMap.balloon.open([[% map_in_page.0 %], [% map_in_page.1 %]], "[% map_in_page.2 %]", {});
+		};
+	</script>
+	
 	[% IF center_msk %]
 		<tr><td colspan="3">
 		<img src="[% static %]/images/vms_moscow.jpg" width="100%">
 		</td></tr>
-		<tr class="ymap"><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3">&nbsp;</td></tr>
 	[% END %]
 
 	<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
