@@ -5,13 +5,14 @@
 | N | Сharacteristic |
 | ------------- | ------------- |
 | 1 | multistage checks, with autogeneration js-checks |
-| 2 | automatic replacement of unprintable characters |
-| 3 | checking the logic of the relation of various fields |
-| 4 | microORM integrated |
-| 5 | flexible structure, based on hash-data |
-| 6 | examples & detailed comments for each field |
-| 7 | mobile version integrated |
-| 8 | etc... |
+| 2 | many types of fields: input, checkbox, radio, checkbox group, etc |
+| 3 | automatic replacement of unprintable characters |
+| 4 | checking the logic of the relation of various fields |
+| 5 | microORM integrated |
+| 6 | flexible structure, based on hash-data |
+| 7 | examples & detailed comments for each field |
+| 8 | mobile version integrated |
+| 9 | etc... |
 
 
 ### Field data example:
