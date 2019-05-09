@@ -609,9 +609,9 @@ sub get_token_and_create_new_form_if_need
 	
 	return '05' if $token eq 'canceled';
 
-	$token =~ s/[^a-z0-9]//g unless $self->{ this_is_self_testing };
+	$token =~ s/[^a-z0-9\-]//g unless $self->{ this_is_self_testing };
 	
-	return $self->save_new_token_in_db( $self->token_generation() ) if $token eq '';
+	return $self->token_generation() if $token eq '';
 	
 	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
 		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
@@ -660,18 +660,16 @@ sub create_clear_form
 	);
 }
 	
-sub save_new_token_in_db
+sub get_timecode
 # //////////////////////////////////////////////////
-{	
-	my ( $self, $token ) = @_;
-
-	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoToken (
-		Token, AutoAppID, AutoAppDataID, AutoSchengenAppDataID,	Step, LastError, Finished, Draft, StartDate, LastIP) 
-		VALUES (?, 0, 0, 0, 1, '', 0, 0, now(), ?)", {}, $token, $ENV{ HTTP_X_REAL_IP }
-	);
+{
+	my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime( time );
 	
-	return $token;
+	$_ += 5 for ( $sec, $min, $hour, $mday, $mon, $year );
+	
+	( undef, my $ms ) = split( /\./, gettimeofday() );
+
+	return "-$sec$mday$min$hour$ms$mon$year-";
 }
 
 sub token_generation
@@ -679,7 +677,19 @@ sub token_generation
 {
 	my $self = shift;
 
-	my ( $token_existing, $token_existed_before, $token ) = ( 1, 't' );
+	my ( $token_existing, $token_existed_before, $token ) = ( 1, 0, 't' );
+	
+	$self->query( 'query', __LINE__, "LOCK TABLES AutoToken WRITE, AutoToken_expired READ" );
+	
+	$self->query( 'query', __LINE__, "
+		INSERT INTO AutoToken (
+		AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft, StartDate, LastIP) 
+		VALUES (0, 0, 0, 1, '', 0, 0, now(), ?)", {}, $ENV{ HTTP_X_REAL_IP }
+	);
+	
+	my $appid = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+	
+	my $appidcode = "-$appid";
 
 	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 
@@ -689,11 +699,17 @@ sub token_generation
 
 	srand( $ms );
 	
+	my $timecode = $self->get_timecode();
+	
 	do {
 		$token = 't';
 	
 		$token .= @alph[ int( rand( 36 ) ) ] for ( 1..63 );
 		
+		substr( $token, 10, length( $timecode ) ) = $timecode;
+		
+		substr( $token, length( $token ) - length( $appidcode ), length( $appidcode ) ) = $appidcode;
+			
 		$token_existing = $self->query( 'sel1', __LINE__, "
 			SELECT ID FROM AutoToken WHERE Token = ?", $token
 		) || 0;
@@ -703,6 +719,12 @@ sub token_generation
 		) || 0;
 				
 	} while ( $token_existing || $token_existed_before );
+	
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET Token = ? WHERE ID = ?", {}, $token, $appid
+	);
+
+	$self->query( 'query', __LINE__, "UNLOCK TABLES");	
 	
 	return $token;
 }
