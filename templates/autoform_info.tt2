@@ -6,9 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VMS - [% langreq('Информация о записи') %]</title>
 
-[% IF title == 1 %]
+[% IF (title == 1) && (map_type == 'geo') %]
 	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=KEY" type="text/javascript"></script>
-[% ELSIF title == 2 %]
+[% END %]
+
+[% IF title == 2 %]
 	<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
@@ -111,31 +113,47 @@
 	</td></tr>
 
 	<tr><td colspan="3">&nbsp;</td></tr>
+	
+	[% IF map_type == 'geo' %]
+	
 	<tr class="ymap"><td colspan="3"><div id="map" class="yandex_map"></div></td></tr>
 	
 	<tr><td colspan="3">&nbsp;</td></tr>
 
 	<script type="text/javascript">
 	
-		var myMap;
+		var map;
 
-		ymaps.ready(init);
+		function initMap() {
 
-		function init () {
-			myMap = new ymaps.Map('map', {
-				center: [[% map_in_page.0 %], [% map_in_page.1 %]],
-				zoom: 16
-			});
-			
-			myMap.balloon.open([[% map_in_page.0 %], [% map_in_page.1 %]], "[% map_in_page.2 %]", {});
-		};
+		    map = new google.maps.Map(document.getElementById('map'), {
+			center: {lat: [% map_in_page.0 %], lng: [% map_in_page.1 %]},
+			zoom: 8
+		    });
+		}
 	</script>
 	
+	[% ELSE %]
+		
+		<tr class="ymap"><td colspan="3"><iframe width="100%" height="300" style="border-width: 0px; margin: 0px;"
+		[% IF map_in_page.type == 'yandexwidget' %]
+			src="https://yandex.ru/map-widget/v1/-/[% map_in_page.code %]" class="iframe-width-100" allowfullscreen="allowfullscreen">
+		[% ELSIF map_in_page.type == 'yandexconstructor' %]
+			src="https://yandex.ru/map-widget/v1/?um=constructor%[% map_in_page.code %]&amp;lang=ru_RU&amp;scroll=true&amp;source=constructor">
+		[% ELSE %]
+			src="https://www.google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
+		[% END %]
+		</iframe></td></tr>
+	
+	[% END %]
+	
+	<tr><td colspan="3"><br>
+	
 	[% IF center_msk %]
-		<tr><td colspan="3">
+		
 		<img src="[% static %]/images/vms_moscow.jpg" width="100%">
 		</td></tr>
-		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr><td colspan="3"><br>&nbsp;<br></td></tr>
 	[% END %]
 
 	<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">

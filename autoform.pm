@@ -268,6 +268,8 @@ sub autoform
 	$tvars->{ map_in_page } = $self->get_geo_info()
 		if ( ref( $special->{ with_map } ) eq 'ARRAY' ) and ( @{ $special->{ with_map } } > 0 );
 
+	$tvars->{ map_type } = $self->{ vars }->getConfig( 'general' )->{ maps_type };
+		
 	for ( 'in', 'out' ) {
 		$tvars->{ "include_name_$_" } = $special->{ "include_$_" } if $special->{ "include_$_" };
 	}
@@ -366,16 +368,27 @@ sub get_geo_info
 	my ( $center, $addr ) = $self->query( 'sel1', __LINE__, "
 		SELECT CenterID, BAddr FROM AutoToken $join WHERE Token = ?", $self->{ token }
 	);
-
-	my $branches = VCS::Site::autodata::get_geo_branches();
 	
-	$branches = VCS::Site::autoselftest::get_geo_branches() if $self->{ this_is_self_testing };
-
-	$addr =~ s/\r?\n/<br>/g;
+	my $maps_type = $self->{ vars }->getConfig( 'general' )->{ maps_type };
 	
-	$branches->{ $center }->[ 2 ] = $addr;
+	if ( $maps_type eq 'geo' ) {
+	
+		my $branches = VCS::Site::autodata::get_geo_branches();
+		
+		$branches = VCS::Site::autoselftest::get_geo_branches() if $self->{ this_is_self_testing };
 
-	return $branches->{ $center };
+		$addr =~ s/\r?\n/<br>/g;
+		
+		$branches->{ $center }->[ 2 ] = $addr;
+
+		return $branches->{ $center };
+	}
+	else {
+	
+		my $branches = VCS::Site::autodata::get_embedded_maps();
+		
+		return $branches->{ $center };
+	}
 }
 
 sub get_lang_if_exist
