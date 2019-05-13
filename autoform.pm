@@ -265,9 +265,6 @@ sub autoform
 			( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) )
 		);
 
-	$tvars->{ map_in_page } = $self->get_geo_info()
-		if ( ref( $special->{ with_map } ) eq 'ARRAY' ) and ( @{ $special->{ with_map } } > 0 );
-
 	$tvars->{ map_type } = $self->{ vars }->getConfig( 'general' )->{ maps_type };
 		
 	for ( 'in', 'out' ) {
@@ -1535,7 +1532,6 @@ sub get_specials_of_element
 		nearest_date	=> [],
 		timeslots	=> [],
 		post_index	=> [],
-		with_map	=> [],
 		captcha		=> [],
 		include_in	=> [],
 		include_out	=> [],

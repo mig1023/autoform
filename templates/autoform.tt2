@@ -11,10 +11,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>VMS - [% langreq('Новая запись') %]</title>
 
-	[% IF ( special.with_map.0 ) %]
-		<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=KEY" type="text/javascript"></script>
-	[% END %]
-
 	[% IF ( special.datepicker.0 || special.post_index.0 || special.mask.0 ) %]
 		<script src="[% static %]/jquery-ui.1.8.min.js"></script>
 		<link href="[% static %]/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
@@ -74,23 +70,6 @@
 							<tr><td class="left" colspan="2"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 							[% content_text %]
-
-							[% IF (special.with_map.0) %]
-
-								<tr class="ymap"><td colspan="2">&nbsp;</td></tr>
-								<tr class="ymap"><td colspan="2"><div id="YMapsID" class="yandex_map"></div></td></tr>
-								<tr class="ymap"><td colspan="2">&nbsp;</td></tr>
-
-								<script type="text/javascript">
-									YMaps.jQuery(function () {
-										var map = new YMaps.Map(YMaps.jQuery("#YMapsID")[0]);
-										map.setCenter(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), 16);
-										map.openBalloon(new YMaps.GeoPoint([% map_in_page.1 %], [% map_in_page.0 %]), "[% map_in_page.2 %]");
-										map.addControl(new YMaps.Zoom());
-									});
-								</script>
-
-							[% END %]
 
 							[% FOREACH include_name IN special.include_in %]
 								[% INCLUDE $include_name %]
