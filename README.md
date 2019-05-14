@@ -8,11 +8,12 @@
 | 2 | many types of fields: input, checkbox, radio, checkbox group, etc |
 | 3 | automatic replacement of unprintable characters |
 | 4 | checking the logic of the relation of various fields |
-| 5 | microORM integrated |
-| 6 | flexible structure, based on hash-data |
-| 7 | examples & detailed comments for each field |
-| 8 | mobile version integrated |
-| 9 | etc... |
+| 5 | high level of security against hacking |
+| 6 | microORM integrated |
+| 7 | flexible structure, based on hash-data |
+| 8 | examples & detailed comments for each field |
+| 9 | mobile version integrated |
+| 10 | etc... |
 
 
 ### Field data example:
