@@ -18,7 +18,18 @@ use Data::Dumper;
 	
 	$vars->db->db_connect( $vars );
 
-	my ( $clear, $first_step ) = ( 0, 0 );
+	my ( $clear, $first_step, $softban_stat ) = ( 0, 0, 0 );
+	
+	# ///////////////
+	
+	$softban_stat = $vars->db->sel1("
+		SELECT COUNT(ID) FROM SoftBan_stat
+		WHERE DATEDIFF(now(), IPDate) > 1"
+	);
+	
+	$vars->db->query("
+		DELETE FROM SoftBan_stat WHERE DATEDIFF(now(), IPDate) > 1"
+	);
 	
 	# ///////////////
 	
@@ -106,6 +117,7 @@ use Data::Dumper;
 		}
 	}
 	
+	log_file( "всего старых записей статистики softban удалено: $softban_stat" );
 	log_file( "всего однодневок удалено: $first_step" );
 	log_file( "всего старых очищено: $clear" );
 	log_file( "- из них незаконченных через 14 дней: $alltokens_count" );
