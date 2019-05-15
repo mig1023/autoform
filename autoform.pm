@@ -185,18 +185,18 @@ sub autoform
 
 	my $javascript_check = 'need_to_check';
 	
-	my $lang = lc( $self->{ vars }->getparam( 'lang' ) );
+	my $lang = lc( $self->param( 'lang' ) );
 	
 	$self->{ lang } = ( $lang =~ /^(en|it)$/i ? $lang : 'ru' );
 
 	for ( 'scanner', 'biometric_data' ) {
 	
-		$self->{ biometric_data } = 'yes' if lc( $self->{ vars }->getparam( $_ ) ) eq 'yes';
+		$self->{ biometric_data } = 'yes' if lc( $self->param( $_ ) ) eq 'yes';
 	}
 
 	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
 
-	return $self->get_mobile_api() if $self->{ vars }->getparam( 'mobile_api' );
+	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 
@@ -208,7 +208,7 @@ sub autoform
 	
 		( $title, $page_content, $template_file ) = $self->get_page_error( $self->{ token } );
 	}
-	elsif ( $self->{ vars }->getparam( 'script' ) ) {
+	elsif ( $self->param( 'script' ) ) {
 	
 		$javascript_check = undef;
 		
@@ -230,7 +230,7 @@ sub autoform
 		delete $symbols_error->{ "$_" };
 	}
 	
-	$self->mod_last_error_date( $self->{ vars }->getparam( 'last_error_return' ) ) if $self->{ vars }->getparam( 'last_error_return' );
+	$self->mod_last_error_date( $self->param( 'last_error_return' ) ) if $self->param( 'last_error_return' );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
@@ -255,7 +255,7 @@ sub autoform
 		'js_symbols'		=> $symbols_error,
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
-		'mobile_app' 		=> ( $self->{ vars }->getparam( 'mobile_app' ) ? 1 : 0 ),
+		'mobile_app' 		=> ( $self->param( 'mobile_app' ) ? 1 : 0 ),
 	};
 	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
@@ -626,7 +626,7 @@ sub get_token_and_create_new_form_if_need
 {
 	my $self = shift;
 	
-	my $token = lc( $self->{ vars }->getparam('t') );
+	my $token = lc( $self->param('t') );
 	
 	return '02' if $token eq 'no_app';
 	
@@ -809,10 +809,10 @@ sub get_autoform_content
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
-	my $action = lc( $self->{ vars }->getparam('action') );
+	my $action = lc( $self->param('action') );
 	$action =~ s/[^a-z]//g;
 	
-	my $appdata_id = $self->{ vars }->getparam('person');
+	my $appdata_id = $self->param('person');
 	$appdata_id =~ s/[^0-9]//g;
 	
 	my $appnum = undef;
@@ -972,7 +972,7 @@ sub get_forward
 	
 	if ( !$current_table_id->{ AutoAppointments } ) {
 	
-		$self->create_clear_form( $self->{ vars }->getparam( 'center' ) );
+		$self->create_clear_form( $self->param( 'center' ) );
 		
 		$current_table_id = $self->get_current_table_id();
 	}
@@ -2055,7 +2055,7 @@ sub save_data_from_form
 		
 			$request .=  "$row = ?, ";
 			
-			my $value = $self->{ vars }->getparam( $request_tables->{ $table }->{ $row } );
+			my $value = $self->param( $request_tables->{ $table }->{ $row } );
 		
 			push ( @values, $self->encode_data_for_db( $step, $request_tables->{ $table }->{ $row }, $value ) );
 			
@@ -2108,7 +2108,7 @@ sub check_special_in_rules_for_save
 		
 			my $key = 'autoform_' . $self->{ token } . '_' . $element->{ name };
 
-			$self->cached( $key, $self->{ vars }->getparam( $element->{ name } ) );
+			$self->cached( $key, $self->param( $element->{ name } ) );
 		}
 	}
 }
@@ -2409,7 +2409,7 @@ sub check_checklist
 	
 	for my $field ( keys %{ $element->{ param } } ) {
 	
-		$at_least_one += ( $self->{ vars }->getparam( $field ) ? 1 : 0 );
+		$at_least_one += ( $self->param( $field ) ? 1 : 0 );
 	}
 	
 	return $self->text_error( 11, $element )
@@ -2421,7 +2421,7 @@ sub check_chkbox
 {
 	my ( $self, $element ) = @_;
 	
-	my $value = $self->{ vars }->getparam( $element->{ name } );
+	my $value = $self->param( $element->{ name } );
 	
 	return $self->text_error( 3, $element ) if ( ( $element->{ check } =~ /true/ ) and ( $value eq '' ) );
 }
@@ -2431,7 +2431,7 @@ sub check_param
 {
 	my ( $self, $element ) = @_;
 	
-	my $value = $self->{ vars }->getparam( $element->{ name } );
+	my $value = $self->param( $element->{ name } );
 	my $rules = $element->{ check };
 
 	$value = $self->get_prepare_line( $value );
@@ -2480,7 +2480,7 @@ sub check_captcha
 	
 	return undef if $self->this_is_inner_ip();
 	
-	my $response = $self->{ vars }->getparam( 'g-recaptcha-response' ) || '';
+	my $response = $self->param( 'g-recaptcha-response' ) || '';
 	
 	my $request = HTTP::Tiny->new();
 
@@ -2504,7 +2504,7 @@ sub check_logic
 {
 	my ( $self, $element, $tables_id ) = @_;
 
-	my $value = $self->{ vars }->getparam( $element->{ name } );
+	my $value = $self->param( $element->{ name } );
 	my $error = 0;
 	
 	$value =~ s/^\s+|\s+$//g;
@@ -2853,9 +2853,9 @@ sub get_app_version
 
 	my $version = VCS::Site::autodata::get_app_version_list();
 	
-	return $version->[ 2 ] if $self->{ vars }->getparam( 'mobile_app' );
+	return $version->[ 2 ] if $self->param( 'mobile_app' );
 
-	return $version->[ 1 ] if $self->{ vars }->getparam( 'mobile_ver' );
+	return $version->[ 1 ] if $self->param( 'mobile_ver' );
 
 	return $version->[ 0 ];
 }
@@ -3153,10 +3153,10 @@ sub get_pcode
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $request = $self->{ vars }->getparam( 'name_startsWith' ) || '';
-	my $request_limit = $self->{ vars }->getparam( 'maxRows' ) || 20;
-	my $callback = $self->{ vars }->getparam( 'callback' ) || "";
-	my $center = $self->{ vars }->getparam( 'center' ) || 1;
+	my $request = $self->param( 'name_startsWith' ) || '';
+	my $request_limit = $self->param( 'maxRows' ) || 20;
+	my $callback = $self->param( 'callback' ) || "";
+	my $center = $self->param( 'center' ) || 1;
 	
 	$request =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя]//g;
 	
@@ -3565,6 +3565,30 @@ sub redirect
 	$self->{ vars }->get_system->redirect( $self->{ autoform }->{ paths }->{ addr } . $param );
 }
 
+sub param
+# //////////////////////////////////////////////////
+{
+	my ( $self, $param_name ) = @_;
+	
+	my $param = $self->{ vars }->getparam( $param_name );
+	
+
+
+	if ( $param =~ /(%3C|<)(%20|\s)*script/i ) {
+
+		warn "***************JS*INJECTION*in*param = $param";
+		$self->{ vars }->get_system->redirect( );
+	}
+	
+	if ( $param =~ /(\d+)\s*=\s*\1/ ) {
+	
+		warn "***************SQL*INJECTION*in*param = $param";
+		$self->{ vars }->get_system->redirect( );
+	}
+	return $param;
+	
+}
+
 sub query
 # //////////////////////////////////////////////////
 {
@@ -3576,13 +3600,13 @@ sub query
 	
 	# my $time_start = $self->time_interval_calculate();
 
-	$return = $self->{ vars }->db->selall(@_) if $type eq 'selall';
+	$return = $self->{ vars }->db->selall( @_ ) if $type eq 'selall';
 	
-	$return = $self->{ vars }->db->selallkeys(@_) if $type eq 'selallkeys';
+	$return = $self->{ vars }->db->selallkeys( @_ ) if $type eq 'selallkeys';
 	
-	$return = $self->{ vars }->db->query(@_) if $type eq 'query';
+	$return = $self->{ vars }->db->query( @_ ) if $type eq 'query';
 	
-	my @result = $self->{ vars }->db->sel1(@_) if $type eq 'sel1';
+	my @result = $self->{ vars }->db->sel1( @_ ) if $type eq 'sel1';
 	
 	# my $milliseconds = $self->time_interval_calculate( $time_start );
 	# warn Dumper( \@_ );
