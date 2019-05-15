@@ -59,6 +59,7 @@
 				<input type = "hidden" value = "0" name = "mobile_ver" id = "mobile_ver">
 				<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
 				<input type = "hidden" value = "[% biometric_data %]" name = "biometric_data" id = "biometric_data">
+				<input type = "hidden" value = "" name = "last_error_return" id = "last_error_return">
 
 				<table style="width: 100%;">
 
@@ -516,6 +517,8 @@
 				var error_y = ( mobilScreen ? 'bottom' : 'center' );
 				var offset_x = ( mobilScreen ? 0 : 5 );
 				var offset_y = ( mobilScreen ? 5 : 0 );
+				
+				$('#last_error_return').val(last_error_text + " (JS, " + last_error_name + ", step [% step %])");
 				
 				if ( last_error_name == 'captha_div' ) {
 				

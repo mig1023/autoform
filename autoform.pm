@@ -229,6 +229,8 @@ sub autoform
 		
 		delete $symbols_error->{ "$_" };
 	}
+	
+	$self->mod_last_error_date( $self->{ vars }->getparam( 'last_error_return' ) ) if $self->{ vars }->getparam( 'last_error_return' );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
@@ -272,6 +274,19 @@ sub autoform
 	}
 	
 	$template->process( $template_file, $tvars );
+}
+
+sub mod_last_error_date
+# //////////////////////////////////////////////////
+{
+	my ( $self, $last_error ) = @_;
+	
+	$last_error =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.\,\:\"\(\)]/!/g;
+	
+	return $self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET LastError = ? WHERE Token = ?", {},
+		$last_error, $self->{ token }
+	);
 }
 
 sub get_mobile_api
@@ -2443,7 +2458,7 @@ sub check_param
 		$regexp .= 'A-Za-z' if $rules =~ /W/; 
 		$regexp .= 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя' if $rules =~ /Ё/;
 		$regexp .= '0-9' if $rules =~ /N/;
-		
+	
 		$rules =~ s/(z|W|Ё|N)//g;
 		
 		my $revers_regexp = '[' . $regexp . $rules . ']';
