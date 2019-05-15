@@ -24,7 +24,7 @@ use Data::Dumper;
 	
 	$softban_stat = $vars->db->sel1("
 		SELECT COUNT(ID) FROM SoftBan_stat
-		WHERE DATEDIFF(now(), IPDate) > 1"
+		WHERE DATEDIFF(now(), IPDate) >= 1"
 	);
 	
 	$vars->db->query("
