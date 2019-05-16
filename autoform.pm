@@ -3572,21 +3572,18 @@ sub param
 	
 	my $param = $self->{ vars }->getparam( $param_name );
 	
-
-
-	if ( $param =~ /(%3C|<)(%20|\s)*script/i ) {
-
-		warn "***************JS*INJECTION*in*param = $param";
-		$self->{ vars }->get_system->redirect( );
+	my $check_list = {
+	
+		'(%3C|<)(%20|\s)*script' => 'js-injection',
+		'(\d+)\s*=\s*\1' => 'sql-injection',
+	};
+	
+	for ( keys %$check_list ) {
+	
+		warn $check_list->{ $_ } if $param =~ /$_/;
 	}
 	
-	if ( $param =~ /(\d+)\s*=\s*\1/ ) {
-	
-		warn "***************SQL*INJECTION*in*param = $param";
-		$self->{ vars }->get_system->redirect( );
-	}
 	return $param;
-	
 }
 
 sub query
