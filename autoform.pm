@@ -3573,14 +3573,14 @@ sub param
 	my $param = $self->{ vars }->getparam( $param_name );
 	
 	my $check_list = {
-	
-		'(%3C|<)(%20|\s)*script' => 'js-injection',
-		'(\d+)\s*=\s*\1' => 'sql-injection',
+		'<\s*script' => 'js-injection',
+		'(\d+)\s*(\'|")\s*=\s*\1' => 'sql-injection',
+		'^\s*(\d+)\s*(\'|")\s*;\s*(SELECT|UPDATE|DROP|INSERT)\s' => 'sql-injection',
 	};
 	
 	for ( keys %$check_list ) {
 	
-		warn $check_list->{ $_ } if $param =~ /$_/;
+		warn $check_list->{ $_ } if $param =~ /$_/i;
 	}
 	
 	return $param;
