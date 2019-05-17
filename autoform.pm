@@ -34,7 +34,6 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
-
 	( my $self, undef, local $_ ) = @_;
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
@@ -3078,14 +3077,15 @@ sub mod_hash
 			$hash->{ SchengenJSON } = JSON->new->pretty->encode( $ext_data );
 			
 			$hash->{ FullAddress } = join( ', ', (
-				$ext_data->{ HomeCountry }, $ext_data->{ HomeCity }, $ext_data->{ HomeAddress }, $ext_data->{ HomePostal }, $hash->{ AppEMail }
+				$self->countries( $ext_data->{ HomeCountry } ), $ext_data->{ HomeCity },
+				$ext_data->{ HomeAddress }, $ext_data->{ HomePostal }, $hash->{ AppEMail }
 			) );
 			
 			$hash->{ ProfActivity } = $ext_data->{ Occupation };
 			
 			$hash->{ WorkOrg } = join( ', ', (
-				$ext_data->{ JobName }, $ext_data->{ JobCountry }, $ext_data->{ JobCity }, $ext_data->{ JobAddress },
-				$ext_data->{ JobPostal }, $ext_data->{ JobPhone }, $ext_data->{ JobEmail }
+				$ext_data->{ JobName }, $self->countries( $ext_data->{ JobCountry } ), $ext_data->{ JobCity },
+				$ext_data->{ JobAddress }, $ext_data->{ JobPostal }, $ext_data->{ JobPhone }, $ext_data->{ JobEmail }
 			) );
 			
 			$hash->{ KinderData } = join( ' ', (
@@ -3122,6 +3122,16 @@ sub mod_hash
 		'AppDataID', 'PrimetimeAlert', 'Copypasta' );
 		
 	return $hash;
+}
+
+sub countries
+# //////////////////////////////////////////////////
+{
+	my ( $self, $number ) = @_;
+	
+	return $self->query( 'sel1', __LINE__, "
+		SELECT Name FROM Countries WHERE ID = ?", $number
+	);
 }
 
 sub visapurpose_assembler
@@ -3642,7 +3652,7 @@ sub param
 	my ( $self, $param_name ) = @_;
 	
 	my $param = $self->{ vars }->getparam( $param_name );
-	
+		
 	return $param; # <----------- tmp
 	
 	my $check_list = {
