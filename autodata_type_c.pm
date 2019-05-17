@@ -557,19 +557,64 @@ sub get_content_rules_hash
 			{
 				type => 'free_line',
 			},
+			
+			
+			
+			{
+				type => 'select',
+				name => 'homeсitizenship',
+				label => 'Страна проживания',
+				comment => 'Страна фактического проживания в настоящее время',
+				example => 'The Russian Federation',
+				check => 'zN',
+				complete_check => 'not_empty',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'HomeCountry',
+				},
+				param => '[citizenship_countries]',
+				first_elements => '70',
+			},
 			{
 				type => 'input',
-				name => 'fulladdress',
+				name => 'homecity',
+				label => 'Город проживания',
+				comment => 'Укажите название города фактического проживания в настоящее время',
+				example => 'Moscow',
+				check => 'zWN\s\-\_\.\,\;\'\"',
+				complete_check => 'not_empty',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'HomeCity',
+				},
+				format => 'capslock',
+			},
+			{
+				type => 'input',
+				name => 'homeaddress',
 				label => 'Домашний адрес',
 				comment => 'Фактический адрес проживания заявителя',
-				example => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
+				example => 'M.Tolmachevskiy pereulok 6 b.1',
 				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AppData',
-					name => 'FullAddress',
+					table => 'AutoSchengenExtData',
+					name => 'HomeAddress',
 				},
 				format => 'capslock'
+			},
+			{
+				type => 'input',
+				name => 'homepostal',
+				label => 'Индекс доставки',
+				comment => 'Введите почтовый индекс фактического адреса проживания заявителя',
+				example => '119017',
+				check => 'N\s\,\.\-\(\)',
+				complete_check => 'not_empty',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'HomePostal',
+				},
 			},
 			{
 				type => 'input',
@@ -706,34 +751,180 @@ sub get_content_rules_hash
 				type => 'free_line',
 			},
 			{
-				type => 'input',
+				type => 'select',
 				name => 'workdata',
 				label => 'Профессиональная деятельность',
-				comment => 'Профессию необходимо указывать на английском или итальянском языках. Если на данный момент Вы не работаете, то укажите unemployed / housewife, для учащихся указывается student / pupil, для пенсионеров – pensioner',
+				comment => 'Профессию необходимо указывать на английском или итальянском языках. Если на данный момент Вы не работаете, то выберите - без профессии',
 				example => 'Doctor',
-				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				check => 'z',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AppData',
-					name => 'ProfActivity',
+					table => 'AutoSchengenExtData',
+					name => 'Occupation',
+				},
+				param => {
+					'Specialista informatico' => 'IT-специалист',
+					'Personale amministrativo e di servizio  (funzionario, impiegato, segretario/a)' => 'Административный и обслуживающий персонал (администратор, секретарь.)',
+					'Personale nel settore della ristorazione e turistico (amministratore, impiegato, guide turictiche,cameriere)' => 'Персонал в сфере общественного питания и туризма (администратор, офисный работник, экскурсовод, официант)',
+					'Architetto' => 'Архитектор',
+					'Banchiere' => 'Банкир',
+					'Businessman' => 'Бизнесмен',
+					'Assistente di volo' => 'Бортпроводник',
+					'Contabile' => 'Бухгалтер, экономист',
+					'Autista' => 'Водитель',
+					'Impiegato del governo' => 'Государственный служащий',
+					'Artista' => 'Деятель искусств',
+					'Casalinga' => 'Домохозяйка',
+					'Diplomatico' => 'Дипломатический агент',
+					'Giornalista' => 'Журналист',
+					'Personale sanitario' => 'Медицинские профессии/средний медицинский персонал (врач, ветеринар, хирург, медсестра)',
+					'Manager' => 'Менеджер',
+					'Capo sezione' => 'Начальник отдела',
+					'Dipendente nel settore di moda, estetica' => 'Работник в сфере моды, косметики',
+					'Imprenditore individuale' => 'Индивидуальный предприниматель',
+					'Marinaio' => 'Моряк',
+					'Ricercatore scientifico' => 'Научный работник',
+					'Pensionata' => 'Пенсионер',
+					'Pilota' => 'Пилот',
+					'Personalità politica' => 'Политический деятель',
+					'Insegnante' => 'Преподаватель, воспитатель',
+					'Venditore' => 'Продавец-кассир, консультант',
+					'Atleta' => 'Профессиональный спортсмен, тренер',
+					'Lavoratore' => 'Рабочий',
+					'Artigiano' => 'Ремесленник',
+					'Dirigente d\'azienda' => 'Руководящий сотрудник компании',
+					'Prete/Religioso/a' => 'Священник, представитель духовенства',
+					'Agente di polizia, Militare' => 'Сотрудник полиции, военнослужащий',
+					'Studente, apprendista' => 'Студент, стажер',
+					'Giudice, procuratore' => 'Судья, прокурор',
+					'Agricoltore' => 'Фермер',
+					'Freelancer' => 'Фрилансер',
+					'Chimico' => 'Химик',
+					'Domestico' => 'Частный домашний работник',
+					'Elettricista' => 'Электрик',
+					'Professione legale (avvocato, consulente legale)' => 'Юрист (адвокат, юридический консультант)',
+					'Disoccupato' => 'Без профессии',
+					'Altre professioni' => 'Другие профессии',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'company_text',
+				label => 'Данные компании',
+				font => 'bold',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'input',
+				name => 'workname',
+				label => 'Название',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				example => 'VMS',
+				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'JobName',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'input',
+				name => 'workpostal',
+				label => 'Индекс',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				example => '119017',
+				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'JobPostal',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'input',
+				name => 'workphone',
+				label => 'Телефон',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				example => '39XXXXXXXX',
+				check => 'zN',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'JobPhone',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'input',
+				name => 'workemail',
+				label => 'Email',
+				comment => 'Введите адрес почты, по которому можно будет связаться с компанией',
+				example => 'info@italyvms.ru',
+				check => 'zWN\@\-\_\.',
+				check_logic => [
+					{
+						condition => 'this_is_email',
+					},
+				],
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'JobEmail',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'select',
+				name => 'workcountry',
+				label => 'Страна',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				example => 'The Russian Federation',
+				check => 'zN',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'JobCountry',
+				},
+				param => '[citizenship_countries]',
+				first_elements => '70',
+			},
+			{
+				type => 'input',
+				name => 'workcity',
+				label => 'Город расположения',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				example => 'Moscow',
+				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'JobCity',
 				},
 				format => 'capslock'
 			},
 			{
 				type => 'input',
 				name => 'workaddr',
-				label => 'Работодатель: название компании, адрес, телефон',
+				label => 'Адрес компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
-				example => 'VMS, Moscow, M.Tolmachevskiy pereulok 6 b.1, (495)7273577',
+				example => 'M.Tolmachevskiy pereulok 6 b.1',
 				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				db => {
-					table => 'AppData',
-					name => 'WorkOrg',
+					table => 'AutoSchengenExtData',
+					name => 'JobAddress',
 				},
 				format => 'capslock'
 			},
 			{
 				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'purpose_text',
+				label => 'Цель поездки',
+				font => 'bold',
 			},
 			{
 				type => 'radiolist',
@@ -776,14 +967,53 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
-				name => 'kinderdata',
-				label => 'Для несовершеннолетних: фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей / законного представителя',
-				comment => 'Фамилия, имя, адрес (если отличается от адреса заявителя) и гражданство лица с полномочием родителей или законного представителя',
-				example => 'Ivanov Ivan, The Russian Federation',
-				check => 'zWN\s\-\,\.\;\_\\\/\'\"',
+				name => 'kindermothername',
+				label => 'Имя матери',
+				comment => 'Для несовершеннолетних: имя лица с полномочием родителей или законного представителя',
+				example => 'Maria',
+				check => 'zW\s\-',
 				db => {
-					table => 'AppData',
-					name => 'KinderData',
+					table => 'AutoSchengenExtData',
+					name => 'MotherName',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'input',
+				name => 'kindermothersurname',
+				label => 'Фамилия матери',
+				comment => 'Для несовершеннолетних: фамилия лица с полномочием родителей или законного представителя',
+				example => 'Ivanova',
+				check => 'zW\s\-',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'MotherSurname',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'input',
+				name => 'kinderfathername',
+				label => 'Имя отца',
+				comment => 'Для несовершеннолетних: имя лица с полномочием родителей или законного представителя',
+				example => 'Ivan',
+				check => 'zW\s\-',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'FatherName',
+				},
+				format => 'capslock'
+			},
+			{
+				type => 'input',
+				name => 'kinderfathersurname',
+				label => 'Фамилия отца',
+				comment => 'Для несовершеннолетних: фамилия лица с полномочием родителей или законного представителя',
+				example => 'Ivanov',
+				check => 'zW\s\-',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'FatherSurname',
 				},
 				format => 'capslock'
 			},
@@ -1310,6 +1540,24 @@ sub get_content_rules_hash
 				},
 				special => 'copy_from_other_applicants',
 			},
+			{
+				type => 'input',
+				name => 'hotelmail',
+				label => 'Email',
+				comment => 'Введите адрес почты, по которому можно будет связаться с гостиницей',
+				example => 'info@italyvms.ru',
+				check => 'WN\@\-\_\.',
+				check_logic => [
+					{
+						condition => 'this_is_email',
+					},
+				],
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'HotelEmail',
+				},
+				format => 'capslock'
+			},
 		],
 		
 		'Информация о месте проживания' => [
@@ -1602,18 +1850,70 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
-				name => 'a_person',
-				label => 'ФИО, адрес, телефон, email контактного лица',
-				comment => 'Укажите данные кантактного лица приглашающей организации',
-				example => 'Ivanov Ivan, Via Esempio 10, Milano, 39XXXXXXXX, info@italyvms.ru',
-				check => 'zWN\@\s\-\.\,\;',
+				name => 'a_name',
+				label => 'Имя приглашающего',
+				comment => 'Укажите имя кантактного лица приглашающей организации',
+				example => 'Ivan',
+				check => 'zW\s\-',
 				db => {
-					table => 'AppData',
-					name => 'ACopmanyPerson',
+					table => 'AutoSchengenExtData',
+					name => 'InvitName',
 				},
 				format => 'capslock',
 				special => 'copy_from_other_applicants',
 			},
+			{
+				type => 'input',
+				name => 'a_surname',
+				label => 'Фамилия приглашающего',
+				comment => 'Укажите фамилию кантактного лица приглашающей организации',
+				example => 'Ivanov',
+				check => 'zW\s\-',
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'InvitSurname',
+				},
+				format => 'capslock',
+				special => 'copy_from_other_applicants',
+			},
+			{
+				type => 'input',
+				name => 'birthdate',
+				label => 'Дата рождения',
+				comment => 'Введите дату рождения кантактного лица приглашающей организации',
+				example => '31.12.1900',
+				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				check_logic => [
+					{
+						condition => 'now_or_earlier',
+					},
+				],
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'InvitBthDate',
+				},
+				special => 'mask, copy_from_other_applicants',
+			},
+			{
+				type => 'input',
+				name => 'p_email',
+				label => 'Email',
+				comment => 'Укажите адрес электронной почты',
+				example => 'info@italyvms.ru',
+				check => 'zWN\@\s\-\_\.',
+				check_logic => [
+					{
+						condition => 'this_is_email',
+					},
+				],
+				db => {
+					table => 'AutoSchengenExtData',
+					name => 'InvitEmail',
+				},
+				format => 'capslock',
+				special => 'copy_from_other_applicants',
+			},
+			
 		],
 		
 		'Расходы заявителя' => [
@@ -2291,7 +2591,11 @@ sub get_content_rules_hash
 				progress => 14,
 			},
 			{
-				type => 'captcha',
+				#type => 'captcha',
+				type => 'text',
+				name => 'captcha_text',
+				label => 'капча отключена',
+				font => 'bold',
 			},
 		],
 		

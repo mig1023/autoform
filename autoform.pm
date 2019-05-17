@@ -1186,6 +1186,14 @@ sub get_delete
 		$result += $self->query( 'query', __LINE__, "
 			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, $sch_id
 		);
+		
+		$result += $self->query( 'query', __LINE__, "
+			DELETE FROM AutoSpbAlterAppData WHERE AppDataID = ?", {}, $appdata_id
+		);
+		
+		$result += $self->query( 'query', __LINE__, "
+			DELETE FROM AutoSchengenExtData WHERE AppDataID = ?", {}, $appdata_id
+		);
 
 		$self->mod_last_change_date();
 	}
@@ -1269,12 +1277,19 @@ sub get_add
 		
 	my $spb_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
 	
+	$self->query( 'query', __LINE__, "
+		INSERT INTO AutoSchengenExtData (AppDataID) VALUES (?)", {},
+		$appdata_id
+	);
+		
+	my $ext_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+	
 	my $step = $self->get_step_by_content( '[list_of_applicants]', 'next' );
 	
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, AutoSpbDataID = ?
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, AutoSpbDataID = ?, AutoSchengenExtID = ?
 		WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $spb_id, $self->{ token }
+		$step, $appdata_id, $sch_id, $spb_id, $ext_id, $self->{ token }
 	);
 	
 	$self->mod_last_change_date();
@@ -1773,7 +1788,13 @@ sub get_html_for_element
 		my $list = '';
 
 		for my $opt ( $self->resort_with_first_elements( $param, $first_elements ) ) {
-			my $selected = ( $value_original == $opt ? 'selected' : '' );
+
+			my $value_for_selected = $value_original;
+			
+			$value_for_selected =~ s/$_/$_/g for ('\/', '\(', '\)' );
+			
+			my $selected = ( $opt =~ /^$value_for_selected$/i ? 'selected' : '' );
+			
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . 
 			( $param->{ $opt } ? $param->{ $opt } : '--- ' . $self->lang( "выберите" ) . ' ---' ) .
 			'</option>'; 
@@ -2318,7 +2339,30 @@ sub check_data_from_db
 	my $self = shift;
 	
 	my $table_id = $self->get_current_table_id();
+	
+	# ///////////// tmp
 
+	if ( !$table_id->{ AutoSchengenExtData } ) {
+	
+		$self->query( 'query', __LINE__, "
+			INSERT INTO AutoSchengenExtData (AppDataID) VALUES (?)", {},
+			$table_id->{ AutoAppData }
+		);
+			
+		my $ext_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+		
+		$self->query( 'query', __LINE__, "
+			UPDATE AutoToken SET AutoSchengenExtID = ? WHERE ID = ?", {}, 
+			$ext_id, $table_id->{ AutoToken }
+		);
+		
+		$self->mod_last_change_date();
+	
+		return 25;
+	}
+	
+	# /////////////
+	
 	my $rules = $self->get_content_db_rules( 'check' );
 	
 	for my $table ( keys %$rules ) {
@@ -2894,7 +2938,8 @@ sub create_new_appointment
 	$self->query( 'query', __LINE__, "
 		LOCK TABLES
 		AutoAppointments READ, Appointments WRITE, AutoAppData READ, AppData WRITE,
-		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ, SpbAlterAppData WRITE"
+		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
+		SpbAlterAppData WRITE, AutoSchengenExtData READ"
 	);
 	
 	my $new_appid = $self->create_table(
@@ -2917,8 +2962,8 @@ sub create_new_appointment
 		);
 		
 		my $appid = $self->create_table(
-			'AutoAppData', 'AppData', $app->{ ID }, $db_rules,
-			$new_appid, $sch_appid, undef, $data_for_contract->{ CenterID }, undef, $app->{ SchengenAppDataID }
+			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid, undef,
+			$data_for_contract->{ CenterID }, undef, $app->{ SchengenAppDataID }
 		);
 		
 		$self->create_table(
@@ -2941,11 +2986,14 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto ) = @_;
+	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid,
+		$info_for_contract, $center, $ver, $sch_auto ) = @_;
 
 	my $hash = $self->get_hash_table( $autoname, 'ID', $transfered_id );
 
-	$hash = $self->mod_hash( $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto );
+	$hash = $self->mod_hash(
+		$hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto
+	);
 
 	return $self->insert_hash_table( $name, $hash );
 }
@@ -2953,7 +3001,8 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract, $center, $ver, $sch_auto ) = @_;
+	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract,
+		$center, $ver, $sch_auto ) = @_;
 
 	for my $column ( keys %$hash ) {
 
@@ -3022,7 +3071,29 @@ sub mod_hash
 			}
 		}
 		else {
-			$hash->{ FullAddress } .= ' ' . $hash->{ AppEMail };
+			my $ext_data = $self->get_hash_table( 'AutoSchengenExtData', 'AppDataID', $hash->{ ID } );
+			
+			$ext_data->{ AppEMail } = $hash->{ AppEMail };
+			
+			$hash->{ SchengenJSON } = JSON->new->pretty->encode( $ext_data );
+			
+			$hash->{ FullAddress } = join( ', ', (
+				$ext_data->{ HomeCountry }, $ext_data->{ HomeCity }, $ext_data->{ HomeAddress }, $ext_data->{ HomePostal }, $hash->{ AppEMail }
+			) );
+			
+			$hash->{ ProfActivity } = $ext_data->{ Occupation };
+			
+			$hash->{ WorkOrg } = join( ', ', (
+				$ext_data->{ JobName }, $ext_data->{ JobCountry }, $ext_data->{ JobCity }, $ext_data->{ JobAddress },
+				$ext_data->{ JobPostal }, $ext_data->{ JobPhone }, $ext_data->{ JobEmail }
+			) );
+			
+			$hash->{ KinderData } = join( ' ', (
+				$ext_data->{ MotherName }, $ext_data->{ MotherSurname }, $ext_data->{ FatherName }, $ext_data->{ FatherSurname }
+			) );
+			
+			$hash->{ ACopmanyPerson } = join( ' ', ( $ext_data->{ InvitName }, $ext_data->{ InvitSurname }	) );
+			
 		}
 	}
 
@@ -3572,7 +3643,10 @@ sub param
 	
 	my $param = $self->{ vars }->getparam( $param_name );
 	
+	return $param; # <----------- tmp
+	
 	my $check_list = {
+	
 		'<\s*script' => 'js-injection',
 		'(\d+)\s*(\'|")\s*=\s*\1' => 'sql-injection',
 		'^\s*(\d+)\s*(\'|")\s*;\s*(SELECT|UPDATE|DROP|INSERT)\s' => 'sql-injection',
