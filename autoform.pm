@@ -34,7 +34,6 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
-
 	( my $self, undef, local $_ ) = @_;
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
@@ -1388,7 +1387,7 @@ sub copy_information
 			$copy_tables->{ $table }->{ $element->{ db }->{ name } } = 1;
 		}
 	}
-	
+
 	for my $table ( keys %$copy_tables ) {
 
 		next if !$tables_id->{ $table }->{ target } or !$tables_id->{ $table }->{ source };
@@ -2346,6 +2345,24 @@ sub get_current_table_id
 	return $tables_id;
 }
 
+sub tmp_schengen_ext_create
+# //////////////////////////////////////////////////
+{
+	my ( $self, $table_id, $final_check, $late_transfer ) = @_;
+
+	$self->query( 'query', __LINE__, "
+		INSERT INTO AutoSchengenExtData (AppDataID, LateTransfer) VALUES (?, ?)", {},
+		$table_id->{ AutoAppData }, $late_transfer
+	);
+		
+	my $ext_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET AutoSchengenExtID = ? WHERE ID = ?", {}, 
+		$ext_id, $table_id->{ AutoToken }
+	);
+}
+
 sub tmp_schengen_ext_fail
 # //////////////////////////////////////////////////
 {
@@ -2371,6 +2388,8 @@ sub tmp_schengen_ext_fail
 					UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $_->{ AID }
 				);
 				
+				$self->tmp_schengen_ext_create( $table_id, 0 );
+				
 				$need_to_return = 1;
 			}
 			elsif ( $_->{ LateTransfer } ) {
@@ -2391,18 +2410,8 @@ sub tmp_schengen_ext_fail
 	}
 	elsif ( !$table_id->{ AutoSchengenExtData } ) {
 
-		$self->query( 'query', __LINE__, "
-			INSERT INTO AutoSchengenExtData (AppDataID, LateTransfer) VALUES (?, 1)", {},
-			$table_id->{ AutoAppData }
-		);
+		$self->tmp_schengen_ext_create( $table_id, 1 );
 			
-		my $ext_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
-	
-		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET AutoSchengenExtID = ? WHERE ID = ?", {}, 
-			$ext_id, $table_id->{ AutoToken }
-		);
-		
 		return 1;
 	}
 	

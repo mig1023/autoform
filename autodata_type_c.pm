@@ -609,7 +609,7 @@ sub get_content_rules_hash
 				label => 'Индекс',
 				comment => 'Введите почтовый индекс фактического адреса проживания заявителя',
 				example => '119017',
-				check => 'zN\s\,\.\-\(\)',
+				check => 'zN\s\-',
 				complete_check => 'not_empty',
 				db => {
 					table => 'AutoSchengenExtData',
@@ -839,7 +839,7 @@ sub get_content_rules_hash
 				label => 'Индекс',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
 				example => '119017',
-				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				check => 'zN\s\-',
 				db => {
 					table => 'AutoSchengenExtData',
 					name => 'JobPostal',
