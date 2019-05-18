@@ -34,6 +34,7 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
+
 	( my $self, undef, local $_ ) = @_;
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
@@ -280,7 +281,7 @@ sub mod_last_error_date
 {
 	my ( $self, $last_error ) = @_;
 	
-	$last_error =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.\,\:\"\(\)]/!/g;
+	$last_error =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.\,\:\"\(\)№]/!/g;
 	
 	return $self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET LastError = ? WHERE Token = ?", {},
