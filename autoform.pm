@@ -34,6 +34,7 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
+
 	( my $self, undef, local $_ ) = @_;
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
@@ -975,6 +976,12 @@ sub get_forward
 		
 		$current_table_id = $self->get_current_table_id();
 	}
+	
+	# ///////////////////// tmp
+	
+		$self->tmp_schengen_ext_fail( $current_table_id ) if ( $step >= 6 ) && ( $step <= 18 );
+		
+	# /////////////////////
 	
 	$self->save_data_from_form( $step, $current_table_id );
 	
@@ -2332,19 +2339,15 @@ sub get_current_table_id
 	return $tables_id;
 }
 
-sub check_data_from_db
+sub tmp_schengen_ext_fail
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	
-	my $table_id = $self->get_current_table_id();
-	
-	# ///////////// tmp
+	my ( $self, $table_id, $final_check ) = @_;
 
 	if ( !$table_id->{ AutoSchengenExtData } ) {
-	
+
 		$self->query( 'query', __LINE__, "
-			INSERT INTO AutoSchengenExtData (AppDataID) VALUES (?)", {},
+			INSERT INTO AutoSchengenExtData (AppDataID, LateTransfer) VALUES (?, 1)", {},
 			$table_id->{ AutoAppData }
 		);
 			
@@ -2355,11 +2358,54 @@ sub check_data_from_db
 			$ext_id, $table_id->{ AutoToken }
 		);
 		
-		$self->mod_last_change_date();
-	
-		return 25;
+		return 1;
 	}
 	
+	if ( $final_check ) {
+	
+		my $late_transfer = $self->query( 'selallkeys', __LINE__, "
+			SELECT AutoAppData.ID as AID, AutoSchengenExtData.ID as EID, LateTransfer
+			FROM AutoAppData
+			LEFT JOIN AutoSchengenExtData ON AutoAppData.ID = AutoSchengenExtData.AppDataID
+			WHERE AutoAppData.AppID = ?",
+			$table_id->{ AutoAppointments }
+		);
+		
+		my $need_to_return = 0;
+
+		for ( @$late_transfer ) {
+		
+			if ( $_->{ LateTransfer } ) {
+			
+				$self->query( 'query', __LINE__, "
+					UPDATE AutoSchengenExtData SET LateTransfer = 0 WHERE ID = ?", {}, $_->{ EID }
+				);
+			
+				$self->query( 'query', __LINE__, "
+					UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $_->{ AID }
+				);
+				
+				$need_to_return = 1;
+			}
+		}
+		
+		return 1 if $need_to_return;
+	}
+
+	return 0;
+}
+
+sub check_data_from_db
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $table_id = $self->get_current_table_id();
+	
+	# ///////////// tmp
+
+		return 25 if $self->tmp_schengen_ext_fail( $table_id, 'final_check' );
+
 	# /////////////
 	
 	my $rules = $self->get_content_db_rules( 'check' );
@@ -2938,7 +2984,7 @@ sub create_new_appointment
 		LOCK TABLES
 		AutoAppointments READ, Appointments WRITE, AutoAppData READ, AppData WRITE,
 		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
-		SpbAlterAppData WRITE, AutoSchengenExtData READ"
+		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ"
 	);
 	
 	my $new_appid = $self->create_table(
@@ -3080,7 +3126,7 @@ sub mod_hash
 				$self->countries( $ext_data->{ HomeCountry } ), $ext_data->{ HomeCity },
 				$ext_data->{ HomeAddress }, $ext_data->{ HomePostal }, $hash->{ AppEMail }
 			) );
-			
+	
 			$hash->{ ProfActivity } = $ext_data->{ Occupation };
 			
 			$hash->{ WorkOrg } = join( ', ', (
