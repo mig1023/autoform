@@ -979,7 +979,10 @@ sub get_forward
 	
 	# ///////////////////// tmp
 	
-		$self->tmp_schengen_ext_fail( $current_table_id ) if ( $step >= 6 ) && ( $step <= 18 );
+		if ( ( $step >= 6 ) && ( $step <= 18 ) && $self->tmp_schengen_ext_fail( $current_table_id ) ) {
+		
+			$current_table_id = $self->get_current_table_id();
+		}
 		
 	# /////////////////////
 	
@@ -1149,19 +1152,23 @@ sub get_edit
 		
 		$step = $self->get_step_by_content( '[list_of_applicants]', 'next');
 		
-		my ( $sch_id, $spb_id ) = $self->query( 'sel1', __LINE__, "
-			SELECT SchengenAppDataID, AutoSpbAlterAppData.ID
+		my ( $sch_id, $spb_id, $ext_id ) = $self->query( 'sel1', __LINE__, "
+			SELECT SchengenAppDataID, AutoSpbAlterAppData.ID, AutoSchengenExtData.ID
 			FROM AutoAppData
 			JOIN AutoSpbAlterAppData ON AutoSpbAlterAppData.AppDataID = AutoAppData.ID
+			LEFT JOIN AutoSchengenExtData ON AutoSchengenExtData.AppDataID = AutoAppData.ID
 			WHERE AutoAppData.ID = ?", $appdata_id
 		);
-		
+
+		$ext_id = 0 unless $ext_id;
+
 		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSpbDataID = ?, AutoSchengenAppDataID = ?
+			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSpbDataID = ?,
+			AutoSchengenAppDataID = ?, AutoSchengenExtID = ?
 			WHERE Token = ?", {}, 
-			$step, $appdata_id, $spb_id, $sch_id, $self->{ token }
+			$step, $appdata_id, $spb_id, $sch_id, $ext_id, $self->{ token }
 		);
-		
+
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $appdata_id
 		);
@@ -2343,26 +2350,9 @@ sub tmp_schengen_ext_fail
 # //////////////////////////////////////////////////
 {
 	my ( $self, $table_id, $final_check ) = @_;
-
-	if ( !$table_id->{ AutoSchengenExtData } ) {
-
-		$self->query( 'query', __LINE__, "
-			INSERT INTO AutoSchengenExtData (AppDataID, LateTransfer) VALUES (?, 1)", {},
-			$table_id->{ AutoAppData }
-		);
-			
-		my $ext_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
-		
-		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET AutoSchengenExtID = ? WHERE ID = ?", {}, 
-			$ext_id, $table_id->{ AutoToken }
-		);
-		
-		return 1;
-	}
 	
 	if ( $final_check ) {
-	
+
 		my $late_transfer = $self->query( 'selallkeys', __LINE__, "
 			SELECT AutoAppData.ID as AID, AutoSchengenExtData.ID as EID, LateTransfer
 			FROM AutoAppData
@@ -2375,7 +2365,15 @@ sub tmp_schengen_ext_fail
 
 		for ( @$late_transfer ) {
 		
-			if ( $_->{ LateTransfer } ) {
+			if ( !$_->{ EID } ) {
+				
+				$self->query( 'query', __LINE__, "
+					UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $_->{ AID }
+				);
+				
+				$need_to_return = 1;
+			}
+			elsif ( $_->{ LateTransfer } ) {
 			
 				$self->query( 'query', __LINE__, "
 					UPDATE AutoSchengenExtData SET LateTransfer = 0 WHERE ID = ?", {}, $_->{ EID }
@@ -2391,7 +2389,23 @@ sub tmp_schengen_ext_fail
 		
 		return 1 if $need_to_return;
 	}
+	elsif ( !$table_id->{ AutoSchengenExtData } ) {
 
+		$self->query( 'query', __LINE__, "
+			INSERT INTO AutoSchengenExtData (AppDataID, LateTransfer) VALUES (?, 1)", {},
+			$table_id->{ AutoAppData }
+		);
+			
+		my $ext_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+	
+		$self->query( 'query', __LINE__, "
+			UPDATE AutoToken SET AutoSchengenExtID = ? WHERE ID = ?", {}, 
+			$ext_id, $table_id->{ AutoToken }
+		);
+		
+		return 1;
+	}
+	
 	return 0;
 }
 
