@@ -109,8 +109,28 @@
 								[% ELSE %]
 									href="/otkaz-ot-otvetstvennosti/"
 								[% END %]
-								>[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a><br><br>
+								>[% langreq('Отказ от ответственности и политика конфиденциальности') %]</a>
 								</td></tr>
+							[% END %]
+							
+							<tr><td class="left" colspan="2"><br>
+							[% IF lang_in_link == 'it' %]								
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
+								&nbsp;
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
+							[% ELSIF lang_in_link == 'en' %]
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
+								&nbsp;
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">transizione all&prime;italiano</a>
+							[% ELSE %]
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">transizione all&prime;italiano</a>
+								&nbsp;
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
+							[% END %]
+							</td></tr>
+							
+							[% IF step == 1 %]
+								<tr><td>&nbsp;<br></td></tr>
 							[% END %]
 
 							[% FOREACH include_name IN special.include_out %]
