@@ -815,7 +815,7 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'company_text',
-				label => 'Данные компании',
+				label => 'Данные работодателя',
 				font => 'bold',
 			},
 			{
@@ -825,9 +825,18 @@ sub get_content_rules_hash
 				type => 'input',
 				name => 'workname',
 				label => 'Название',
-				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => 'VMS',
-				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
+				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
+					},
+				],
 				db => {
 					table => 'AutoSchengenExtData',
 					name => 'JobName',
@@ -838,9 +847,18 @@ sub get_content_rules_hash
 				type => 'input',
 				name => 'workpostal',
 				label => 'Индекс',
-				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => '119017',
-				check => 'zN\s\-',
+				check => 'N\s\-',
+				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
+					},
+				],
 				db => {
 					table => 'AutoSchengenExtData',
 					name => 'JobPostal',
@@ -851,9 +869,18 @@ sub get_content_rules_hash
 				type => 'input',
 				name => 'workphone',
 				label => 'Телефон',
-				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => '79XXXXXXXXX',
-				check => 'zN\-',
+				check => 'N\-',
+				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
+					},
+				],				
 				db => {
 					table => 'AutoSchengenExtData',
 					name => 'JobPhone',
@@ -866,8 +893,15 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите адрес почты, по которому можно будет связаться с компанией',
 				example => 'info@italyvms.ru',
-				check => 'zWN\@\-\_\.',
+				check => 'WN\@\-\_\.',
 				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale; Studente, apprendista, scolaro',
+						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
+					},
 					{
 						condition => 'this_is_email',
 					},
@@ -884,7 +918,16 @@ sub get_content_rules_hash
 				label => 'Страна',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы.',
 				example => 'The Russian Federation',
-				check => 'zN',
+				check => 'N',
+				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
+					},
+				],
 				db => {
 					table => 'AutoSchengenExtData',
 					name => 'JobCountry',
@@ -896,9 +939,18 @@ sub get_content_rules_hash
 				type => 'input',
 				name => 'workcity',
 				label => 'Город расположения',
-				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => 'Moscow',
-				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
+				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
+					},
+				],
 				db => {
 					table => 'AutoSchengenExtData',
 					name => 'JobCity',
@@ -909,9 +961,18 @@ sub get_content_rules_hash
 				type => 'input',
 				name => 'workaddr',
 				label => 'Адрес компании',
-				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
+				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => 'M.Tolmachevskiy pereulok 6 b.1',
-				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
+				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
+					},
+				],
 				db => {
 					table => 'AutoSchengenExtData',
 					name => 'JobAddress',

@@ -2724,22 +2724,36 @@ sub check_logic
 			}
 		}
 		
-		if ( $rule->{ condition } =~ /^free_only_if(_not)?$/ ) {
+		if ( $rule->{ condition } =~ /^free_only_if(_not)?(_eq)?$/ ) {
 			
-			my $not = $1;
-			
+			my ( $not, $eq ) = ( $1, $2 );
+	
 			my $field_in_db = $self->query( 'sel1', __LINE__, "
 				SELECT $rule->{name} FROM Auto$rule->{table} WHERE ID = ?", 
 				$tables_id->{ 'Auto'.$rule->{table} }
 			);
 
-			if ( $not ) {
+			if ( $eq ) {
+				
+				my $eq_find = 0;
+	
+				for ( split /;/, $rule->{ values } ) {
+		
+					$eq_find = 1 if /^\s*$field_in_db\s*$/i;
+				}
+	
 				return $self->text_error( 14, $element, undef, $rule->{error} ) 
-					if ( $field_in_db and !$value );
+					if $value and $eq_find and $not;
+					
+				return $self->text_error( 13, $element, undef, $rule->{error} ) 
+					if !$value and !$eq_find and !$not;
 			}
 			else {
+				return $self->text_error( 14, $element, undef, $rule->{error} ) 
+					if $field_in_db and !$value and $not;
+
 				return $self->text_error( 13, $element, undef, $rule->{error} ) 
-					unless ( $field_in_db or $value );
+					if !$not and !( $field_in_db or $value );
 			}
 		}
 		
