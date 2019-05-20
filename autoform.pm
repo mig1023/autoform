@@ -3147,15 +3147,15 @@ sub mod_hash
 			$hash->{ SchengenJSON } = JSON->new->pretty->encode( $ext_data );
 			
 			$hash->{ FullAddress } = join( ', ', (
-				$self->countries( $ext_data->{ HomeCountry } ), $ext_data->{ HomeCity },
-				$ext_data->{ HomeAddress }, $ext_data->{ HomePostal }, $hash->{ AppEMail }
+				$ext_data->{ HomeCity }, $ext_data->{ HomeAddress },
+				$ext_data->{ HomePostal }, $hash->{ AppEMail }
 			) );
 	
 			$hash->{ ProfActivity } = $ext_data->{ Occupation } || 'ALTRE PROFESSIONI';
 			
 			$hash->{ WorkOrg } = join( ', ', (
-				$ext_data->{ JobName }, $self->countries( $ext_data->{ JobCountry } ), $ext_data->{ JobCity },
-				$ext_data->{ JobAddress }, $ext_data->{ JobPostal }, $ext_data->{ JobPhone }, $ext_data->{ JobEmail }
+				$ext_data->{ JobName }, $ext_data->{ JobCity }, $ext_data->{ JobAddress },
+				$ext_data->{ JobPostal }, $ext_data->{ JobPhone }, $ext_data->{ JobEmail }
 			) );
 			
 			$hash->{ KinderData } = join( ' ', (

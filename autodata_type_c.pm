@@ -334,7 +334,7 @@ sub get_content_rules_hash
 				check_logic => [
 					{
 						condition => 'english_only_for_not_rf_citizen',
-						full_error => 'Для граждан РФ отч необходимо вводить на русском языке',
+						full_error => 'Для граждан РФ отчество необходимо вводить на русском языке',
 					},
 					{
 						condition => 'free_only_if',
@@ -764,7 +764,7 @@ sub get_content_rules_hash
 				},
 				param => {
 					'Specialista informatico' => 'IT-специалист',
-					'Personale amministrativo e di servizio  (funzionario, impiegato, segretario/a)' => 'Административный и обслуживающий персонал (администратор, секретарь.)',
+					'Personale amministrativo e di servizio  (funzionario, impiegato, segretario/a)' => 'Административный и обслуживающий персонал (администратор, секретарь)',
 					'Personale nel settore della ristorazione e turistico (amministratore, impiegato, guide turictiche,cameriere)' => 'Персонал в сфере общественного питания и туризма (администратор, офисный работник, экскурсовод, официант)',
 					'Architetto' => 'Архитектор',
 					'Banchiere' => 'Банкир',
@@ -795,7 +795,7 @@ sub get_content_rules_hash
 					'Dirigente d\'azienda' => 'Руководящий сотрудник компании',
 					'Prete/Religioso/a' => 'Священник, представитель духовенства',
 					'Agente di polizia, Militare' => 'Сотрудник полиции, военнослужащий',
-					'Studente, apprendista' => 'Студент, стажер',
+					'Studente, apprendista, scolaro' => 'Студент, стажер, школьник',
 					'Giudice, procuratore' => 'Судья, прокурор',
 					'Agricoltore' => 'Фермер',
 					'Freelancer' => 'Фрилансер',
@@ -806,7 +806,8 @@ sub get_content_rules_hash
 					'Disoccupato' => 'Без профессии',
 					'Altre professioni' => 'Другие профессии',
 				},
-				format => 'capslock'
+				format => 'capslock',
+				first_elements => 'default_free',
 			},
 			{
 				type => 'free_line',
