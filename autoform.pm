@@ -249,14 +249,17 @@ sub autoform
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'progress' 		=> $progress,
-		'biometric_data'	=> ( $self->{ biometric_data } ? 'yes' : '' ),
+		
 		'lang_in_link' 		=> $self->{ lang },
 		'js_rules'		=> $js_rules,
 		'js_symbols'		=> $symbols_error,
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
-		'mobile_app' 		=> ( $self->param( 'mobile_app' ) ? 1 : 0 ),
 	};
+	
+	$tvars->{ biometric_data } = ( $self->{ biometric_data } ? 'yes' : 0 );
+	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
+	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
@@ -272,7 +275,7 @@ sub autoform
 	for ( 'in', 'out' ) {
 		$tvars->{ "include_name_$_" } = $special->{ "include_$_" } if $special->{ "include_$_" };
 	}
-	
+
 	$template->process( $template_file, $tvars );
 }
 
