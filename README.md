@@ -10,7 +10,7 @@
 | 4 | checking the logic of the relation of various fields |
 | 5 | high level of security against hacking |
 | 6 | microORM integrated |
-| 7 | flexible structure, based on hash-data |
+| 7 | flexible structure, based on associative arrays |
 | 8 | examples & detailed comments for each field |
 | 9 | mobile version integrated |
 | 10 | etc... |
