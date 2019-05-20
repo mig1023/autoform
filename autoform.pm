@@ -3151,7 +3151,7 @@ sub mod_hash
 				$ext_data->{ HomeAddress }, $ext_data->{ HomePostal }, $hash->{ AppEMail }
 			) );
 	
-			$hash->{ ProfActivity } = $ext_data->{ Occupation };
+			$hash->{ ProfActivity } = $ext_data->{ Occupation } || 'ALTRE PROFESSIONI';
 			
 			$hash->{ WorkOrg } = join( ', ', (
 				$ext_data->{ JobName }, $self->countries( $ext_data->{ JobCountry } ), $ext_data->{ JobCity },

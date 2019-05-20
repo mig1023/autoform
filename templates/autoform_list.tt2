@@ -47,7 +47,7 @@
 	<tr><td class="left" colspan="5" id = "applist">
 	[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
 	[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Зарегистрировать заявителя"</b>') %]!<br><br>
-	[% langreq('После заполнения данных первого заявителя Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза') %].<br><br>
+	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза') %].<br><br>
 	</td></tr>
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
@@ -104,7 +104,21 @@
 	</span>
 	
 </td></tr>
-<tr><td colspan="5">&nbsp;</td></tr>
+<tr><td class="left" colspan="2"><br>
+	[% IF lang_in_link == 'it' %]								
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
+		&nbsp;
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
+	[% ELSIF lang_in_link == 'en' %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
+		&nbsp;
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
+	[% ELSE %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
+		&nbsp;
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
+	[% END %]
+</td></tr>
 </table>
 
 </td></tr></table>

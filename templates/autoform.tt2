@@ -121,9 +121,9 @@
 							[% ELSIF lang_in_link == 'en' %]
 								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
 								&nbsp;
-								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">transizione all&prime;italiano</a>
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
 							[% ELSE %]
-								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">transizione all&prime;italiano</a>
+								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
 								&nbsp;
 								<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
 							[% END %]
