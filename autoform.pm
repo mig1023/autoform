@@ -3158,7 +3158,7 @@ sub mod_hash
 		}
 		else {
 			my $ext_data = $self->get_hash_table( 'AutoSchengenExtData', 'AppDataID', $hash->{ ID } );
-			
+	
 			$ext_data->{ AppEMail } = $hash->{ AppEMail };
 			
 			$hash->{ SchengenJSON } = JSON->new->pretty->encode( $ext_data );
@@ -3168,8 +3168,8 @@ sub mod_hash
 				$ext_data->{ HomePostal }, $hash->{ AppEMail }
 			) );
 	
-			$hash->{ ProfActivity } = $ext_data->{ Occupation } || 'ALTRE PROFESSIONI';
-			
+			$hash->{ ProfActivity } = $ext_data->{ Occupation } || $hash->{ ProfActivity } || 'ALTRE PROFESSIONI';
+
 			$hash->{ WorkOrg } = join( ', ', (
 				$ext_data->{ JobName }, $ext_data->{ JobCity }, $ext_data->{ JobAddress },
 				$ext_data->{ JobPostal }, $ext_data->{ JobPhone }, $ext_data->{ JobEmail }
