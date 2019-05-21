@@ -3176,7 +3176,10 @@ sub mod_hash
 			) );
 			
 			$hash->{ KinderData } = join( ' ', (
-				$ext_data->{ MotherName }, $ext_data->{ MotherSurname }, $ext_data->{ FatherName }, $ext_data->{ FatherSurname }
+				$ext_data->{ MotherName }, $ext_data->{ MotherSurname },
+				$self->countries( $ext_data->{ MotherCitizenship } ), ', ',
+				$ext_data->{ FatherName }, $ext_data->{ FatherSurname },
+				$self->countries( $ext_data->{ FatherCitizenship } ), 
 			) );
 			
 			$hash->{ ACopmanyPerson } = join( ' ', ( $ext_data->{ InvitName }, $ext_data->{ InvitSurname }	) );

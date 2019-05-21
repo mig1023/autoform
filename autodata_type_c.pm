@@ -1017,6 +1017,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 600,
 				progress => 5,
+				param => 1,
 				copy_from_other_applicants => 'now',
 				
 				relation => {
@@ -1054,6 +1055,20 @@ sub get_content_rules_hash
 				format => 'capslock'
 			},
 			{
+				type => 'select',
+				name => 'motherсitizenship',
+				label => 'Гражданство матери',
+				comment => 'Для несовершеннолетних: гражданство родителей или законного представителя',
+				example => 'The Russian Federation',
+				check => 'zN',
+				db => {
+					table => 'SchengenExtData',
+					name => 'MotherCitizenship',
+				},
+				param => '[citizenship_countries]',
+				first_elements => '70',
+			},
+			{
 				type => 'input',
 				name => 'kinderfathername',
 				label => 'Имя отца',
@@ -1078,6 +1093,20 @@ sub get_content_rules_hash
 					name => 'FatherSurname',
 				},
 				format => 'capslock'
+			},
+			{
+				type => 'select',
+				name => 'fatherсitizenship',
+				label => 'Гражданство отца',
+				comment => 'Для несовершеннолетних: гражданство родителей или законного представителя',
+				example => 'The Russian Federation',
+				check => 'zN',
+				db => {
+					table => 'SchengenExtData',
+					name => 'FatherCitizenship',
+				},
+				param => '[citizenship_countries]',
+				first_elements => '70',
 			},
 		],
 		
