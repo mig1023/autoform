@@ -3180,7 +3180,13 @@ sub mod_hash
 			) );
 			
 			$hash->{ ACopmanyPerson } = join( ' ', ( $ext_data->{ InvitName }, $ext_data->{ InvitSurname }	) );
-			
+
+			if ( ( $schengen_data->{ HostDataType } =~ /^(H|S)$/i ) && ( $ext_data->{ HotelAddress } !~ /^\s*$/ ) ) {
+
+				$hash->{ HotelAdresses } = $ext_data->{ HotelCity } if $ext_data->{ HotelCity };
+				$hash->{ HotelAdresses } .= ', ' if $ext_data->{ HotelCity } and $ext_data->{ HotelAddress };
+				$hash->{ HotelAdresses } .= $ext_data->{ HotelAddress } if $ext_data->{ HotelAddress };
+			}
 		}
 	}
 

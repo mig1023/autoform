@@ -569,7 +569,7 @@ sub get_content_rules_hash
 				check => 'zN',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'HomeCountry',
 				},
 				param => '[citizenship_countries]',
@@ -584,7 +584,7 @@ sub get_content_rules_hash
 				check => 'zWN\s\-\_\.\,\;\'\"',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'HomeCity',
 				},
 				format => 'capslock',
@@ -598,7 +598,7 @@ sub get_content_rules_hash
 				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'HomeAddress',
 				},
 				format => 'capslock'
@@ -612,7 +612,7 @@ sub get_content_rules_hash
 				check => 'zN\s\-',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'HomePostal',
 				},
 			},
@@ -759,7 +759,7 @@ sub get_content_rules_hash
 				check => 'z',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'Occupation',
 				},
 				param => {
@@ -833,12 +833,12 @@ sub get_content_rules_hash
 						condition => 'free_only_if_eq',
 						table => 'SchengenExtData',
 						name => 'Occupation',
-						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale',
 						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'JobName',
 				},
 				format => 'capslock'
@@ -855,12 +855,12 @@ sub get_content_rules_hash
 						condition => 'free_only_if_eq',
 						table => 'SchengenExtData',
 						name => 'Occupation',
-						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale',
 						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'JobPostal',
 				},
 				format => 'capslock'
@@ -877,12 +877,12 @@ sub get_content_rules_hash
 						condition => 'free_only_if_eq',
 						table => 'SchengenExtData',
 						name => 'Occupation',
-						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale',
 						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
 					},
 				],				
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'JobPhone',
 				},
 				format => 'capslock'
@@ -907,7 +907,7 @@ sub get_content_rules_hash
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'JobEmail',
 				},
 				format => 'capslock'
@@ -924,12 +924,12 @@ sub get_content_rules_hash
 						condition => 'free_only_if_eq',
 						table => 'SchengenExtData',
 						name => 'Occupation',
-						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale',
 						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'JobCountry',
 				},
 				param => '[citizenship_countries]',
@@ -947,12 +947,12 @@ sub get_content_rules_hash
 						condition => 'free_only_if_eq',
 						table => 'SchengenExtData',
 						name => 'Occupation',
-						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale',
 						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'JobCity',
 				},
 				format => 'capslock'
@@ -969,12 +969,12 @@ sub get_content_rules_hash
 						condition => 'free_only_if_eq',
 						table => 'SchengenExtData',
 						name => 'Occupation',
-						values => 'Freelancer, Pensionata, Disoccupato, Casalinga, Imprenditore individuale',
+						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale',
 						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'JobAddress',
 				},
 				format => 'capslock'
@@ -1035,7 +1035,7 @@ sub get_content_rules_hash
 				example => 'Maria',
 				check => 'zW\s\-',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'MotherName',
 				},
 				format => 'capslock'
@@ -1048,7 +1048,7 @@ sub get_content_rules_hash
 				example => 'Ivanova',
 				check => 'zW\s\-',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'MotherSurname',
 				},
 				format => 'capslock'
@@ -1061,7 +1061,7 @@ sub get_content_rules_hash
 				example => 'Ivan',
 				check => 'zW\s\-',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'FatherName',
 				},
 				format => 'capslock'
@@ -1074,7 +1074,7 @@ sub get_content_rules_hash
 				example => 'Ivanov',
 				check => 'zW\s\-',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'FatherSurname',
 				},
 				format => 'capslock'
@@ -1577,14 +1577,28 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
-				name => 'hotelsaddr',
+				name => 'hotelcity',
+				label => 'Город места пребывания',
+				comment => 'Укажите город, в котором расположена гостиница',
+				example => 'Rome',
+				check => 'zWN\s\-\_\.\,\;\'\"\@',
+				db => {
+					table => 'SchengenExtData',
+					name => 'HotelCity',
+				},
+				format => 'capslock',
+				special => 'copy_from_other_applicants',
+			},
+			{
+				type => 'input',
+				name => 'hoteladdr',
 				label => 'Адрес места пребывания',
 				comment => 'Укажите адрес гостиницы',
-				example => 'Via Esempio 1, Rome',
-				check => 'zWN\s\-\_\.\,\;\'\"',
+				example => 'Via Esempio 1',
+				check => 'zWN\s\-\_\.\,\;\'\"\@',
 				db => {
-					table => 'AppData',
-					name => 'HotelAdresses',
+					table => 'SchengenExtData',
+					name => 'HotelAddress',
 				},
 				format => 'capslock',
 				special => 'copy_from_other_applicants',
@@ -1615,7 +1629,7 @@ sub get_content_rules_hash
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'HotelEmail',
 				},
 				format => 'capslock'
@@ -1641,7 +1655,7 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
-				name => 'hotels',
+				name => 'hotels_tr',
 				label => 'Название гостиницы или ФИО приглашающего',
 				comment => 'Укажите полное название гостиницы и данные приглашающего лица',
 				example => 'VMS',
@@ -1655,21 +1669,35 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
-				name => 'hotelsaddr',
-				label => 'Адрес места пребывания',
-				comment => 'Укажите адрес гостиницы',
-				example => 'Via Esempio 1, Rome',
+				name => 'hotelcity_tr',
+				label => 'Город места пребывания',
+				comment => 'Укажите город, в котором расположена гостиница',
+				example => 'Rome',
 				check => 'WN\s\-\_\.\,\;\'\"\@',
 				db => {
-					table => 'AppData',
-					name => 'HotelAdresses',
+					table => 'SchengenExtData',
+					name => 'HotelCity',
 				},
 				format => 'capslock',
 				special => 'copy_from_other_applicants',
 			},
 			{
 				type => 'input',
-				name => 'hotelpho',
+				name => 'hoteladdr_tr',
+				label => 'Адрес места пребывания',
+				comment => 'Укажите адрес гостиницы',
+				example => 'Via Esempio 1',
+				check => 'WN\s\-\_\.\,\;\'\"\@',
+				db => {
+					table => 'SchengenExtData',
+					name => 'HotelAddress',
+				},
+				format => 'capslock',
+				special => 'copy_from_other_applicants',
+			},
+			{
+				type => 'input',
+				name => 'hotelpho_tr',
 				label => 'Телефон',
 				comment => 'Укажите контактный телефон гостиницы',
 				example => '39XXXXXXXX',
@@ -1918,7 +1946,7 @@ sub get_content_rules_hash
 				example => 'Ivan',
 				check => 'zW\s\-',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'InvitName',
 				},
 				format => 'capslock',
@@ -1932,7 +1960,7 @@ sub get_content_rules_hash
 				example => 'Ivanov',
 				check => 'zW\s\-',
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'InvitSurname',
 				},
 				format => 'capslock',
@@ -1951,7 +1979,7 @@ sub get_content_rules_hash
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'InvitBthDate',
 				},
 				special => 'mask, copy_from_other_applicants',
@@ -1969,7 +1997,7 @@ sub get_content_rules_hash
 					},
 				],
 				db => {
-					table => 'AutoSchengenExtData',
+					table => 'SchengenExtData',
 					name => 'InvitEmail',
 				},
 				format => 'capslock',
