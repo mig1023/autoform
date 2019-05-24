@@ -3169,6 +3169,8 @@ sub mod_hash
 				$ext_data->{ HomeCity }, $ext_data->{ HomeAddress },
 				$ext_data->{ HomePostal }, $hash->{ AppEMail }
 			) );
+			
+			$ext_data->{ Occupation } =~ s/\s\(.*$//;
 	
 			$hash->{ ProfActivity } = $ext_data->{ Occupation } || $hash->{ ProfActivity } || 'ALTRE PROFESSIONI';
 
@@ -3183,6 +3185,8 @@ sub mod_hash
 				$ext_data->{ FatherName }, $ext_data->{ FatherSurname },
 				$self->countries( $ext_data->{ FatherCitizenship } ), 
 			) );
+			
+			$hash->{ KinderData } =~ s/^\s*,\s*$//;
 			
 			$hash->{ ACopmanyPerson } = join( ' ', ( $ext_data->{ InvitName }, $ext_data->{ InvitSurname }	) );
 
