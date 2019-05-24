@@ -24,6 +24,8 @@ sub get_content_rules_hash
 # //////////////////////////////////////////////////
 {
 
+	my $standart_date_check = 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
+
 	return {
 	
 		'Начало записи' => [
@@ -152,7 +154,7 @@ sub get_content_rules_hash
 				label => 'Дата начала поездки',
 				comment => 'Введите предполагаемую дату начала поездки',
 				example => '31.12.1900',
-				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				check => $standart_date_check,
 				check_logic => [
 					{
 						condition => 'now_or_later',
@@ -172,7 +174,7 @@ sub get_content_rules_hash
 				label => 'Дата окончания поездки',
 				comment => 'Введите предполагаемую дату окончания поездки',
 				example => '31.12.1900',
-				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				check => $standart_date_check,
 				check_logic => [
 					{
 						condition => 'equal_or_later',
@@ -305,7 +307,7 @@ sub get_content_rules_hash
 				label => 'Дата рождения',
 				comment => 'Введите дату рождения',
 				example => '31.12.1900',
-				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				check => $standart_date_check,
 				complete_check => 'not_empty',
 				check_logic => [
 					{
@@ -492,7 +494,7 @@ sub get_content_rules_hash
 				label => 'Дата выдачи',
 				comment => 'Введите дату выдачи, указанную в паспорте',
 				example => '31.12.1900',
-				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				check => $standart_date_check,
 				check_logic => [
 					{
 						condition => 'now_or_earlier',
@@ -609,7 +611,7 @@ sub get_content_rules_hash
 				label => 'Дата выдачи',
 				comment => 'Введите дату выдачи, указанную в паспорте',
 				example => '31.12.1900',
-				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				check => $standart_date_check,
 				check_logic => [
 					{
 						condition => 'now_or_earlier',
@@ -679,7 +681,7 @@ sub get_content_rules_hash
 				name => 'app_date',
 				label => 'Дата записи в Визовый центр',
 				comment => 'Введите дату, когда собираетесь посетить Визовый центр для подачи документов',
-				check => 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-2]\d))$',
+				check => $standart_date_check,
 				check_logic => [
 					{
 						condition => 'now_or_later',
