@@ -18,6 +18,7 @@ use POSIX;
 use JSON;
 use HTTP::Tiny;
 use Encode qw(decode encode);
+use Crypt::Random qw( makerandom ); 
 
 sub new
 # //////////////////////////////////////////////////
@@ -688,18 +689,6 @@ sub create_clear_form
 	);
 }
 	
-sub get_timecode
-# //////////////////////////////////////////////////
-{
-	my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime( time );
-	
-	$_ += 5 for ( $sec, $min, $hour, $mday, $mon, $year );
-	
-	( undef, my $ms ) = split( /\./, gettimeofday() );
-
-	return "-$sec$mday$min$hour$ms$mon$year-";
-}
-
 sub token_generation
 # //////////////////////////////////////////////////
 {
@@ -717,26 +706,21 @@ sub token_generation
 	
 	my $appid = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
 	
-	my $appidcode = "-$appid";
+	my $appidcode = "-$appid-";
 
-	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
+	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' x 2 );
 
-	( undef, my $ms ) = split( /\./, gettimeofday() );
-	
-	$ms = substr( $ms, 0, 3 ) if length( $ms ) > 3;
-
-	srand( $ms );
-	
-	my $timecode = $self->get_timecode();
-	
 	do {
 		$token = 't';
+		
+		for ( 1..63 ) {
+		
+			my $dice = makerandom ( Size => 6, Strength => 1, Uniform => 1 );
+			
+			substr( $token, $_, 1 ) = $alph[ $dice ];
+		}
 	
-		$token .= @alph[ int( rand( 36 ) ) ] for ( 1..63 );
-		
-		substr( $token, 10, length( $timecode ) ) = $timecode;
-		
-		substr( $token, length( $token ) - length( $appidcode ), length( $appidcode ) ) = $appidcode;
+		substr( $token, 10, length( $appidcode ) ) = $appidcode;
 			
 		$token_existing = $self->query( 'sel1', __LINE__, "
 			SELECT ID FROM AutoToken WHERE Token = ?", $token
