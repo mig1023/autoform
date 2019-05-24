@@ -2740,9 +2740,11 @@ sub check_logic
 				
 				my $eq_find = 0;
 	
-				for ( split /;/, $rule->{ values } ) {
-		
-					$eq_find = 1 if /^\s*$field_in_db\s*$/i;
+				for my $val ( split /;/, $rule->{ values } ) {
+				
+					s/(^\s+|\s+$)//g for ( $val, $field_in_db );
+				
+					$eq_find = 1 if lc( $val ) eq lc( $field_in_db );
 				}
 	
 				return $self->text_error( 14, $element, undef, $rule->{error} ) 
