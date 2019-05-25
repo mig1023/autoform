@@ -3736,16 +3736,26 @@ sub param
 		
 	return $param; # <----------- tmp
 	
+	return if !$param;
+	
 	my $check_list = {
 	
 		'<\s*script' => 'js-injection',
-		'(\d+)\s*(\'|")\s*=\s*\1' => 'sql-injection',
-		'^\s*(\d+)\s*(\'|")\s*;\s*(SELECT|UPDATE|DROP|INSERT)\s' => 'sql-injection',
+		'(\d+)\s*(\'|")\s*(AND|OR)\s*(\d+)\s*=\s*\4' => 'sql-injection',
+		'\s*\d+\s*(\'|")\s*;\s*(SELECT|UPDATE|DROP|INSERT)' => 'sql-injection',
 	};
-	
+
 	for ( keys %$check_list ) {
 	
-		warn $check_list->{ $_ } if $param =~ /$_/i;
+		if ( $param =~ /$_/i ) {
+	
+			$self->query( 'query', __LINE__, "
+				INSERT INTO SoftBan (IP, BanDate, Reason) VALUES (?, now(), ?)", {},
+				$ENV{ HTTP_X_REAL_IP }, $check_list->{ $_ } . ': ' . $param
+			);
+			
+			$self->{ vars }->get_system->redirect( "/vcs/block.htm" );
+		}
 	}
 	
 	return $param;
