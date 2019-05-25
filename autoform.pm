@@ -18,7 +18,7 @@ use POSIX;
 use JSON;
 use HTTP::Tiny;
 use Encode qw(decode encode);
-use Crypt::Random qw( makerandom ); 
+use Math::Random::Secure qw(irand); 
 
 sub new
 # //////////////////////////////////////////////////
@@ -708,17 +708,12 @@ sub token_generation
 	
 	my $appidcode = "-$appid-";
 
-	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' x 2 );
+	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 
 	do {
 		$token = 't';
 		
-		for ( 1..63 ) {
-		
-			my $dice = makerandom ( Size => 6, Strength => 1, Uniform => 1 );
-			
-			substr( $token, $_, 1 ) = $alph[ $dice ];
-		}
+		$token .= $alph[ int( irand( 36 ) ) ] for ( 1..63 );
 	
 		substr( $token, 10, length( $appidcode ) ) = $appidcode;
 			
