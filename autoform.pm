@@ -42,6 +42,8 @@ sub getContent
 	
 	return if $self->{ vars }->af->softban_block( $self->{ vars }, $ENV{ HTTP_X_REAL_IP }, 'only_ban_test' );
 	
+	return $self->availability_responder() if /^availability_responder$/i;
+	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 
 	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
@@ -124,6 +126,16 @@ sub get_content_rules_hash_opt
 	return VCS::Site::autodata_type_c_spb::get_content_rules_hash() if VCS::Site::autodata::this_is_spb_center( $center );
 
 	return VCS::Site::autodata_type_c::get_content_rules_hash();
+}
+
+sub availability_responder
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	print "all-is-ok";
 }
 
 sub get_app_visa_and_center
@@ -3442,7 +3454,7 @@ sub send_app_confirm
 	my $conf = $self->{ autoform }->{ confirm };
 	
 	my $html = $self->get_file_content( $conf->{ tt } );
-
+	
 	my $data = $self->query( 'selallkeys', __LINE__, "
 		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName
 		FROM Appointments
@@ -3451,7 +3463,6 @@ sub send_app_confirm
 	)->[ 0 ];
 	
 	$replacer->{ branch_addr } = $self->lang( 'Address-' . $data->{ CenterID } );
-	
 	
 	$replacer->{ branch_addr } = $self->query( 'sel1', __LINE__, "
 		SELECT BAddr FROM Branches WHERE ID = ?", $data->{ CenterID }
