@@ -16,11 +16,13 @@ use VCS::Memcache;
 use VCS::AdminFunc;
 use Date::Calc;
 
-	# лог для контроля
-		my $log_name = '/var/log/autoform_softban.log';
+	my $log_name = '/var/log/autoform_softban.log';
 		
-	# кол-во пустых обращений, считающееся подозрительным
-		my $warn_connection = 50;
+	my $warn_connection = 50;
+		
+	my $inner_ip = {
+		'127.0.0.1' => 1,
+	};
 		
 	log_file();
 	log_file("Включение скрипта подавления подозрительной активности");	
@@ -49,8 +51,11 @@ use Date::Calc;
 
 		next if $already_banned{ $row->{ IP } };
 		
+		next if exists $inner_ip->{ $row->{ IP } };
+		
 		$vars->db->query("
-			INSERT INTO SoftBan (IP, BanDate) VALUES (?, now())", {}, $row->{ IP }
+			INSERT INTO SoftBan (IP, BanDate, Reason) VALUES (?, now(), ?)",
+			{}, $row->{ IP }, "autoform empty forms"
 		);
 		
 		log_file( $row->{ IP } . " --> " . $row->{ ConnectionNumber } );

@@ -16,17 +16,14 @@ use VCS::Memcache;
 use VCS::AdminFunc;
 use Date::Calc;
 
-	# лог для контроля
-		my $log_name = '/var/log/autoform_softban_warn.log';
-		
-	# список рассылки
-		my @addresses = (
-			'mail@mail.com',
-		);
+	my $log_name = '/var/log/autoform_softban_warn.log';
 	
-	# подпись письма
-		my $signature = 
-			'Скрипт отчёта о подозрительной активности';
+	my @addresses = (
+		'mail@mail.com',
+	);
+
+	my $signature = 
+		'С уважением,<br>Скрипт отчёта о подозрительной активности';
 	
 	log_file();
 	log_file("Включение скрипта проверки заблокированной активности");	
@@ -37,7 +34,8 @@ use Date::Calc;
 	$vars->db->db_connect($vars);
 
 	my $connections = $vars->db->selallkeys("
-		SELECT IP, BanDate FROM SoftBan WHERE DATE(BanDate) = (CURDATE() - INTERVAL 1 DAY) ORDER BY BanDate
+		SELECT IP, BanDate, Reason FROM SoftBan
+		WHERE DATE(BanDate) = (CURDATE() - INTERVAL 1 DAY) ORDER BY BanDate
 	");
 	
 	my $table = create_table( $connections );
@@ -86,7 +84,7 @@ sub create_table {
 	
 	$_->{ N } = ++$n for @$connections;  
 	
-	my @heads = ( 'N', 'IP', 'BanDate' );
+	my @heads = ( 'N', 'IP', 'BanDate', 'Reason' );
 	
 	$table .= "<td $tdheadstyle>$_ </td>" for ( @heads );
 	
