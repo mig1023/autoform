@@ -471,24 +471,24 @@
 						'fdate': '[% appinfo.fdate %]', 
 						'lang': '[% lang_in_link %]',
 						
-						}, function(xml) {
-							$(xml).find('node').each( function() {
-							
-								var apptimeValue = $(this).find('id').text();
-								var apptimeText = $(this).find('title').text();
-								var defaultOpt = $(this).find('default').text();
+					}, function(xml) {
+						$(xml).find('node').each( function() {
+						
+							var apptimeValue = $(this).find('id').text();
+							var apptimeText = $(this).find('title').text();
+							var defaultOpt = $(this).find('default').text();
 
-								$('#timeslot').append(
-									'<option value="' + apptimeValue + '" ' +
-									( (
-										( apptimeValue == "" )
-										||
-										( apptimeValue == reload_timeslot )
-										||
-										( ( reload_timeslot == "0" ) && ( defaultOpt == "this" ) )
-									) ? 'selected' : '' )
-									+ ' >'+ apptimeText + '</option>'
-								);
+							$('#timeslot').append(
+								'<option value="' + apptimeValue + '" ' +
+								( (
+									( apptimeValue == "" )
+									||
+									( apptimeValue == reload_timeslot )
+									||
+									( ( reload_timeslot == "0" ) && ( defaultOpt == "this" ) )
+								) ? 'selected' : '' )
+								+ ' >'+ apptimeText + '</option>'
+							);
 						});
 						
 						$('#tmp_img').remove();
@@ -513,7 +513,7 @@
 							var alertText = al.text();
 							alert(alertText);
 						}
-				    }, 'xml');
+					}, 'xml');
 				};
 			[% END %]
 
