@@ -1469,14 +1469,14 @@ sub correct_values
 
 	$$current_values->{ 'new_app_num' } = $appnum if $appnum;
 
-	if ( $$current_values->{ 'new_app_branch' } ) {
+	if ( exists $$current_values->{ 'new_app_branch' } ) {
 	
 		$$current_values->{ 'new_app_branch' } = $self->query( 'sel1', __LINE__, "
 			SELECT BName FROM Branches WHERE ID = ?", $$current_values->{ 'new_app_branch' }
 		);
 	};
 	
-	if ( $$current_values->{ 'new_app_timedate' } ) {
+	if ( exists $$current_values->{ 'new_app_timedate' } ) {
 
 		$$current_values->{ 'new_app_timedate' } = $self->query( 'sel1', __LINE__, "
 			SELECT AppDate
@@ -1488,7 +1488,7 @@ sub correct_values
 		$$current_values->{ 'new_app_timedate' } = $self->date_format( $$current_values->{ 'new_app_timedate' } );
 	}
 	
-	if ( $$current_values->{ 'new_app_timeslot' } ) {
+	if ( exists $$current_values->{ 'new_app_timeslot' } ) {
 	
 		my ( $start, $end ) = $self->query( 'sel1', __LINE__, "
 			SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $$current_values->{ 'new_app_timeslot' }
@@ -3454,7 +3454,7 @@ sub send_app_confirm
 	my $conf = $self->{ autoform }->{ confirm };
 	
 	my $html = $self->get_file_content( $conf->{ tt } );
-	
+
 	my $data = $self->query( 'selallkeys', __LINE__, "
 		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName
 		FROM Appointments
