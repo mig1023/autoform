@@ -2802,6 +2802,20 @@ sub check_logic
 			return $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
 				if ( $citizenship == 70 ) and $value =~ /[A-Za-z]/i;
 		}
+		
+		if ( $rule->{ condition } =~ /^(more|less)_than$/ ) {
+			
+			my $type = $1;
+			
+			my $error_type = ( $type eq 'more' ? 28 : 29 );
+			
+			return $self->text_error( $error_type, $element, undef, $rule->{ offset } ) 
+				if (
+					( ( $type eq 'more' ) and ( $value <= $rule->{ offset } ) )
+					or
+				 	( ( $type eq 'less' ) and ( $value >= $rule->{ offset } ) )
+				);
+		}
 	}
 }
 
