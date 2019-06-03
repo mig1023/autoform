@@ -2807,13 +2807,13 @@ sub check_logic
 			
 			my $type = $1;
 			
-			my $error_type = ( $type eq 'more' ? 28 : 29 );
+			my $error_type = ( $type eq 'more' ? 29 : 28 );
 			
 			return $self->text_error( $error_type, $element, undef, $rule->{ offset } ) 
 				if (
-					( ( $type eq 'more' ) and ( $value <= $rule->{ offset } ) )
+					( ( $type eq 'more' ) and ( $value < $rule->{ offset } ) )
 					or
-				 	( ( $type eq 'less' ) and ( $value >= $rule->{ offset } ) )
+				 	( ( $type eq 'less' ) and ( $value > $rule->{ offset } ) )
 				);
 		}
 	}
