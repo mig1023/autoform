@@ -693,6 +693,11 @@ sub get_content_rules_hash
 						offset => -90,
 						full_error => 'Запись в Визовый центр более чем за [offset] до начала поездки не осуществляется',
 					},
+					{
+						condition => 'now_or_earlier',
+						offset => 90,
+						full_error => 'Запись в Визовый центр более чем за [offset] не осуществляется',
+					},
 				],
 				db => {
 					table => 'Appointments',
