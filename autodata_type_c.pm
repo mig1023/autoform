@@ -755,7 +755,7 @@ sub get_content_rules_hash
 				name => 'workdata',
 				label => 'Профессиональная деятельность',
 				comment => 'Профессию необходимо выбрать в соответствии со справкой с места работы/учёбы. Если на данный момент Вы не работаете, то выберите - без профессии',
-				example => 'Doctor',
+				example => 'Менеджер',
 				check => 'z',
 				complete_check => 'not_empty',
 				db => {
@@ -1014,6 +1014,32 @@ sub get_content_rules_hash
 					10 => 'иная',
 				},
 				special => 'save_info_about_hastdatatype',
+			},
+		],
+		
+		'Уточнение по профессии' => [
+			{
+				page_ord => 550,
+				progress => 5,
+				relation => {
+					only_if => {
+						table => 'SchengenExtData',
+						name => 'Occupation',
+						value => 'Altre professioni',
+					}
+				},
+			},
+			{
+				type => 'input',
+				name => 'workdata_add',
+				label => 'Профессиональная деятельность',
+				comment => 'Профессию необходимо указывать на английском или итальянском языках',
+				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				db => {
+					table => 'AppData',
+					name => 'ProfActivity',
+				},
+				format => 'capslock'
 			},
 		],
 		
