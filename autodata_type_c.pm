@@ -1025,7 +1025,7 @@ sub get_content_rules_hash
 					only_if => {
 						table => 'SchengenExtData',
 						name => 'Occupation',
-						value => 'Altre professioni',
+						value => 'ALTRE PROFESSIONI',
 					}
 				},
 			},

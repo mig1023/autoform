@@ -3175,9 +3175,13 @@ sub mod_hash
 				$ext_data->{ HomePostal }, $hash->{ AppEMail }
 			) );
 			
-			$ext_data->{ Occupation } =~ s/\s\(.*$//;
-	
-			$hash->{ ProfActivity } = $ext_data->{ Occupation } || $hash->{ ProfActivity } || 'ALTRE PROFESSIONI';
+			if ( $ext_data->{ Occupation } eq 'ALTRE PROFESSIONI' ) {
+			
+				$hash->{ ProfActivity } = $hash->{ ProfActivity } || 'ALTRE PROFESSIONI';
+			}
+			else {
+				$hash->{ ProfActivity } = $ext_data->{ Occupation } || $hash->{ ProfActivity } || 'ALTRE PROFESSIONI';
+			}
 
 			$hash->{ WorkOrg } = join( ', ', (
 				$ext_data->{ JobName }, $ext_data->{ JobCity }, $ext_data->{ JobAddress },
@@ -3773,7 +3777,7 @@ sub param
 	for ( keys %$check_list ) {
 	
 		if ( $param =~ /$_/i ) {
-	
+
 			$self->query( 'query', __LINE__, "
 				INSERT INTO SoftBan (IP, BanDate, Reason) VALUES (?, now(), ?)", {},
 				$ENV{ HTTP_X_REAL_IP }, $check_list->{ $_ } . ': ' . $param
