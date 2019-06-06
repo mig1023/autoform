@@ -3770,8 +3770,10 @@ sub param
 	my $check_list = {
 	
 		'<\s*script' => 'js-injection',
+		'<\s*img\s+.*src\s*=' => 'js-injection',
 		'(\d+)\s*(\'|")\s*(AND|OR)\s*(\d+)\s*=\s*\4' => 'sql-injection',
 		'\s*\d+\s*(\'|")\s*;\s*(SELECT|UPDATE|DROP|INSERT)' => 'sql-injection',
+		'\sUNION\s+SELECT\s' => 'sql-injection',
 	};
 
 	for ( keys %$check_list ) {
