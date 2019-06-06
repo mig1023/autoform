@@ -990,12 +990,11 @@ sub get_forward
 	
 	my $appid = undef;
 	
-	if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) ) {
+	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
+		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
 	
-		( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step );
-	
-		( $last_error, $step ) = $self->check_mutex_for_creation( $step );
-	}
+	( $last_error, $step ) = $self->check_mutex_for_creation( $step )
+		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
 
 	if ( $last_error ) {
 	
