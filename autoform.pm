@@ -649,6 +649,8 @@ sub get_token_and_create_new_form_if_need
 	return '03' if $token eq 'no_field';
 	
 	return '05' if $token eq 'canceled';
+	
+	return '06' if $self->{ autoform }->{ general }->{ technical_work };
 
 	$token =~ s/[^a-z0-9\-]//g unless $self->{ this_is_self_testing };
 	
@@ -786,7 +788,7 @@ sub get_page_error
 	
 	my $error_type = VCS::Site::autodata::get_page_error();
 	
-	my $title = ( $error_num == 5 ? '' : $self->lang( 'ошибка: ' ) ) . $self->lang( $error_type->[ $error_num ] );
+	my $title = ( $error_num =~ /^0?(5|6)$/ ? '' : $self->lang( 'ошибка: ' ) ) . $self->lang( $error_type->[ $error_num ] );
 	
 	return ( "<center>$title</center>", undef, 'autoform.tt2' );
 }
