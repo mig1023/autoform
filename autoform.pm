@@ -3770,23 +3770,43 @@ sub param
 	
 	my $check_list = {
 	
-		'<\s*script' => 'js-injection',
-		'<\s*img\s+.*src\s*=' => 'js-injection',
-		'(\d+)\s*(\'|")\s*(AND|OR)\s*(\d+)\s*=\s*\4' => 'sql-injection',
-		'\s*\d+\s*(\'|")\s*;\s*(SELECT|UPDATE|DROP|INSERT)' => 'sql-injection',
-		'\sUNION\s+SELECT\s' => 'sql-injection',
+		'js-injection' => [
+		
+			'<\s*script',
+			'<\s*img\s+.*src\s*=',
+		],
+		
+		'sql-injection' => [
+		
+			'(\d+)\s*(\'|")\s*(AND|OR)\s*(\d+)\s*=\s*\4',
+			'\s*\d+\s*(\'|")\s*;\s*(select|update|drop|insert)',
+			'(^|\s)union\s+select\s',
+		],
+		
+		'sql-query' => [
+		
+			'(^|\s)select(\s.*\s|\*)from\s',
+			'update\s+(low_priority|ignore)?.*\sset\s',
+			'insert\s+(low_priority|delayed|ignore|into)?.*\s(set|values)',
+			'drop\s+(low_priority|quick)?\s*(table|database)\s',
+			'delete\s+(low_priority|quick)?\s*from\s',
+			'alter\s+(ignore\s+)?table\s.*\s(add|drop|change|alter)\s',
+		],
 	};
 
-	for ( keys %$check_list ) {
+	for my $type ( keys %$check_list ) {
 	
-		if ( $param =~ /$_/i ) {
-
-			$self->query( 'query', __LINE__, "
-				INSERT INTO SoftBan (IP, BanDate, Reason) VALUES (?, now(), ?)", {},
-				$ENV{ HTTP_X_REAL_IP }, $check_list->{ $_ } . ': ' . $param
-			);
-			
-			$self->{ vars }->get_system->redirect( "/vcs/block.htm" );
+		for ( @{ $check_list->{ $type } } ) {
+	
+			if ( $param =~ /$_/i ) {
+				
+				$self->query( 'query', __LINE__, "
+					INSERT INTO SoftBan (IP, BanDate, Reason) VALUES (?, now(), ?)", {},
+					$ENV{ HTTP_X_REAL_IP }, $type . ': ' . $param
+				);
+				
+				$self->{ vars }->get_system->redirect( "/vcs/block.htm" );
+			}
 		}
 	}
 	
