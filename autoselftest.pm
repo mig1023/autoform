@@ -1,4 +1,4 @@
-package VCS::Site::autoselftest;
+﻿package VCS::Site::autoselftest;
 use strict;
 
 use VCS::Vars;
@@ -10,8 +10,9 @@ sub get_test_list {
 	my $tests = [
 		{ 	func => \&{ VCS::Site::autoform::get_token_and_create_new_form_if_need },
 			comment => 'get_token_and_create_new_form_if_need',
+			
 			test => {	
-				1 => { 	expected => '^t[a-z0-9]{63}$'
+				1 => { 	expected => '^t[a-z0-9\-]{63}$',
 				},
 				2 => {	param => { t => '[token]' },
 					expected => '[token]',
@@ -37,17 +38,7 @@ sub get_test_list {
 		{ 	func => \&{ VCS::Site::autoform::token_generation },
 			comment => 'token_generation',
 			test => { 	
-				1 => { 	expected => '^t[a-z0-9]{63}$'
-				},
-			},
-		},
-		{ 	func => \&{ VCS::Site::autoform::save_new_token_in_db },
-			comment => 'save_new_token_in_db',
-			test => { 	
-				1 => { 	tester => \&test_write_db,
-					args => [ 'tbcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171' ],
-					expected => 'tbcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171'.
-						':AutoToken:Token:tbcdefghijklmnopqrstuvwxyz0123456789abcdefghigklmopqrstuvwxyz171',
+				1 => { 	expected => '^t[a-z0-9\-]{63}$'
 				},
 			},
 		},
@@ -151,7 +142,6 @@ sub get_test_list {
 								's_date',
 								'f_date',
 							],
-							with_map => [],
 							post_index => [],
 							captcha => [],
 							include_in => [],
@@ -176,6 +166,7 @@ sub get_test_list {
 							}	
 						],
 					],
+					debug=>1,
 				},
 				3 => { 	prepare => \&pre_content_2,
 					param => { action => 'back' },
@@ -190,7 +181,6 @@ sub get_test_list {
 							timeslots => [],
 							mask => [],
 							datepicker => [],
-							with_map => [],
 							post_index => [],
 							captcha => [],
 							include_in => [],
@@ -419,7 +409,8 @@ sub get_test_list {
 					expected => '<td class="left" colspan="3">text</td>',
 				},
 				11 => {	args => [ 'example', undef, 'text' ],
-					expected => '<tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: text</span></td></tr>',
+					expected => 
+						'<tr><td class="exam_td_gen left"><span class="exam_span_gen"><table class="no_border"><tr><td class="no_mobile_transform exam_td_gen">пример:</td><td class="no_mobile_transform">text</td></tr></table></span></td></tr>',
 				},
 				12 => {	args => [ 'info', 'element', 'text' ],
 					expected => '<label class="info" title="" id="element">text</label>',
@@ -476,7 +467,7 @@ sub get_test_list {
 						}
 					],
 					expected => 
-						'<tr><td class="left" rowspan=2><label data-id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr>',
+						'<tr><td class="left" rowspan=2 valign=top><label data-id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="testvalue@mail.ru" name="email" id="email" title="<br><br><b>Обязательное поле</b><br>В поле допустимо вводить "></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen"><table class="no_border"><tr><td class="no_mobile_transform exam_td_gen">пример:</td><td class="no_mobile_transform">mail@mail.ru</td></tr></table></span></td></tr>',
 				},
 				2 => { 	args => [
 						{
@@ -538,14 +529,12 @@ sub get_test_list {
 						mask => [],
 						datepicker => [],
 						post_index => [],
-						with_map => [],
 						captcha => [],
 						include_in => [],
 						include_out => [],
 						no_copypast => [],
 						min_date => [],
 					},
-
 				},
 				2 => { 	args => [ 2 ],
 					expected => {
@@ -560,14 +549,12 @@ sub get_test_list {
 							'f_date',
 						],
 						post_index => [],
-						with_map => [],
 						captcha => [],
 						include_in => [],
 						include_out => [],
 						no_copypast => [],
 						min_date => [],
 					},
-
 				},
 			},
 		},
@@ -1394,6 +1381,7 @@ sub get_test_list {
 						AutoToken => '[token_id]',
 						AutoAppointments => '[app_id]',
 						AutoSpbAlterAppData => '[spb_id]',
+						AutoSchengenExtData => '[ext_id]',
 					},
 				},
 			},
@@ -1889,7 +1877,11 @@ sub get_test_list {
 			comment => 'get_geo_info',
 			test => { 	
 				1 => { 	prepare => \&pre_geo_or_collect,
-					expected => [ [ 55, 49, 'Казань' ] ],
+					expected => [ { 
+						'type' => 'googlemap',
+						'code' =>
+							'!1m18!1m12!1m3!1d5336.3034966631785!2d49.12628122335797!3d55.78213722804083!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x415ead0f53431109%3A0x5edc1ff305beb11a!2z0YPQuy4g0J7RgdGC0YDQvtCy0YHQutC-0LPQviwgODcsINCa0LDQt9Cw0L3RjCwg0KDQtdGB0L8uINCi0LDRgtCw0YDRgdGC0LDQvSwgNDIwMTA3!5e0!3m2!1sru!2sru!4v1506952021696'
+					} ],
 				},
 			},
 		},
@@ -2389,13 +2381,13 @@ sub get_test_list {
 		{ 	func => \&{ VCS::Site::autoform::get_app_version },
 			comment => 'get_app_version',
 			test => {
-				1 => { 	expected => 'новая форма записи',
+				1 => { 	expected => 'расширенный шенген экспорт',
 				},
 				2 => { 	param => { mobile_ver => 1 },
-					expected => 'новая форма записи (мобильная версия)',
+					expected => 'расширенный шенген экспорт (мобильная версия)',
 				},
 				3 => { 	param => { mobile_app => 1 },
-					expected => 'новая форма записи (мобильное приложение)',
+					expected => 'расширенный шенген экспорт (мобильное приложение)',
 				},
 			},
 		},
@@ -2451,7 +2443,7 @@ sub get_test_list {
 			comment => 'get_delete',
 			test => {
 				1 => { 	args => [ '[appdata_id]' ],
-					expected => 2,
+					expected => 4,
 				},
 				2 => { 	tester => \&test_write_db,
 					args => [ '[appdata_id]' ],
@@ -2469,16 +2461,16 @@ my $progress_bar =
 	'<td class="pr_size_gen pr_white_gray_gen center"><div class="big_progr pr_current centered" title=""><div class="pr_in_gen">1</div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Данные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">2</div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Паспорта"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Допданные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Поездка"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Проживание"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Расходы"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Ещё?"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="На кого?"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Данные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">3</div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Офис"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_white_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
 
 my $progress_bar_2 = 
-	'<td class="pr_size_gen pr_white_red_gen center"><div class="big_progr pr_past centered" title=""><div class="pr_in_gen">1</div></div></td><td class="pr_size_gen pr_red_gray_gen center"><div class="ltl_progr pr_current centered" title="Данные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">2</div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Паспорта"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Допданные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Поездка"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Проживание"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Расходы"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Ещё?"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="На кого?"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Данные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">3</div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Офис"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_white_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td>';
+	'<td class="pr_size_gen pr_white_red_gen center"><div class="big_progr pr_past centered" title=""><div class="pr_in_gen">1</div></div></td><td class="pr_size_gen pr_red_gray_gen center"><div class="ltl_progr pr_current centered" title="Данные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">2</div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Паспорта"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Допданные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Поездка"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Проживание"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Расходы"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Ещё?"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="На кого?"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Данные"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">3</div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Офис"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_gray_gen center"><div class="ltl_progr pr_future centered" title="Подтверждение"><div class="pr_in_gen"></div></div></td><td class="pr_size_gen pr_gray_white_gen center"><div class="big_progr pr_future centered" title=""><div class="pr_in_gen">4</div></div></td></tr><tr><td class="stage_gen">Начало</td><td class="stage_gen"></td><td class="stage_gen">Заявители</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Оформление</td><td class="stage_gen"></td><td class="stage_gen"></td><td class="stage_gen">Готово!</td';
 
 my $first_page = 
-	'<tr><td class="left"><label data-id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label data-id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td class="left"><label data-id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">—</label></td></tr><tr><td class="left" rowspan=2><label data-id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info">&nbsp;<label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info">&nbsp;<label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td class="left"><label data-id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label data-id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option  value="13">Turismo</option></select></td></tr><tr><td class="left"><label data-id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">—</label></td></tr><tr><td class="left" rowspan=2 valign=top><label data-id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen"><table class="no_border"><tr><td class="no_mobile_transform exam_td_gen">пример:</td><td class="no_mobile_transform">mail@mail.ru</td></tr></table></span></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info">&nbsp;<label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info">&nbsp;<label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 
 my $first_page_selected = 
-	'<tr><td class="left"><label data-id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label data-id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td class="left"><label data-id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">—</label></td></tr><tr><td class="left" rowspan=2><label data-id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: mail@mail.ru</span></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info">&nbsp;<label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info">&nbsp;<label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
+	'<tr><td class="left"><label data-id="text">Визовый центр</label></td><td class="left"><select class="input_width select_gen" size = "1" name="center" title="" id="center" onchange="update_nearest_date_free_date();"></select></td></tr><tr><td class="left"><label data-id="text">Тип визы</label></td><td class="left"><select class="input_width select_gen" size = "1" name="vtype" title="" id="vtype"><option selected value="13">Turismo</option></select></td></tr><tr><td class="left"><label data-id="text">Ближайшее доступное время</label></td><td class="left"><label class="info" title="" id="free_date">—</label></td></tr><tr><td class="left" rowspan=2 valign=top><label data-id="text">Email</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="email" id="email" title="Введите существующий адрес почты. На него будет выслано подтверждение и запись в визовый центре<br><br><b>Обязательное поле</b><br>В поле допустимо вводить английские буквы, цифры, а также символы @, пробела, дефиса, точки, запятой, точки с запятой"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen"><table class="no_border"><tr><td class="no_mobile_transform exam_td_gen">пример:</td><td class="no_mobile_transform">mail@mail.ru</td></tr></table></span></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="pers_info" name="pers_info" id="pers_info">&nbsp;<label for="pers_info">я согласен на обработку персональных данных</label></td></tr><tr><td class="left"><label data-id="text"></label></td><td class="left"><input type="checkbox" value="mobil_info" name="mobil_info" id="mobil_info">&nbsp;<label for="mobil_info">я согласен на условия работы с мобильными телефона на территории визового центра</label></td></tr>';
 	
 my $second_page = 
-	'<tr><td class="left" rowspan=2><label data-id="text">Дата начала поездки</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: 01.01.2025</span></td></tr><tr><td class="left" rowspan=2><label data-id="text">Дата окончания поездки</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen">пример: 31.12.2025</span></td></tr>';
+	'<tr><td class="left" rowspan=2 valign=top><label data-id="text">Дата начала поездки</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="s_date" id="s_date" title="Введите предполагаемую дату начала поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen"><table class="no_border"><tr><td class="no_mobile_transform exam_td_gen">пример:</td><td class="no_mobile_transform">01.01.2025</td></tr></table></span></td></tr><tr><td class="left" rowspan=2 valign=top><label data-id="text">Дата окончания поездки</label></td><td class="left bottom" ><input class="input_width input_gen" type="text" value="" name="f_date" id="f_date" title="Введите предполагаемую дату окончания поездки<br><br><b>Обязательное поле</b><br>В поле вводится дата в формате ДД.ММ.ГГГГ"></td></tr><tr><td class="exam_td_gen left"><span class="exam_span_gen"><table class="no_border"><tr><td class="no_mobile_transform exam_td_gen">пример:</td><td class="no_mobile_transform">31.12.2025</td></tr></table></span></td></tr>';
 
 sub get_content_rules_hash
 # //////////////////////////////////////////////////
@@ -2786,7 +2778,7 @@ sub selftest
 	$vars->get_memd->set( 'autoform_' . $param[0] . '_vtype', 1, 60 );
 	$vars->get_memd->set( 'autoform_' . $param[0]. '_center', 5, 60 );
 	
-	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $param[0] =~ /^t[a-z0-9]{63}$/ ) and ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
+	push @$result, { 'text' => 'create_clear_form', 'status' => ( ( $param[0] =~ /^t[a-z0-9\-]{63}$/ ) and ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
 	push @$result, { 'text' => 'get_add', 'status' => ( ( $param[1] =~ /^\d+$/ ) ? 0 : 1 ) };
 	push @$result, get_tests( $self, $vars, @param );
 	
@@ -2814,7 +2806,7 @@ sub get_test_appointments
 	$self->get_add( $appid, $test_token );
 
 	my @param = $vars->db->sel1("
-		SELECT AutoAppDataID, AutoSchengenAppDataID, ID, AutoSpbDataID
+		SELECT AutoAppDataID, AutoSchengenAppDataID, ID, AutoSpbDataID, AutoSchengenExtID
 		FROM AutoToken WHERE Token = ?", $test_token);
 		
 	return ( $test_token, $appid, @param );
@@ -2905,49 +2897,53 @@ sub tester_func
 sub replace_var
 # //////////////////////////////////////////////////
 {
-	local $_ = shift;
-	
-	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id, $test_spb_id ) = @_;
+	my $data = shift;
+
+	my ( $self, $vars, $test_token, $test_appid, $test_appdataid, $test_appdata_schid, $token_id, $test_spb_id, $ext_data_id ) = @_;
 
 	my $table_id = {
 		'AutoToken' => $token_id,
 		'AutoAppointments' => $test_appid,
 		'AutoAppData' => $test_appdataid,
 		'AutoSchengenAppData' => $test_appdata_schid,
-		'AutoSpbAlterAppData' => $test_spb_id
+		'AutoSpbAlterAppData' => $test_spb_id,
+		'AutoSchengenExtData' => $ext_data_id,
 	};
 	
-	$_ = $table_id if /\[table_id\]/;
+	$data = $table_id if $data =~ /\[table_id\]/;
 	
-	$_ = $self->get_progressbar_hash_opt() if /\[progressbar_hash\]/;
+	$data = $self->get_progressbar_hash_opt() if $data =~/\[progressbar_hash\]/;
 	
-	s/\[token\]/$test_token/g;
-	s/\[token_id\]/$token_id/g;
-	s/\[app_id\]/$test_appid/g;
-	s/\[appdata_id\]/$test_appdataid/g;
-	s/\[schdata_id\]/$test_appdata_schid/g;
-	s/\[spb_id\]/$test_spb_id/g;
-	s/\[progress_bar\]/$progress_bar/g;
-	s/\[progress_bar_2\]/$progress_bar_2/g;
-	s/\[first_page\]/$first_page/g;
-	s/\[first_page_selected\]/$first_page_selected/g;
-	s/\[second_page\]/$second_page/g;
+	$data =~ s/\[token\]/$test_token/g;
+	$data =~ s/\[token_id\]/$token_id/g;
+	$data =~ s/\[app_id\]/$test_appid/g;
+	$data =~ s/\[appdata_id\]/$test_appdataid/g;
+	$data =~ s/\[schdata_id\]/$test_appdata_schid/g;
+	$data =~ s/\[spb_id\]/$test_spb_id/g;
+	$data =~ s/\[ext_id\]/$ext_data_id/g;
+	$data =~ s/\[progress_bar\]/$progress_bar/g;
+	$data =~ s/\[progress_bar_2\]/$progress_bar_2/g;
+	$data =~ s/\[first_page\]/$first_page/g;
+	$data =~ s/\[first_page_selected\]/$first_page_selected/g;
 	
-	if ( ref($_) eq 'HASH' ) {
-		for my $field ( keys %$_ ) {
-			$_->{ $field } = replace_var( $_->{ $field }, @_ );
+
+	if ( ref( $data ) eq 'HASH' ) {
+
+		for my $field ( keys %$data ) {
+
+			$data->{ $field } = replace_var( $data->{ $field }, @_ );
 		}
 	}
-	
-	if ( /\[page(\d+)\]/ ) {
-		$_ = $self->get_content_rules( $1, 'full' );
+
+	if ( $data =~ /\[page(\d+)\]/ ) {
+		$data = $self->get_content_rules( $1, 'full' );
 	}
-	
-	if ( /\[progress(\d+)\]/ ) {
-		$_ = $self->get_content_rules( $1, 'full' )->[0]->{ progress };
+
+	if ( $data =~ /\[progress(\d+)\]/ ) {
+		$data = $self->get_content_rules( $1, 'full' )->[0]->{ progress };
 	}
-	
-	return $_;
+
+	return $data;
 }
 
 sub show_result
@@ -3195,7 +3191,7 @@ sub test_write_db
 
 	my $vars = $self->{ 'VCS::Vars' };
 	
-	my $field = ( $token_or_appid =~ /^(t[a-z0-9]{63}|Token\d?)$/ ? "Token" : "ID" );
+	my $field = ( $token_or_appid =~ /^(t[a-z0-9\-]{63}|Token\d?)$/ ? "Token" : "ID" );
 	
 	my $value = $vars->db->sel1("
 		SELECT $db_name FROM $db_table WHERE $field = '$token_or_appid'"
