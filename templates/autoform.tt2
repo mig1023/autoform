@@ -321,6 +321,11 @@
 					create_datepicker("[% mask %]");
 				}
 			[% END %]
+			
+			[% FOREACH mask IN special.full_mask %]
+
+				$("#[% mask.0 %]").mask("[% mask.1 %]");
+			[% END %]
 
 			[% IF ( special.datepicker.0 || special.mask.0 ) %]
 
@@ -475,7 +480,7 @@
 						$(xml).find('node').each( function() {
 						
 							var apptimeValue = $(this).find('id').text();
-							var apptimeText = $(this).find('title').text();
+							var apptimeText = $(this).find('title').text().split("&mdash;")[0];
 							var defaultOpt = $(this).find('default').text();
 
 							$('#timeslot').append(

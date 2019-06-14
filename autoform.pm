@@ -1567,6 +1567,7 @@ sub get_specials_of_element
 	my $special = {
 		datepicker 	=> [],
 		mask		=> [],
+		full_mask	=> [],
 		nearest_date	=> [],
 		timeslots	=> [],
 		post_index	=> [],
@@ -1585,6 +1586,9 @@ sub get_specials_of_element
 		
 			push( @{ $special->{ $spec_type } }, $element->{ name } ) if $element->{ special } =~ /$spec_type/;
 		}
+		
+		push( @{ $special->{ full_mask } }, [ $element->{ name }, $element->{ mask } ] )
+			if exists $element->{ mask };
 
 		push( @{ $special->{ captcha } }, $self->get_captcha_id() )
 			if $element->{ type } eq 'captcha';
