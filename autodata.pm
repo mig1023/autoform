@@ -11,6 +11,7 @@ sub get_settings
 			max_file_upload_size => ( 10 * 1024 * 1024 ), # <--- 10 mb
 			maps_type => 'embedded', # <--- embedded / geo
 			technical_work => 0, 
+			anti_injection => 0,
 		},
 	
 		paths => {

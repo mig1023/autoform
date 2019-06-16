@@ -3767,9 +3767,9 @@ sub param
 	my ( $self, $param_name ) = @_;
 	
 	my $param = $self->{ vars }->getparam( $param_name );
-		
-	return $param; # <----------- tmp
-	
+
+	return $param unless $self->{ autoform }->{ general }->{ anti_injection };
+
 	return if !$param;
 	
 	my $check_list = {
