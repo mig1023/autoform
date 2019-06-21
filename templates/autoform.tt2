@@ -396,9 +396,12 @@
 			[% FOREACH near IN special.nearest_date %]
 
 				update_nearest_date_[% near %]();
-
+				
+				var whatisnearestdate = '&nbsp;<a class="dotted_link" href="javascript:alert(' + "'[% langreq('Это дата показывает ближайшую дату на которую можно записаться в текущий момент. Имейте в виду, что всё может изменится в любой момент') %]'" + ')">[% langreq('( что это за дата? )') %]</a>';
+						
 				function update_nearest_date_[% near %]()
 				{	
+					
 
 					if ($('#center').val() != 0) {
 						$("#[% near %]").html("<div id='tmp_near_img'><img src='[% static %]/images/autoform_wait.gif' /></div>");
@@ -408,7 +411,7 @@
 							'persons': 1, 
 							'urgent':0 }, 
 							function(data) {
-								$("#[% near %]").html(data);
+								$("#[% near %]").html(data + (data ? whatisnearestdate : ''));
 							}
 						);
 					}
