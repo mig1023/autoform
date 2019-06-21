@@ -1904,13 +1904,9 @@ sub get_html_for_element
 	
 		$value = '—' if !$value;
 		$content =~ s/\[text\]/$value/;
-		
-		$content = $self->add_css_class( $content, 'gray_txt') if $name =~ /free_date/;
 	}
 	
 	$content =~ s/\[text\]/$comment/ if $type eq 'biometric_data';
-	
-	$content = $self->add_css_class( $content, 'gray_txt') if ( ( $name =~ /text_free_date/ ) and ( $type eq 'label' ) );
 	
 	if ( $uniq_code ) {
 	

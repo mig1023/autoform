@@ -116,17 +116,17 @@
 							<tr><td class="left" colspan="2"><br>
 							[% IF error_page != 'error' %]
 								[% IF lang_in_link == 'it' %]								
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>
 									&nbsp;
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to english</b></a>
 								[% ELSIF lang_in_link == 'en' %]
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>
 									&nbsp;
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
-								[% ELSE %]
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
+								[% ELSE %]<b>
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
 									&nbsp;
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to english</b></a>
 								[% END %]
 							[% END %]
 							</td></tr>
@@ -396,10 +396,9 @@
 			[% FOREACH near IN special.nearest_date %]
 
 				update_nearest_date_[% near %]();
-						
+
 				function update_nearest_date_[% near %]()
 				{	
-					
 
 					if ($('#center').val() != 0) {
 						$("#[% near %]").html("<div id='tmp_near_img'><img src='[% static %]/images/autoform_wait.gif' /></div>");

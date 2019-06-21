@@ -70,7 +70,6 @@ sub get_content_rules_hash
 				type => 'info',
 				name => 'free_date',
 				label => 'Ближайшая доступная дата',
-				comment => 'Вы сможете выбрать удобную для Вас дату подачи документов во время оформления записи',
 				special => 'nearest_date',
 			},
 			{
