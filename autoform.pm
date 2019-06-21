@@ -1656,7 +1656,7 @@ sub get_html_line
 
 	$content .= $self->get_cell(
 			$self->get_html_for_element(
-				'label', 'text', $element->{ label }
+				'label', 'text_' . $element->{ name }, $element->{ label }
 			), $element->{ example }
 		) .
 		$self->get_cell(
@@ -1904,9 +1904,13 @@ sub get_html_for_element
 	
 		$value = '—' if !$value;
 		$content =~ s/\[text\]/$value/;
+		
+		$content = $self->add_css_class( $content, 'gray_txt') if $name =~ /free_date/;
 	}
 	
 	$content =~ s/\[text\]/$comment/ if $type eq 'biometric_data';
+	
+	$content = $self->add_css_class( $content, 'gray_txt') if ( ( $name =~ /text_free_date/ ) and ( $type eq 'label' ) );
 	
 	if ( $uniq_code ) {
 	
