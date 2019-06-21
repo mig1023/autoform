@@ -216,6 +216,8 @@
 	padding:15px;
 	font-size:9px;
 	text-align:justify;
+	overflow-y: auto;
+	height: 200px;
 }
 
 .no_border {
