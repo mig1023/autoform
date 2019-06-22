@@ -233,6 +233,7 @@ sub get_content_rules_hash
 				page_ord => 400,
 				progress => 3,
 				goto_link => 'back_to_appdata',
+				all_app_in_title => 1,
 				replacer => '[list_of_applicants]',
 			},
 		],
@@ -241,6 +242,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 500,
 				progress => 4,
+				all_app_in_title => 1,
 				param => 1,
 			},
 			{
@@ -607,6 +609,7 @@ sub get_content_rules_hash
 				page_ord => 600,
 				progress => 5,
 				param => 1,
+				all_app_in_title => 1,
 				ussr_or_rf_first => 1,
 			},
 			{
@@ -794,6 +797,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 700,
 				progress => 5,
+				all_app_in_title => 1,
 				copy_from_other_applicants => 'now',
 				
 				relation => {
@@ -823,6 +827,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 800,
 				progress => 5,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -849,6 +854,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 900,
 				progress => 5,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'AppData',
@@ -888,6 +894,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1000,
 				progress => 5,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -915,6 +922,7 @@ sub get_content_rules_hash
 				page_ord => 1100,
 				progress => 6,
 				param => 1,
+				all_app_in_title => 1,
 			},
 			{
 				type => 'text',
@@ -1113,6 +1121,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1200,
 				progress => 6,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1166,6 +1175,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1300,
 				progress => 6,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1219,6 +1229,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1400,
 				progress => 6,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1256,6 +1267,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1500,
 				progress => 7,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1285,6 +1297,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1600,
 				progress => 7,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'SchengenAppData',
@@ -1385,6 +1398,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1700,
 				progress => 7,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'SchengenAppData',
@@ -1445,6 +1459,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1800,
 				progress => 7,
+				all_app_in_title => 1,
 				param => 1,
 				relation => {
 					only_if_not => {
@@ -1592,6 +1607,7 @@ sub get_content_rules_hash
 				page_ord => 1900,
 				progress => 7,
 				param => 1,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'AppData',
@@ -1715,6 +1731,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2000,
 				progress => 8,
+				all_app_in_title => 1,
 			},
 			{
 				type => 'radiolist',
@@ -1737,6 +1754,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2100,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1763,6 +1781,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2200,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1795,6 +1814,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2300,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1826,6 +1846,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2400,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1852,6 +1873,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2500,
 				progress => 8,
+				all_app_in_title => 1,
 				param => 1,
 				relation => {
 					only_if_not => {
@@ -1928,10 +1950,11 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Вы успешно добавили заявителя. Что теперь?' => [	
+		'Вы успешно добавили заявителя' => [	
 			{
 				page_ord => 2600,
 				progress => 9,
+				all_app_in_title => 1,
 				replacer => '[app_finish]',
 			},
 		],

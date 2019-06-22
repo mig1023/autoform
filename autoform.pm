@@ -36,7 +36,9 @@ sub getContent
 # //////////////////////////////////////////////////
 {
 
-	( my $self, undef, local $_ ) = @_;
+	my ( $self ) = @_;
+	
+	$_ = @_[2];
 	
 	$self->{ vars } = $self->{ 'VCS::Vars' };
 	
@@ -246,6 +248,13 @@ sub autoform
 	$self->mod_last_error_date( $self->param( 'last_error_return' ) ) if $self->param( 'last_error_return' );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $current_table_id = $self->get_current_table_id(); 
+
+
+	my $max_app = $self->query( 'sel1', __LINE__, "
+		SELECT NCount FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
+	);
 
 	my $tvars = {
 		'langreq' 		=> sub { return $self->lang( @_ ) },
@@ -256,7 +265,7 @@ sub autoform
 		'step' 			=> $step,
 		'min_step' 		=> 1,
 		'max_step' 		=> $self->get_content_rules( 'length' ),
-		'max_applicants' 	=> $self->{ autoform }->{ general }->{ max_applicants },
+		'max_applicants' 	=> $max_app,
 		'addr' 			=> $self->{ autoform }->{ paths }->{ addr },
 		'static'		=> $self->{ autoform }->{ paths }->{ static },
 		'special' 		=> $special,
@@ -269,6 +278,11 @@ sub autoform
 		'js_errors'		=> map { $self->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 		'javascript_check' 	=> $javascript_check,
 	};
+	
+	my ( $all, $max ) = $self->get_current_apps();
+	
+	$tvars->{ app_all } = $all || 0;
+	$tvars->{ app_max } = $max || 0;
 	
 	$tvars->{ biometric_data } = ( $self->{ biometric_data } ? 'yes' : 0 );
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
@@ -290,6 +304,29 @@ sub autoform
 	}
 
 	$template->process( $template_file, $tvars );
+}
+
+sub get_current_apps
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $all = $self->query( 'sel1', __LINE__, "
+		SELECT COUNT(AutoAppData.ID) FROM AutoToken
+		JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $max = $self->query( 'sel1', __LINE__, "
+		SELECT NCount FROM AutoToken
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	$all = 0 unless $all;
+	$max = 0 unless $max;
+	
+	return ( $all, $max );
 }
 
 sub mod_last_error_date
@@ -849,7 +886,17 @@ sub get_autoform_content
 	if ( $page !~ /\[/ ) {
 	
 		$title = $self->lang( $page->[ 0 ]->{ page_name } );
+		
+		if ( $page->[ 0 ]->{ all_app_in_title } ) {
+
+			my ( $all, $max ) = $self->get_current_apps();
+			
+			$title .= " ( $all / $max )" if $max;
+		}
 	}
+	
+	$step = $self->get_step_by_content( 'back_to_appdata' )
+		if $step == $self->get_step_by_content( '[app_finish]');
 
 	my ( $content, $template ) = $self->get_html_page( $step, $appnum );
 
@@ -1014,7 +1061,7 @@ sub get_forward
 			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
 		);
 		
-		$self->set_current_app_finished( $current_table_id ) 
+		$self->set_current_app_finished( $current_table_id )
 			if $step == $self->get_step_by_content( '[app_finish]');
 
 		( $appid, $appnum ) = $self->set_appointment_finished()
@@ -1449,8 +1496,6 @@ sub get_html_page
 
 	return $self->get_list_of_app() if $page_content eq '[list_of_applicants]';
 	
-	return $self->get_finish() if $page_content eq '[app_finish]';
-	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id() );
 	
 	$self->correct_values( \$current_values, $appnum );
@@ -1547,12 +1592,6 @@ sub get_list_of_app
 	}
 
 	return ( $content, 'autoform_list.tt2' );
-}
-
-sub get_finish
-# //////////////////////////////////////////////////
-{
-	return ( undef, 'autoform_finish.tt2' );
 }
 
 sub get_specials_of_element

@@ -46,8 +46,8 @@
 [% IF content_text.0.ID == "X" %]
 	<tr><td class="left" colspan="5" id = "applist">
 	[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
-	[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Зарегистрировать заявителя"</b>') %]!<br><br>
-	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза') %].<br><br>
+	[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Следующий заявитель"</b>') %]!<br><br>
+	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза') %].<br>
 	</td></tr>
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
@@ -75,23 +75,17 @@
 	</td></tr>
 [% END %]
 
-[% IF i < max_applicants %]
+[% IF ( ( i < 10 ) && ( max_applicants == 0 ) ) %]
 <tr><td class="left" colspan="5">
 	<span id="spacer"></span>
-	<input class="action_button" type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');">
+	<input class="action_button" type="button" value="[% langreq('Зарегистрировать заявителя') %]" onclick="go_button('addapp');"><br><br>
 </td></tr>
 [% END %]
 
 [% IF content_text.0.ID == "X" %]
 	<tr><td class="left" colspan="5"><br><span style="font-size:smaller;">
-	[% langreq('На указанную Вами электронную почту отправлено письмо со ссылкой, перейдя по которой, Вы сможете:<br>1. продолжить запись в Визовый центр, которую Вы начали не более 14 дней назад;<br>2. после завершения записи Вы сможете получать информацию о своей записи, отменить её или перенесети на другое время, распечатать уже заполненную шенгенскую анкету;<br>3. после подачи Вы сможете отслеживать статус документов, их отправку в Консульство и готовность к получению.<br><br>Если вы не получили его в течение часа, проверьте папку нежелательные сообщения (спам)') %].<br></span>
+	[% langreq('На указанную Вами электронную почту отправлено письмо со ссылкой, перейдя по которой, Вы сможете:<br>1. продолжить запись в Визовый центр, которую Вы начали не более 14 дней назад;<br>2. после завершения записи Вы сможете получать информацию о своей записи, отменить её или перенесети на другое время, распечатать уже заполненную шенгенскую анкету;<br>3. после подачи Вы сможете отслеживать статус документов, их отправку в Консульство и готовность к получению.<br><br>Если вы не получили его в течение часа, проверьте папку нежелательные сообщения (спам)') %].<br><br></span>
 	</td></tr>
-[% END %]
-
-[% IF i < max_applicants %]
-<tr><td class="left" colspan="5">
-	<div style="height:10px; overflow:hidden;">&nbsp;</div>
-</td></tr>
 [% END %]
 
 <tr><td class="left" colspan="5">
@@ -100,24 +94,28 @@
 	</span>
 	&nbsp;
 	<span id="mobile_order_top">
+[% IF i < max_applicants %]
+	<input class="action_button" type="button" value="[% langreq('Следующий заявитель') %] &#9655;" onclick="go_button('addapp');">
+[% ELSE %]
 	<input class="action_button" type="button" value="[% langreq('Оформить запись') %] &#9655;" onclick="go_button('tofinish');">
+[% END %]
 	</span>
 	
 </td></tr>
 <tr><td class="left" colspan="2"><br>
-	[% IF lang_in_link == 'it' %]								
-		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
-		&nbsp;
-		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
-	[% ELSIF lang_in_link == 'en' %]
-		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru">перейти на русский язык</a>
-		&nbsp;
-		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
-	[% ELSE %]
-		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it">passare all&prime;italiano</a>
-		&nbsp;
-		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en">switch to english</a>
-	[% END %]
+[% IF lang_in_link == 'it' %]								
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>
+	&nbsp;
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to english</b></a>
+[% ELSIF lang_in_link == 'en' %]
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>
+	&nbsp;
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
+[% ELSE %]<b>
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
+	&nbsp;
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to english</b></a>
+[% END %]
 </td></tr>
 </table>
 

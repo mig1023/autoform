@@ -351,6 +351,8 @@
 						[% END %]
 					[% END %]
 				});
+				
+				$('#'+date_id).datepicker( "option", "disabled", true );
 			};
 			[% END %]
 
@@ -399,7 +401,7 @@
 				
 				var whatisnearestdate = '&nbsp;<a class="dotted_link" href="javascript:alert(' + "'[% langreq('Это дата показывает ближайшую дату на которую можно записаться в текущий момент. Имейте в виду, что всё может изменится в любой момент') %]'" + ')">[% langreq('( что это за дата? )') %]</a>';
 						
-				function update_nearest_date_[% near %]()
+				function update_nearest_date_[% near %](without_vtype)
 				{	
 					
 
@@ -408,7 +410,7 @@
 					
 						$.get("[% vcs_tools %]get_nearest.htm", {
 							'center': $('#center').val(), 
-							'persons': 1, 
+							'persons': $('#num_of_person').val(), 
 							'urgent':0 }, 
 							function(data) {
 								$("#[% near %]").html(data + (data ? whatisnearestdate : ''));
@@ -416,42 +418,45 @@
 						);
 					}
 					
-					var selected_el = $('#vtype').val();
-					var restore_el = 0;
+					if ( !without_vtype ) {
 					
-					$('#vtype').hide();
-					
-					if ( ! ( $('#tmp_vtype_img').length > 0 ) ) {
-						$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% static %]/images/autoform_wait.gif' />");
-					}
+						var selected_el = $('#vtype').val();
+						var restore_el = 0;
+						
+						$('#vtype').hide();
+						
+						if ( ! ( $('#tmp_vtype_img').length > 0 ) ) {
+							$('#vtype').parent().prepend("<div id='tmp_vtype_img'><img src='[% static %]/images/autoform_wait.gif' />");
+						}
 
-					if ( mobilScreen ) {
-						$("#tmp_vtype_img, #tmp_near_img").css('height', '38px');
-					}
+						if ( mobilScreen ) {
+							$("#tmp_vtype_img, #tmp_near_img").css('height', '38px');
+						}
 
-					$('#vtype').find('option').remove();
-					
-					$.get("[% vcs_tools %]get_vtypes.htm",
-						{ 'center': $('#center').val() }, 
-						function(xml) {
-							$(xml).find('node').each( function() {
-								$('#vtype').append(
-									'<option value="' + $(this).find('id').text() + '"'+
-									(parseInt($(this).find('default').text()) ? ' selected'  : '')+
-									'>'+$(this).find('title').text() + '</option>'
-								);
-							
-								if ($(this).find('id').text() == selected_el) { restore_el = 1; };
-							});
-							
-							if (restore_el) {
-								$('#vtype').val(selected_el);
-							}
-							$('#tmp_vtype_img').remove();
-							$('#vtype').show();
-							
-						}, 
-					'xml');
+						$('#vtype').find('option').remove();
+						
+						$.get("[% vcs_tools %]get_vtypes.htm",
+							{ 'center': $('#center').val() }, 
+							function(xml) {
+								$(xml).find('node').each( function() {
+									$('#vtype').append(
+										'<option value="' + $(this).find('id').text() + '"'+
+										(parseInt($(this).find('default').text()) ? ' selected'  : '')+
+										'>'+$(this).find('title').text() + '</option>'
+									);
+								
+									if ($(this).find('id').text() == selected_el) { restore_el = 1; };
+								});
+								
+								if (restore_el) {
+									$('#vtype').val(selected_el);
+								}
+								$('#tmp_vtype_img').remove();
+								$('#vtype').show();
+								
+							}, 
+						'xml');
+					}
 				}
 			[% END %]
 

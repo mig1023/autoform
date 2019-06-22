@@ -64,6 +64,25 @@ sub get_content_rules_hash
 				special => 'cach_this_value',
 			},
 			{
+				type => 'input',
+				name => 'num_of_person',
+				label => 'Количество заявителей',
+				comment => 'Укажите количество заявителей',
+				example => '1',
+				check => 'zN',
+				uniq_code => 'onkeyup="update_nearest_date_free_date(1);"',
+				check_logic => [
+					{
+						condition => 'less_than',
+						offset => '10',
+					},
+				],
+				db => {
+					table => 'Appointments',
+					name => 'NCount',
+				},
+			},
+			{
 				type => 'info',
 				name => 'free_date',
 				label => 'Ближайшая доступная дата',
@@ -197,6 +216,7 @@ sub get_content_rules_hash
 				page_ord => 300,
 				progress => 3,
 				goto_link => 'back_to_appdata',
+				all_app_in_title => 1,
 				replacer => '[list_of_applicants]',
 			},
 		],
@@ -205,6 +225,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 400,
 				progress => 4,
+				all_app_in_title => 1,
 				param => 1,
 			},
 			{
@@ -325,6 +346,7 @@ sub get_content_rules_hash
 		'Данные загранпаспорта' => [
 			{
 				page_ord => 500,
+				all_app_in_title => 1,
 				progress => 5,
 			},
 			{
@@ -397,10 +419,11 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Вы успешно добавили заявителя. Что теперь?' => [	
+		'Вы успешно добавили заявителя' => [	
 			{
 				page_ord => 600,
 				progress => 6,
+				all_app_in_title => 1,
 				replacer => '[app_finish]',
 			},
 		],

@@ -67,6 +67,25 @@ sub get_content_rules_hash
 				special => 'cach_this_value',
 			},
 			{
+				type => 'input',
+				name => 'num_of_person',
+				label => 'Количество заявителей',
+				comment => 'Укажите количество заявителей',
+				example => '1',
+				check => 'zN',
+				uniq_code => 'onkeyup="update_nearest_date_free_date(1);"',
+				check_logic => [
+					{
+						condition => 'less_than',
+						offset => '10',
+					},
+				],
+				db => {
+					table => 'Appointments',
+					name => 'NCount',
+				},
+			},
+			{
 				type => 'info',
 				name => 'free_date',
 				label => 'Ближайшая доступная дата',
@@ -249,6 +268,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 300,
 				progress => 3,
+				all_app_in_title => 1,
 				goto_link => 'back_to_appdata',
 				replacer => '[list_of_applicants]',
 			},
@@ -258,6 +278,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 400,
 				progress => 4,
+				all_app_in_title => 1,
 				param => 1,
 			},
 			{
@@ -656,6 +677,7 @@ sub get_content_rules_hash
 				page_ord => 500,
 				progress => 5,
 				param => 1,
+				all_app_in_title => 1,
 				ussr_or_rf_first => 1,
 			},
 			{
@@ -1020,6 +1042,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 550,
 				progress => 5,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'SchengenExtData',
@@ -1047,6 +1070,7 @@ sub get_content_rules_hash
 				page_ord => 600,
 				progress => 5,
 				param => 1,
+				all_app_in_title => 1,
 				copy_from_other_applicants => 'now',
 				
 				relation => {
@@ -1143,6 +1167,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 700,
 				progress => 5,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1169,6 +1194,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 800,
 				progress => 5,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'AppData',
@@ -1208,6 +1234,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 900,
 				progress => 5,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1234,6 +1261,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1000,
 				progress => 6,
+				all_app_in_title => 1,
 				param => 1,
 				
 			},
@@ -1434,6 +1462,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1100,
 				progress => 6,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1487,6 +1516,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1200,
 				progress => 6,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1540,6 +1570,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1300,
 				progress => 6,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1577,6 +1608,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1400,
 				progress => 7,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -1606,6 +1638,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1500,
 				progress => 7,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'SchengenAppData',
@@ -1698,6 +1731,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1600,
 				progress => 7,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'SchengenAppData',
@@ -1773,6 +1807,7 @@ sub get_content_rules_hash
 				page_ord => 1700,
 				progress => 7,
 				param => 1,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'SchengenAppData',
@@ -1906,6 +1941,7 @@ sub get_content_rules_hash
 				page_ord => 1800,
 				progress => 7,
 				param => 1,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'AppData',
@@ -2068,6 +2104,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1900,
 				progress => 8,
+				all_app_in_title => 1,
 			},
 			{
 				type => 'radiolist',
@@ -2090,6 +2127,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2000,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -2116,6 +2154,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2100,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -2148,6 +2187,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2200,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -2179,6 +2219,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2300,
 				progress => 8,
+				all_app_in_title => 1,
 				relation => {
 					only_if => {
 						table => 'AppData',
@@ -2206,6 +2247,7 @@ sub get_content_rules_hash
 				page_ord => 2400,
 				progress => 8,
 				param => 1,
+				all_app_in_title => 1,
 				relation => {
 					only_if_not => {
 						table => 'AppData',
@@ -2281,10 +2323,11 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Вы успешно добавили заявителя. Что теперь?' => [	
+		'Вы успешно добавили заявителя' => [	
 			{
 				page_ord => 2500,
 				progress => 9,
+				all_app_in_title => 1,
 				replacer => '[app_finish]',
 			},
 		],
