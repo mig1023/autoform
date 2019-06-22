@@ -137,7 +137,7 @@ sub get_html_elements
 		checkbox 	=> '<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
 		
 		disclaimer	=> '<div id="disc" class="disclaimer"><br>[comment]<br><br>'.
-				'<a class = "dotted_link_big" href = "javascript:openDisclaimer()">[close]</a></div>' .
+				'<a class = "dotted_link_big" href = "javascript:openDisclaimer()">[close]</a><br><br></div>' .
 				'<input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>' .
 				'<script>function openDisclaimer() { if ( $("#disc").css("display") == "none" )' .
 				'{ $("#disc").show(); } else { $("#disc").hide(); } }</script>',

@@ -1692,12 +1692,14 @@ sub get_html_line
 			$current_value->{ $sub_value } = $values->{ $sub_value };
 		}
 	}
+	
+	my $label_text = $self->get_cell(
+		$self->get_html_for_element( 'label', 'text_' . $element->{ name }, $element->{ label } ), $element->{ example }
+	);
+	
+	$label_text = '' if $element->{ full_line };
 
-	$content .= $self->get_cell(
-			$self->get_html_for_element(
-				'label', 'text_' . $element->{ name }, $element->{ label }
-			), $element->{ example }
-		) .
+	$content .= $label_text .
 		$self->get_cell(
 			$self->get_html_for_element(
 				$element->{ type }, $element->{ name }, $current_value, $element->{ param }, 
@@ -1705,7 +1707,7 @@ sub get_html_line
 				$self->check_comments_alter_version( $element->{ comment } ),
 				$element->{ check },
 			) . $label_for_need, undef, ( $element->{ type } eq 'input' ? 'bottom' : undef ),
-			'width=280px'
+			'width=280px' . ( $element->{ full_line } ? ' colspan=2' : '' )
 		);
 	
 	$content .= $self->get_html_for_element( 'end_line' );

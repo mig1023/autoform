@@ -115,11 +115,15 @@ sub get_content_rules_hash
 				special => 'no_copypast',
 			},
 			{
+				type => 'free_line',
+			},
+			{
 				type => 'disclaimer',
 				name => 'pers_info',
 				label_for => 'я согласен с <a class = "dotted_link_big" href = "javascript:openDisclaimer()">условиями</a> обработки персональных данных визовым центром',
 				comment => 'disclaimer_text',
 				check => 'true',
+				full_line => 1,
 				db => {
 					table => 'Appointments',
 					name => 'PersonalDataPermission',
@@ -131,6 +135,7 @@ sub get_content_rules_hash
 				name => 'mobil_info',
 				label_for => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
 				check => 'true',
+				full_line => 1,
 				db => {
 					table => 'Appointments',
 					name => 'MobilPermission',
