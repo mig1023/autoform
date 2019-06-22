@@ -1665,7 +1665,8 @@ sub get_html_line
 				$element->{ uniq_code }, $element->{ first_elements },
 				$self->check_comments_alter_version( $element->{ comment } ),
 				$element->{ check },
-			) . $label_for_need, undef, ( $element->{ type } eq 'input' ? 'bottom' : undef )
+			) . $label_for_need, undef, ( $element->{ type } eq 'input' ? 'bottom' : undef ),
+			'width=280px'
 		);
 	
 	$content .= $self->get_html_for_element( 'end_line' );
@@ -1679,10 +1680,11 @@ sub get_html_line
 sub get_cell
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element, $rowspan, $bottom ) = @_;
+	my ( $self, $element, $rowspan, $bottom, $width_fix ) = @_;
 	
 	my $start_cell = $self->get_html_for_element(
-		'start_cell', undef, undef, undef, ( $rowspan eq '' ? $bottom : 'rowspan=2 valign=top' )
+		'start_cell', undef, undef, undef,
+		( $rowspan eq '' ? $bottom : 'rowspan=2 valign=top' ) . ( $width_fix ? " $width_fix" : '' )
 	);
 	
 	return $start_cell . $element . $self->get_html_for_element( 'end_cell' );
