@@ -1020,15 +1020,6 @@ sub get_forward
 		$current_table_id = $self->get_current_table_id();
 	}
 	
-	# ///////////////////// tmp
-	
-		if ( ( $step >= 6 ) && ( $step <= 18 ) && $self->tmp_schengen_ext_fail( $current_table_id ) ) {
-		
-			$current_table_id = $self->get_current_table_id();
-		}
-		
-	# /////////////////////
-	
 	$self->save_data_from_form( $step, $current_table_id );
 	
 	$self->mod_last_change_date();
@@ -2388,91 +2379,12 @@ sub get_current_table_id
 	return $tables_id;
 }
 
-sub tmp_schengen_ext_create
-# //////////////////////////////////////////////////
-{
-	my ( $self, $table_id, $final_check, $late_transfer ) = @_;
-
-	$self->query( 'query', __LINE__, "
-		INSERT INTO AutoSchengenExtData (AppDataID, LateTransfer) VALUES (?, ?)", {},
-		$table_id->{ AutoAppData }, $late_transfer
-	);
-		
-	my $ext_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
-
-	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET AutoSchengenExtID = ? WHERE ID = ?", {}, 
-		$ext_id, $table_id->{ AutoToken }
-	);
-}
-
-sub tmp_schengen_ext_fail
-# //////////////////////////////////////////////////
-{
-	my ( $self, $table_id, $final_check ) = @_;
-	
-	if ( $final_check ) {
-
-		my $late_transfer = $self->query( 'selallkeys', __LINE__, "
-			SELECT AutoAppData.ID as AID, AutoSchengenExtData.ID as EID, LateTransfer
-			FROM AutoAppData
-			LEFT JOIN AutoSchengenExtData ON AutoAppData.ID = AutoSchengenExtData.AppDataID
-			WHERE AutoAppData.AppID = ?",
-			$table_id->{ AutoAppointments }
-		);
-		
-		my $need_to_return = 0;
-
-		for ( @$late_transfer ) {
-		
-			if ( !$_->{ EID } ) {
-				
-				$self->query( 'query', __LINE__, "
-					UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $_->{ AID }
-				);
-				
-				$self->tmp_schengen_ext_create( $table_id, 0 );
-				
-				$need_to_return = 1;
-			}
-			elsif ( $_->{ LateTransfer } ) {
-			
-				$self->query( 'query', __LINE__, "
-					UPDATE AutoSchengenExtData SET LateTransfer = 0 WHERE ID = ?", {}, $_->{ EID }
-				);
-			
-				$self->query( 'query', __LINE__, "
-					UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $_->{ AID }
-				);
-				
-				$need_to_return = 1;
-			}
-		}
-		
-		return 1 if $need_to_return;
-	}
-	elsif ( !$table_id->{ AutoSchengenExtData } ) {
-
-		$self->tmp_schengen_ext_create( $table_id, 1 );
-			
-		return 1;
-	}
-	
-	return 0;
-}
-
 sub check_data_from_db
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
 	
 	my $table_id = $self->get_current_table_id();
-	
-	# ///////////// tmp
-
-		return 25 if $self->tmp_schengen_ext_fail( $table_id, 'final_check' );
-
-	# /////////////
 	
 	my $rules = $self->get_content_db_rules( 'check' );
 	
