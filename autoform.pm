@@ -1691,7 +1691,7 @@ sub get_html_line
 		$self->get_html_for_element( 'label', 'text_' . $element->{ name }, $element->{ label } ), $element->{ example }
 	);
 	
-	$label_text = '' if $element->{ full_line };
+	$label_text = '' if $element->{ full_line } or $element->{ type } eq 'captcha';
 
 	$content .= $label_text .
 		$self->get_cell(
