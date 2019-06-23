@@ -883,6 +883,12 @@ sub get_autoform_content
 		( $step, $page ) = $self->check_relation( $step, $page, $back );
 	}
 	
+	if ( $step == $self->get_step_by_content( '[app_finish]') ) {
+	
+		$step = $self->get_step_by_content( 'back_to_appdata' );
+		$page = $self->get_content_rules( $step, 'full' );
+	}
+		
 	if ( $page !~ /\[/ ) {
 	
 		$title = $self->lang( $page->[ 0 ]->{ page_name } );
@@ -894,9 +900,6 @@ sub get_autoform_content
 			$title .= " ( $all / $max )" if $max;
 		}
 	}
-	
-	$step = $self->get_step_by_content( 'back_to_appdata' )
-		if $step == $self->get_step_by_content( '[app_finish]');
 
 	my ( $content, $template ) = $self->get_html_page( $step, $appnum );
 

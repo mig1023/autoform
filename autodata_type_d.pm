@@ -10,7 +10,6 @@ sub get_progressline
 		{ big => 1, name => 'Заявители', },
 		{ big => 0, name => 'Данные паспорта', },
 		{ big => 0, name => 'Данные загранпаспорта', },
-		{ big => 0, name => 'Добавление нового заявителя', },
 		{ big => 1, name => 'Оформление', },
 		{ big => 0, name => 'Данные для договора', },
 		{ big => 0, name => 'Выбор даты записи', },
@@ -436,7 +435,7 @@ sub get_content_rules_hash
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
 				page_ord => 700,
-				progress => 7,
+				progress => 6,
 				persons_in_page => 1,
 			},
 			{
@@ -457,7 +456,7 @@ sub get_content_rules_hash
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
 				page_ord => 800,
-				progress => 8,
+				progress => 7,
 				relation => {
 					only_if_not => {
 						table => 'Appointments',
@@ -576,7 +575,7 @@ sub get_content_rules_hash
 		'Укажите данные доверенного лица' => [
 			{
 				page_ord => 900,
-				progress => 8,
+				progress => 7,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -692,7 +691,7 @@ sub get_content_rules_hash
 		'Оформление записи' => [
 			{
 				page_ord => 1000,
-				progress => 9,
+				progress => 8,
 				persons_in_page => 1,
 			},
 			{
@@ -855,7 +854,7 @@ sub get_content_rules_hash
 		'Предпочтительный офис получения готовых документов' => [
 			{
 				page_ord => 1100,
-				progress => 10,
+				progress => 9,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -884,7 +883,7 @@ sub get_content_rules_hash
 		'Подтвердить запись' => [
 			{
 				page_ord => 1200,
-				progress => 11,
+				progress => 10,
 			},
 			{
 				type => 'captcha',
@@ -894,7 +893,7 @@ sub get_content_rules_hash
 		'Запись успешно создана!' => [
 			{
 				page_ord => 1300,
-				progress => 12,
+				progress => 11,
 			},
 			{
 				type => 'text',

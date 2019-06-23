@@ -13,11 +13,9 @@ sub get_progressline
 		{ big => 0, name => 'Данные о поездке', },
 		{ big => 0, name => 'Проживание', },
 		{ big => 0, name => 'Расходы', },
-		{ big => 0, name => 'Добавление нового заявителя', },
 		{ big => 1, name => 'Оформление', },
 		{ big => 0, name => 'Данные для договора', },
 		{ big => 0, name => 'Выбор даты записи', },
-		{ big => 0, name => 'Офис выдачи', },
 		{ big => 0, name => 'Подтверждение', },
 		{ big => 1, name => 'Готово!', },
 	];
@@ -1967,7 +1965,7 @@ sub get_content_rules_hash
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
 				page_ord => 2700,
-				progress => 10,
+				progress => 9,
 				persons_in_page => 1,
 			},
 			{
@@ -1988,7 +1986,7 @@ sub get_content_rules_hash
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
 				page_ord => 2800,
-				progress => 11,
+				progress => 10,
 				relation => {
 					only_if_not => {
 						table => 'Appointments',
@@ -2107,7 +2105,7 @@ sub get_content_rules_hash
 		'Укажите данные доверенного лица' => [
 			{
 				page_ord => 2900,
-				progress => 11,
+				progress => 10,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -2223,7 +2221,7 @@ sub get_content_rules_hash
 		'Оформление записи' => [
 			{
 				page_ord => 3000,
-				progress => 12,
+				progress => 11,
 				persons_in_page => 1,
 				goto_link => 'back_to_appdate',
 			},
@@ -2387,7 +2385,7 @@ sub get_content_rules_hash
 		'Подтвердить запись' => [
 			{
 				page_ord => 3100,
-				progress => 14,
+				progress => 12,
 			},
 			{
 				type => 'captcha',
@@ -2397,7 +2395,7 @@ sub get_content_rules_hash
 		'Запись успешно создана!' => [
 			{
 				page_ord => 3200,
-				progress => 15,
+				progress => 13,
 			},
 			{
 				type => 'text',
