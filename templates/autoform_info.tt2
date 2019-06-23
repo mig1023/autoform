@@ -212,6 +212,28 @@
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 
+[% ELSIF title == 4 %]
+
+	<tr><td colspan="2">
+	<br><br>
+	<h2>[% langreq('Запись успешно перенесена') %]</h2><br></td></tr>
+
+	<tr><td>
+	<table width="100%">
+
+	<tr>
+	<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
+	</tr>
+
+	<tr><td colspan="2"><br>
+	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>	
+	
 [% END %]
 
 </table>
@@ -249,7 +271,7 @@
 				$(xml).find('node').each( function() {
 				
 					var apptimeValue = $(this).find('id').text();
-					var apptimeText = $(this).find('title').text();
+					var apptimeText = $(this).find('title').text().split("&mdash;")[0];
 					
 					$('#apptime').append(
 						'<option value="' + apptimeValue + '" ' +

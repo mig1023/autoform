@@ -29,7 +29,8 @@ sub autoinfopage
 	
 	$self->{ vars }->{ session }->{ login } = 'website';
 	
-	$self->{ vars }->{ session }->{ langid } = 'en' if $self->{ vars }->getparam( 'lang' ) =~ /^en$/i ;
+	$self->{ vars }->{ session }->{ langid } = $self->{ vars }->getparam( 'lang' )
+		if $self->{ vars }->getparam( 'lang' ) =~ /^(en|it)$/i ;
 		
 	$_ = $self->{ vars }->getparam( 'action' );
 	
@@ -42,6 +43,8 @@ sub autoinfopage
 	return autoinfopage_entry( @_ ) if $entry;
 
 	return reschedule( @_ ) if /^reschedule$/i;
+	
+	return rescheduled( @_ ) if /^rescheduled$/i;
 	
 	return cancel( @_ ) if /^cancel$/i;
 	
@@ -123,6 +126,8 @@ sub get_infopage
 	my $center_msk = ( $app_info->{ new_app_branch } == 1 ? 1 : 0 );
 
 	$self->{ af }->correct_values( \$app_info );
+	
+	$app_info->{ new_app_timeslot } =~ s/\s.+//g;
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
@@ -207,7 +212,7 @@ sub reschedule
 
 			$id_or_error = $self->set_new_appdate( $new );
 			
-			return $self->{ af }->redirect( 'current' ) if $id_or_error =~ /^\d+$/;
+			return $self->{ af }->redirect( $self->{ token }.'&action=rescheduled' ) if $id_or_error =~ /^\d+$/;
 		}
 
 	}
@@ -222,6 +227,41 @@ sub reschedule
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'error'		=> $id_or_error,
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub rescheduled
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT AppDate as new_app_date,	TimeslotID as new_app_timeslot
+		FROM AutoToken
+		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+		WHERE Token = ?", $self->{ token }
+	)->[0];
+	
+	my @new_date = split( /\-/, $app_info->{ new_app_date } );
+	
+	my $months = VCS::Site::autodata::get_months();
+	
+	$app_info->{ new_app_date } = [ $new_date[2], $months->{ $new_date[1] }, $new_date[0] ];
+	
+	$self->{ af }->correct_values( \$app_info );
+	
+	$app_info->{ new_app_timeslot } =~ s/\s.+//g;
+
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'app_info'	=> $app_info,
+		'title' 	=> 4,
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
