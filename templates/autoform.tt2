@@ -413,7 +413,7 @@
 							'persons': $('#num_of_person').val(), 
 							'urgent':0 }, 
 							function(data) {
-								$("#[% near %]").html(data + (data ? whatisnearestdate : ''));
+								$("#[% near %]").html(data + (/^\d{2}\.\d{2}\.\d{4}$/.test(data) ? whatisnearestdate : ''));
 							}
 						);
 					}
