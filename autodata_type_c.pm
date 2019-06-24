@@ -85,10 +85,16 @@ sub get_content_rules_hash
 				},
 			},
 			{
+				type => 'free_line',
+			},
+			{
 				type => 'info',
 				name => 'free_date',
 				label => 'Ближайшая доступная дата',
 				special => 'nearest_date',
+			},
+			{
+				type => 'free_line',
 			},
 			{
 				type => 'input',

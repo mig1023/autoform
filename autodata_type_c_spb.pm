@@ -65,11 +65,36 @@ sub get_content_rules_hash
 				special => 'cach_this_value',
 			},
 			{
+				type => 'input',
+				name => 'num_of_person',
+				label => 'Количество заявителей',
+				comment => 'Укажите количество заявителей',
+				example => '1',
+				check => 'zN',
+				uniq_code => 'onkeyup="update_nearest_date_free_date(1);"',
+				check_logic => [
+					{
+						condition => 'less_than',
+						offset => '10',
+					},
+				],
+				db => {
+					table => 'Appointments',
+					name => 'NCount',
+				},
+			},
+			{
+				type => 'free_line',
+			},
+			{
 				type => 'info',
 				name => 'free_date',
 				label => 'Ближайшая доступная дата',
 				comment => 'Вы сможете выбрать удобную для Вас дату подачи документов во время оформления записи',
 				special => 'nearest_date',
+			},
+			{
+				type => 'free_line',
 			},
 			{
 				type => 'input',
