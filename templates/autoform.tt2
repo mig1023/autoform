@@ -399,7 +399,7 @@
 
 				update_nearest_date_[% near %]();
 				
-				var whatisnearestdate = '&nbsp;<a class="dotted_link" href="javascript:alert(' + "'[% langreq('Это дата показывает ближайшую дату на которую можно записаться в текущий момент. Имейте в виду, что всё может изменится в любой момент') %]'" + ')">[% langreq('( что это за дата? )') %]</a>';
+				var whatisnearestdate = '&nbsp;<a class="dotted_link" href="javascript:alert(' + "'[% langreq('Ближайшая дата, на которую возможна запись в текущий момент. Обратите внимание, что окончательные дату и время вы выбираете после регистрации всех заявителей. Эта дата может отличаться от указанной здесь') %]'" + ')">[% langreq('( что это за дата? )') %]</a>';
 						
 				function update_nearest_date_[% near %](without_vtype)
 				{	
