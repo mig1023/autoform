@@ -887,6 +887,8 @@ sub get_autoform_content
 	
 		$step = $self->get_step_by_content( 'back_to_appdata' );
 		$page = $self->get_content_rules( $step, 'full' );
+		
+		$self->set_step( $step );
 	}
 		
 	if ( $page !~ /\[/ ) {
@@ -968,13 +970,8 @@ sub check_relation
 	
 	} while ( $skip_this_page );
 
-	if ( $at_least_one_page_skipped ) {
+	$self->set_step( $step ) if $at_least_one_page_skipped;
 	
-		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
-		);
-	}
-
 	return ( $step, $page );
 }
 
@@ -1049,11 +1046,10 @@ sub get_forward
 		);
 		
 	} else {
-		$step++;
-			
-		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
-		);
+
+		$step += 1;
+
+		$self->set_step( $step );
 		
 		$self->set_current_app_finished( $current_table_id )
 			if $step == $self->get_step_by_content( '[app_finish]');
@@ -1163,6 +1159,16 @@ sub get_step_by_content
 	$step++ if $next;
 
 	return $step;
+}
+
+sub set_step
+# //////////////////////////////////////////////////
+{
+	my ( $self, $step ) = @_;
+
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
+	);
 }
 
 sub set_step_by_content
@@ -1464,16 +1470,14 @@ sub get_back
 	$self->mod_last_change_date();
 	
 	$step--;
-	
+		
 	if ( $step == $self->get_step_by_content( '[app_finish]' ) ) {
 	
 		$step = $self->set_step_by_content( '[list_of_applicants]' );
 	}
 	
-	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
-	);
-		
+	$self->set_step( $step );
+	
 	return $step;
 }
 
