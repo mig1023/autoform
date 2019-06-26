@@ -7,7 +7,7 @@
 <title>VMS - [% langreq('Информация о записи') %]</title>
 
 [% IF (title == 1) && (map_type == 'geo') %]
-	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=KEY" type="text/javascript"></script>
+	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=[% yandex_key %]" type="text/javascript"></script>
 [% END %]
 
 [% IF title == 2 %]

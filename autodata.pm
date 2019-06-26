@@ -29,6 +29,10 @@ sub get_settings
 			mutex_exptime => 30,
 		},
 		
+		yandex_map => {
+			api_key => '',
+		},
+		
 		captcha => {
 			public_key => '',
 			private_key => '',

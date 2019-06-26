@@ -134,6 +134,7 @@ sub get_infopage
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 1,
+		'yandex_key'	=> $self->{ autoform }->{ yandex_map }->{ api_key },
 		'app_info'	=> $app_info,
 		'app_list'	=> $self->get_app_list(),
 		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
