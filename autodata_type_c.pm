@@ -931,13 +931,6 @@ sub get_content_rules_hash
 				check => 'WN\@\-\_\.',
 				check_logic => [
 					{
-						condition => 'free_only_if_eq',
-						table => 'SchengenExtData',
-						name => 'Occupation',
-						values => 'Freelancer; Pensionata; Disoccupato; Casalinga; Imprenditore individuale; Studente, apprendista, scolaro',
-						error => 'Без профессии / Фрилансер / Домохозяйка / ИП',
-					},
-					{
 						condition => 'this_is_email',
 					},
 				],
