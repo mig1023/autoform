@@ -326,6 +326,19 @@
 
 				$("#[% mask.0 %]").mask("[% mask.1 %]");
 			[% END %]
+			
+			[% FOREACH phone IN special.phone_correct %]
+
+				$("#[% phone %]").bind("paste", function(e){
+						e.preventDefault();
+						var text = (e.originalEvent || e).clipboardData.getData('text/plain').replace(/\D/g, '');
+						if ((text.length > 10) && ((text.charAt(0) == '8') || (text.charAt(0) == '7'))) {
+							text = text.substr(1);
+						}
+						$("#[% phone %]").val(text);
+					}
+				);
+			[% END %]
 
 			[% IF ( special.datepicker.0 || special.mask.0 ) %]
 

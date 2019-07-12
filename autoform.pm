@@ -1613,6 +1613,7 @@ sub get_specials_of_element
 		include_out	=> [],
 		no_copypast	=> [],
 		min_date 	=> [],
+		phone_correct	=> [],
 	};
 
 	my $js_rules = [];
