@@ -115,18 +115,16 @@
 							
 							<tr><td class="left" colspan="2"><br>
 							[% IF error_page != 'error' %]
-								[% IF lang_in_link == 'it' %]								
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>
-									&nbsp;
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to english</b></a>
-								[% ELSIF lang_in_link == 'en' %]
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>
-									&nbsp;
+								[% IF lang_in_link != 'ru' %]
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>&nbsp;
+								[% END %]
+								
+								[% IF lang_in_link != 'en' %]
+									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to English</b></a>&nbsp;
+								[% END %]
+								
+								[% IF lang_in_link != 'it' %]
 									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
-								[% ELSE %]<b>
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
-									&nbsp;
-									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to english</b></a>
 								[% END %]
 							[% END %]
 							</td></tr>
