@@ -106,7 +106,10 @@
 		<tr>
 		<td class="info_list"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
 		<td class="m_right"><span class="mobil_hide">[% person.BirthDate %]&nbsp;</span>
-		<input class="small_button" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');"></td>
+		[% IF app_info.category == 'C' %]
+			<input class="small_button" type="button" value="[% langreq('Распечатать анкету') %]" onclick="go_button('print_a', '[% person.ID %]');">
+		[% END %]
+		</td>
 		</tr>
 	[% END %]
 	</table>

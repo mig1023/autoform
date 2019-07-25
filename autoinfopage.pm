@@ -108,7 +108,7 @@ sub get_infopage
 
 	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
-		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname
+		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname, category
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
