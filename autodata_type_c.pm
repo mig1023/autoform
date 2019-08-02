@@ -2784,6 +2784,47 @@ sub get_content_rules_hash
 			},
 		],
 		
+		'Оплата консульского сбора' => [
+			{
+				page_ord => 3050,
+				progress => 13,
+				relation => {
+					only_if => {
+						table => 'Appointments',
+						name => 'VType',
+						value => '1, 2, 5, 7, 13, 14, 15',
+					},
+					only_if => {
+						table => 'Appointments',
+						name => 'CenterID',
+						value => '41, 44',
+					},
+				},
+			},
+			{
+				type => 'text',
+				name => 'concil1_text',
+				label => 'Для Вашего удобства Вы можете оплатить консульский сбор онлайн на сайте банкза, следуя инструкциям Банка. Документ с кодом проверки платежа, отправленный Банком на указанный адрес электронной почты, необходимо распечатать и предоставить при подаче документов.', 
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'concil2_text',
+				label => '<a target = "_blank" class = "dotted_link_big" href="127.0.0.1/">Для продолжения оплаты нажмите здесь</a>', 
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'concil3_text',
+				label => 'Пожалуйста, ознакомьтесь со <a target = "_blank" class = "dotted_link_middle" href="127.0.0.1/">льготными категориями граждан</a>, освобождаемых от оплаты консульского сбора.', 
+			},
+			
+		],
+		
 		'Подтвердить запись' => [
 			{
 				page_ord => 3100,
