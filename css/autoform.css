@@ -216,16 +216,10 @@
 	padding:15px;
 	font-size:9px;
 	text-align:justify;
-	overflow-y: auto;
-	height: 200px;
 }
 
 .no_border {
 	border: none;
 	border-spacing: 0;
 	border-collanse: collapse;
-}
-
-.gray_txt{
-	color:gray;
 }

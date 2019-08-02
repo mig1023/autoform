@@ -979,7 +979,9 @@ sub skip_page_by_relation
 # //////////////////////////////////////////////////
 {
 	my ( $self, $condition, $relation ) = @_;
-
+	
+	return ( $self->citizenship_check_fail( $relation->{ value } ) ? 1 : 0 ) if $condition =~ /^only_if_citizenship$/;
+	
 	my $current_table_id = $self->get_current_table_id(); 
 	
 	my $value = $self->query( 'sel1', __LINE__, "
@@ -1002,6 +1004,27 @@ sub skip_by_condition
 	return 1 if $condition =~ /^only_if_not(_\d+)?$/ and exists $relation{ $value };
 	
 	return 1 if $condition =~ /^only_if(_\d+)?$/ and !exists $relation{ $value };
+	
+	return 0;
+}
+
+sub citizenship_check_fail
+# //////////////////////////////////////////////////
+{
+	my ( $self, $value ) = @_;
+	
+	my %citizenship = map { $_ => 1 } split( /,\s?/, $value );
+
+	my $applicants = $self->query( 'selallkeys', __LINE__, "
+		SELECT Citizenship FROM AutoAppData
+		JOIN AutoToken ON AutoAppData.AppID = AutoToken.AutoAppID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	for ( @$applicants ) {
+	
+		return 1 if !exists $citizenship{ $_->{ Citizenship } };
+	}
 	
 	return 0;
 }
