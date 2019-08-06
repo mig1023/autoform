@@ -217,6 +217,7 @@ sub get_content_rules_hash
 				name => 'pers_info',
 				label_for => 'я ознакомлен со стоимостью дополнительных услуг',
 				check => 'true',
+				full_line => 1,
 				db => {
 					table => 'Appointments',
 					name => 'PrimetimeAlert',
@@ -2823,7 +2824,7 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'concil3_text',
-				label => 'Пожалуйста, ознакомьтесь со <a target = "_blank" class = "dotted_link_middle" href="127.0.0.1/">льготными категориями граждан</a>, освобождаемых от оплаты консульского сбора.', 
+				label => 'Пожалуйста, ознакомьтесь со <a target = "_blank" class = "dotted_link_middle" href="127.0.0.1/">льготными категориями граждан</a>, освобождаемых от оплаты консульского сбора.',
 			},
 			
 		],

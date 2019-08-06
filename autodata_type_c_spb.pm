@@ -199,6 +199,7 @@ sub get_content_rules_hash
 				name => 'pers_info',
 				label_for => 'я ознакомлен со стоимостью дополнительных услуг',
 				check => 'true',
+				full_line => 1,
 				db => {
 					table => 'Appointments',
 					name => 'PrimetimeAlert',
