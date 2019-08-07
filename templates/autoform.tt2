@@ -491,6 +491,7 @@
 						'center': '[% appinfo.center %]', 
 						'persons': '[% appinfo.persons %]', 
 						'appdate':$('#app_date').val(),
+						'urgent_allowed':'[% urgent_allowed %]',
 						'fdate': '[% appinfo.fdate %]', 
 						'lang': '[% lang_in_link %]',
 						

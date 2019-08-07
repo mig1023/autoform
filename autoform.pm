@@ -288,6 +288,8 @@ sub autoform
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 	
+	$tvars->{ urgent_allowed } = ( $special->{ timeslots } ? $self->urgent_allowed() : 0 );
+warn "urgent_allowed = ".$tvars->{ urgent_allowed };
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
 	$tvars->{ appinfo } = $self->get_same_info_for_timeslots()
@@ -304,6 +306,38 @@ sub autoform
 	}
 
 	$template->process( $template_file, $tvars );
+}
+
+sub urgent_allowed
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $allow = 1;
+	
+	my $apps = $self->query( 'selallkeys', __LINE__, "
+		SELECT Citizenship
+		FROM AutoToken
+		JOIN AutoAppData ON AutoAppData.AppID = AutoToken.AutoAppID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	for ( @$apps ) {
+	
+		$allow = 0 if $_->{ Citizenship } != 70;
+	}
+	
+	my $vtype = $self->query( 'sel1', __LINE__, "
+		SELECT VisaTypes.category
+		FROM AutoToken
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	$allow = 0 if $vtype ne 'C';
+	
+	return $allow;
 }
 
 sub get_current_apps
