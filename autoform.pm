@@ -289,7 +289,7 @@ sub autoform
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 	
 	$tvars->{ urgent_allowed } = ( $special->{ timeslots } ? $self->urgent_allowed() : 0 );
-warn "urgent_allowed = ".$tvars->{ urgent_allowed };
+
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
 	$tvars->{ appinfo } = $self->get_same_info_for_timeslots()

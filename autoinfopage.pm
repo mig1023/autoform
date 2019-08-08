@@ -41,6 +41,8 @@ sub autoinfopage
 	return $self->print_appdata() if /^print_a$/i;
 	
 	return autoinfopage_entry( @_ ) if $entry;
+	
+	return edit( @_ ) if /^edit$/i;
 
 	return reschedule( @_ ) if /^reschedule$/i;
 	
@@ -178,6 +180,32 @@ sub print_appdata
 	$self->{ vars }->setparam( 'appid', $appdata );
 	
 	$print->print_anketa();
+}
+
+sub edit
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT AppData.ID, AppData.AppID, AppData.FName, AppData.LName, AppData.BirthDate
+		FROM AutoToken 
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		WHERE Token = ? AND AppData.Status != 2", $self->{ token }
+	);
+
+	
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'title' 	=> 3,
+		'app_list'	=> $app_list,
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+	};
+	$template->process( 'autoform_edit.tt2', $tvars );
 }
 
 sub reschedule

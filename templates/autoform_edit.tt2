@@ -1,0 +1,78 @@
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMS - [% langreq('Информация о записи') %]</title>
+
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
+<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
+<link href="[% static %]/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
+
+
+</head>
+
+<font face="arial">
+
+<center>
+<div id="info_form">
+
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+
+	var mobilScreen = isMobile();
+
+	if ( mobilScreen ) {
+		$('#info_form').hide();
+	}
+
+</script>
+
+<form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
+<input type = "hidden" value = "nothing" name = "action" id = "action">
+<input type = "hidden" value = "" name = "appdata" id = "appdata">
+
+<table width="100%">
+
+<tr><td align="center">
+
+<table width="600px" id="app_table">
+
+	<tr><td colspan="2">
+	<br><br>
+	<h2>[% langreq('Внести правки в данные заявителей') %]</h2><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr><td width="60%"><label id="text">Новая дата записи</label></td>
+	<td><input class="input_width input_gen mobil_big width_full" type="text" value="[% appinfo.appdate %]" name="appdate" id="appdate" onchange="update_timeslots();"></td></tr>
+	<tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen mobil_big width_full" size = "1" name="apptime" title="" id="apptime" data-timeslot="5694"></select></td></tr>
+
+	<tr><td colspan="2"><br>
+	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+	<input class="small_button" type="button" value="[% langreq('Назначить другую дату') %] &#9655;" onclick="go_button('reschedule');"><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
+
+</table>
+
+</form>
+
+<script>
+
+function go_button(where, who) {
+	$('#action').val(where);
+	$('#appdata').val(who);
+	document.dataform.submit();
+};
+
+</script>
+
+</div>
