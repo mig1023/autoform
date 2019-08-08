@@ -187,15 +187,24 @@ sub edit
 {
 	my ( $self, $task, $id, $template ) = @_;
 	
-	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppData.ID, AppData.AppID, AppData.FName, AppData.LName, AppData.BirthDate
-		FROM AutoToken 
-		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
-		WHERE Token = ? AND AppData.Status != 2", $self->{ token }
-	);
+	my $content_rules = VCS::Site::autodata_type_c::get_content_rules_hash();
+	
+	my %editable_fields = VCS::Site::autodata::get_editable_fields();
+	
+	for my $page ( keys %$content_rules ) {
+	
+		next if $content_rules->{ $page } =~ /^\[/;
+		
+		for my $element ( @{ $content_rules->{ $page } } ) {
+		
+			next unless $editable_fields{ $element->{ name } };
+			
+			warn Dumper( $element );
+		}
+	}
+	
+	my $app_list = $self->get_app_list();
 
-	
-	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {

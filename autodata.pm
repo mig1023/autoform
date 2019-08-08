@@ -556,6 +556,15 @@ sub get_appointment_text
 	};
 };
 
+sub get_editable_fields
+# //////////////////////////////////////////////////
+{
+	return map { $_ => 1 } (
+		'visanum',
+	);
+}
+
+
 sub get_mobile_api_fields
 # //////////////////////////////////////////////////
 {

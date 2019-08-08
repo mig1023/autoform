@@ -634,7 +634,7 @@ sub init_add_param
 		
 			next if $content_rules->{ $page } =~ /^\[/;
 			
-			for my $element ( @{ $content_rules->{$page} } ) {
+			for my $element ( @{ $content_rules->{ $page } } ) {
 
 				if ( ref( $element->{ param } ) ne 'HASH' ) {
 				
