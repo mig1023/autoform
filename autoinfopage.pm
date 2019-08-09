@@ -42,7 +42,7 @@ sub autoinfopage
 	
 	return autoinfopage_entry( @_ ) if $entry;
 	
-	return edit( @_ ) if /^edit$/i;
+	return edit( @_ ) if /^(edit|save_edit_app)$/i;
 
 	return reschedule( @_ ) if /^reschedule$/i;
 	
@@ -211,9 +211,22 @@ sub edit
 	
 	$app_data =~ s/[^\d]+//;
 	
+	$app_data = 0 unless $self->{ af }->check_existing_id_in_token( $app_data, "finished" );
+	
 	my $tables_ids = { 'AppData' => $app_data };
 	
-	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, 'finished', $editable_fields );
+	my $action_type = $self->{ vars }->getparam( 'action' );
+	
+	my $last_error = '';
+	
+	if ( $action_type eq "save_edit_app" ) {
+	
+		$last_error = $self->{ af }->check_data_from_form( undef, $editable_fields, $tables_ids );
+		
+		$self->{ af }->save_data_from_form( undef, $tables_ids, "finished", $editable_fields );
+	}
+	
+	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, "finished", $editable_fields );
 	
 	$all_values->{ edt_purpose } = $self->visapurpose_disassembler( $all_values->{ edt_purpose } );
 	
@@ -245,10 +258,14 @@ sub edit
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'special'	=> $special,
+		'app_data'	=> $app_data,
 		'js_rules'	=> $js_rules,
 		'js_symbols'	=> $symbols_error,
 		'js_errors'	=> map { $self->{ af }->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 	};
+	
+	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
+	
 	$template->process( 'autoform_edit.tt2', $tvars );
 }
 

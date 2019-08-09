@@ -263,7 +263,7 @@ function get_date_from(date_id) {
 
 	update_nearest_date_[% near %]();
 	
-	var whatisnearestdate = '&nbsp;<a class="dotted_link" href="javascript:alert(' + "'[% langreq('Ближайшая дата, на которую возможна запись в текущий момент. Обратите внимание, что окончательные дату и время вы выбираете после регистрации всех заявителей. Эта дата может отличаться от указанной здесь') %]'" + ')">[% langreq('( что это за дата? )') %]</a>';
+	var whatisnearestdate = '&nbsp;<a class="dotted_link" href="javascript:alert(' + "'[% langreq('Р‘Р»РёР¶Р°Р№С€Р°СЏ РґР°С‚Р°, РЅР° РєРѕС‚РѕСЂСѓСЋ РІРѕР·РјРѕР¶РЅР° Р·Р°РїРёСЃСЊ РІ С‚РµРєСѓС‰РёР№ РјРѕРјРµРЅС‚. РћР±СЂР°С‚РёС‚Рµ РІРЅРёРјР°РЅРёРµ, С‡С‚Рѕ РѕРєРѕРЅС‡Р°С‚РµР»СЊРЅС‹Рµ РґР°С‚Сѓ Рё РІСЂРµРјСЏ РІС‹ РІС‹Р±РёСЂР°РµС‚Рµ РїРѕСЃР»Рµ СЂРµРіРёСЃС‚СЂР°С†РёРё РІСЃРµС… Р·Р°СЏРІРёС‚РµР»РµР№. Р­С‚Р° РґР°С‚Р° РјРѕР¶РµС‚ РѕС‚Р»РёС‡Р°С‚СЊСЃСЏ РѕС‚ СѓРєР°Р·Р°РЅРЅРѕР№ Р·РґРµСЃСЊ') %]'" + ')">[% langreq('( С‡С‚Рѕ СЌС‚Рѕ Р·Р° РґР°С‚Р°? )') %]</a>';
 			
 	function update_nearest_date_[% near %](without_vtype)
 	{	
@@ -623,14 +623,14 @@ function check_input( field, type, check, label ) {
 			if ( /W/.test( check ) ) {
 				regexp += 'A-Za-z';
 			}
-			if ( /Ё/.test( check ) ) {
-				regexp += 'А-ЯЁа-яё';
+			if ( /РЃ/.test( check ) ) {
+				regexp += 'Рђ-РЇРЃР°-СЏС‘';
 			}
 			if ( /N/.test( check ) ) {
 				regexp += '0-9';
 			}
 
-			var regexp_add = check.replace( /(z|W|Ё|N)/g, '' );
+			var regexp_add = check.replace( /(z|W|РЃ|N)/g, '' );
 
 			var input_reg = new RegExp( '[^' + regexp + regexp_add + ']' );
 

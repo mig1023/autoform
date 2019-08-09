@@ -46,7 +46,7 @@
 
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
-<input type = "hidden" value = "" name = "appdata" id = "appdata">
+<input type = "hidden" value = "[% app_data %]" name = "appdata" id = "appdata">
 
 <table width="100%">
 

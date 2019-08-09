@@ -1316,18 +1316,29 @@ sub get_delete
 sub check_existing_id_in_token
 # //////////////////////////////////////////////////
 {
-	my ( $self, $appdata_id ) = @_;
+	my ( $self, $appdata_id, $finished ) = @_;
 	
 	my $exist = 0;
 	
-	my $list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.ID
-		FROM AutoToken 
-		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
-		WHERE Token = ?", $self->{ token }
-	);
-
+	my $list_of_app_in_token;
+	
+	if ( $finished eq 'finished' ) {
+	
+		$list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
+			SELECT AppData.ID FROM AutoToken 
+			JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+			JOIN AppData ON Appointments.ID = AppData.AppID
+			WHERE Token = ?", $self->{ token }
+		);
+	}
+	else {
+		$list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
+			SELECT AutoAppData.ID FROM AutoToken 
+			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
+			WHERE Token = ?", $self->{ token }
+		);
+	};
+	
 	for my $app ( @$list_of_app_in_token ) {
 	
 		$exist = 1 if ( $app->{ID} == $appdata_id );
@@ -2170,14 +2181,14 @@ sub save_data_from_form
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step, $table_id, $app_finished, $content ) = @_;
+
+	my $content_rules = ( $app_finished ? $content : $self->get_content_rules( $step ) );
 	
-	my $request_tables = $self->get_names_db_for_save_or_get(
-		( $app_finished ? $content : $self->get_content_rules( $step ) ), 'save', $app_finished
-	);
+	my $request_tables = $self->get_names_db_for_save_or_get( $content_rules, 'save', $app_finished );
 
 	for my $table ( keys %$request_tables ) {
 		
-		next if !$table_id->{ $table };
+		next if ( $app_finished != "finished" ) and !$table_id->{ $table };
 		
 		next if $table eq 'alternative_data_source';
 	
@@ -2190,18 +2201,18 @@ sub save_data_from_form
 			
 			my $value = $self->param( $request_tables->{ $table }->{ $row } );
 		
-			push ( @values, $self->encode_data_for_db( $step, $request_tables->{ $table }->{ $row }, $value ) );
+			push ( @values, $self->encode_data_for_db( $content_rules, $request_tables->{ $table }->{ $row }, $value ) );
 			
-			$self->change_current_appdata( $value, $table_id ) if $row eq 'PersonForAgreements';
+			$self->change_current_appdata( $value, $table_id ) if ( $app_finished != "finished" ) and ( $row eq 'PersonForAgreements' );
 		}
-		$request =~ s/,\s$//;			
+		$request =~ s/,\s$//;		
 
 		$self->query( 'query', __LINE__, "
 			UPDATE $table SET $request WHERE ID = ?", {}, @values, $table_id->{ $table }
 		);
 	}
 	
-	$self->check_special_in_rules_for_save( $step, $table_id );
+	$self->check_special_in_rules_for_save( $step, $table_id ) if $app_finished != "finished";
 }
 
 sub change_current_appdata
@@ -2324,9 +2335,9 @@ sub decode_data_from_db
 sub encode_data_for_db
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $element_name, $value ) = @_;
+	my ( $self, $content_rules, $element_name, $value ) = @_;
 
-	my $element = $self->get_element_by_name( $step, $element_name );
+	my $element = $self->get_element_by_name( $content_rules, $element_name );
 	
 	$value = $self->get_prepare_line( $value );
 	
@@ -2344,9 +2355,7 @@ sub encode_data_for_db
 sub get_element_by_name
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $element_name ) = @_;
-	
-	my $page_content = $self->get_content_rules( $step );
+	my ( $self, $page_content, $element_name ) = @_;
 	
 	for my $element_search ( @$page_content ) {
 	
@@ -2500,11 +2509,11 @@ sub check_data_from_db
 sub check_data_from_form
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step ) = @_;
+	my ( $self, $step, $content, $tables_ids_edt ) = @_;
 	
-	my $page_content = $self->get_content_rules( $step, undef, 'init' );
+	my $page_content = ( $content ? $content : $self->get_content_rules( $step, undef, 'init' ) );
 	
-	my $tables_id = $self->get_current_table_id();
+	my $tables_id = ( $tables_ids_edt ? $tables_ids_edt : $self->get_current_table_id() );
 
 	return if $page_content =~ /^\[/;
 	
@@ -2518,8 +2527,8 @@ sub check_data_from_form
 
 		$first_error = $self->check_captcha() if $element->{ type } =~ /captcha/;
 
-		$first_error = $self->check_logic( $element, $tables_id )
-			if !$first_error and $element->{ check_logic }
+		$first_error = $self->check_logic( $element, $tables_id, ( $tables_ids_edt ? 1 : 0 ) )
+			if !$first_error and $element->{ check_logic };
 	}
 	
 	return $first_error;
@@ -2639,20 +2648,22 @@ sub check_captcha
 sub check_logic
 # //////////////////////////////////////////////////
 {
-	my ( $self, $element, $tables_id ) = @_;
+	my ( $self, $element, $tables_id, $finished ) = @_;
 
 	my $value = $self->param( $element->{ name } );
 	my $error = 0;
 	
 	$value =~ s/^\s+|\s+$//g;
+	
+	my $prefix = ( $finished ? '' : 'Auto' );
 
 	for my $rule ( @{ $element->{ check_logic } } ) {
 	
 		if ( $rule->{ condition } =~ /^equal$/ ) {
 			
 			my $related_value = $self->query( 'sel1', __LINE__, "
-				SELECT $rule->{name} FROM Auto$rule->{table} WHERE ID = ?",
-				$tables_id->{ 'Auto'.$rule->{table} }
+				SELECT $rule->{name} FROM $prefix$rule->{table} WHERE ID = ?",
+				$tables_id->{ $prefix.$rule->{table} }
 			);
 
 			return $self->text_error( 26, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
@@ -2664,7 +2675,7 @@ sub check_logic
 			$value = $self->date_format( $value, 'to_iso' );
 	
 			my $datediff = $self->get_datediff(
-				$value, $rule, $tables_id, ( $rule->{ condition } =~ /^equal/ )
+				$value, $rule, $tables_id, ( $rule->{ condition } =~ /^equal/ ? 1 : 0 ), $prefix
 			);
 
 			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
@@ -2696,7 +2707,7 @@ sub check_logic
 			) if $spb;
 			
 			
-			my $datediff = $self->get_datediff( $value, $rule, $tables_id, !$from_now );
+			my $datediff = $self->get_datediff( $value, $rule, $tables_id, ( $from_now ? 0 : 1 ), $prefix );
 
 			return $self->text_error(
 				23, $element, undef, $rule->{ error }, $rule->{ offset }, $rule->{ full_error }
@@ -2713,7 +2724,7 @@ sub check_logic
 			
 			my $app = $self->query( 'selallkeys', __LINE__, "
 				SELECT birthdate, CURRENT_DATE() as currentdate
-				FROM AutoAppData WHERE ID = ?", $tables_id->{ AutoAppData }
+				FROM " . $prefix . "AppData WHERE ID = ?", $tables_id->{ AutoAppData }
 			)->[ 0 ];
 			
 			return $self->text_error( 21, $element, undef, $rule->{ offset } ) 
@@ -2753,8 +2764,8 @@ sub check_logic
 			my ( $not, $eq ) = ( $1, $2 );
 	
 			my $field_in_db = $self->query( 'sel1', __LINE__, "
-				SELECT $rule->{name} FROM Auto$rule->{table} WHERE ID = ?", 
-				$tables_id->{ 'Auto'.$rule->{table} }
+				SELECT $rule->{name} FROM $prefix$rule->{table} WHERE ID = ?", 
+				$tables_id->{ $prefix.$rule->{table} }
 			);
 
 			if ( $eq ) {
@@ -2825,8 +2836,8 @@ sub check_logic
 		if ( $rule->{ condition } =~ /^english_only_for_not_rf_citizen$/ and $value ) {
 			
 			my $citizenship = $self->query( 'sel1', __LINE__, "
-				SELECT Citizenship FROM AutoAppData WHERE ID = ?", 
-				$tables_id->{ 'AutoAppData' }
+				SELECT Citizenship FROM " . $prefix . "AppData WHERE ID = ?", 
+				$tables_id->{ $prefix.'AppData' }
 			);
 
 			return $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
@@ -2852,11 +2863,11 @@ sub check_logic
 sub get_datediff
 # //////////////////////////////////////////////////
 {
-	my ( $self, $value, $rule, $tables_id, $use_date ) = @_;
+	my ( $self, $value, $rule, $tables_id, $use_date, $prefix ) = @_;
 
 	return $self->query( 'sel1', __LINE__, "
-		SELECT DATEDIFF( ?, $rule->{name} ) FROM Auto$rule->{table} WHERE ID = ?",
-		$value, $tables_id->{ 'Auto'.$rule->{table} }
+		SELECT DATEDIFF( ?, $rule->{name} ) FROM $prefix$rule->{table} WHERE ID = ?",
+		$value, $tables_id->{ $prefix.$rule->{table} }
 		
 	) if $use_date;
 
