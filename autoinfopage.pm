@@ -187,60 +187,19 @@ sub edit
 {
 	my ( $self, $task, $id, $template ) = @_;
 	
-	my $content_rules = VCS::Site::autodata_type_c::get_content_rules_hash();
-	
-	my $editable_fields = VCS::Site::autodata::get_editable_fields();
-	
-	my $editable_elements = [];
-	
+	my $editable_fields = VCS::Site::autodata_type_c::get_content_edit_rules_hash();
+
 	my $app_data = $self->{ vars }->getparam( 'appdata' ) || 0;
 	
 	$app_data =~ s/[^\d]+//;
 	
 	my $tables_ids = { 'AppData' => $app_data };
 	
-	for my $page ( keys %$content_rules ) {
-	
-		next if $content_rules->{ $page } =~ /^\[/;
-		
-		for my $element ( @{ $content_rules->{ $page } } ) {
-		
-			next unless $editable_fields->{ $element->{ name } };
-			
-			$element->{ type } = 'info' if $element->{ name } =~ /^(fname|lname|rupassnum)$/;
-			
-			$element->{ ord_in_page } = $editable_fields->{ $element->{ name } };
-			
-			if ( $element->{ name } =~ /^hoteladdr$/ ) {
-			
-				$element->{ db }->{ table } = 'AppData';
-				$element->{ db }->{ name } = 'FullAddress';
-			}
-			
-			if ( $element->{ name } =~ /^workaddr$/ ) {
-			
-				$element->{ db }->{ table } = 'AppData';
-				$element->{ db }->{ name } = 'WorkOrg';
-			}
-			
-			if ( $element->{ name } =~ /^kindermothername$/ ) {
-			
-				$element->{ db }->{ table } = 'AppData';
-				$element->{ db }->{ name } = 'KinderData';
-				$element->{ db }->{ label } = 'Данные опекунов/представителей';
-			}
-
-			push( @$editable_elements, $element );
-		}
-	}
-
-	@$editable_elements = sort { $a->{ ord_in_page } <=> $b->{ ord_in_page } } @$editable_elements;
-	
-	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, 'finished', $editable_elements );
+	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, 'finished', $editable_fields );
 	
 	my $content = '';
-	
-	for my $element ( @$editable_elements ) {
+warn Dumper($editable_fields);
+	for my $element ( @$editable_fields ) {
 	
 		$content .= $self->{ af }->get_html_line( $element, $all_values );
 	}
@@ -249,7 +208,6 @@ sub edit
 	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
-		'title' 	=> 3,
 		'content_text' 	=> $content,
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },

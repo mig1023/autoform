@@ -556,20 +556,6 @@ sub get_appointment_text
 	};
 };
 
-sub get_editable_fields
-# //////////////////////////////////////////////////
-{
-	return {
-		'fname' => 1,
-		'lname' => 2,
-		'rupassnum' => 3,
-		'visanum' => 4,
-		'hoteladdr' => 5,
-		'workaddr' => 6,
-		'kindermothername' => 7,
-	};
-}
-
 sub get_mobile_api_fields
 # //////////////////////////////////////////////////
 {

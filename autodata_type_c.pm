@@ -2824,7 +2824,7 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'concil3_text',
-				label => 'Пожалуйста, ознакомьтесь со <a target = "_blank" class = "dotted_link_middle" href="127.0.0.1/">льготными категориями граждан</a>, освобождаемых от оплаты консульского сбора.',
+				label => 'Пожалуйста, ознакомьтесь со <a target = "_blank" class = "dotted_link_middle" href="127.0.0.1/">льготными категориями граждан</a>, освобождаемых от оплаты консульского сбора.', 
 			},
 			
 		],
@@ -2886,6 +2886,232 @@ sub get_content_rules_hash
 			},
 		],
 	};
+}
+
+sub get_content_edit_rules_hash
+# //////////////////////////////////////////////////
+{
+
+	my $standart_date_check = 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
+
+	return [
+		{
+			type => 'info',
+			name => 'edt_lname',
+			label => 'Фамилия',
+			db => {
+				table => 'AppData',
+				name => 'LName',
+			},
+		},
+		{
+			type => 'info',
+			name => 'edt_fname',
+			label => 'Имя',
+			db => {
+				table => 'AppData',
+				name => 'FName',
+			},
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'edt_addr',
+			label => 'Адрес места жительства',
+			comment => 'Укажите адрес гостиницы',
+			example => 'Via Esempio 1',
+			check => 'WN\s\-\_\.\,\;\'\"\@',
+			db => {
+				table => 'AppData',
+				name => 'FullAddress',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'input',
+			name => 'edt_workorg',
+			label => 'Адрес места работы',
+			comment => 'Укажите адрес места своей работы',
+			example => 'Via Esempio 1',
+			check => 'WN\s\-\_\.\,\;\'\"\@',
+			db => {
+				table => 'AppData',
+				name => 'WorkOrg',
+			},
+			format => 'capslock',
+		},
+		
+		{
+			type => 'select',
+			name => 'edt_visanum',
+			label => 'Виза запрашивается для',
+			comment => 'Виза с однократным въездом даёт возможность пересечь границу Шенгена только один раз. После того как Вы покинете зону Шенгена по данной визе, она будет закрыта и перестанет действовать. Виза с двукратным въездом позволяет въехать и покинуть зону Шенгена два раза в период действия визы. Виза с многократным въездом даёт возможность пересекать границу зоны Шенгенского соглашения в период действия визы',
+			example => 'многократного въезда',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'VisaNum',
+			},
+			param => {
+				0 => 'однократного въезда',
+				1 => 'двукратного въезда',
+				2 => 'многократного въезда',
+			},
+			first_elements => '2, 1, 0',
+		},
+		{
+			type => 'input',
+			name => 'edt_apps_date',
+			label => 'Дата начала поездки',
+			comment => 'Укажите дату начала действия запрашиваемой визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			check_logic => [
+				{
+					condition => 'now_or_later',
+					offset => '[collect_date_offset]',
+				},
+				{
+					condition => 'equal_or_earlier',
+					table => 'AppData',
+					name => 'PassDate',
+					offset => ( 10 * 365 ), # <--- 10 years
+					error => 'Дата выдачи паспорта',
+				},
+			],
+			db => {
+				table => 'AppData',
+				name => 'AppSDate',
+			},
+			special => 'datepicker, mask',
+			minimal_date => 'current',
+		},
+		{
+			type => 'input',
+			name => 'edt_appf_date',
+			label => 'Дата окончания поездки',
+			comment => 'Укажите дату окончания действия запрашиваемой визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			check_logic => [
+				{
+					condition => 'equal_or_later',
+					table => 'AppData',
+					name => 'AppSDate',
+					error => 'Дата начала поездки',
+				},
+				{
+					condition => 'not_closer_than',
+					table => 'AppData',
+					name => 'PassTill',
+					offset => -90,
+					full_error => 'Между окончанием срока действия паспорта и датой окончания поездки должно быть как минимум [offset]',
+				},
+			],
+			db => {
+				table => 'AppData',
+				name => 'AppFDate',
+			},
+			special => 'datepicker, mask',
+			minimal_date => 'apps_date',
+		},
+		{
+			type => 'input',
+			name => 'edt_calcdur',
+			label => 'Продолжительность пребывания',
+			comment => {
+				'1,31,2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,39,40,42,44,45' =>
+					'При запросе многократной визы на год необходимо указать 180 дней, при запросе визы на 2 года — 360 дней',
+				'27,33,38,11,30,34,29,43,37' =>
+					'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
+			},
+			example => '14',
+			check => 'zWN\s\+',
+			db => {
+				table => 'AppData',
+				name => 'CalcDuration',
+			},
+		},
+		
+		{
+			type => 'radiolist',
+			name => 'edt_prevvisa',
+			label => 'Были ли визы за последние три года',
+			check => 'zN',
+			db => {
+				table => 'AppData',
+				name => 'PrevVisa',
+			},
+			param => { 
+				1 => 'нет', 
+				2 => 'да',
+			},
+		},
+		{
+			type => 'input',
+			name => 'edt_prevvisafd',
+			label => 'Дата начала',
+			comment => 'Укажите дату начала действия визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			db => {
+				table => 'AppData',
+				name => 'PrevVisaFD',
+			},
+			special => 'mask',
+		},
+		{
+			type => 'input',
+			name => 'edt_prevvised',
+			label => 'Дата окончания',
+			comment => 'Укажите дату окончания действия визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			check_logic => [
+				{
+					condition => 'now_or_later',
+					offset => ( -3 * 365 ), # <--- 3 years
+					full_error => 'Допустимо указывать только визы, выданные за последние [offset]'
+				},
+				{
+					condition => 'equal_or_later',
+					table => 'AppData',
+					name => 'PrevVisaFD',
+					error => 'Дата начала действия визы',
+				},
+			],
+			db => {
+				table => 'AppData',
+				name => 'PrevVisaED',
+			},
+			special => 'mask',
+		},
+		{
+			type => 'radiolist',
+			name => 'edt_purpose',
+			label => 'Основная цель поездки',
+			check => 'zN',
+			db => {
+				table => 'AppData',
+				name => 'VisaPurpose',
+			},
+			param => { 
+				1 => 'туризм', 
+				2 => 'деловая',
+				3 => 'учёба',
+				4 => 'официальная',
+				5 => 'культура',
+				6 => 'спорт',
+				7 => 'транзит',
+				8 => 'лечение',
+				9 => 'посещение родственников или друзей',
+				10 => 'иная',
+			},
+			special => 'save_info_about_hastdatatype',
+		},
+	];
 }
 
 1;
