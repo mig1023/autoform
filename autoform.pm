@@ -941,7 +941,7 @@ sub get_autoform_content
 
 	my $progress = $self->get_progressbar( $page->[ 0 ]->{ progress }, $self->get_progressbar_hash_opt() );
 	
-	my ( $special, $js_check ) = $self->get_specials_of_element( $step );
+	my ( $special, $js_check ) = $self->get_specials_of_element( $self->get_content_rules( $step ) );
 	
 	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check );
 }
@@ -1652,9 +1652,7 @@ sub get_list_of_app
 sub get_specials_of_element
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	
-	my $page_content = $self->get_content_rules( shift, undef, shift );
+	my ( $self, $page_content ) = @_;
 	
 	return if $page_content =~ /^\[/;
 	
@@ -1847,7 +1845,7 @@ sub get_html_for_element
 	my $example = $self->lang( 'пример' );
 	
 	my $elements = VCS::Site::autodata::get_html_elements();
-	
+
 	my $content = $elements->{ $type };
 
 	if ( ref( $value ) eq 'ARRAY' ) {
@@ -1919,8 +1917,9 @@ sub get_html_for_element
 	
 		my $list = '';
 		my $uniq_id = 0;
-		
+
 		for my $opt ( sort { $a <=> $b } keys %$param ) {
+
 			my $checked = ( $value_original eq $opt ? 'checked' : '' );
 			
 			$uniq_id++;

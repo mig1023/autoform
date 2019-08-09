@@ -182,6 +182,24 @@ sub print_appdata
 	$print->print_anketa();
 }
 
+sub visapurpose_disassembler
+# //////////////////////////////////////////////////
+{
+	my ( $self, $line ) = @_;
+
+	my @visa_var = split( /\|/, $line );
+	
+	my $visa = 0;
+
+	for ( 0..16 ) {
+		
+		$visa = $_ if $visa_var[ $_ ] == 1;
+	};
+
+	return $visa + 1;
+}
+
+
 sub edit
 # //////////////////////////////////////////////////
 {
@@ -197,11 +215,26 @@ sub edit
 	
 	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, 'finished', $editable_fields );
 	
+	$all_values->{ edt_purpose } = $self->visapurpose_disassembler( $all_values->{ edt_purpose } );
+	
 	my $content = '';
-warn Dumper($editable_fields);
+
 	for my $element ( @$editable_fields ) {
 	
 		$content .= $self->{ af }->get_html_line( $element, $all_values );
+	}
+	
+	my ( $special, $js_rules ) = $self->{ af }->get_specials_of_element( $editable_fields );
+	
+	my $symbols_error = VCS::Site::autodata::get_symbols_error();
+	
+	$symbols_error->{ $_ } = $self->{ af}->lang( $symbols_error->{ $_ } ) for keys %$symbols_error;
+	
+	for ( "'", "\\" ) {
+	
+		$symbols_error->{ "\\$_" } = $symbols_error->{ "$_" };
+		
+		delete $symbols_error->{ "$_" };
 	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -211,6 +244,10 @@ warn Dumper($editable_fields);
 		'content_text' 	=> $content,
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'special'	=> $special,
+		'js_rules'	=> $js_rules,
+		'js_symbols'	=> $symbols_error,
+		'js_errors'	=> map { $self->{ af }->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 	};
 	$template->process( 'autoform_edit.tt2', $tvars );
 }
