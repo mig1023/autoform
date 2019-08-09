@@ -189,7 +189,7 @@ sub edit
 	
 	my $content_rules = VCS::Site::autodata_type_c::get_content_rules_hash();
 	
-	my %editable_fields = VCS::Site::autodata::get_editable_fields();
+	my $editable_fields = VCS::Site::autodata::get_editable_fields();
 	
 	my $editable_elements = [];
 	
@@ -205,9 +205,11 @@ sub edit
 		
 		for my $element ( @{ $content_rules->{ $page } } ) {
 		
-			next unless $editable_fields{ $element->{ name } };
+			next unless $editable_fields->{ $element->{ name } };
 			
 			$element->{ type } = 'info' if $element->{ name } =~ /^(fname|lname|rupassnum)$/;
+			
+			$element->{ ord_in_page } = $editable_fields->{ $element->{ name } };
 			
 			if ( $element->{ name } =~ /^hoteladdr$/ ) {
 			
@@ -215,9 +217,24 @@ sub edit
 				$element->{ db }->{ name } = 'FullAddress';
 			}
 			
+			if ( $element->{ name } =~ /^workaddr$/ ) {
+			
+				$element->{ db }->{ table } = 'AppData';
+				$element->{ db }->{ name } = 'WorkOrg';
+			}
+			
+			if ( $element->{ name } =~ /^kindermothername$/ ) {
+			
+				$element->{ db }->{ table } = 'AppData';
+				$element->{ db }->{ name } = 'KinderData';
+				$element->{ db }->{ label } = 'Данные опекунов/представителей';
+			}
+
 			push( @$editable_elements, $element );
 		}
 	}
+
+	@$editable_elements = sort { $a->{ ord_in_page } <=> $b->{ ord_in_page } } @$editable_elements;
 	
 	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, 'finished', $editable_elements );
 	
