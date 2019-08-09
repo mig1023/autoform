@@ -191,6 +191,14 @@ sub edit
 	
 	my %editable_fields = VCS::Site::autodata::get_editable_fields();
 	
+	my $editable_elements = [];
+	
+	my $app_data = $self->{ vars }->getparam( 'appdata' ) || 0;
+	
+	$app_data =~ s/[^\d]+//;
+	
+	my $tables_ids = { 'AppData' => $app_data };
+	
 	for my $page ( keys %$content_rules ) {
 	
 		next if $content_rules->{ $page } =~ /^\[/;
@@ -199,18 +207,33 @@ sub edit
 		
 			next unless $editable_fields{ $element->{ name } };
 			
-			warn Dumper( $element );
+			$element->{ type } = 'info' if $element->{ name } =~ /^(fname|lname|rupassnum)$/;
+			
+			if ( $element->{ name } =~ /^hoteladdr$/ ) {
+			
+				$element->{ db }->{ table } = 'AppData';
+				$element->{ db }->{ name } = 'FullAddress';
+			}
+			
+			push( @$editable_elements, $element );
 		}
 	}
 	
-	my $app_list = $self->get_app_list();
+	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, 'finished', $editable_elements );
+	
+	my $content = '';
+	
+	for my $element ( @$editable_elements ) {
+	
+		$content .= $self->{ af }->get_html_line( $element, $all_values );
+	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 3,
-		'app_list'	=> $app_list,
+		'content_text' 	=> $content,
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};

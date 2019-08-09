@@ -48,16 +48,13 @@
 
 	<tr><td colspan="2">
 	<br><br>
-	<h2>[% langreq('Внести правки в данные заявителей') %]</h2><br></td></tr>
+	<h2>[% langreq('Внести правки в данные заявителя') %]</h2><br></td></tr>
 
-	<tr><td colspan="2">&nbsp;</td></tr>
-	<tr><td width="60%"><label id="text">Новая дата записи</label></td>
-	<td><input class="input_width input_gen mobil_big width_full" type="text" value="[% appinfo.appdate %]" name="appdate" id="appdate" onchange="update_timeslots();"></td></tr>
-	<tr><td><label id="text">Новое время записи</label></td><td><select class="input_width select_gen mobil_big width_full" size = "1" name="apptime" title="" id="apptime" data-timeslot="5694"></select></td></tr>
+	[% content_text %]
 
 	<tr><td colspan="2"><br>
 	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-	<input class="small_button" type="button" value="[% langreq('Назначить другую дату') %] &#9655;" onclick="go_button('reschedule');"><br></td></tr>
+	<input class="small_button" type="button" value="[% langreq('Сохранить изменения') %] &#9655;" onclick="go_button('save_edit_app');"><br></td></tr>
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 

@@ -560,10 +560,13 @@ sub get_editable_fields
 # //////////////////////////////////////////////////
 {
 	return map { $_ => 1 } (
+		'fname',
+		'lname',
+		'rupassnum',
 		'visanum',
+		'hoteladdr',
 	);
 }
-
 
 sub get_mobile_api_fields
 # //////////////////////////////////////////////////

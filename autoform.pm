@@ -2170,9 +2170,11 @@ sub resort_with_first_elements
 sub save_data_from_form
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $table_id ) = @_;
+	my ( $self, $step, $table_id, $app_finished, $content ) = @_;
 	
-	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ), 'save' );
+	my $request_tables = $self->get_names_db_for_save_or_get(
+		( $app_finished ? $content : $self->get_content_rules( $step ) ), 'save', $app_finished
+	);
 
 	for my $table ( keys %$request_tables ) {
 		
@@ -2248,11 +2250,13 @@ sub check_special_in_rules_for_save
 sub get_all_values
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step, $table_id ) = @_;
+	my ( $self, $step, $table_id, $app_finished, $content ) = @_;
 
 	my $all_values = {};
 	
-	my $request_tables = $self->get_names_db_for_save_or_get( $self->get_content_rules( $step ) );
+	my $request_tables = $self->get_names_db_for_save_or_get(
+		( $app_finished ? $content : $self->get_content_rules( $step ) ), undef, $app_finished
+	);
 
 	for my $table ( keys %$request_tables ) {
 
@@ -2362,7 +2366,7 @@ sub get_element_by_name
 sub get_names_db_for_save_or_get
 # //////////////////////////////////////////////////
 {
-	my ( $self, $page_content, $save_or_get ) = @_;
+	my ( $self, $page_content, $save_or_get, $app_finished ) = @_;
 	
 	my $request_tables = {};
 	
@@ -2391,6 +2395,8 @@ sub get_names_db_for_save_or_get
 		next if ref( $element->{ db } ) ne 'HASH';
 
 		my $prefix = ( $element->{ db }->{ table } !~ /^Auto/i ? 'Auto' : '' );
+		
+		$prefix = '' if $app_finished eq 'finished';
 
 		if ( $element->{ db }->{ name } eq 'complex' ) {
 		
