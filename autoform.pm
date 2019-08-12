@@ -1945,7 +1945,7 @@ sub get_html_for_element
 	if ( $type eq 'checklist' ) {
 
 		my $list = '';
-		
+
 		for my $opt ( sort { $a cmp $b } keys %$param ) {
 		
 			my $checked = ( $value->{ $opt } ? 'checked' : '' );
@@ -2341,7 +2341,8 @@ sub encode_data_for_db
 	
 	$value = $self->get_prepare_line( $value );
 	
-	$value = ( ( $value eq $element_name ) ? 1 : 0 ) if $element->{type} =~ /checkbox|disclaimer|checklist/;
+	$value = ( ( $value eq $element_name ) ? 1 : 0 )
+		if $element->{ type } =~ /checkbox|disclaimer|checklist/ and $element->{ name } ne 'edt_mezzi';
 	
 	$value = $self->{ vars }->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
 	

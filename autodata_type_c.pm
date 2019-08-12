@@ -2893,6 +2893,7 @@ sub get_content_edit_rules_hash
 {
 
 	my $standart_date_check = 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
+	my $standart_date_check_opt = 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
 
 	return [
 		{
@@ -2914,6 +2915,24 @@ sub get_content_edit_rules_hash
 			},
 		},
 		{
+			type => 'info',
+			name => 'edt_passnum',
+			label => 'Паспорт',
+			db => {
+				table => 'AppData',
+				name => 'PassNum',
+			},
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_addr_text',
+			label => 'Адреса',
+			font => 'bold',
+		},
+		{
 			type => 'free_line',
 		},
 		{
@@ -2922,27 +2941,52 @@ sub get_content_edit_rules_hash
 			label => 'Адрес места жительства',
 			comment => 'Укажите адрес гостиницы',
 			example => 'Via Esempio 1',
-			check => 'WN\s\-\_\.\,\;\'\"\@',
+			check => 'zWN\s\-\_\.\,\;\'\"\@',
 			db => {
 				table => 'AppData',
 				name => 'FullAddress',
 			},
 			format => 'capslock',
 		},
+
 		{
 			type => 'input',
-			name => 'edt_workorg',
-			label => 'Адрес места работы',
-			comment => 'Укажите адрес места своей работы',
+			name => 'edt_hotels',
+			label => 'Название гостиницы или ФИО приглашающего',
+			comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней- укажите первое.',
 			example => 'Via Esempio 1',
-			check => 'WN\s\-\_\.\,\;\'\"\@',
+			check => 'zW\s\-\.',
 			db => {
 				table => 'AppData',
-				name => 'WorkOrg',
+				name => 'Hotels',
 			},
 			format => 'capslock',
 		},
-		
+		{
+			type => 'input',
+			name => 'edt_hoteladdr',
+			label => 'Город места пребывания',
+			comment => 'Укажите адрес гостиницы',
+			example => 'Rome, Via Esempio 1',
+			check => 'zWN\s\-\_\.\,\;\'\"\@',
+			db => {
+				table => 'AppData',
+				name => 'HotelAdresses',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_visa_text',
+			label => 'Виза',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
 		{
 			type => 'select',
 			name => 'edt_visanum',
@@ -3034,7 +3078,15 @@ sub get_content_edit_rules_hash
 				name => 'CalcDuration',
 			},
 		},
-		
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_prevvise_text',
+			label => 'Предыдущие визы',
+			font => 'bold',
+		},
 		{
 			type => 'radiolist',
 			name => 'edt_prevvisa',
@@ -3048,6 +3100,9 @@ sub get_content_edit_rules_hash
 				1 => 'нет', 
 				2 => 'да',
 			},
+		},
+		{
+			type => 'free_line',
 		},
 		{
 			type => 'input',
@@ -3089,6 +3144,15 @@ sub get_content_edit_rules_hash
 			special => 'mask',
 		},
 		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_purpose_text',
+			label => 'Цель поездки',
+			font => 'bold',
+		},
+		{
 			type => 'radiolist',
 			name => 'edt_purpose',
 			label => 'Основная цель поездки',
@@ -3110,6 +3174,211 @@ sub get_content_edit_rules_hash
 				10 => 'иная',
 			},
 			special => 'save_info_about_hastdatatype',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_prof_text',
+			label => 'Профессиональная деятельность',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'etc_workdata',
+			label => 'Профессиональная деятельность',
+			comment => 'Профессию необходимо указывать на английском или итальянском языках',
+			example => 'Manager',
+			check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+			db => {
+				table => 'AppData',
+				name => 'ProfActivity',
+			},
+			format => 'capslock'
+		},
+		{
+			type => 'input',
+			name => 'edt_workorg',
+			label => 'Адрес места работы',
+			comment => 'Укажите адрес места своей работы',
+			example => 'Via Esempio 1',
+			check => 'zWN\s\-\_\.\,\;\'\"\@',
+			db => {
+				table => 'AppData',
+				name => 'WorkOrg',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_ec_text',
+			label => 'Данные родственника в ЕС',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'radiolist',
+			name => 'femrel',
+			label => 'Степень родства',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'FamRel',
+			},
+			param => { 
+				0 => 'нет', 
+				1 => 'супруг',
+				2 => 'ребёнок',
+				3 => 'иные близкие родственники',
+				4 => 'иждивенец',
+			},
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'eu_lname',
+			label => 'Фамилия',
+			comment => 'Введите фамилию на английском языке так, как она указана в паспорте',
+			example => 'Ivanov',
+			check => 'W\s\-',
+			db => {
+				table => 'AppData',
+				name => 'EuLName',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'input',
+			name => 'eu_fname',
+			label => 'Имя',
+			comment => 'Введите имя на английском языке так, как оно указано в паспорте',
+			example => 'Ivan',
+			check => 'W\s\-',
+			db => {
+				table => 'AppData',
+				name => 'EuFName',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'input',
+			name => 'eu_bdate',
+			label => 'Дата рождения',
+			comment => 'Введите дату рождения',
+			example => '31.12.1900',
+			check => $standart_date_check_opt,
+			db => {
+				table => 'AppData',
+				name => 'EuBDate',
+			},
+			special => 'mask',
+		},
+		{
+			type => 'select',
+			name => 'eu_citizenship',
+			label => 'Гражданство',
+			comment => 'Укажите гражданство родственника',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'EuCitizen',
+			},
+			param => '[eu_countries]',
+			first_elements => '133',
+		},
+		{
+			type => 'input',
+			name => 'eu_idnum',
+			label => 'Номер паспорта',
+			comment => 'Введите серию и номер паспорта',
+			example => '750000001',
+			check => 'WN',
+			db => {
+				table => 'AppData',
+				name => 'EuPassNum',
+			},
+			format => 'capslock',
+		},
+				{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_ec_text',
+			label => 'Расходы',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'radiolist',
+			name => 'edt_mezziwhom',
+			label => 'Расходы заявителя оплачивает',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'MezziWhom',
+			},
+			param => { 
+				0 => 'сам заявитель', 
+				1 => 'приглашающая сторона',
+				2 => 'иной спонсор',
+			},
+		},
+		{
+			type => 'input',
+			name => 'edt_mezziwhomother',
+			label => 'Спонсор',
+			comment => 'Укажите спонсора, оплачивающего расходы во время поездки',
+			check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
+			db => {
+				table => 'AppData',
+				name => 'MezziWhomOther',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'checklist',
+			name => 'edt_mezzi',
+			label => 'Средства',
+			check => 'at_least_one',
+			db => {
+				table => 'AppData',
+				name => 'Mezzi'
+			},
+			param => {
+				mezzi1 => { db => 'Mezzi1', label_for => 'Наличные деньги' },
+				mezzi2 => { db => 'Mezzi2', label_for => 'Дорожные чеки' },
+				mezzi3 => { db => 'Mezzi3', label_for => 'Кредитная карточка' },
+				mezzi4 => { db => 'Mezzi4', label_for => 'Предоплачено место проживания' },
+				mezzi5 => { db => 'Mezzi5', label_for => 'Предоплаченный транспорт' },
+				mezzi6 => { db => 'Mezzi6', label_for => 'Оплачиваются все расходы' },
+				mezzi7 => { db => 'Mezzi7', label_for => 'Иные' },
+			},
+		},
+		{
+			type => 'input',
+			name => 'edt_whomothersrc',
+			label => 'Иные средства',
+			comment => 'Укажите иные финансовые гарантии',
+			check => 'WwN\s_\.\,\"\'\-\(\)\#\*',
+			db => {
+				table => 'AppData',
+				name => 'MezziOtherSrc',
+			},
+			format => 'capslock',
 		},
 	];
 }

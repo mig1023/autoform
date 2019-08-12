@@ -182,30 +182,40 @@ sub print_appdata
 	$print->print_anketa();
 }
 
-sub visapurpose_disassembler
+sub mezzi_disassembler
 # //////////////////////////////////////////////////
 {
 	my ( $self, $line ) = @_;
 
-	my @visa_var = split( /\|/, $line );
+	my @mezzi_var = split( /\|/, $line );
 	
-	my $visa = 0;
+	my $mezzi = {};
 
-	for ( 0..16 ) {
+	for ( 0..$#mezzi_var ) {
 		
-		$visa = $_ if $visa_var[ $_ ] == 1;
+		$mezzi->{ 'mezzi' . ( $_ + 1 ) } = $mezzi_var[ $_ ];
 	};
 
-	return $visa + 1;
+	return $mezzi;
 }
 
+sub mezzi_assembler
+# //////////////////////////////////////////////////
+{
+	my ( $self, $line ) = @_;
+	
+	return '1|0|1|0|1|0|0';
+}
 
 sub edit
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
 	
+	# надо делить с СПБ!!
 	my $editable_fields = VCS::Site::autodata_type_c::get_content_edit_rules_hash();
+	
+	$editable_fields = $self->{ af }->init_add_param( { page => $editable_fields }, { param => 1 } )->{ page };
 
 	my $app_data = $self->{ vars }->getparam( 'appdata' ) || 0;
 	
@@ -223,12 +233,14 @@ sub edit
 	
 		$last_error = $self->{ af }->check_data_from_form( undef, $editable_fields, $tables_ids );
 		
+		$self->{ vars }->setparam( 'edt_mezzi', $self->mezzi_assembler( $self->{ vars }->getparam( 'edt_mezzi' ) ) );
+		
 		$self->{ af }->save_data_from_form( undef, $tables_ids, "finished", $editable_fields );
 	}
 	
 	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, "finished", $editable_fields );
 	
-	$all_values->{ edt_purpose } = $self->visapurpose_disassembler( $all_values->{ edt_purpose } );
+	$all_values->{ edt_mezzi } = $self->mezzi_disassembler( $all_values->{ edt_mezzi } );
 	
 	my $content = '';
 
