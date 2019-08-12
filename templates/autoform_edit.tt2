@@ -33,17 +33,19 @@
 <div id="info_form">
 
 <script>
-
 	function isMobile() {
 		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 	}
-
+	
+	function isIphone() {
+		return (/iPhone|iPad|iPod/i.test(navigator.userAgent));
+	}
+	
 	var mobilScreen = isMobile();
 
 	if ( mobilScreen ) {
-		$('#info_form').hide();
+		$('#app_form').hide();
 	}
-
 </script>
 
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">

@@ -3284,6 +3284,20 @@ sub get_content_edit_rules_hash
 			},
 			special => 'mask',
 		},
+
+		{
+			type => 'input',
+			name => 'eu_idnum',
+			label => 'Номер паспорта',
+			comment => 'Введите серию и номер паспорта',
+			example => '750000001',
+			check => 'WN',
+			db => {
+				table => 'AppData',
+				name => 'EuPassNum',
+			},
+			format => 'capslock',
+		},
 		{
 			type => 'select',
 			name => 'eu_citizenship',
@@ -3298,29 +3312,13 @@ sub get_content_edit_rules_hash
 			first_elements => '133',
 		},
 		{
-			type => 'input',
-			name => 'eu_idnum',
-			label => 'Номер паспорта',
-			comment => 'Введите серию и номер паспорта',
-			example => '750000001',
-			check => 'WN',
-			db => {
-				table => 'AppData',
-				name => 'EuPassNum',
-			},
-			format => 'capslock',
-		},
-				{
 			type => 'free_line',
 		},
 		{
 			type => 'text',
 			name => 'edt_ec_text',
-			label => 'Расходы',
+			label => 'Оплата расходов',
 			font => 'bold',
-		},
-		{
-			type => 'free_line',
 		},
 		{
 			type => 'radiolist',
@@ -3340,7 +3338,7 @@ sub get_content_edit_rules_hash
 		{
 			type => 'input',
 			name => 'edt_mezziwhomother',
-			label => 'Спонсор',
+			label => 'Иной спонсор',
 			comment => 'Укажите спонсора, оплачивающего расходы во время поездки',
 			check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
 			db => {
@@ -3348,6 +3346,9 @@ sub get_content_edit_rules_hash
 				name => 'MezziWhomOther',
 			},
 			format => 'capslock',
+		},
+		{
+			type => 'free_line',
 		},
 		{
 			type => 'checklist',
