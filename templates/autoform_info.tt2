@@ -238,6 +238,16 @@
 
 	<tr><td colspan="2">&nbsp;</td></tr>	
 	
+[% ELSIF title == 5 %]
+
+	<tr><td colspan="2">
+	<br><br>
+	<h2>[% langreq('Данные заявителя успешно изменены') %]</h2></td></tr>
+
+	<tr><td colspan="2"><input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>	
+	
 [% END %]
 
 </table>

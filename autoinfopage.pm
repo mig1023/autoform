@@ -43,6 +43,8 @@ sub autoinfopage
 	return autoinfopage_entry( @_ ) if $entry;
 	
 	return edit( @_ ) if /^(edit|save_edit_app)$/i;
+	
+	return edited( @_ ) if /^(edited)$/i;
 
 	return reschedule( @_ ) if /^reschedule$/i;
 	
@@ -204,7 +206,13 @@ sub mezzi_assembler
 {
 	my ( $self, $line ) = @_;
 	
-	return '1|0|1|0|1|0|0';
+	my $mezzi = '';
+	
+	$mezzi .= ( $self->{ vars }->getparam( "mezzi$_" ) ? 1 : 0 ) . '|' for ( 1..7 );
+	
+	$mezzi =~ s/\|$//;
+	
+	return $mezzi;
 }
 
 sub edit
@@ -233,9 +241,14 @@ sub edit
 	
 		$last_error = $self->{ af }->check_data_from_form( undef, $editable_fields, $tables_ids );
 		
-		$self->{ vars }->setparam( 'edt_mezzi', $self->mezzi_assembler( $self->{ vars }->getparam( 'edt_mezzi' ) ) );
+		if ( !$last_error ) {
 		
-		$self->{ af }->save_data_from_form( undef, $tables_ids, "finished", $editable_fields );
+			$self->{ vars }->setparam( 'edt_mezzi', $self->mezzi_assembler() );
+			
+			$self->{ af }->save_data_from_form( undef, $tables_ids, "finished", $editable_fields );
+		
+			return $self->{ af }->redirect( $self->{ token }.'&action=edited' )
+		}
 	}
 	
 	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, "finished", $editable_fields );
@@ -279,6 +292,24 @@ sub edit
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
 	$template->process( 'autoform_edit.tt2', $tvars );
+}
+
+
+sub edited
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'title' 	=> 5,
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
 }
 
 sub reschedule
