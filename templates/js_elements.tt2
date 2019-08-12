@@ -110,7 +110,7 @@ function go_button(where) {
 		}
 	[% END %]
 	
-	if (where == 'forward') {
+	if ((where == 'forward') || (where == 'save_edit_app')) {
 	
 		[% IF ( ( step + 1 ) == max_step ) %]
 			$('#next_button').prop('disabled', true);
