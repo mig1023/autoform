@@ -175,7 +175,7 @@ sub print_appdata
 	
 	$appdata =~ s/[^0-9]//g;
 
-	return $self->{ af }->redirect( 'current' ) unless $self->check_existing_id_in_token( $appdata );
+	return $self->{ af }->redirect( 'current' ) unless $self->{ af }->check_existing_id_in_token( $appdata, "finished" );
 
 	my $print = VCS::Docs::docs->new( 'VCS::Docs::docs', $self->{ vars } );
 	
@@ -184,35 +184,45 @@ sub print_appdata
 	$print->print_anketa();
 }
 
-sub mezzi_disassembler
+sub param_disassembler
 # //////////////////////////////////////////////////
 {
-	my ( $self, $line ) = @_;
+	my ( $self, $line, $param_type, $only_num  ) = @_;
 
-	my @mezzi_var = split( /\|/, $line );
+	my @param_var = split( /\|/, $line );
+
+	my $param = {};
 	
-	my $mezzi = {};
+	my $param_num = -1;
 
-	for ( 0..$#mezzi_var ) {
+	for ( 0..$#param_var ) {
+	
+		$param->{ $param_type . ( $_ + 1 ) } = $param_var[ $_ ];
 		
-		$mezzi->{ 'mezzi' . ( $_ + 1 ) } = $mezzi_var[ $_ ];
+		$param_num = $_ if $param_var[ $_ ] == 1;
 	};
 
-	return $mezzi;
+	return ( $only_num ? $param_num + 1 : $param );
 }
 
-sub mezzi_assembler
+sub param_assembler
 # //////////////////////////////////////////////////
 {
-	my ( $self, $line ) = @_;
+	my ( $self, $param_type, $param_len, $only_num ) = @_;
 	
-	my $mezzi = '';
+	my $param = '';
+
+	$param .= (
+		( $only_num ?
+			$self->{ vars }->getparam( $param_type ) == $_
+			:
+			$self->{ vars }->getparam( $param_type . $_ )
+		) ? 1 : 0
+	) . '|' for ( 1..$param_len );
+
+	$param =~ s/\|$//;
 	
-	$mezzi .= ( $self->{ vars }->getparam( "mezzi$_" ) ? 1 : 0 ) . '|' for ( 1..7 );
-	
-	$mezzi =~ s/\|$//;
-	
-	return $mezzi;
+	return $param;
 }
 
 sub edit
@@ -243,7 +253,8 @@ sub edit
 		
 		if ( !$last_error ) {
 		
-			$self->{ vars }->setparam( 'edt_mezzi', $self->mezzi_assembler() );
+			$self->{ vars }->setparam( 'edt_mezzi', $self->param_assembler( "mezzi", 7 ) );
+			$self->{ vars }->setparam( 'edt_purpose', $self->param_assembler( "edt_purpose", 17, "only_num" ) );
 			
 			$self->{ af }->save_data_from_form( undef, $tables_ids, "finished", $editable_fields );
 		
@@ -253,7 +264,8 @@ sub edit
 	
 	my $all_values = $self->{ af }->get_all_values( undef, $tables_ids, "finished", $editable_fields );
 	
-	$all_values->{ edt_mezzi } = $self->mezzi_disassembler( $all_values->{ edt_mezzi } );
+	$all_values->{ edt_mezzi } = $self->param_disassembler( $all_values->{ edt_mezzi }, "mezzi" );
+	$all_values->{ edt_purpose } = $self->param_disassembler( $all_values->{ edt_purpose }, "edt_purpose", "only_num" );
 	
 	my $content = '';
 
@@ -534,28 +546,6 @@ sub set_new_appdate
 	) unless $error;
 
 	return ( $error ? $error : $new_app_id );
-}
-
-sub check_existing_id_in_token
-# //////////////////////////////////////////////////
-{
-	my ( $self, $appdata_id ) = @_;
-	
-	my $exist = 0;
-	
-	my $list_of_app_in_token = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppData.ID
-		FROM AutoToken 
-		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
-		JOIN AppData ON Appointments.ID = AppData.AppID
-		WHERE Token = ?", $self->{ token }
-	);
-
-	for my $app ( @$list_of_app_in_token ) {
-		$exist = 1 if ( $app->{ID} == $appdata_id );
-	}
-	
-	return $exist;
 }
 	
 1;

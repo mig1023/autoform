@@ -2938,9 +2938,9 @@ sub get_content_edit_rules_hash
 		{
 			type => 'input',
 			name => 'edt_addr',
-			label => 'Адрес места жительства',
-			comment => 'Укажите адрес гостиницы',
-			example => 'Via Esempio 1',
+			label => 'Домашний адрес',
+			comment => 'Укажите адрес места жительства',
+			example => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
 			check => 'zWN\s\-\_\.\,\;\'\"\@',
 			db => {
 				table => 'AppData',
@@ -2965,8 +2965,8 @@ sub get_content_edit_rules_hash
 		{
 			type => 'input',
 			name => 'edt_hoteladdr',
-			label => 'Город места пребывания',
-			comment => 'Укажите адрес гостиницы',
+			label => 'Адрес места пребывания',
+			comment => 'Укажите адрес гостиницы или приглашающего, или временного места пребывания',
 			example => 'Rome, Via Esempio 1',
 			check => 'zWN\s\-\_\.\,\;\'\"\@',
 			db => {
