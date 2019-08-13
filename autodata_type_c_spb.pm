@@ -2465,6 +2465,504 @@ sub get_content_rules_hash
 			},
 		],
 	};
+	
+	sub get_content_edit_rules_hash
+# //////////////////////////////////////////////////
+{
+
+	my $standart_date_check = 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
+	my $standart_date_check_opt = 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
+
+	return [
+		{
+			type => 'info',
+			name => 'edt_lname',
+			label => 'Фамилия',
+			db => {
+				table => 'AppData',
+				name => 'LName',
+			},
+		},
+		{
+			type => 'info',
+			name => 'edt_fname',
+			label => 'Имя',
+			db => {
+				table => 'AppData',
+				name => 'FName',
+			},
+		},
+		{
+			type => 'info',
+			name => 'edt_passnum',
+			label => 'Паспорт',
+			db => {
+				table => 'AppData',
+				name => 'PassNum',
+			},
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_addr_text',
+			label => 'Адреса',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'edt_addr',
+			label => 'Домашний адрес и адрес электронной почты',
+			comment => 'Укажите адрес места жительства',
+			example => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
+			check => 'zWN\s\-\_\.\,\;\'\"\@',
+			db => {
+				table => 'AppData',
+				name => 'FullAddress',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'edt_hotels',
+			label => 'Название гостиницы или ФИО приглашающего',
+			comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней- укажите первое.',
+			example => 'Via Esempio 1',
+			check => 'zW\s\-\.',
+			db => {
+				table => 'AppData',
+				name => 'Hotels',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'edt_hoteladdr',
+			label => 'Адрес места пребывания и телефон',
+			comment => 'Укажите адрес гостиницы или приглашающего, или временного места пребывания, а также контактный телефон',
+			example => 'Rome, Via Esempio 1, 39XXXXXXXX',
+			check => 'zWN\s\-\_\.\,\;\'\"\@',
+			db => {
+				table => 'AppData',
+				name => 'HotelAdresses',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_visa_text',
+			label => 'Виза',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'select',
+			name => 'edt_visanum',
+			label => 'Виза запрашивается для',
+			comment => 'Виза с однократным въездом даёт возможность пересечь границу Шенгена только один раз. После того как Вы покинете зону Шенгена по данной визе, она будет закрыта и перестанет действовать. Виза с двукратным въездом позволяет въехать и покинуть зону Шенгена два раза в период действия визы. Виза с многократным въездом даёт возможность пересекать границу зоны Шенгенского соглашения в период действия визы',
+			example => 'многократного въезда',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'VisaNum',
+			},
+			param => {
+				0 => 'однократного въезда',
+				1 => 'двукратного въезда',
+				2 => 'многократного въезда',
+			},
+			first_elements => '2, 1, 0',
+		},
+		{
+			type => 'input',
+			name => 'edt_apps_date',
+			label => 'Дата начала поездки',
+			comment => 'Укажите дату начала действия запрашиваемой визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			check_logic => [
+				{
+					condition => 'now_or_later',
+					offset => '[collect_date_offset]',
+				},
+				{
+					condition => 'equal_or_earlier',
+					table => 'AppData',
+					name => 'PassDate',
+					offset => ( 10 * 365 ), # <--- 10 years
+					error => 'Дата выдачи паспорта',
+				},
+			],
+			db => {
+				table => 'AppData',
+				name => 'AppSDate',
+			},
+			special => 'datepicker, mask',
+			minimal_date => 'current',
+		},
+		{
+			type => 'input',
+			name => 'edt_appf_date',
+			label => 'Дата окончания поездки',
+			comment => 'Укажите дату окончания действия запрашиваемой визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			check_logic => [
+				{
+					condition => 'equal_or_later',
+					table => 'AppData',
+					name => 'AppSDate',
+					error => 'Дата начала поездки',
+				},
+				{
+					condition => 'not_closer_than',
+					table => 'AppData',
+					name => 'PassTill',
+					offset => -90,
+					full_error => 'Между окончанием срока действия паспорта и датой окончания поездки должно быть как минимум [offset]',
+				},
+			],
+			db => {
+				table => 'AppData',
+				name => 'AppFDate',
+			},
+			special => 'datepicker, mask',
+			minimal_date => 'apps_date',
+		},
+		{
+			type => 'input',
+			name => 'edt_calcdur',
+			label => 'Продолжительность пребывания',
+			comment => 'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
+			example => '14',
+			check => 'zWN\s\+',
+			db => {
+				table => 'AppData',
+				name => 'CalcDuration',
+			},
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_prevvise_text',
+			label => 'Предыдущие визы',
+			font => 'bold',
+		},
+		{
+			type => 'radiolist',
+			name => 'edt_prevvisa',
+			label => 'Были ли визы за последние три года',
+			check => 'zN',
+			db => {
+				table => 'AppData',
+				name => 'PrevVisa',
+			},
+			param => { 
+				1 => 'нет', 
+				2 => 'да',
+			},
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'edt_prevvisafd',
+			label => 'Дата начала',
+			comment => 'Укажите дату начала действия визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			db => {
+				table => 'AppData',
+				name => 'PrevVisaFD',
+			},
+			special => 'mask',
+		},
+		{
+			type => 'input',
+			name => 'edt_prevvised',
+			label => 'Дата окончания',
+			comment => 'Укажите дату окончания действия визы',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			check_logic => [
+				{
+					condition => 'now_or_later',
+					offset => ( -3 * 365 ), # <--- 3 years
+					full_error => 'Допустимо указывать только визы, выданные за последние [offset]'
+				},
+				{
+					condition => 'equal_or_later',
+					table => 'AppData',
+					name => 'PrevVisaFD',
+					error => 'Дата начала действия визы',
+				},
+			],
+			db => {
+				table => 'AppData',
+				name => 'PrevVisaED',
+			},
+			special => 'mask',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_purpose_text',
+			label => 'Цель поездки',
+			font => 'bold',
+		},
+		{
+			type => 'radiolist',
+			name => 'edt_purpose',
+			label => 'Основная цель поездки',
+			check => 'zN',
+			db => {
+				table => 'AppData',
+				name => 'VisaPurpose',
+			},
+			param => { 
+				1 => 'туризм', 
+				2 => 'деловая',
+				3 => 'учёба',
+				4 => 'официальная',
+				5 => 'культура',
+				6 => 'спорт',
+				7 => 'транзит',
+				8 => 'лечение',
+				9 => 'посещение родственников или друзей',
+				10 => 'иная',
+			},
+			special => 'save_info_about_hastdatatype',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_prof_text',
+			label => 'Профессиональная деятельность',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'etc_workdata',
+			label => 'Профессиональная деятельность',
+			comment => 'Профессию необходимо указывать на английском или итальянском языках',
+			example => 'Manager',
+			check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+			db => {
+				table => 'AppData',
+				name => 'ProfActivity',
+			},
+			format => 'capslock'
+		},
+		{
+			type => 'input',
+			name => 'edt_workorg',
+			label => 'Адрес места работы и телефон',
+			comment => 'Укажите адрес места своей работы и телефон',
+			example => '191186, St. Petersburg, 1/25 Kazanskaya st., 5, 79XXXXXXXX',
+			check => 'zWN\s\-\_\.\,\;\'\"\@',
+			db => {
+				table => 'AppData',
+				name => 'WorkOrg',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_ec_text',
+			label => 'Данные родственника в ЕС',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'radiolist',
+			name => 'femrel',
+			label => 'Степень родства',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'FamRel',
+			},
+			param => { 
+				0 => 'нет', 
+				1 => 'супруг',
+				2 => 'ребёнок',
+				3 => 'иные близкие родственники',
+				4 => 'иждивенец',
+			},
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'eu_lname',
+			label => 'Фамилия',
+			comment => 'Введите фамилию на английском языке так, как она указана в паспорте',
+			example => 'Ivanov',
+			check => 'W\s\-',
+			db => {
+				table => 'AppData',
+				name => 'EuLName',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'input',
+			name => 'eu_fname',
+			label => 'Имя',
+			comment => 'Введите имя на английском языке так, как оно указано в паспорте',
+			example => 'Ivan',
+			check => 'W\s\-',
+			db => {
+				table => 'AppData',
+				name => 'EuFName',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'input',
+			name => 'eu_bdate',
+			label => 'Дата рождения',
+			comment => 'Введите дату рождения',
+			example => '31.12.1900',
+			check => $standart_date_check_opt,
+			db => {
+				table => 'AppData',
+				name => 'EuBDate',
+			},
+			special => 'mask',
+		},
+
+		{
+			type => 'input',
+			name => 'eu_idnum',
+			label => 'Номер паспорта',
+			comment => 'Введите серию и номер паспорта',
+			example => '750000001',
+			check => 'WN',
+			db => {
+				table => 'AppData',
+				name => 'EuPassNum',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'select',
+			name => 'eu_citizenship',
+			label => 'Гражданство',
+			comment => 'Укажите гражданство родственника',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'EuCitizen',
+			},
+			param => '[eu_countries]',
+			first_elements => '133',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'text',
+			name => 'edt_ec_text',
+			label => 'Оплата расходов',
+			font => 'bold',
+		},
+		{
+			type => 'radiolist',
+			name => 'edt_mezziwhom',
+			label => 'Расходы заявителя оплачивает',
+			check => 'N',
+			db => {
+				table => 'AppData',
+				name => 'MezziWhom',
+			},
+			param => { 
+				0 => 'сам заявитель', 
+				1 => 'приглашающая сторона',
+				2 => 'иной спонсор',
+			},
+		},
+		{
+			type => 'input',
+			name => 'edt_mezziwhomother',
+			label => 'Иной спонсор',
+			comment => 'Укажите спонсора, оплачивающего расходы во время поездки',
+			check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
+			db => {
+				table => 'AppData',
+				name => 'MezziWhomOther',
+			},
+			format => 'capslock',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'checklist',
+			name => 'edt_mezzi',
+			label => 'Средства',
+			check => 'at_least_one',
+			db => {
+				table => 'AppData',
+				name => 'Mezzi'
+			},
+			param => {
+				mezzi1 => { db => 'Mezzi1', label_for => 'Наличные деньги' },
+				mezzi2 => { db => 'Mezzi2', label_for => 'Дорожные чеки' },
+				mezzi3 => { db => 'Mezzi3', label_for => 'Кредитная карточка' },
+				mezzi4 => { db => 'Mezzi4', label_for => 'Предоплачено место проживания' },
+				mezzi5 => { db => 'Mezzi5', label_for => 'Предоплаченный транспорт' },
+				mezzi6 => { db => 'Mezzi6', label_for => 'Оплачиваются все расходы' },
+				mezzi7 => { db => 'Mezzi7', label_for => 'Иные' },
+			},
+		},
+		{
+			type => 'input',
+			name => 'edt_whomothersrc',
+			label => 'Иные средства',
+			comment => 'Укажите иные финансовые гарантии',
+			check => 'WwN\s_\.\,\"\'\-\(\)\#\*',
+			db => {
+				table => 'AppData',
+				name => 'MezziOtherSrc',
+			},
+			format => 'capslock',
+		},
+	];
+}
+
+1;
 }
 
 1;

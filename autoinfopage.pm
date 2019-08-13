@@ -230,10 +230,7 @@ sub edit
 {
 	my ( $self, $task, $id, $template ) = @_;
 	
-	# надо делить с СПБ!!
-	my $editable_fields = VCS::Site::autodata_type_c::get_content_edit_rules_hash();
-	
-	$editable_fields = $self->{ af }->init_add_param( { page => $editable_fields }, { param => 1 } )->{ page };
+	my $editable_fields = $self->{ af }->init_add_param( { page => $self->get_editable_fields() }, { param => 1 } )->{ page };
 
 	my $app_data = $self->{ vars }->getparam( 'appdata' ) || 0;
 	
@@ -306,6 +303,22 @@ sub edit
 	$template->process( 'autoform_edit.tt2', $tvars );
 }
 
+sub get_editable_fields
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $center = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CenterID	FROM Appointments
+		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	return VCS::Site::autodata_type_c_spb::get_content_edit_rules_hash()
+		if VCS::Site::autodata::this_is_spb_center( $center );
+	
+	return VCS::Site::autodata_type_c::get_content_edit_rules_hash()
+}
 
 sub edited
 # //////////////////////////////////////////////////
