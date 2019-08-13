@@ -2938,7 +2938,7 @@ sub get_content_edit_rules_hash
 		{
 			type => 'input',
 			name => 'edt_addr',
-			label => 'Домашний адрес',
+			label => 'Домашний адрес и адрес электронной почты',
 			comment => 'Укажите адрес места жительства',
 			example => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
 			check => 'zWN\s\-\_\.\,\;\'\"\@',
@@ -2948,7 +2948,9 @@ sub get_content_edit_rules_hash
 			},
 			format => 'capslock',
 		},
-
+		{
+			type => 'free_line',
+		},
 		{
 			type => 'input',
 			name => 'edt_hotels',
@@ -2961,6 +2963,9 @@ sub get_content_edit_rules_hash
 				name => 'Hotels',
 			},
 			format => 'capslock',
+		},
+		{
+			type => 'free_line',
 		},
 		{
 			type => 'input',
