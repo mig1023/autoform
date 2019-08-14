@@ -857,13 +857,9 @@ sub get_page_error
 {
 	my ( $self, $error_num ) = @_;
 	
-	$error_num =~ s/[^\d]+//g;
+	my $error_type = VCS::Site::autodata::get_page_error();
 	
-	my $error_type = VCS::Site::autodata::get_page_error( $self );
-	
-	my $token = 
-	
-	my $title = ( $error_num =~ /^0?(5|6|7)$/ ? '' : $self->lang( 'ошибка: ' ) ) . $self->lang( $error_type->[ $error_num ] );
+	my $title = ( $error_num =~ /^0?(5|6)$/ ? '' : $self->lang( 'ошибка: ' ) ) . $self->lang( $error_type->[ $error_num ] );
 	
 	return ( "<center>$title</center>", undef, 'autoform.tt2' );
 }
@@ -2215,7 +2211,7 @@ sub save_data_from_form
 		
 			push ( @values, $self->encode_data_for_db( $content_rules, $request_tables->{ $table }->{ $row }, $value ) );
 			
-			$self->change_current_appdata( $value, $table_id ) if ( $app_finished != "finished" ) and ( $row eq 'PersonForAgreements' );
+			$self->change_current_appdata( $value, $table_id ) if ( $app_finished ne "finished" ) and ( $row eq 'PersonForAgreements' );
 		}
 		$request =~ s/,\s$//;		
 
@@ -2231,7 +2227,7 @@ sub change_current_appdata
 # //////////////////////////////////////////////////
 {
 	my ( $self, $new_app_id, $table_id ) = @_;
-	
+
 	return $self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET AutoAppDataID = ? WHERE ID = ?", {}, $new_app_id, $table_id->{ AutoToken }
 	);
@@ -3280,7 +3276,7 @@ sub mod_hash
 		$hash->{ Notes } = $ver;
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
-	
+
 			$hash->{ dwhom } = 0;
 		
 			$hash->{ $_ } = $info_for_contract->{ $_ } for ( keys %$info_for_contract );
