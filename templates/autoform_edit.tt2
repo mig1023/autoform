@@ -30,7 +30,7 @@
 <font face="arial">
 
 <center>
-<div id="info_form">
+<div id="app_form">
 
 <script>
 	function isMobile() {
@@ -65,8 +65,13 @@
 	[% content_text %]
 
 	<tr><td colspan="2"><br>
-	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-	<input class="small_button" type="button" value="[% langreq('Сохранить изменения') %] &#9655;" onclick="go_button('save_edit_app');"><br></td></tr>
+	<span id="mobile_order_bottom">
+	<input class="small_button action_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+	</span>
+	<span id="mobile_order_top">
+	<input class="small_button action_button" type="button" value="[% langreq('Сохранить изменения') %] &#9655;" onclick="go_button('save_edit_app');">
+	</span>
+	<br></td></tr>
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 
