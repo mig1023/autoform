@@ -857,9 +857,13 @@ sub get_page_error
 {
 	my ( $self, $error_num ) = @_;
 	
-	my $error_type = VCS::Site::autodata::get_page_error();
+	$error_num =~ s/[^\d]+//g;
 	
-	my $title = ( $error_num =~ /^0?(5|6)$/ ? '' : $self->lang( 'ошибка: ' ) ) . $self->lang( $error_type->[ $error_num ] );
+	my $error_type = VCS::Site::autodata::get_page_error( $self );
+	
+	my $token = 
+	
+	my $title = ( $error_num =~ /^0?(5|6|7)$/ ? '' : $self->lang( 'ошибка: ' ) ) . $self->lang( $error_type->[ $error_num ] );
 	
 	return ( "<center>$title</center>", undef, 'autoform.tt2' );
 }
@@ -895,7 +899,7 @@ sub get_autoform_content
 	
 	( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
 		if ( $action eq 'forward' ) and ( $step < $max_step );
-	
+
 	$step = $self->get_edit( $step, $appdata_id ) if ( $action eq 'edit' ) and $appdata_id;
 	
 	$self->get_delete( $appdata_id ) if ( $action eq 'delapp' ) and $appdata_id;
@@ -1083,9 +1087,7 @@ sub get_forward
 	
 	my $last_error = $self->check_data_from_form( $step );
 	
-	my $appnum = undef;
-	
-	my $appid = undef;
+	my ( $appnum, $appid ) = ( undef, undef );
 	
 	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
 		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
@@ -1138,7 +1140,17 @@ sub set_appointment_finished
 {
 	my $self = shift;
 	
-	my ( $new_appid, $ncount, $appnum ) = $self->create_new_appointment();
+	my ( $new_appid, $ncount, $appnum, $error ) = $self->create_new_appointment();
+	
+	if ( $error ) {
+	
+		$self->query( 'query', __LINE__, "
+			UPDATE AutoToken SET EndDate = NULL, Finished = 0, CreatedApp = NULL, Step = 1
+			WHERE Token = ?", {}, $self->{ token }
+		);
+	
+		return $self->redirect( 'current' );
+	}
 
 	$appnum =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
 
@@ -3082,6 +3094,13 @@ sub create_new_appointment
 		$db_rules, undef, undef, $info_for_contract, undef, $ver
 	);
 	
+	if ( !$new_appid ) {
+	
+		$self->query( 'query', __LINE__, "UNLOCK TABLES");
+		
+		return ( 0, 0, 0, "new appointment error" );
+	}
+
 	my $allapp = $self->query( 'selallkeys', __LINE__, "
 		SELECT AutoAppData.ID, SchengenAppDataID, AutoSpbAlterAppData.ID as SpbID
 		FROM AutoAppData
@@ -3257,7 +3276,7 @@ sub mod_hash
 		$hash->{ AppNum } = $appointments->getLastAppNum( $self->{ vars }, $hash->{ CenterID }, $hash->{ AppDate } );
 		
 		$hash->{ OfficeToReceive } = ( $hash->{ OfficeToReceive } == 2 ? 39 : undef ) ;
-
+		
 		$hash->{ Notes } = $ver;
 		
 		if ( ref( $info_for_contract ) eq 'HASH' ) {
@@ -3374,7 +3393,7 @@ sub insert_hash_table
 	$self->query( 'query', __LINE__, "
 		INSERT INTO $table_name($request_columns) VALUES ($request_values)", {}, @request_values
 	);
-
+	
 	my $current_id = $self->query( 'sel1', __LINE__, 
 		"SELECT last_insert_id()"
 	) || 0;
@@ -3794,7 +3813,7 @@ sub redirect
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
 	
 	return $param if $self->{ this_is_self_testing };
-	
+
 	$self->{ vars }->get_system->redirect( $self->{ autoform }->{ paths }->{ addr } . $param );
 }
 
