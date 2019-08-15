@@ -2196,7 +2196,7 @@ sub save_data_from_form
 
 	for my $table ( keys %$request_tables ) {
 		
-		next if ( $app_finished != "finished" ) and !$table_id->{ $table };
+		next if ( $app_finished ne "finished" ) and !$table_id->{ $table };
 		
 		next if $table eq 'alternative_data_source';
 	
@@ -2220,7 +2220,7 @@ sub save_data_from_form
 		);
 	}
 	
-	$self->check_special_in_rules_for_save( $step, $table_id ) if $app_finished != "finished";
+	$self->check_special_in_rules_for_save( $step, $table_id ) if $app_finished ne "finished";
 }
 
 sub change_current_appdata
