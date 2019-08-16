@@ -27,6 +27,7 @@ sub get_content_rules_hash
 {
 
 	my $standart_date_check = 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
+	my $standart_date_check_opt = 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
 
 	return {
 	
@@ -1859,7 +1860,16 @@ sub get_content_rules_hash
 				label => 'Дата рождения',
 				comment => 'Укажите дату рождения приглашающего лица',
 				example => '31.12.1900',
-				check => $standart_date_check,
+				check => $standart_date_check_opt,
+				check_logic => [
+					{
+						condition => 'free_only_if_eq',
+						table => 'Appointments',
+						name => 'VType',
+						values => '16',
+						full_error => 'Для выбранного типа визы дата рождения приглашающего лица является обязательной',
+					},
+				],
 				db => {
 					table => 'SchengenAppData',
 					name => 'HostDataDateOfBirth',
@@ -3070,12 +3080,7 @@ sub get_content_edit_rules_hash
 			type => 'input',
 			name => 'edt_calcdur',
 			label => 'Продолжительность пребывания',
-			comment => {
-				'1,31,2,3,4,5,6,7,8,9,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,39,40,42,44,45' =>
-					'При запросе многократной визы на год необходимо указать 180 дней, при запросе визы на 2 года — 360 дней',
-				'27,33,38,11,30,34,29,43,37' =>
-					'Если Вы запрашиваете визу на год, укажите 180, если на два, то 180+180, на три - 180+180+180',
-			},
+			comment => 'При запросе многократной визы на год необходимо указать 180 дней, при запросе визы на 2 года — 360 дней',
 			example => '14',
 			check => 'zWN\s\+',
 			db => {
@@ -3115,7 +3120,7 @@ sub get_content_edit_rules_hash
 			label => 'Дата начала',
 			comment => 'Укажите дату начала действия визы',
 			example => '31.12.1900',
-			check => $standart_date_check,
+			check => $standart_date_check_opt,
 			db => {
 				table => 'AppData',
 				name => 'PrevVisaFD',
@@ -3128,7 +3133,7 @@ sub get_content_edit_rules_hash
 			label => 'Дата окончания',
 			comment => 'Укажите дату окончания действия визы',
 			example => '31.12.1900',
-			check => $standart_date_check,
+			check => $standart_date_check_opt,
 			check_logic => [
 				{
 					condition => 'now_or_later',

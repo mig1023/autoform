@@ -2776,6 +2776,8 @@ sub check_logic
 				SELECT $rule->{name} FROM $prefix$rule->{table} WHERE ID = ?", 
 				$tables_id->{ $prefix.$rule->{table} }
 			);
+			
+			my @err_param = ( $element, undef, $rule->{ error }, undef, $rule->{ full_error } );
 
 			if ( $eq ) {
 				
@@ -2787,19 +2789,15 @@ sub check_logic
 				
 					$eq_find = 1 if lc( $val ) eq lc( $field_in_db );
 				}
-	
-				return $self->text_error( 14, $element, undef, $rule->{error} ) 
-					if $value and $eq_find and $not;
+
+				return $self->text_error( 14, @err_param ) if $value and $eq_find and $not;
 					
-				return $self->text_error( 13, $element, undef, $rule->{error} ) 
-					if !$value and !$eq_find and !$not;
+				return $self->text_error( 13, @err_param ) if !$value and !$eq_find and !$not;
 			}
 			else {
-				return $self->text_error( 14, $element, undef, $rule->{error} ) 
-					if $field_in_db and !$value and $not;
+				return $self->text_error( 14, @err_param ) if $field_in_db and !$value and $not;
 
-				return $self->text_error( 13, $element, undef, $rule->{error} ) 
-					if !$not and !( $field_in_db or $value );
+				return $self->text_error( 13, @err_param ) if !$not and !( $field_in_db or $value );
 			}
 		}
 		
