@@ -1860,16 +1860,7 @@ sub get_content_rules_hash
 				label => 'Дата рождения',
 				comment => 'Укажите дату рождения приглашающего лица',
 				example => '31.12.1900',
-				check => $standart_date_check_opt,
-				check_logic => [
-					{
-						condition => 'free_only_if_eq',
-						table => 'Appointments',
-						name => 'VType',
-						values => '16',
-						full_error => 'Для выбранного типа визы дата рождения приглашающего лица является обязательной',
-					},
-				],
+				check => $standart_date_check,
 				db => {
 					table => 'SchengenAppData',
 					name => 'HostDataDateOfBirth',
@@ -2080,10 +2071,17 @@ sub get_content_rules_hash
 				label => 'Дата рождения',
 				comment => 'Введите дату рождения кантактного лица приглашающей организации',
 				example => '31.12.1900',
-				check => $standart_date_check,
+				check => $standart_date_check_opt,
 				check_logic => [
 					{
 						condition => 'now_or_earlier',
+					},
+					{
+						condition => 'free_only_if_eq',
+						table => 'Appointments',
+						name => 'VType',
+						values => '16',
+						full_error => 'Для выбранного типа визы дата рождения приглашающего лица является обязательной',
 					},
 				],
 				db => {
