@@ -132,12 +132,17 @@
 
 .info_list{
 	overflow:hidden;
-	max-width:321px;
+	max-width:280px;
 	text-overflow:ellipsis;
 }
 
 .m_right{
 	text-align:right;
+}
+
+.m_right_m{
+	text-align:right;
+	white-space: nowrap;
 }
 
 .dashed_line{
