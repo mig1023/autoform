@@ -89,6 +89,13 @@
 	text-decoration:none;
 }
 
+.dotted_link_middle{
+	color:#999999;
+	font-weight:normal;
+	border-bottom:1px dotted #999999;
+	text-decoration:none;
+}
+
 .dotted_link_big{
 	color:#FF6666;
 	font-weight:normal;
