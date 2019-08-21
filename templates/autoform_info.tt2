@@ -341,6 +341,7 @@ function mobileScreenCheck() {
 		$('.big_button, .small_button').css( "margin-bottom", '2px' );
 		$('.small_button').css( "height", '25px' );
 		$('.m_left').css( "text-align", 'right' );
+		$('.m_right_m').css( "white-space", 'nowrap' );
 		$('.suppl_text, .dotted_link').css( "font-size", '12px' );
 
 		return;
@@ -351,6 +352,7 @@ function mobileScreenCheck() {
 	$('.big_button, .small_button').css( "margin-bottom", '15px' );
 	$('.small_button').css( "height", '70px' );
 	$('.m_left').css( "text-align", 'left' );
+	$('.m_right_m').css( "white-space", 'normal' );
 	$('.suppl_text, .dotted_link').css( "font-size", '15px' );
 
 	$('*').css( "font-size", '15px' );
