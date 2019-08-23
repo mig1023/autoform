@@ -2044,6 +2044,15 @@ sub get_content_rules_hash
 				comment => 'Укажите имя контактного лица приглашающей организации',
 				example => 'Ivan',
 				check => 'zW\s\-',
+				check_logic => [
+					{
+						condition => 'free_only_if_not_eq',
+						table => 'Appointments',
+						name => 'VType',
+						values => '13',
+						full_error => 'Для выбранного типа визы имя приглашающего лица является обязательным полем',
+					},
+				],
 				db => {
 					table => 'SchengenExtData',
 					name => 'InvitName',
@@ -2057,7 +2066,16 @@ sub get_content_rules_hash
 				label => 'Фамилия приглашающего',
 				comment => 'Укажите фамилию контактного лица приглашающей организации',
 				example => 'Ivanov',
-				check => 'zW\s\-',
+				check => 'W\s\-',
+				check_logic => [
+					{
+						condition => 'free_only_if_not_eq',
+						table => 'Appointments',
+						name => 'VType',
+						values => '13',
+						full_error => 'Для выбранного типа визы фамилия приглашающего лица является обязательным полем',
+					},
+				],
 				db => {
 					table => 'SchengenExtData',
 					name => 'InvitSurname',
@@ -2077,11 +2095,11 @@ sub get_content_rules_hash
 						condition => 'now_or_earlier',
 					},
 					{
-						condition => 'free_only_if_eq',
+						condition => 'free_only_if_not_eq',
 						table => 'Appointments',
 						name => 'VType',
-						values => '16',
-						full_error => 'Для выбранного типа визы дата рождения приглашающего лица является обязательной',
+						values => '13',
+						full_error => 'Для выбранного типа визы дата рождения приглашающего лица является обязательным полем',
 					},
 				],
 				db => {
