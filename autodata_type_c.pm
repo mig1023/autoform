@@ -2043,7 +2043,7 @@ sub get_content_rules_hash
 				label => 'Имя приглашающего',
 				comment => 'Укажите имя контактного лица приглашающей организации',
 				example => 'Ivan',
-				check => 'zW\s\-',
+				check => 'W\s\-',
 				check_logic => [
 					{
 						condition => 'free_only_if_not_eq',
@@ -2966,7 +2966,7 @@ sub get_content_edit_rules_hash
 			name => 'edt_addr',
 			label => 'Домашний адрес и адрес электронной почты',
 			comment => 'Укажите адрес места жительства',
-			example => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
+			example => 'Via Esempio 1',
 			check => 'zWN\s\-\_\.\,\;\'\"\@',
 			db => {
 				table => 'AppData',
