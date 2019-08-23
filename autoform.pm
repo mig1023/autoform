@@ -908,8 +908,6 @@ sub get_autoform_content
 	
 	my $page = $self->get_content_rules( $step, 'full' );
 	
-	$self->copy_unpersonal_information() if $page->[ 0 ]->{ copy_from_other_applicants };
-	
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
 	if ( !$last_error and ( exists $page->[ 0 ]->{ relation } ) ) {
@@ -936,6 +934,8 @@ sub get_autoform_content
 			$title .= " ( $all / $max )" if $max;
 		}
 	}
+	
+	$self->copy_unpersonal_information() if $page->[ 0 ]->{ copy_from_other_applicants };
 
 	my ( $content, $template ) = $self->get_html_page( $step, $appnum );
 
@@ -1449,7 +1449,7 @@ sub copy_unpersonal_information
 		'SchengenAppData' => { target => $app->{ SchengenAppDataID } },
 		'SpbAlterAppData' => { target => $app->{ SpbID } },
 	};	
-	
+
 	$self->copy_information( $self->find_source( $copy_ids, $app->{ AutoAppID }, $app->{ VisaPurpose } ) );
 }
 

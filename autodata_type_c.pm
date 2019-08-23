@@ -626,7 +626,7 @@ sub get_content_rules_hash
 				name => 'homeaddress',
 				label => 'Домашний адрес',
 				comment => 'Фактический адрес проживания заявителя',
-				example => 'M.Tolmachevskiy pereulok 6 b.1',
+				example => 'Via Esempio 1',
 				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
@@ -992,7 +992,7 @@ sub get_content_rules_hash
 				name => 'workaddr',
 				label => 'Адрес компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
-				example => 'M.Tolmachevskiy pereulok 6 b.1',
+				example => 'Via Esempio 1',
 				check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
 				check_logic => [
 					{
@@ -1076,7 +1076,6 @@ sub get_content_rules_hash
 				progress => 5,
 				param => 1,
 				all_app_in_title => 1,
-				copy_from_other_applicants => 'now',
 				
 				relation => {
 					only_if_younger => {
@@ -1268,6 +1267,7 @@ sub get_content_rules_hash
 				progress => 6,
 				all_app_in_title => 1,
 				param => 1,
+				copy_from_other_applicants => 'now',
 				
 			},
 			{
