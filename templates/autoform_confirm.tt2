@@ -54,6 +54,9 @@
 			<div style="color:rgba(68, 87, 98, 0.69);font-size:100%;font-size: 8px; line-height: 1.5;"> 
 			<strong>[%dis_head%]</strong> <br>
 			[%dis_tx%]</div>
+			<div style="color:rgba(68, 87, 98, 0.69);font-size:100%;font-size: 14px; line-height: 1.5;"> 
+			<strong><br>[%no_reply_head%]</strong> <br>
+			[%no_reply%]</div>
                 </td>
                 <td style="background-color:rgba(241, 245, 247, 0.5);padding:20px;border-top-right-radius:
                   7px;border-bottom-right-radius: 7px;">
@@ -96,6 +99,12 @@
                     0px;border: 1px solid #cad3d9;border-radius:
                     4px;color: #33c3ba;background:
                     #f7f9fa;margin-bottom: 7px;">[%prnt_btn%]</a>
+		    <a moz-do-not-send="true" href="[%link_site%]/autoform/?t=[%app_token%]"
+                    style="width: 177px;text-decoration:
+                    none;text-align: center;display: block;padding: 1px
+                    0px;border: 1px solid #cad3d9;border-radius:
+                    4px;color: #33c3ba;background:
+                    #f7f9fa;margin-bottom: 7px;">[%edit_btn%]</a>
                 </td>
               </tr>
               <tr>

@@ -3557,8 +3557,7 @@ sub send_app_confirm
 
 	$replacer->{ date_time } = 
 		$date_sp[ 2 ] . ' ' . $self->lang( $months->{ $date_sp[ 1 ] } ) . ' ' . $date_sp[ 0 ] . ', ' . 
-		$self->{ vars }->get_system->time_to_str( $tstart ) . ' - ' .
-		$self->{ vars }->get_system->time_to_str( $tend );
+		$self->{ vars }->get_system->time_to_str( $tstart );
 	
 	$replacer->{ app_person } = ( !$data->{ dwhom } ? '<b>' . $lang_local->{ pers } .'</b>' : 
 		$lang_local->{ by_the_doc } . ' <b>' . 
