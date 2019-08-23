@@ -2790,8 +2790,8 @@ sub check_logic
 					$eq_find = 1 if lc( $val ) eq lc( $field_in_db );
 				}
 
-				return $self->text_error( 14, @err_param ) if $value and $eq_find and $not;
-					
+				return $self->text_error( 14, @err_param ) if !$value and $eq_find and $not;
+			
 				return $self->text_error( 13, @err_param ) if !$value and !$eq_find and !$not;
 			}
 			else {
