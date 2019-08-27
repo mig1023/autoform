@@ -2955,6 +2955,51 @@ sub get_content_edit_rules_hash
 		{
 			type => 'text',
 			name => 'edt_addr_text',
+			label => 'Личные данные',
+			font => 'bold',
+		},
+		{
+			type => 'free_line',
+		},
+		{
+			type => 'input',
+			name => 'birthdate',
+			label => 'Дата рождения',
+			comment => 'Введите дату рождения',
+			example => '31.12.1900',
+			check => $standart_date_check,
+			complete_check => 'not_empty',
+			check_logic => [
+				{
+					condition => 'now_or_earlier',
+				},
+			],
+			db => {
+				table => 'AppData',
+				name => 'BirthDate',
+			},
+			special => 'mask',
+		},
+		{
+			type => 'input',
+			name => 'brhplace',
+			label => 'Место рождения',
+			comment => 'Укажите место рождения латинскими буквами в соответствии с информацией в загранпаспорте, населенный пункт должен быть указан обязательно',
+			example => [
+				'Pushkino, Moscowskaya',
+				'Moscow',
+				'Belgorod, Belgorodskaya',
+			],
+			check => 'zWN\s\-\,\;',
+			db => {
+				table => 'AppData',
+				name => 'BrhPlace',
+			},
+			format => 'capslock'
+		},
+		{
+			type => 'text',
+			name => 'edt_addr_text',
 			label => 'Адреса',
 			font => 'bold',
 		},
@@ -2982,7 +3027,7 @@ sub get_content_edit_rules_hash
 			name => 'edt_hotels',
 			label => 'Название гостиницы или ФИО приглашающего',
 			comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней- укажите первое.',
-			example => 'Via Esempio 1',
+			example => 'VMS',
 			check => 'zW\s\-\.',
 			db => {
 				table => 'AppData',
