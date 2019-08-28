@@ -8,7 +8,6 @@ use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
-use VCS::Site::autoselftest;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -48,8 +47,6 @@ sub getContent
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 
-	# return autoselftest( @_ ) if /^selftest$/i;  # <--- only for development
-	
 	return autoform( @_ ) if /^index$/i;
 	
 	return get_pcode( @_ ) if /^findpcode$/i;
@@ -121,8 +118,6 @@ sub get_content_rules_hash_opt
 	
 	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
-	return VCS::Site::autoselftest::get_content_rules_hash() if $self->{ this_is_self_testing };
-
 	return VCS::Site::autodata_type_d::get_content_rules_hash() if $visa_category eq 'D';
 
 	return VCS::Site::autodata_type_c_spb::get_content_rules_hash() if VCS::Site::autodata::this_is_spb_center( $center );
@@ -383,25 +378,11 @@ sub get_mobile_api
 
 	my $api_response = VCS::Site::automobile_api::get_mobile_api( $self, $token );
 
-	return $api_response if $self->{ this_is_self_testing };
-	
 	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 	
 	return if ref( $api_response ) != /^(HASH|ARRAY)$/;
 	
 	print JSON->new->pretty->encode( $api_response );
-}
-
-sub autoselftest
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $self_test_result = VCS::Site::autoselftest::selftest( $self );
-	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	print $self_test_result;
 }
 
 sub autoinfopage
@@ -474,8 +455,6 @@ sub get_geo_info
 	
 		my $branches = VCS::Site::autodata::get_geo_branches();
 		
-		$branches = VCS::Site::autoselftest::get_geo_branches() if $self->{ this_is_self_testing };
-
 		$addr =~ s/\r?\n/<br>/g;
 		
 		$branches->{ $center }->[ 2 ] = $addr;
@@ -723,8 +702,6 @@ sub get_token_and_create_new_form_if_need
 	
 	return '06' if $self->{ autoform }->{ general }->{ technical_work };
 
-	$token =~ s/[^a-z0-9\-]//g unless $self->{ this_is_self_testing };
-	
 	return $self->token_generation() if $token eq '';
 	
 	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
@@ -1844,8 +1821,6 @@ sub get_progressbar_hash_opt
 	
 	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
 		
-	return VCS::Site::autoselftest::get_progressline() if $self->{ this_is_self_testing };
-	
 	return VCS::Site::autodata_type_d::get_progressline() if $visa_category eq 'D';
 	
 	return VCS::Site::autodata_type_c_spb::get_progressline() if VCS::Site::autodata::this_is_spb_center( $center );
@@ -2826,8 +2801,6 @@ sub check_logic
 
 			my $blocket_emails = VCS::Site::autodata::get_blocked_emails();
 			
-			$blocket_emails = VCS::Site::autoselftest::get_blocked_emails() if $self->{ this_is_self_testing };
-			
 			for my $m ( @$blocket_emails ) {
 				
 				my %check = map { $_ => 1 } @{ $m->{ emails } };
@@ -3459,8 +3432,6 @@ sub get_pcode
 		}
 	}
 
-	return $finded_pcode if $self->{ this_is_self_testing };
-	
 	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 	
 	my $tvars = {
@@ -3676,8 +3647,6 @@ sub cached
 		$name, $save, $self->{ autoform }->{ memcached }->{ memcached_exptime }
 	) if $save;
 	
-	return if $self->{ this_is_self_testing };
-
 	return $self->{ vars }->get_memd->get( $name );
 }
 
@@ -3724,8 +3693,6 @@ sub check_passnum_already_in_pending
 
 	$pass_already = undef unless $pass_already;
 
-	return ( $pass_already ? 1 : 0 ) if $self->{ this_is_self_testing };
-	
 	return ( $pass_already, $pass_list, $pass_double );
 }
 
@@ -3745,8 +3712,6 @@ sub mutex_fail
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	
-	return if $self->{ this_is_self_testing };
 	
 	my $app_status = $self->check_all_app_finished_and_not_empty();
 	
@@ -3805,8 +3770,6 @@ sub redirect
 	
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
 	
-	return $param if $self->{ this_is_self_testing };
-
 	$self->{ vars }->get_system->redirect( $self->{ autoform }->{ paths }->{ addr } . $param );
 }
 
