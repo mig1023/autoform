@@ -254,6 +254,7 @@ sub get_doc_list
 			id => 1,
 			title => 'Загранпаспорт',
 			visa => '1, 13, 9, 17, 15',
+			help => '/zagranpasport/',
 		},
 		{ 
 			id => 2,
@@ -279,6 +280,11 @@ sub get_doc_list
 			id => 6,
 			title => 'Финансовая гарантия',
 			visa => '1, 13, 15',
+			help => {
+				1 => '',
+				13 => '',
+				15 => '',
+			},
 		},
 		{
 			id => 7,

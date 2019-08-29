@@ -259,27 +259,35 @@
 	<br><br>
 	<h2>[% langreq('Загрузить документы') %]</h2><br></td></tr>
 	
-	<tr><td colspan="2" align ="justify">
+	<tr><td colspan="2" align ="justify" class="grayborder">
 	<span class="suppl_text">
 	[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %].
 	<br><br>[% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %].
 	<br>[% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %].	
 	<br><br>[% langreq('Допустимы к загрузки изображения формата в формате JPEG, PNG, а также файлы PDF') %].
 	<br>[% langreq('Максимально допустимый размер загружаемого файла ') %] [% max_size_mb %] [% langreq('МБ') %].
-	<br><br><br>
-	</span></td></tr>
+	<br></span></td></tr>
+	
+	<tr><td colspan="2">&nbsp;</td></tr>
 
 	<tr><td><table width="100%">
 	[% FOREACH doc IN doc_list %]
 	<tr>
-		<td>[% langreq(doc.title) %]</td>
+		<td>[% langreq(doc.title) %]
+		[% IF doc.help != '' %]
+			<a target="_blank" class="nfc_link" href="[% doc.help %]">[ ? ]</a>
+		[% END %]
+		</td>
 		<td>
 		<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
+		[% IF doc.type != '' %]
+			<img src="/vcs/static/images/type_[% doc.type %].png">
+		[% END %]
 		<span id="img_span_[% doc.id %]">[% doc.date %]</span>
 		</td>
-		<td>		
+		<td class="m_right">		
 		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept="image/*" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input class="small_button" type="button" value="Загрузить" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
+		<input class="small_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
 		</td>
 	</tr>
 	[% END %]
@@ -514,7 +522,7 @@ function go_button(where, who) {
 		
 		var ext = parts.pop().toLowerCase();
 		
-		if ( ( ext != 'jpg' ) && ( ext != 'jpeg' ) && ( ext !='png' ) ) {
+		if ( ( ext != 'jpg' ) && ( ext != 'jpeg' ) && ( ext !='png' ) && ( ext !='pdf' ) ) {
 		
 			return error_upload( '[% langreq('У файла недопустимый графический формат') %]', doc_id );
 		}
@@ -536,11 +544,19 @@ function go_button(where, who) {
 				
 					window.location = '/autoform/?t=[% token %]&action=upload_doc&appdata=[% app_id %]';
 				}
+				else if (data.indexOf('already')+1) {
+					
+					alert( '[% langreq('Данный файл уже загружен для этого заявителя.') %]' );
+				}
+				else if (data.indexOf('size')+1) {
+					
+					alert( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]' );
+				}
 				else {
 					alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно, файл в неправильном формате.') %]' );
-					
-					show_hide( doc_id, 'img_span_', 'tmp_span_' );
 				}
+				
+				show_hide( doc_id, 'img_span_', 'tmp_span_' );
 			}
 		});
 	};

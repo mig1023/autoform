@@ -585,7 +585,7 @@ sub upload_doc
 	);
 	
 	my $all_docs = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT DocType, UploadDate FROM DocUploaded WHERE AppDataID = ?", $appdata_id
+		SELECT DocType, UploadDate, Ext FROM DocUploaded WHERE AppDataID = ?", $appdata_id
 	) if $appdata_id;
 
 	my $index = 0;
@@ -594,7 +594,7 @@ sub upload_doc
 	
 		my %visas = map { $_ => 1 } split /,\s?/, $doc_list->[ $index ]->{ visa };
 
-		unless ( exists $visas{ $visa_type } ) {
+		if ( !exists $visas{ $visa_type } ) {
 
 			splice( @$doc_list, $index, 1 );
 		}
@@ -604,11 +604,21 @@ sub upload_doc
 				if ( $doc_list->[ $index ]->{ id } == $doc->{ DocType } ) {
 				
 					$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}:\d{2})/;
-				
+					
 					$doc_list->[ $index ]->{ date } = "$4 $3.$2.$1";
+					$doc_list->[ $index ]->{ type } = $doc->{ Ext };
+					
 				}
 			}
+			
+			my $help_var = $doc_list->[ $index ]->{ help };
+			
+			my $help_link = ( ref( $help_var ) eq 'HASH' ? $help_var->{ $visa_type } : $help_var );
+			
+			$doc_list->[ $index ]->{ help } = $help_link;
 		}
+		
+
 	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -654,14 +664,20 @@ sub upload_file
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
 	return print 'error' if ( !$file or !$appdata_id or !$doc_type );
-	
-	my ( $path_name, $date_name ) = $self->get_folder_name( $appid );
-	
-	my $md5 = md5_hex( $file_content );
-	
-	my $file_name = $path_name . $md5;
 
 	$file_content .= $_ while ( <$file> );
+		
+	my $md5 = md5_hex( $file_content );
+	
+	my $already_exist = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT ID FROM DocUploaded WHERE AppDataID = ? AND md5 = ?", $appdata_id, $md5
+	);
+
+	return print 'already' if $already_exist;
+
+	my ( $path_name, $date_name ) = $self->get_folder_name( $appid );
+	
+	my $file_name = $path_name . $md5;
 	
 	return print 'error' unless $self->set_file_content( $file_name, $file_content );
 
@@ -669,11 +685,11 @@ sub upload_file
 	
 		unlink $file_name;
 		
-		return print 'error';
+		return print 'size';
 	}
 		
 	$self->{ af }->query( 'query', __LINE__, "
-		INSERT INTO DocUploaded (AppDataID, DocType, md5, UploadDate, Folder, OriginalNameExt)
+		INSERT INTO DocUploaded (AppDataID, DocType, MD5, UploadDate, Folder, Ext)
 		VALUES (?, ?, ?, now(), ?, ?)",
 		{}, $appdata_id, $doc_type, $md5, $date_name, $ext
 	);
