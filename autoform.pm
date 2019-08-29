@@ -1311,8 +1311,7 @@ sub check_existing_id_in_token
 	
 		$list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
 			SELECT AppData.ID FROM AutoToken 
-			JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
-			JOIN AppData ON Appointments.ID = AppData.AppID
+			JOIN AppData ON AutoToken.CreatedApp = AppData.AppID
 			WHERE Token = ?", $self->{ token }
 		);
 	}
