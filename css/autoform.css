@@ -183,6 +183,10 @@
 	-webkit-transform-origin: left top;
 }
 
+.hidden {
+	display:none;
+}
+
 .suppl_text {
 	color:#585858;
 }
