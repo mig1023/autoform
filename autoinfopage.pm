@@ -55,6 +55,8 @@ sub autoinfopage
 	
 	return upload_doc( @_ ) if /^upload_doc$/i;
 	
+	return remove_file( @_ ) if /^remove_file$/i;
+	
 	return upload_file( @_ ) if /^upload_file$/i;
 
 	return download_file( @_ ) if /^download_file$/i;
@@ -607,18 +609,19 @@ sub upload_doc
 					
 					$doc_list->[ $index ]->{ date } = "$4 $3.$2.$1";
 					$doc_list->[ $index ]->{ type } = $doc->{ Ext };
-					
 				}
 			}
 			
 			my $help_var = $doc_list->[ $index ]->{ help };
 			
-			my $help_link = ( ref( $help_var ) eq 'HASH' ? $help_var->{ $visa_type } : $help_var );
+			my $help_link = ( exists $help_var->{ ru } ?
+				$help_var->{ $self->{ af }->{ lang } }
+				:
+				$help_var->{ $visa_type }->{ $self->{ af }->{ lang } }
+			);
 			
 			$doc_list->[ $index ]->{ help } = $help_link;
 		}
-		
-
 	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -634,6 +637,36 @@ sub upload_doc
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub remove_file
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
+	
+	my $doc_type = $self->{ vars }->getparam( 'type' );
+	
+	$_ =~ s/[^0-9]//g for ( $appdata_id, $doc_type );
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	return print 'error' unless $self->{ af }->check_existing_id_in_token( $appdata_id, "finished" );
+	
+	my ( $path_to_file, $md5 ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT Folder, MD5 FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		DELETE FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", {}, $appdata_id, $doc_type
+	);
+	
+	my $file_name = $self->{ vars }->getConfig('general')->{ tmp_folder } . "doc/" . $path_to_file . $md5;
+	
+	unlink $file_name;
+	
+	return print 'ok';
 }
 
 sub upload_file
@@ -711,8 +744,7 @@ sub download_file
 	$_ =~ s/[^a-z0-9]//g for ( $appdata_id, $doc_type );
 	
 	my $folder = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT Folder FROM DocUploaded
-		WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+		SELECT Folder FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
 	) . '/' unless $appdata_id eq 'simple';
 	
 	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $appdata_id . '_' . $doc_type;
