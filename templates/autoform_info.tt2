@@ -100,7 +100,9 @@
 
 	<tr><td colspan="2">
 	<table width="100%">
-	<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
+	[% IF app_info.category == 'C' %]
+		<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
+	[% END %]
 	[% SET i = 0 %]
 	[% FOREACH person IN app_list %]
 		[% SET i = i + 1 %]
