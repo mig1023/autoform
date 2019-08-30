@@ -44,6 +44,7 @@
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "" name = "appdata" id = "appdata">
+<input type = "hidden" value = "[% lang %]" name = "lang" id = "lang">
 
 <table width="100%">
 
@@ -267,7 +268,7 @@
 	[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %].
 	<br><br>[% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %].
 	<br>[% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %].	
-	<br><br>[% langreq('Допустимы к загрузки изображения формата в формате JPEG, PNG, а также файлы PDF') %].
+	<br><br>[% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, а также файлы PDF') %].
 	<br>[% langreq('Максимально допустимый размер загружаемого файла ') %] [% max_size_mb %] [% langreq('МБ') %].
 	<br></span></td></tr>
 	
@@ -278,8 +279,10 @@
 	<tr>
 		<td>
 		[% IF doc.type != '' %]
-			&#10003;&nbsp;
+			<span class="uplsuccess">&#10003;</span>
 		[% END %]
+		&nbsp;</td>
+		<td class="info_list">
 		[% langreq(doc.title) %]
 		[% IF doc.help != '' %]
 			<a target="_blank" class="nfc_link" href="[% doc.help %]">[?]</a>
@@ -304,6 +307,16 @@
 		</td>
 	</tr>
 	[% END %]
+	<tr>
+		<td colspan="4">
+		[% langreq('Загрузить дополнительный документ по вашему усмотрению') %]
+		</td>
+		<td class="m_right">
+		<input type="file" id="upfile_opt" class="hidden" name="upfile_opt" accept="image/*" capture="camera" onchange="upload('[% opt_doc_next %]', 'upfile_opt' )"/>
+		<input class="small_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_opt').click();" />
+		</td>
+	</tr>
+	
 	</table></td></tr>
 
 	<tr><td colspan="2"><br>

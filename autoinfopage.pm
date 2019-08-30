@@ -157,6 +157,7 @@ sub get_infopage
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -307,6 +308,7 @@ sub edit
 		'js_rules'	=> $js_rules,
 		'js_symbols'	=> $symbols_error,
 		'js_errors'	=> map { $self->{ af }->lang( $_ ) } VCS::Site::autodata::get_text_error(),
+		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
@@ -344,6 +346,7 @@ sub edited
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -396,6 +399,7 @@ sub reschedule
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'error'		=> $id_or_error,
+		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -431,6 +435,7 @@ sub rescheduled
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -485,6 +490,7 @@ sub cancel
 		'app_list'	=> $app_list,
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -587,7 +593,7 @@ sub upload_doc
 	);
 	
 	my $all_docs = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT DocType, UploadDate, Ext FROM DocUploaded WHERE AppDataID = ?", $appdata_id
+		SELECT DocType, UploadDate, Name, Ext FROM DocUploaded WHERE AppDataID = ?", $appdata_id
 	) if $appdata_id;
 
 	my $index = 0;
@@ -605,7 +611,7 @@ sub upload_doc
 			
 				if ( $doc_list->[ $index ]->{ id } == $doc->{ DocType } ) {
 				
-					$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}:\d{2})/;
+					$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}):\d{2}$/;
 					
 					$doc_list->[ $index ]->{ date } = "$4 $3.$2.$1";
 					$doc_list->[ $index ]->{ type } = $doc->{ Ext };
@@ -623,6 +629,25 @@ sub upload_doc
 			$doc_list->[ $index ]->{ help } = $help_link;
 		}
 	}
+	
+	my $opt_doc_index = 1;
+	
+	for my $doc ( @$all_docs ) {
+			
+		if ( $doc->{ DocType } < 0 ) {
+		
+			$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}):\d{2}$/;
+			
+			push( @$doc_list, {
+				title => $doc->{ Name },
+				date => "$4 $3.$2.$1",
+				type => $doc->{ Ext },
+				id => $doc->{ DocType },
+			} );
+			
+			$opt_doc_index += 1 ;
+		}
+	}
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -635,6 +660,7 @@ sub upload_doc
 		'max_size_mb'	=> ( $self->{ autodata }->{ general }->{ max_file_upload_size } / ( 1024 * 1024 ) ),
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'opt_doc_next'	=> $opt_doc_index * -1,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -648,7 +674,7 @@ sub remove_file
 	
 	my $doc_type = $self->{ vars }->getparam( 'type' );
 	
-	$_ =~ s/[^0-9]//g for ( $appdata_id, $doc_type );
+	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -684,15 +710,17 @@ sub upload_file
 	
 	my $doc_type = $self->{ vars }->getparam( 'type' );
 	
-	$_ =~ s/[^0-9]//g for ( $appdata_id, $doc_type );
+	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
 	
 	my $file = $self->{ vars }->getparam( 'file' );
 	
-	$self->{ vars }->getparam( 'filename' ) =~ /\.([^\.]+)$/;
+	$self->{ vars }->getparam( 'filename' ) =~ /(.+)\.([^\.]+)$/;
 
-	my $ext = $1;
+	my ( $filename, $ext ) = ( $1, lc( $2 ) );
 
 	$ext =~ s/[^A-Za-z0-9_\-\.]//g;
+	$filename =~ s/\s/_/g;
+	$filename =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.]//g;
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
@@ -722,9 +750,9 @@ sub upload_file
 	}
 		
 	$self->{ af }->query( 'query', __LINE__, "
-		INSERT INTO DocUploaded (AppDataID, DocType, MD5, UploadDate, Folder, Ext)
-		VALUES (?, ?, ?, now(), ?, ?)",
-		{}, $appdata_id, $doc_type, $md5, $date_name, $ext
+		INSERT INTO DocUploaded (AppDataID, DocType, MD5, UploadDate, Folder, Name, Ext)
+		VALUES (?, ?, ?, now(), ?, ?, ?)",
+		{}, $appdata_id, $doc_type, $md5, $date_name, $filename, $ext
 	);
 
 	return print 'ok';
