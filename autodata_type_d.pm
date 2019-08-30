@@ -260,7 +260,7 @@ sub get_content_rules_hash
 				name => 'rulname',
 				label => 'Фамилия',
 				comment => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
-				example => 'Иванов',
+				example => 'Петров',
 				check => 'zWЁ\s\-',
 				check_logic => [
 					{
@@ -279,7 +279,7 @@ sub get_content_rules_hash
 				name => 'rufname',
 				label => 'Имя',
 				comment => 'Введите имя на русском языке так, как оно указано во внутреннем паспорте',
-				example => 'Иван',
+				example => 'Петр',
 				check => 'zWЁ\s\-',
 				check_logic => [
 					{
@@ -298,7 +298,7 @@ sub get_content_rules_hash
 				name => 'rumname',
 				label => 'Отчество',
 				comment => 'Введите отчество на русском языке так, как оно указано во внутреннем паспорте',
-				example => 'Иванович',
+				example => 'Петрович',
 				check => 'WЁ\s\-',
 				check_logic => [
 					{
