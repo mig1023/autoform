@@ -1547,7 +1547,7 @@ sub get_html_page
 	return $self->get_list_of_app() if $page_content eq '[list_of_applicants]';
 	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id() );
-	
+
 	$self->correct_values( \$current_values, $appnum );
 	
 	for my $element ( @$page_content ) {
@@ -1832,7 +1832,7 @@ sub get_html_for_element
 {
 	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment, $check ) = @_;
 
-	my $value = $self->lang( $value_original );
+	my $value = ( $type eq 'input' ? $value_original : $self->lang( $value_original ) );
 	my $param = $self->lang( $param );
 	my $comment = $self->lang( $comment );
 	my $example = $self->lang( 'пример' );
@@ -2306,7 +2306,7 @@ sub decode_data_from_db
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step, $element_name, $value ) = @_;
-	
+
 	$value = $self->date_format( $value );
 	
 	$value = '' if ( $value eq '00.00.0000' );
