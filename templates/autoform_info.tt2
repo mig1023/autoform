@@ -266,8 +266,9 @@
 	<tr><td colspan="2" align ="justify" class="grayborder">
 	<span class="suppl_text">
 	[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %].
+	<br><br>[% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %].	
+	
 	<br><br>[% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %].
-	<br>[% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %].	
 	<br><br>[% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, а также файлы PDF') %].
 	<br>[% langreq('Максимально допустимый размер загружаемого файла ') %] [% max_size_mb %] [% langreq('МБ') %].
 	<br></span></td></tr>
@@ -308,6 +309,7 @@
 	</tr>
 	[% END %]
 	<tr>
+		<tr><td colspan="5"><hr></td></tr>
 		<td colspan="4">
 		[% langreq('Загрузить дополнительный документ по вашему усмотрению') %]
 		<span id="tmp_span_opt" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
