@@ -310,6 +310,7 @@
 	<tr>
 		<td colspan="4">
 		[% langreq('Загрузить дополнительный документ по вашему усмотрению') %]
+		<span id="tmp_span_opt" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
 		</td>
 		<td class="m_right">
 		<input type="file" id="upfile_opt" class="hidden" name="upfile_opt" accept="image/*" capture="camera" onchange="upload('[% opt_doc_next %]', 'upfile_opt' )"/>

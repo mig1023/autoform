@@ -630,7 +630,7 @@ sub upload_doc
 		}
 	}
 	
-	my $opt_doc_index = 1;
+	my $opt_doc_index = 0;
 	
 	for my $doc ( @$all_docs ) {
 			
@@ -645,7 +645,7 @@ sub upload_doc
 				id => $doc->{ DocType },
 			} );
 			
-			$opt_doc_index += 1 ;
+			$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
 		}
 	}
 
@@ -660,7 +660,7 @@ sub upload_doc
 		'max_size_mb'	=> ( $self->{ autodata }->{ general }->{ max_file_upload_size } / ( 1024 * 1024 ) ),
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
-		'opt_doc_next'	=> $opt_doc_index * -1,
+		'opt_doc_next'	=> $opt_doc_index - 1,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
