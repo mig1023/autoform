@@ -557,7 +557,11 @@ function go_button(where, who) {
 
 	function upload( doc_id, upfile_field ) {
 
-		show_hide( doc_id, 'tmp_span_', 'img_span_' );
+		if ( upfile_field == 'upfile_opt' ) {
+			show_hide( 'opt', 'tmp_span_', 'img_span_' );
+		} else {
+			show_hide( doc_id, 'tmp_span_', 'img_span_' );
+		}
 		
 		var file = document.getElementById(upfile_field).files[0];
 		
@@ -610,6 +614,12 @@ function go_button(where, who) {
 				}
 				
 				show_hide( doc_id, 'img_span_', 'tmp_span_' );
+				
+				if ( upfile_field == 'upfile_opt' ) {
+					show_hide( 'opt', 'img_span_', 'tmp_span_' );
+				} else {
+					show_hide( doc_id, 'img_span_', 'tmp_span_' );
+				}
 			}
 		});
 	};
