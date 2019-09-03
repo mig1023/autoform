@@ -153,6 +153,10 @@
 	white-space: nowrap;
 }
 
+.gray_line{
+	border: 1px solid #D3D3D3;
+}
+
 .dashed_line{
 	border-bottom: 1px dashed #999999;
 }
@@ -225,6 +229,16 @@
 	display:table-cell;
 	vertical-align:middle;
 	text-align:center;
+}
+
+.middle{
+	vertical-align:middle;
+}
+
+.uplsuccess{
+	color: green;
+	font-size:25px;
+	line-height: 0.8;
 }
 
 .disclaimer {
