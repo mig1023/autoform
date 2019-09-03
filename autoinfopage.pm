@@ -598,6 +598,8 @@ sub upload_doc
 
 	my $index = 0;
 	
+	my $lang = $self->{ af }->{ lang };
+	
 	for ( my $index = $#$doc_list; $index >= 0; --$index ) {
 	
 		my %visas = map { $_ => 1 } split /,\s?/, $doc_list->[ $index ]->{ visa };
@@ -618,13 +620,9 @@ sub upload_doc
 				}
 			}
 			
-			my $help_var = $doc_list->[ $index ]->{ help };
+			my $help = $doc_list->[ $index ]->{ help };
 			
-			my $help_link = ( exists $help_var->{ ru } ?
-				$help_var->{ $self->{ af }->{ lang } }
-				:
-				$help_var->{ $visa_type }->{ $self->{ af }->{ lang } }
-			);
+			my $help_link = $help->{ ( exists $help->{ $visa_type } ? $visa_type : "base" ) }->{ $lang };
 			
 			$doc_list->[ $index ]->{ help } = $help_link;
 		}

@@ -255,9 +255,11 @@ sub get_doc_list
 			title => 'Загранпаспорт',
 			visa => '1, 13, 9, 17, 15',
 			help => {
-				ru => '/zagranpasport/',
-				en => '/travel-document-passport/',
-				it => '/il-titolo-di-viaggio/',
+				base => {
+					ru => '/zagranpasport/',
+					en => '/travel-document-passport/',
+					it => '/il-titolo-di-viaggio/',
+				},
 			},
 		},
 		{ 
@@ -283,8 +285,13 @@ sub get_doc_list
 		{
 			id => 6,
 			title => 'Финансовая гарантия',
-			visa => '1, 13, 15',
+			visa => '1, 13, 15, 2',
 			help => {
+				base => {
+					ru => 'ru',
+					en => 'en',
+					it => 'it',
+				},
 				1 => {
 					ru => 'ru',
 					en => 'en',
@@ -309,7 +316,7 @@ sub get_doc_list
 		},
 		{
 			id => 8,
-			title => 'Согласие о перс.данных',
+			title => 'Согласие на обработку ПД',
 			visa => '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17',
 		},
 		{
