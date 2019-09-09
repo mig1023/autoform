@@ -2566,10 +2566,10 @@ sub check_param
 	$value = $self->get_prepare_line( $value );
 	
 	return $self->text_error( 30, $element )
-		if ( $element->{ example } ne '' ) and ( $value eq $element->{ example } ); 
+		if ( $element->{ example_not_for_copy } and $element->{ example } ne '' ) and ( $value eq $element->{ example } ); 
 
-	return $self->text_error( 0, $element ) if 
-		( $rules =~ /z/ ) and (	( $value eq '' ) or ( $value eq '0' ) );
+	return $self->text_error( 0, $element )
+		if ( $rules =~ /z/ ) and ( ( $value eq '' ) or ( $value eq '0' ) );
 			
 	return if $rules eq 'z';
 
