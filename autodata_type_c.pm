@@ -124,6 +124,7 @@ sub get_content_rules_hash
 				label => 'Подтвердите email',
 				comment => 'Обратите внимание, что адрес электронной почты необходимо вводить вручную, не копируя его из предыдущего поля. Это поможет Вам избежать ошибки и возможной отправки подтверждения Вашей записи не тому адресату.',
 				example => 'info@italyvms.ru',
+				example_not_for_copy => 1,
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -480,6 +481,7 @@ sub get_content_rules_hash
 				label => '№ загранпаспорта',
 				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
 				example => '650000001',
+				example_not_for_copy => 1,
 				check => 'zWN',
 				complete_check => 'not_empty',
 				check_logic => [
@@ -551,6 +553,7 @@ sub get_content_rules_hash
 				label => 'Кем выдан',
 				comment => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
 				example => 'FMS 12345',
+				example_not_for_copy => 1,
 				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
@@ -655,6 +658,7 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
 				example => 'info@italyvms.ru',
+				example_not_for_copy => 1,
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -865,6 +869,7 @@ sub get_content_rules_hash
 				label => 'Название',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => 'VMS',
+				example_not_for_copy => 1,
 				check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
 				check_logic => [
 					{
@@ -931,6 +936,7 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите адрес почты, по которому можно будет связаться с компанией',
 				example => 'info@italyvms.ru',
+				example_not_for_copy => 1,
 				check => 'WN\@\-\_\.',
 				check_logic => [
 					{
@@ -1664,6 +1670,7 @@ sub get_content_rules_hash
 				label => 'Название гостиницы или ФИО приглашающего',
 				comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней- укажите первое.',
 				example => 'VMS',
+				example_not_for_copy => 1,
 				check => 'zW\s\-\.',
 				db => {
 					table => 'AppData',
@@ -1719,6 +1726,7 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите адрес почты, по которому можно будет связаться с гостиницей',
 				example => 'info@italyvms.ru',
+				example_not_for_copy => 1,
 				check => 'WN\@\-\_\.',
 				check_logic => [
 					{
@@ -1757,6 +1765,7 @@ sub get_content_rules_hash
 				label => 'Название гостиницы или ФИО приглашающего',
 				comment => 'Укажите полное название гостиницы и данные приглашающего лица',
 				example => 'VMS',
+				example_not_for_copy => 1,
 				check => 'W\s\-\.',
 				db => {
 					table => 'AppData',
@@ -1928,6 +1937,7 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Укажите адрес электронной почты',
 				example => 'info@italyvms.ru',
+				example_not_for_copy => 1,
 				check => 'zWN\@\s\-\_\.',
 				check_logic => [
 					{
@@ -1990,6 +2000,7 @@ sub get_content_rules_hash
 				label => 'Название приглашающей компании',
 				comment => 'Укажите полное название организации',
 				example => 'Visa Management Service',
+				example_not_for_copy => 1,
 				check => 'zW\s\-\.',
 				db => {
 					table => 'AppData',
@@ -2115,6 +2126,7 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Укажите адрес электронной почты',
 				example => 'info@italyvms.ru',
+				example_not_for_copy => 1,
 				check => 'zWN\@\s\-\_\.',
 				check_logic => [
 					{
@@ -2482,6 +2494,7 @@ sub get_content_rules_hash
 				label => 'Адрес регистрации',
 				comment => 'Укажите адрес регистрации',
 				example => 'г.Москва, М.Толмачевский пер., д. 6, стр.1',
+				example_not_for_copy => 1,
 				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'AppData',
@@ -2599,6 +2612,7 @@ sub get_content_rules_hash
 				label => 'Адрес',
 				comment => 'Полный адрес, включая индекс',
 				example => '119017, г.Москва, М.Толмачевский пер., д. 6, стр.1',
+				example_not_for_copy => 1,
 				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'Appointments',
@@ -2750,6 +2764,7 @@ sub get_content_rules_hash
 				label => 'Адрес доставки',
 				comment => 'Введите адрес для доставки документов документов, без указания индекса и города; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				example => 'Малый Толмачёвский пер., д.6 стр.1',
+				example_not_for_copy => 1,
 				check => 'ЁN\s\-\_\.\,\;\'\"',
 				check_logic => [
 					{
@@ -3029,6 +3044,7 @@ sub get_content_edit_rules_hash
 			label => 'Название гостиницы или ФИО приглашающего',
 			comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней- укажите первое.',
 			example => 'VMS',
+			example_not_for_copy => 1,
 			check => 'zW\s\-\.',
 			db => {
 				table => 'AppData',
