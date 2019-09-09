@@ -2564,6 +2564,9 @@ sub check_param
 	my $rules = $element->{ check };
 
 	$value = $self->get_prepare_line( $value );
+	
+	return $self->text_error( 30, $element )
+		if ( $element->{ example } ne '' ) and ( $value eq $element->{ example } ); 
 
 	return $self->text_error( 0, $element ) if 
 		( $rules =~ /z/ ) and (	( $value eq '' ) or ( $value eq '0' ) );
