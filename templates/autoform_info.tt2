@@ -44,7 +44,6 @@
 <form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "" name = "appdata" id = "appdata">
-<input type = "hidden" value = "[% lang %]" name = "lang" id = "lang">
 
 <table width="100%">
 
@@ -102,7 +101,7 @@
 	<tr><td colspan="2">
 	<table width="100%">
 	[% IF app_info.category == 'C' %]
-		<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td><td>&nbsp;</td></tr>
+		<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
 	[% END %]
 	[% SET i = 0 %]
 	[% FOREACH person IN app_list %]
@@ -114,10 +113,6 @@
 		[% IF app_info.category == 'C' %]
 			<input class="small_button" type="button" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.ID %]');">
 			&nbsp;<input class="small_button" type="button" value="[% langreq('Распечатать') %]" onclick="go_button('print_a', '[% person.ID %]');">
-		</td><td class="m_right_m">
-			&nbsp;<input class="small_button" type="button" value="[% langreq('Загрузить документы') %]" onclick="go_button('upload_doc', '[% person.ID %]');"></td>
-		[% ELSE %]
-			&nbsp;</td><td>&nbsp;
 		[% END %]
 		</td>
 		</tr>
@@ -256,76 +251,6 @@
 	<tr><td colspan="2"><input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
 
 	<tr><td colspan="2">&nbsp;</td></tr>	
-	
-[% ELSIF title == 6 %]
-
-	<tr><td colspan="2">
-	<br><br>
-	<h2>[% langreq('Загрузить документы') %]</h2><br></td></tr>
-	
-	<tr><td colspan="2" align ="justify" class="grayborder">
-	<span class="suppl_text">
-	[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %].
-	<br><br>[% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %].	
-	
-	<br><br>[% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %].
-	<br><br>[% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %].
-	<br>[% langreq('Максимально допустимый размер загружаемого файла ') %] [% max_size_mb %] [% langreq('МБ') %].
-	<br></span></td></tr>
-	
-	<tr><td colspan="2">&nbsp;</td></tr>
-
-	<tr><td><table width="100%">
-	[% FOREACH doc IN doc_list %]
-	<tr>
-		<td>
-		[% IF doc.type != '' %]
-			<span class="uplsuccess">&#10003;</span>
-		[% END %]
-		&nbsp;</td>
-		<td class="info_list">
-		[% langreq(doc.title) %]
-		[% IF doc.help != '' %]
-			<a target="_blank" class="nfc_link" href="[% doc.help %]">[?]</a>
-		[% END %]
-		</td>
-		<td class="middle">
-		<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
-		[% IF doc.type != '' %]
-			<img src="/vcs/static/images/type_[% doc.type %].png">
-		[% END %]
-		</td>
-		<td class="middle">
-		<span id="img_span_[% doc.id %]" class="ltl_text">[% doc.date %]</span>
-		</td>
-		<td class="m_right">
-		[% IF doc.type != '' %]
-			<input class="small_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
-		[% ELSE %]
-			<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-			<input class="small_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
-		[% END %]
-		</td>
-	</tr>
-	[% END %]
-	<tr>
-		<tr><td colspan="5"><hr class="gray_line"></td></tr>
-		<td colspan="4">
-		[% langreq('Загрузить дополнительный документ по вашему усмотрению') %]
-		<span id="tmp_span_opt" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
-		</td>
-		<td class="m_right">
-		<input type="file" id="upfile_opt" class="hidden" name="upfile_opt" accept="image/*" capture="camera" onchange="upload('[% opt_doc_next %]', 'upfile_opt' )"/>
-		<input class="small_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_opt').click();" />
-		</td>
-	</tr>
-	
-	</table></td></tr>
-
-	<tr><td colspan="2"><br>
-	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
-
-	<tr><td colspan="2">&nbsp;</td></tr>
 	
 [% END %]
 
@@ -514,119 +439,6 @@ function go_button(where, who) {
 	$('#appdata').val(who);
 	document.dataform.submit();
 };
-
-[% IF ( title == 6 ) %]
-
-	function show_hide( doc_id, show, hide ) {
-		
-		$('#' + hide + doc_id).hide();
-		$('#' + show + doc_id).show();
-	}
-
-
-	function error_upload( line, doc_id ) {
-
-		alert( line );
-		
-		show_hide( doc_id, 'img_span_', 'tmp_span_' );
-	}
-	
-	function remove( doc_id ) {
-	
-		var addr = '?t=[% token %]&action=remove_file&appdata=[% app_id %]&type=' + doc_id;
-		
-		if ( confirm("[% langreq("Вы уверены, что хотите удалить файл?") %]") ) {
-		
-			$.ajax({
-				url: '/autoform/' + addr,
-				type: 'POST',
-				encoding: 'utf8',
-				success: function(data) {
-
-					if (data.indexOf('ok')+1) {
-					
-						window.location = '/autoform/?t=[% token %]&action=upload_doc&appdata=[% app_id %]';
-					}
-					else {
-						alert( '[% langreq('В процессе удаления произошла ошибка.') %]' );
-					}
-					
-					show_hide( doc_id, 'img_span_', 'tmp_span_' );
-				}
-			});
-		}
-	}
-
-	function upload( doc_id, upfile_field ) {
-
-		if ( upfile_field == 'upfile_opt' ) {
-			show_hide( 'opt', 'tmp_span_', 'img_span_' );
-		} else {
-			show_hide( doc_id, 'tmp_span_', 'img_span_' );
-		}
-		
-		var file = document.getElementById(upfile_field).files[0];
-		
-		if ( file.size > [% max_size %] ) {
-
-			return error_upload( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]', doc_id );
-		}
-		
-		var parts = file.name.split('.');
-		
-		if ( parts.length <= 1 ) {
-
-			return error_upload( '[% langreq('У файла неверно указан формат') %]', doc_id );
-		}
-		
-		var ext = parts.pop().toLowerCase();
-		
-		if (/^(jpg|jpeg|png|tif|tiff|pdf)$/i.test(ext)) {
-		
-			return error_upload( '[% langreq('У файла недопустимый графический формат') %]', doc_id );
-		}
-		
-		var addr = '?t=[% token %]&action=upload_file&filename='+file.name+'&appdata=[% app_id %]&type=' + doc_id;
-		var ajaxData = new FormData();
-		ajaxData.append('file', file);
-		
-		$.ajax({
-			url: '/autoform/' + addr,
-			type: 'POST',
-			data: ajaxData,
-			encoding: 'utf8',
-			contentType: false,
-			processData: false,
-			success: function(data) {
-			
-				if (data.indexOf('ok')+1) {
-				
-					window.location = '/autoform/?t=[% token %]&action=upload_doc&appdata=[% app_id %]';
-				}
-				else if (data.indexOf('already')+1) {
-					
-					alert( '[% langreq('Данный файл уже загружен для этого заявителя.') %]' );
-				}
-				else if (data.indexOf('size')+1) {
-					
-					alert( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]' );
-				}
-				else {
-					alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно, файл в неправильном формате.') %]' );
-				}
-				
-				show_hide( doc_id, 'img_span_', 'tmp_span_' );
-				
-				if ( upfile_field == 'upfile_opt' ) {
-					show_hide( 'opt', 'img_span_', 'tmp_span_' );
-				} else {
-					show_hide( doc_id, 'img_span_', 'tmp_span_' );
-				}
-			}
-		});
-	};
-
-[% END %]
 
 </script>
 

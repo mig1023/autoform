@@ -7,7 +7,6 @@ use VCS::Site::autodata;
 use Data::Dumper;
 use Date::Calc;
 use JSON;
-use Digest::MD5 qw( md5_hex );
 
 sub new
 # //////////////////////////////////////////////////
@@ -30,8 +29,6 @@ sub autoinfopage
 	
 	$self->{ vars }->{ session }->{ login } = 'website';
 	
-	$self->{ autodata } = VCS::Site::autodata::get_settings();
-	
 	$self->{ vars }->{ session }->{ langid } = $self->{ vars }->getparam( 'lang' )
 		if $self->{ vars }->getparam( 'lang' ) =~ /^(en|it)$/i ;
 		
@@ -52,14 +49,6 @@ sub autoinfopage
 	return reschedule( @_ ) if /^reschedule$/i;
 	
 	return rescheduled( @_ ) if /^rescheduled$/i;
-	
-	return upload_doc( @_ ) if /^upload_doc$/i;
-	
-	return remove_file( @_ ) if /^remove_file$/i;
-	
-	return upload_file( @_ ) if /^upload_file$/i;
-
-	return download_file( @_ ) if /^download_file$/i;
 	
 	return cancel( @_ ) if /^cancel$/i;
 	
@@ -157,7 +146,6 @@ sub get_infopage
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
-		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -308,7 +296,6 @@ sub edit
 		'js_rules'	=> $js_rules,
 		'js_symbols'	=> $symbols_error,
 		'js_errors'	=> map { $self->{ af }->lang( $_ ) } VCS::Site::autodata::get_text_error(),
-		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
@@ -346,7 +333,6 @@ sub edited
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
-		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -399,7 +385,6 @@ sub reschedule
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'error'		=> $id_or_error,
-		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -435,7 +420,6 @@ sub rescheduled
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
-		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -490,7 +474,6 @@ sub cancel
 		'app_list'	=> $app_list,
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
-		'lang'		=> $self->{ vars }->{ session }->{ langid },
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -576,260 +559,6 @@ sub set_new_appdate
 	) unless $error;
 
 	return ( $error ? $error : $new_app_id );
-}
-
-sub upload_doc
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-	
-	my $conf = $self->{ vars }->getConfig('general');
-	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
-
-	my $doc_list = VCS::Site::autodata::get_doc_list();
-	
-	my $visa_type = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT VType FROM Appointments JOIN AppData ON AppData.AppID = Appointments.ID WHERE AppData.ID = ?", $appdata_id
-	);
-	
-	my $all_docs = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT DocType, UploadDate, Name, Ext FROM DocUploaded WHERE AppDataID = ?", $appdata_id
-	) if $appdata_id;
-
-	my $index = 0;
-	
-	my $lang = $self->{ af }->{ lang };
-	
-	for ( my $index = $#$doc_list; $index >= 0; --$index ) {
-	
-		my %visas = map { $_ => 1 } split /,\s?/, $doc_list->[ $index ]->{ visa };
-
-		if ( !exists $visas{ $visa_type } ) {
-
-			splice( @$doc_list, $index, 1 );
-		}
-		else {
-			for my $doc ( @$all_docs ) {
-			
-				if ( $doc_list->[ $index ]->{ id } == $doc->{ DocType } ) {
-				
-					$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}):\d{2}$/;
-					
-					$doc_list->[ $index ]->{ date } = "$4 $3.$2.$1";
-					$doc_list->[ $index ]->{ type } = $doc->{ Ext };
-				}
-			}
-			
-			my $help = $doc_list->[ $index ]->{ help };
-			
-			my $help_link = $help->{ ( exists $help->{ $visa_type } ? $visa_type : "base" ) }->{ $lang };
-			
-			$doc_list->[ $index ]->{ help } = $help_link;
-		}
-	}
-	
-	my $opt_doc_index = 0;
-	
-	for my $doc ( @$all_docs ) {
-			
-		if ( $doc->{ DocType } < 0 ) {
-		
-			$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}):\d{2}$/;
-			
-			push( @$doc_list, {
-				title => $doc->{ Name },
-				date => "$4 $3.$2.$1",
-				type => $doc->{ Ext },
-				id => $doc->{ DocType },
-			} );
-			
-			$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
-		}
-	}
-
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	my $tvars = {
-		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
-		'title' 	=> 6,
-		'app_id'	=> $appdata_id,
-		'doc_list'	=> $doc_list,
-		'max_size'	=> $self->{ autodata }->{ general }->{ max_file_upload_size },
-		'max_size_mb'	=> ( $self->{ autodata }->{ general }->{ max_file_upload_size } / ( 1024 * 1024 ) ),
-		'token' 	=> $self->{ token },
-		'static'	=> $self->{ autoform }->{ paths }->{ static },
-		'opt_doc_next'	=> $opt_doc_index - 1,
-	};
-	$template->process( 'autoform_info.tt2', $tvars );
-}
-
-sub remove_file
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-	
-	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
-	
-	my $doc_type = $self->{ vars }->getparam( 'type' );
-	
-	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
-	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	return print 'error' unless $self->{ af }->check_existing_id_in_token( $appdata_id, "finished" );
-	
-	my ( $path_to_file, $md5 ) = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT Folder, MD5 FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
-	);
-	
-	$self->{ af }->query( 'query', __LINE__, "
-		DELETE FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", {}, $appdata_id, $doc_type
-	);
-	
-	my $file_name = $self->{ vars }->getConfig('general')->{ tmp_folder } . "doc/" . $path_to_file . $md5;
-	
-	unlink $file_name;
-	
-	return print 'ok';
-}
-
-sub upload_file
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-	
-	my $file_content;
-	
-	my $appid = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
-	);
-
-	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
-	
-	my $doc_type = $self->{ vars }->getparam( 'type' );
-	
-	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
-	
-	my $file = $self->{ vars }->getparam( 'file' );
-	
-	$self->{ vars }->getparam( 'filename' ) =~ /(.+)\.([^\.]+)$/;
-
-	my ( $filename, $ext ) = ( $1, lc( $2 ) );
-
-	$ext =~ s/[^A-Za-z0-9_\-\.]//g;
-	$filename =~ s/\s/_/g;
-	$filename =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.]//g;
-	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-
-	return print 'error' if ( !$file or !$appdata_id or !$doc_type );
-
-	$file_content .= $_ while ( <$file> );
-		
-	my $md5 = md5_hex( $file_content );
-	
-	my $already_exist = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT ID FROM DocUploaded WHERE AppDataID = ? AND md5 = ?", $appdata_id, $md5
-	);
-
-	return print 'already' if $already_exist;
-
-	my ( $path_name, $date_name ) = $self->get_folder_name( $appid );
-	
-	my $file_name = $path_name . $md5;
-	
-	return print 'error' unless $self->set_file_content( $file_name, $file_content );
-
-	if ( -s $file_name > $self->{ autodata }->{ general }->{ max_file_upload_size } ) {
-	
-		unlink $file_name;
-		
-		return print 'size';
-	}
-		
-	$self->{ af }->query( 'query', __LINE__, "
-		INSERT INTO DocUploaded (AppDataID, DocType, MD5, UploadDate, Folder, Name, Ext)
-		VALUES (?, ?, ?, now(), ?, ?, ?)",
-		{}, $appdata_id, $doc_type, $md5, $date_name, $filename, $ext
-	);
-
-	return print 'ok';
-}
-
-sub download_file
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-	
-	my $conf = $self->{ vars }->getConfig('general');
-	
-	my $appdata_id = $self->{ vars }->getparam( 'appdata' );
-	
-	my $doc_type = $self->{ vars }->getparam( 'type' );
-	
-	$_ =~ s/[^a-z0-9]//g for ( $appdata_id, $doc_type );
-	
-	my $folder = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT Folder FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
-	) . '/' unless $appdata_id eq 'simple';
-	
-	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $appdata_id . '_' . $doc_type;
-	
-	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"preview.jpg\"\nContent-Disposition: attachment; filename=\"preview.jpg\"\n\n";
-	
-	my $file_content = $self->{ af }->get_file_content( $file_name );
-	
-	print $file_content;
-}
-
-sub set_file_content
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-	
-	my $name = shift;
-	
-	my $content = shift;
-	
-	open( my $file, '>', $name ) or return undef;
-	
-	binmode $file;
-	
-	print $file $content;
-	
-	close $file;
-	
-	return 1;
-}
-
-sub get_folder_name
-# //////////////////////////////////////////////////
-{
-	my ( $self, $appid ) = @_;
-	
-	my $conf = $self->{ vars }->getConfig('general');
-
-	my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime( time );
-	
-	$year += 1900;
-	
-	$mon += 1;
-	
-	my $path_name = $conf->{ tmp_folder } . "doc/";
-	
-	my $folder_name = '';
-	
-	for ( $year, $mon, $mday, $appid ) {
-		
-		$_ = "0$_" if $_ < 10;
-		
-		$folder_name .= $_ . '/';
-		$path_name .= $_ . '/';
-		
-		mkdir $path_name unless -d $path_name;
-	};
-	
-	return ( $path_name, $folder_name );
 }
 	
 1;
