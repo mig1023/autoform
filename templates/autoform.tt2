@@ -60,6 +60,7 @@
 				<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
 				<input type = "hidden" value = "[% biometric_data %]" name = "biometric_data" id = "biometric_data">
 				<input type = "hidden" value = "" name = "last_error_return" id = "last_error_return">
+				<input type = "hidden" value = "0" name = "urgent_slots" id = "urgent_slots">
 
 				<table style="width: 100%;">
 

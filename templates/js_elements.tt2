@@ -387,8 +387,11 @@ function get_date_from(date_id) {
 			
 			if (al.text() != '') {
 			
-				var alertText = al.text();
-				alert(alertText);
+				alert(al.text());
+				
+				$('#urgent_slots').val(1);
+			} else {
+				$('#urgent_slots').val(0);
 			}
 		}, 'xml');
 	};

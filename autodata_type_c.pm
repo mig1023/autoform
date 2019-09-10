@@ -2676,7 +2676,7 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'AppDate',
 				},
-				special => 'datepicker, mask',
+				special => 'datepicker, mask, save_urgent_info',
 				uniq_code => 'onchange="update_timeslots(1);"',
 			},
 			{

@@ -414,14 +414,14 @@ sub get_same_info_for_timeslots
 	
 	my $app = {};
 
-	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot }, $app->{ appdate } ) = 
-		$self->query( 'sel1', __LINE__, "
-			SELECT count(AutoAppData.ID), CenterID, SDate, TimeslotID, AppDate
-			FROM AutoToken 
-			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
-			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-			WHERE Token = ?", $self->{ token }
-		);
+	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot }, 
+			$app->{ appdate }, $app->{ urgent } ) = $self->query( 'sel1', __LINE__, "
+		SELECT count(AutoAppData.ID), CenterID, SDate, TimeslotID, AppDate, Urgent
+		FROM AutoToken 
+		JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $self->{ token }
+	);
 	
 	$app->{ fdate_iso } = $app->{ fdate };
 	
@@ -1165,7 +1165,9 @@ sub check_timeslots_already_full_or_not_actual
 
 	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } );
 	
-	my $timeslots = $appobj->get_timeslots_arr( $app->{ center }, $app->{ persons }, $app->{ appdate } );
+	my $timeslots = $appobj->get_timeslots_arr(
+		$app->{ center }, $app->{ persons }, $app->{ appdate }, 0, $app->{ urgent }
+	);
 
 	for ( @$timeslots ) {
 
@@ -2225,8 +2227,8 @@ sub check_special_in_rules_for_save
 			);
 
 			$self->query( 'query', __LINE__, "
-				UPDATE AutoSchengenAppData SET HostDataType = 'S'
-				WHERE ID = ?", {}, $table_id->{ AutoSchengenAppData }
+				UPDATE AutoSchengenAppData SET HostDataType = 'S' WHERE ID = ?", {},
+				$table_id->{ AutoSchengenAppData }
 				
 			) unless $visa_type == 1;
 		}
@@ -2235,6 +2237,15 @@ sub check_special_in_rules_for_save
 			my $key = 'autoform_' . $self->{ token } . '_' . $element->{ name };
 
 			$self->cached( $key, $self->param( $element->{ name } ) );
+		}
+		elsif ( $element->{ special } =~ /save_urgent_info/ ) {
+		
+			my $urgent = ( $self->param( 'urgent_slots' ) ? 1 : 0 );
+			
+			$self->query( 'query', __LINE__, "
+				UPDATE AutoAppointments SET Urgent = ? WHERE ID = ?", {},
+				$urgent, $table_id->{ AutoAppointments }
+			);
 		}
 	}
 }
