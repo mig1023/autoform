@@ -811,9 +811,18 @@ sub doc_status
 		WHERE Token = ?", $self->{ token }
 	);
 	
-	$status = 0 if $status == 7;
+	my $public_status = {
+		7  => 0,
+		8  => 3,
+		9  => 3,
+		10 => 2,
+		11 => 2,
+		12 => 3,
+		13 => 3,
+		14 => 3,
+	};
 	
-	$status = 3 if $status > 7;
+	$status = $public_status->{ $status } if exists $public_status->{ $status };
 	
 	my $doc_progressbar = VCS::Site::autodata::get_docstatus_progress();
 	
