@@ -26,6 +26,7 @@ sub get_content_rules_hash
 {
 
 	my $standart_date_check = 'zD^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
+	my $standart_date_check_opt = 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
 
 	return {
 	
@@ -102,7 +103,6 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите существующий адрес почты. На него будет выслано подтверждение записи в визовый центр. Пожалуйста, проверьте правильность каждой буквы/символа, из которых состоит адрес Вашей электронной почты',
 				example => 'info@italyvms.ru',
-				example_not_for_copy => 1,
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -123,7 +123,6 @@ sub get_content_rules_hash
 				label => 'Подтвердите email',
 				comment => 'Обратите внимание, что адрес электронной почты необходимо вводить вручную, не копируя его из предыдущего поля. Это поможет Вам избежать ошибки и возможной отправки подтверждения Вашей записи не тому адресату. ',
 				example => 'info@italyvms.ru',
-				example_not_for_copy => 1,
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -533,7 +532,6 @@ sub get_content_rules_hash
 				label => 'Кем выдан',
 				comment => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
 				example => 'FMS 12345',
-				example_not_for_copy => 1,
 				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
@@ -593,7 +591,6 @@ sub get_content_rules_hash
 				label => 'Домашний адрес',
 				comment => 'Фактический адрес проживания заявителя, без города',
 				example => 'M.Tolmachevskiy pereulok 6 b.1',
-				example_not_for_copy => 1,
 				check => 'zWN\s\-\_\.\,\;\'\"\/',
 				complete_check => 'not_empty',
 				db => {
@@ -608,7 +605,6 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
 				example => 'info@italyvms.ru',
-				example_not_for_copy => 1,
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -754,7 +750,6 @@ sub get_content_rules_hash
 				label => 'Название компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
 				example => 'VMS',
-				example_not_for_copy => 1,
 				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				db => {
 					table => 'SpbAlterAppData',
@@ -781,7 +776,6 @@ sub get_content_rules_hash
 				label => 'Адрес нахождения компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
 				example => 'M.Tolmachevskiy pereulok 6 b.1',
-				example_not_for_copy => 1,
 				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
 				db => {
 					table => 'SpbAlterAppData',
@@ -795,7 +789,6 @@ sub get_content_rules_hash
 				label => 'Контактный телефон компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
 				example => '12345',
-				example_not_for_copy => 1,
 				check => 'zN\-',
 				db => {
 					table => 'SpbAlterAppData',
@@ -1281,7 +1274,7 @@ sub get_content_rules_hash
 				label => 'Дата сдачи отпечатков, если известна',
 				comment => 'Укажите, если помните, дату, когда сдавались отпечатки пальцев для предыдущей визы',
 				example => '31.12.1900',
-				check => $standart_date_check,
+				check => $standart_date_check_opt,
 				db => {
 					table => 'AppData',
 					name => 'FingersDate',
@@ -1354,7 +1347,6 @@ sub get_content_rules_hash
 				label => 'Название гостиницы или ФИО приглашающего',
 				comment => 'Укажите полное название гостиницы и данные приглашающего лица',
 				example => 'VMS',
-				example_not_for_copy => 1,
 				check => 'zW\s\-\.',
 				db => {
 					table => 'SpbAlterAppData',
@@ -1456,7 +1448,6 @@ sub get_content_rules_hash
 				label => 'Название гостиницы или ФИО приглашающего',
 				comment => 'Укажите полное название гостиницы и данные приглашающего лица',
 				example => 'VMS',
-				example_not_for_copy => 1,
 				check => 'W\s\-\.',
 				db => {
 					table => 'AppData',
@@ -1627,7 +1618,6 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Укажите адрес электронной почты',
 				example => 'info@italyvms.ru',
-				example_not_for_copy => 1,
 				check => 'zWN\@\s\-\_\.',
 				check_logic => [
 					{
@@ -1703,7 +1693,6 @@ sub get_content_rules_hash
 				label => 'Название приглашающей компании',
 				comment => 'Укажите полное название организации',
 				example => 'Visa Management Service',
-				example_not_for_copy => 1,
 				check => 'zW\s\-\.',
 				db => {
 					table => 'AppData',
@@ -2119,7 +2108,6 @@ sub get_content_rules_hash
 				label => 'Адрес регистрации',
 				comment => 'Укажите адрес регистрации',
 				example => 'г.Москва, М.Толмачевский пер., д. 6, стр.1',
-				example_not_for_copy => 1,
 				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'AppData',
@@ -2388,7 +2376,6 @@ sub get_content_rules_hash
 				label => 'Адрес доставки',
 				comment => 'Введите адрес для доставки документов документов, без указания индекса и города; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				example => 'Малый Толмачёвский пер., д.6 стр.1',
-				example_not_for_copy => 1,
 				check => 'ЁN\s\-\_\.\,\;\'\"',
 				check_logic => [
 					{
@@ -2533,7 +2520,6 @@ sub get_content_rules_hash
 			label => 'Домашний адрес и адрес электронной почты',
 			comment => 'Укажите адрес места жительства',
 			example => 'Moscow, M.Tolmachevskiy pereulok 6 b.1',
-			example_not_for_copy => 1,
 			check => 'zWN\s\-\_\.\,\;\'\"\@',
 			db => {
 				table => 'AppData',
@@ -2799,7 +2785,6 @@ sub get_content_rules_hash
 			label => 'Адрес места работы и телефон',
 			comment => 'Укажите адрес места своей работы и телефон',
 			example => '191186, St. Petersburg, 1/25 Kazanskaya st., 5, 79XXXXXXXX',
-			example_not_for_copy => 1,
 			check => 'zWN\s\-\_\.\,\;\'\"\@',
 			db => {
 				table => 'AppData',
