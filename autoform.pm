@@ -1354,14 +1354,51 @@ sub check_all_app_finished_and_not_empty
 		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 		WHERE Token = ?", $self->{ token }
 	);
-
+	
+	my $all_rules = $self->get_content_rules( undef, 'full' );
+	
+	my $all_factor = {
+		CenterID => [],
+		VisaPurpose => [],
+	};
+	
+	for my $page ( keys %$all_rules ) {
+	
+		for my $element ( @{ $all_rules->{ $page } } ) {
+		
+			for my $relation ( keys %{ $element->{ relation } } ) {
+			
+				for my $factor ( keys %$all_factor ) {
+		
+					if ( $element->{ relation }->{ $relation }->{ name } eq $factor ) {
+					
+						my @tmp = split( /\s?,\s?/, $element->{ relation }->{ $relation }->{ value } );
+						
+						push( $all_factor->{ $factor }, $_ ) for @tmp;
+					}
+				}
+			}
+		}
+	}
+	
+	for my $factor ( keys %$all_factor ) {
+	
+		my %tmp = map { $_ => 1 } @{ $all_factor->{ $factor } };
+	
+		$all_factor->{ $factor } = \%tmp;
+	}
+	
 	for ( @$allfinished ) {
 	
 		return 4 unless $_->{ FinishedVType } and $_->{ FinishedCenter };
 		
-		return 19 if $_->{ FinishedVType } != $_->{ VType };
+		my $old_v_not_homolog = $all_factor->{ VisaPurpose }->{ $_->{ FinishedVType } };
+		my $new_v_not_homolog = $all_factor->{ VisaPurpose }->{ $_->{ VType } };
+		my $old_c_not_homolog = $all_factor->{ CenterID }->{ $_->{ FinishedCenter } };
+		my $new_c_not_homolog = $all_factor->{ CenterID }->{ $_->{ CenterID } };
 		
-		return 22 if $_->{ FinishedCenter } != $_->{ CenterID };
+		return 19 if ( $_->{ FinishedVType } != $_->{ VType } ) and ( $old_v_not_homolog or $new_v_not_homolog );
+		return 22 if ( $_->{ FinishedCenter } != $_->{ CenterID } ) and ( $old_c_not_homolog or $new_c_not_homolog );
 	}
 	
 	return 5 if @$allfinished < 1;
