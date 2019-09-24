@@ -1315,24 +1315,14 @@ sub check_existing_id_in_token
 	my ( $self, $appdata_id, $finished ) = @_;
 	
 	my $exist = 0;
-	
-	my $list_of_app_in_token;
-	
-	if ( $finished eq 'finished' ) {
-	
-		$list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
-			SELECT AppData.ID FROM AutoToken 
-			JOIN AppData ON AutoToken.CreatedApp = AppData.AppID
-			WHERE Token = ?", $self->{ token }
-		);
-	}
-	else {
-		$list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
-			SELECT AutoAppData.ID FROM AutoToken 
-			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
-			WHERE Token = ?", $self->{ token }
-		);
-	};
+
+	my ( $auto, $created ) = ( $finished eq 'finished' ? ( '', 'CreatedApp' ) : ( 'Auto', 'AutoAppID' ) );
+
+	my $list_of_app_in_token = $self->query( 'selallkeys', __LINE__, "
+		SELECT $auto" . "AppData.ID FROM AutoToken 
+		JOIN $auto" . "AppData ON AutoToken.$created = $auto". "AppData.AppID
+		WHERE Token = ?", $self->{ token }
+	);
 	
 	for my $app ( @$list_of_app_in_token ) {
 	
