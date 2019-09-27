@@ -35,6 +35,7 @@ sub get_content_rules_hash
 				page_ord => 100,
 				progress => 1,
 				param => 1,
+				page_db_id => 200001,
 			},
 			{
 				type => 'select',
@@ -186,6 +187,7 @@ sub get_content_rules_hash
 						value => '43',
 					}
 				},
+				page_db_id => 200002,
 			},
 			{
 				type => 'text',
@@ -213,6 +215,7 @@ sub get_content_rules_hash
 				page_ord => 300,
 				progress => 2,
 				collect_date => 1,
+				page_db_id => 200003,
 			},
 			{
 				type => 'input',
@@ -265,6 +268,7 @@ sub get_content_rules_hash
 				goto_link => 'back_to_appdata',
 				all_app_in_title => 1,
 				replacer => '[list_of_applicants]',
+				page_db_id => 200004,
 			},
 		],
 		
@@ -274,6 +278,7 @@ sub get_content_rules_hash
 				progress => 4,
 				all_app_in_title => 1,
 				param => 1,
+				page_db_id => 200005,
 			},
 			{
 				type => 'text',
@@ -641,6 +646,7 @@ sub get_content_rules_hash
 				param => 1,
 				all_app_in_title => 1,
 				ussr_or_rf_first => 1,
+				page_db_id => 200006,
 			},
 			{
 				type => 'text',
@@ -829,7 +835,6 @@ sub get_content_rules_hash
 				progress => 5,
 				all_app_in_title => 1,
 				copy_from_other_applicants => 'now',
-				
 				relation => {
 					only_if_younger => {
 						table => 'AppData',
@@ -837,6 +842,7 @@ sub get_content_rules_hash
 						value => '18',
 					}
 				},
+				page_db_id => 200007,
 			},
 			{
 				type => 'input',
@@ -865,6 +871,7 @@ sub get_content_rules_hash
 						value => '6',
 					}
 				},
+				page_db_id => 200008,
 			},
 			{
 				type => 'input',
@@ -892,6 +899,7 @@ sub get_content_rules_hash
 						value => '70',
 					}
 				},
+				page_db_id => 200009,
 			},
 			{
 				type => 'input',
@@ -932,6 +940,7 @@ sub get_content_rules_hash
 						value => '10',
 					}
 				},
+				page_db_id => 200010,
 			},
 			{
 				type => 'input',
@@ -953,6 +962,7 @@ sub get_content_rules_hash
 				progress => 6,
 				param => 1,
 				all_app_in_title => 1,
+				page_db_id => 200011,
 			},
 			{
 				type => 'text',
@@ -1159,6 +1169,7 @@ sub get_content_rules_hash
 						value => '7',
 					}
 				},
+				page_db_id => 200012,
 			},
 			{
 				type => 'input',
@@ -1213,6 +1224,7 @@ sub get_content_rules_hash
 						value => '2',
 					}
 				},
+				page_db_id => 200013,
 			},
 			{
 				type => 'input',
@@ -1267,6 +1279,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
+				page_db_id => 200014,
 			},
 			{
 				type => 'input',
@@ -1305,6 +1318,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
+				page_db_id => 200015,
 			},
 			{
 				type => 'radiolist',
@@ -1340,6 +1354,7 @@ sub get_content_rules_hash
 						value => '7',
 					}
 				},
+				page_db_id => 200016,
 			},
 			{
 				type => 'input',
@@ -1441,6 +1456,7 @@ sub get_content_rules_hash
 						value => '7',
 					}
 				},
+				page_db_id => 200017,
 			},
 			{
 				type => 'input',
@@ -1503,6 +1519,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
+				page_db_id => 200018,
 			},
 			{
 				type => 'input',
@@ -1645,6 +1662,7 @@ sub get_content_rules_hash
 						value => '1, 7, 9',
 					},
 				},
+				page_db_id => 200019,
 			},
 			{
 				type => 'select',
@@ -1762,6 +1780,7 @@ sub get_content_rules_hash
 				page_ord => 2000,
 				progress => 8,
 				all_app_in_title => 1,
+				page_db_id => 200020,
 			},
 			{
 				type => 'radiolist',
@@ -1792,6 +1811,7 @@ sub get_content_rules_hash
 						value => '2',
 					}
 				},
+				page_db_id => 200021,
 			},
 			{
 				type => 'input',
@@ -1819,6 +1839,7 @@ sub get_content_rules_hash
 						value => '0',
 					}
 				},
+				page_db_id => 200022,
 			},
 			{
 				type => 'checklist',
@@ -1852,6 +1873,7 @@ sub get_content_rules_hash
 						value => '1,2',
 					}
 				},
+				page_db_id => 200023,
 			},
 			{
 				type => 'checklist',
@@ -1884,6 +1906,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
+				page_db_id => 200024,
 			},
 			{
 				type => 'input',
@@ -1912,6 +1935,7 @@ sub get_content_rules_hash
 						value => '0',
 					}
 				},
+				page_db_id => 200025,
 			},
 			{
 				type => 'input',
@@ -1986,6 +2010,7 @@ sub get_content_rules_hash
 				progress => 9,
 				all_app_in_title => 1,
 				replacer => '[app_finish]',
+				page_db_id => 200026,
 			},
 		],
 		
@@ -1994,6 +2019,7 @@ sub get_content_rules_hash
 				page_ord => 2700,
 				progress => 9,
 				persons_in_page => 1,
+				page_db_id => 200027,
 			},
 			{
 				type => 'select',
@@ -2021,6 +2047,7 @@ sub get_content_rules_hash
 						value => '-1',
 					}
 				},
+				page_db_id => 200028,
 			},
 			{
 				type => 'text',
@@ -2140,6 +2167,7 @@ sub get_content_rules_hash
 						value => '-1',
 					}
 				},
+				page_db_id => 200029,
 			},
 			{
 				type => 'input',
@@ -2251,6 +2279,7 @@ sub get_content_rules_hash
 				progress => 11,
 				persons_in_page => 1,
 				goto_link => 'back_to_appdate',
+				page_db_id => 200030,
 			},
 			{
 				type => 'text',
@@ -2413,6 +2442,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 3100,
 				progress => 12,
+				page_db_id => 200031,
 			},
 			{
 				type => 'captcha',
@@ -2423,6 +2453,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 3200,
 				progress => 13,
+				page_db_id => 200032,
 			},
 			{
 				type => 'text',

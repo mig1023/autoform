@@ -32,6 +32,7 @@ sub get_content_rules_hash
 				page_ord => 100,
 				progress => 1,
 				param => 1,
+				page_db_id => 300001,
 			},
 			{
 				type => 'select',
@@ -100,7 +101,6 @@ sub get_content_rules_hash
 				label => 'Email',
 				comment => 'Введите существующий адрес почты. На него будет выслано подтверждение записи в визовый центр. Пожалуйста, проверьте правильность каждой буквы/символа, из которых состоит адрес Вашей электронной почты',
 				example => 'info@italyvms.ru',
-				example_not_for_copy => 1,
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -121,7 +121,6 @@ sub get_content_rules_hash
 				label => 'Подтвердите email',
 				comment => 'Обратите внимание, что адрес электронной почты необходимо вводить вручную, не копируя его из предыдущего поля. Это поможет Вам избежать ошибки и возможной отправки подтверждения Вашей записи не тому адресату. ',
 				example => 'info@italyvms.ru',
-				example_not_for_copy => 1,
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -178,6 +177,7 @@ sub get_content_rules_hash
 				page_ord => 200,
 				progress => 2,
 				collect_date => 1,
+				page_db_id => 300002,
 			},
 			{
 				type => 'input',
@@ -230,6 +230,7 @@ sub get_content_rules_hash
 				goto_link => 'back_to_appdata',
 				all_app_in_title => 1,
 				replacer => '[list_of_applicants]',
+				page_db_id => 300003,
 			},
 		],
 		
@@ -239,6 +240,7 @@ sub get_content_rules_hash
 				progress => 4,
 				all_app_in_title => 1,
 				param => 1,
+				page_db_id => 300004,
 			},
 			{
 				type => 'select',
@@ -360,6 +362,7 @@ sub get_content_rules_hash
 				page_ord => 500,
 				all_app_in_title => 1,
 				progress => 5,
+				page_db_id => 300005,
 			},
 			{
 				type => 'input',
@@ -437,6 +440,7 @@ sub get_content_rules_hash
 				progress => 6,
 				all_app_in_title => 1,
 				replacer => '[app_finish]',
+				page_db_id => 300006,
 			},
 		],
 		
@@ -445,6 +449,7 @@ sub get_content_rules_hash
 				page_ord => 700,
 				progress => 6,
 				persons_in_page => 1,
+				page_db_id => 300007,
 			},
 			{
 				type => 'select',
@@ -472,6 +477,7 @@ sub get_content_rules_hash
 						value => '-1',
 					}
 				},
+				page_db_id => 300008,
 			},
 			{
 				type => 'text',
@@ -559,7 +565,6 @@ sub get_content_rules_hash
 				label => 'Адрес регистрации',
 				comment => 'Укажите адрес регистрации',
 				example => 'г.Москва, М.Толмачевский пер., д. 6, стр.1',
-				example_not_for_copy => 1,
 				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'AppData',
@@ -592,6 +597,7 @@ sub get_content_rules_hash
 						value => '-1',
 					}
 				},
+				page_db_id => 300009,
 			},
 			{
 				type => 'input',
@@ -677,7 +683,6 @@ sub get_content_rules_hash
 				label => 'Адрес',
 				comment => 'Полный адрес, включая индекс',
 				example => '119017, г.Москва, М.Толмачевский пер., д. 6, стр.1',
-				example_not_for_copy => 1,
 				check => 'zWЁN\s\-\_\.\,\;\'\"',
 				db => {
 					table => 'Appointments',
@@ -703,6 +708,7 @@ sub get_content_rules_hash
 				page_ord => 1000,
 				progress => 8,
 				persons_in_page => 1,
+				page_db_id => 300010,
 			},
 			{
 				type => 'text',
@@ -828,7 +834,6 @@ sub get_content_rules_hash
 				label => 'Адрес доставки',
 				comment => 'Введите адрес для доставки документов документов, без указания индекса и города; услуга платная, оставьте поле пустым, если в ней нет необходимости',
 				example => 'Малый Толмачёвский пер., д.6 стр.1',
-				example_not_for_copy => 1,
 				check => 'ЁN\s\-\_\.\,\;\'\"',
 				check_logic => [
 					{
@@ -873,7 +878,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
-				
+				page_db_id => 300011,
 			},
 			{
 				type => 'radiolist',
@@ -895,6 +900,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1200,
 				progress => 10,
+				page_db_id => 300012,
 			},
 			{
 				type => 'captcha',
@@ -905,6 +911,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 1300,
 				progress => 11,
+				page_db_id => 300013,
 			},
 			{
 				type => 'text',
