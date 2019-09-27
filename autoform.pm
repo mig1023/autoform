@@ -111,6 +111,37 @@ sub get_content_rules
 	return $content->{ $current_page };
 }
 
+sub get_step_by_id
+# //////////////////////////////////////////////////
+{
+	my ( $self, $page_id ) = @_;
+	
+		# ////////////////// tmp
+		return $page_id if $page_id < 1000;
+		# //////////////////
+	
+	my $page_content = $self->get_content_rules( undef, 'full' );
+	
+	for my $page ( keys %$page_content ) {
+	
+		return $page if $page_content->{ $page }->[ 0 ]->{ page_db_id } eq $page_id;
+	}
+	
+	return 0;
+}
+
+sub get_id_by_step
+# //////////////////////////////////////////////////
+{
+	my ( $self, $step ) = @_;
+	
+	my $page_content = $self->get_content_rules( undef, 'full' );
+	
+	my $id_page = $page_content->{ $step }->[ 0 ]->{ page_db_id };
+	
+	return $id_page;
+}
+
 sub get_content_rules_hash_opt
 # //////////////////////////////////////////////////
 {
@@ -763,7 +794,7 @@ sub token_generation
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoToken (
 		AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft, StartDate, LastIP) 
-		VALUES (0, 0, 0, 1, '', 0, 0, now(), ?)", {}, $ENV{ HTTP_X_REAL_IP }
+		VALUES (0, 0, 0, ?, '', 0, 0, now(), ?)", {}, $self->get_id_by_step( 1 ), $ENV{ HTTP_X_REAL_IP }
 	);
 	
 	my $appid = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
@@ -858,9 +889,11 @@ sub get_autoform_content
 	my $last_error;
 	my $title;
 	
-	my ( $step, $app_id ) = $self->query( 'sel1', __LINE__, "
+	my ( $id_page, $app_id ) = $self->query( 'sel1', __LINE__, "
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
+	
+	my $step = $self->get_step_by_id( $id_page );
 
 	my $action = lc( $self->param('action') );
 	$action =~ s/[^a-z]//g;
@@ -1081,9 +1114,11 @@ sub get_forward
 	
 		my @last_error = split( /\|/, $last_error );
 
+		my $id_page = $self->get_id_by_step( $step );
+
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET Step = ?, LastError = ? WHERE Token = ?", {}, 
-			$step, "$last_error[1] ($last_error[0], step $step)", $self->{ token }
+			$id_page, "$last_error[1] ($last_error[0], step $step/id $id_page)", $self->{ token }
 		);
 		
 	} else {
@@ -1127,8 +1162,8 @@ sub set_appointment_finished
 	if ( $error ) {
 	
 		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET EndDate = NULL, Finished = 0, CreatedApp = NULL, Step = 1
-			WHERE Token = ?", {}, $self->{ token }
+			UPDATE AutoToken SET EndDate = NULL, Finished = 0, CreatedApp = NULL, Step = ?
+			WHERE Token = ?", {}, $self->get_id_by_step( 1 ), $self->{ token }
 		);
 	
 		return $self->redirect( 'current' );
@@ -1220,7 +1255,8 @@ sub set_step
 	my ( $self, $step ) = @_;
 
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {},
+		$self->get_id_by_step( $step ), $self->{ token }
 	);
 }
 
@@ -1232,7 +1268,8 @@ sub set_step_by_content
 	my $step = $self->get_step_by_content( $content, $next );
 
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ? WHERE Token = ?", {}, $step, $self->{ token }
+		UPDATE AutoToken SET Step = ? WHERE Token = ?", {},
+		$self->get_id_by_step( $step ), $self->{ token }
 	);
 
 	return $step;
@@ -1261,7 +1298,7 @@ sub get_edit
 			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSpbDataID = ?,
 			AutoSchengenAppDataID = ?, AutoSchengenExtID = ?
 			WHERE Token = ?", {}, 
-			$step, $appdata_id, $spb_id, $sch_id, $ext_id, $self->{ token }
+			$self->get_id_by_step( $step ), $appdata_id, $spb_id, $sch_id, $ext_id, $self->{ token }
 		);
 
 		$self->query( 'query', __LINE__, "
@@ -1434,7 +1471,7 @@ sub get_add
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, AutoSpbDataID = ?, AutoSchengenExtID = ?
 		WHERE Token = ?", {}, 
-		$step, $appdata_id, $sch_id, $spb_id, $ext_id, $self->{ token }
+		$self->get_id_by_step( $step ), $appdata_id, $sch_id, $spb_id, $ext_id, $self->{ token }
 	);
 	
 	$self->mod_last_change_date();
