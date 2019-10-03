@@ -116,9 +116,7 @@ sub get_step_by_id
 {
 	my ( $self, $page_id ) = @_;
 	
-		# ////////////////// tmp
-		return $page_id if $page_id < 1000;
-		# //////////////////
+	return $page_id if $page_id < 1000;
 	
 	my $page_content = $self->get_content_rules( undef, 'full' );
 	
@@ -136,7 +134,7 @@ sub get_id_by_step
 	my ( $self, $step ) = @_;
 	
 	my $page_content = $self->get_content_rules( undef, 'full' );
-	
+
 	my $id_page = $page_content->{ $step }->[ 0 ]->{ page_db_id };
 	
 	return $id_page;
