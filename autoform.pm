@@ -1391,7 +1391,7 @@ sub get_homologous_series
 					
 						my @tmp = split( /\s?,\s?/, $element->{ relation }->{ $relation }->{ value } );
 						
-						push( $all_factor->{ $factor }, $_ ) for @tmp;
+						push( @{ $all_factor->{ $factor } }, $_ ) for @tmp;
 					}
 				}
 			}
