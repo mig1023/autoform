@@ -1722,18 +1722,14 @@ sub get_list_of_app
 		$content->[ 0 ]->{ ID } = 'X';
 		
 	} else {
-	
+
+		my $all_factor = $self->get_homologous_series();
+
 		for my $app ( @$content ) {
-		
-			$app->{ BirthDate } = $self->date_format( $app->{ BirthDate } );	
 
-			$app->{ Finished } = 1;
-			
-			$app->{ Finished } = 3 if $app->{ FinishedCenter } != $app->{ CenterID };
-			
-			$app->{ Finished } = 2 if $app->{ FinishedVType } != $app->{ VType };
+			$app->{ BirthDate } = $self->date_format( $app->{ BirthDate } );
 
-			$app->{ Finished } = 0 if !$app->{ FinishedVType } or !$app->{ FinishedCenter };
+			$app->{ Finished } = $self->homology_fail( $app, $all_factor ) || 0;
 		}
 	}
 

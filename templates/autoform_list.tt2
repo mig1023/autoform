@@ -54,9 +54,9 @@
 	<tr>
 	<td class="left" >[% i %].</td>
 	<td class="left" [% IF i == 1 %]id = "applist"[% END %] width="90%">
-	[% IF person.Finished == 0 %]<b>[[% langreq('черновик') %]]</b>
-	[% ELSIF person.Finished == 2 %]<b>[[% langreq('тип визы') %]]</b>
-	[% ELSIF person.Finished == 3 %]<b>[[% langreq('в.центр') %]]</b>
+	[% IF person.Finished == 4 %]<b>[[% langreq('черновик') %]]</b>
+	[% ELSIF person.Finished == 19 %]<b>[[% langreq('тип визы') %]]</b>
+	[% ELSIF person.Finished == 22 %]<b>[[% langreq('в.центр') %]]</b>
 	[% END %]
 	[% IF (person.FName != '') || (person.LName != '') %]
 	[% person.FName %] [% person.LName %]
