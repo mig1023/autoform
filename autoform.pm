@@ -1367,19 +1367,11 @@ sub check_existing_id_in_token
 	return $exist;
 }
 
-sub check_all_app_finished_and_not_empty
+sub get_homologous_series
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
 
-	my $allfinished = $self->query( 'selallkeys',  __LINE__, "
-		SELECT FinishedVType, FinishedCenter, VType, CenterID
-		FROM AutoAppData
-		JOIN AutoAppointments ON AutoAppointments.ID = AutoAppData.AppID
-		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
-		WHERE Token = ?", $self->{ token }
-	);
-	
 	my $all_rules = $self->get_content_rules( undef, 'full' );
 	
 	my $all_factor = {
@@ -1405,25 +1397,56 @@ sub check_all_app_finished_and_not_empty
 			}
 		}
 	}
-	
+
 	for my $factor ( keys %$all_factor ) {
 	
 		my %tmp = map { $_ => 1 } @{ $all_factor->{ $factor } };
 	
 		$all_factor->{ $factor } = \%tmp;
 	}
+
+	return $all_factor;
+}
+
+
+sub homology_fail
+# //////////////////////////////////////////////////
+{
+	my ( $self, $app, $homologous_series ) = @_;
+
+	return 4 unless $app->{ FinishedVType } and $app->{ FinishedCenter };
 	
+	my $old_visa_not_h = $homologous_series->{ VisaPurpose }->{ $app->{ FinishedVType } };
+	my $new_visa_not_h = $homologous_series->{ VisaPurpose }->{ $app->{ VType } };
+	my $old_center_not_h = $homologous_series->{ CenterID }->{ $app->{ FinishedCenter } };
+	my $new_center_not_h = $homologous_series->{ CenterID }->{ $app->{ CenterID } };
+	
+	return 19 if ( $app->{ FinishedVType } != $app->{ VType } ) and ( $old_visa_not_h or $new_visa_not_h );
+	return 22 if ( $app->{ FinishedCenter } != $app->{ CenterID } ) and ( $old_center_not_h or $new_center_not_h );
+
+	return undef;
+}
+
+sub check_all_app_finished_and_not_empty
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $allfinished = $self->query( 'selallkeys',  __LINE__, "
+		SELECT FinishedVType, FinishedCenter, VType, CenterID
+		FROM AutoAppData
+		JOIN AutoAppointments ON AutoAppointments.ID = AutoAppData.AppID
+		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $all_factor = $self->get_homologous_series();
+
 	for ( @$allfinished ) {
 	
-		return 4 unless $_->{ FinishedVType } and $_->{ FinishedCenter };
-		
-		my $old_v_not_homolog = $all_factor->{ VisaPurpose }->{ $_->{ FinishedVType } };
-		my $new_v_not_homolog = $all_factor->{ VisaPurpose }->{ $_->{ VType } };
-		my $old_c_not_homolog = $all_factor->{ CenterID }->{ $_->{ FinishedCenter } };
-		my $new_c_not_homolog = $all_factor->{ CenterID }->{ $_->{ CenterID } };
-		
-		return 19 if ( $_->{ FinishedVType } != $_->{ VType } ) and ( $old_v_not_homolog or $new_v_not_homolog );
-		return 22 if ( $_->{ FinishedCenter } != $_->{ CenterID } ) and ( $old_c_not_homolog or $new_c_not_homolog );
+		my $fail = $self->homology_fail( $_, $all_factor );
+
+		return $fail if $fail;
 	}
 	
 	return 5 if @$allfinished < 1;
