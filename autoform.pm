@@ -1408,6 +1408,18 @@ sub get_homologous_series
 	return $all_factor;
 }
 
+sub type_change_fail
+# //////////////////////////////////////////////////
+{
+	my ( $self, $app ) = @_;
+
+	my %type_c = map { $_ => 1 } split( /,/, '1,2,4,5,7,13,14,15,16,17' );
+	my %type_d = map { $_ => 1 } split( /,/, '3,6,8,9,10,11,12' );
+
+	return 1 if $type_c{ $app->{ VType } } and $type_d{ $app->{ FinishedVType } };
+
+	return 0;
+}
 
 sub homology_fail
 # //////////////////////////////////////////////////
@@ -1421,7 +1433,10 @@ sub homology_fail
 	my $old_center_not_h = $homologous_series->{ CenterID }->{ $app->{ FinishedCenter } };
 	my $new_center_not_h = $homologous_series->{ CenterID }->{ $app->{ CenterID } };
 	
+	return 19 if $self->type_change_fail( $app );
+
 	return 19 if ( $app->{ FinishedVType } != $app->{ VType } ) and ( $old_visa_not_h or $new_visa_not_h );
+
 	return 22 if ( $app->{ FinishedCenter } != $app->{ CenterID } ) and ( $old_center_not_h or $new_center_not_h );
 
 	return undef;
