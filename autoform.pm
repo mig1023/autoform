@@ -326,7 +326,7 @@ sub autoform
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 
-	$tvars->{ urgent_allowed } = ( $special->{ timeslots } ? $self->urgent_allowed() : 0 );
+	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
@@ -349,8 +349,10 @@ sub autoform
 sub urgent_allowed
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
-	
+	my ( $self, $special ) = @_;
+
+	return 0 unless $special->{ timeslots } and @{ $special->{ timeslots } };
+
 	my $allow = 1;
 	
 	my $apps = $self->query( 'selallkeys', __LINE__, "
@@ -366,7 +368,7 @@ sub urgent_allowed
 	}
 	
 	my ( undef, $category ) = $self->get_app_visa_and_center();
-
+	
 	$allow = 0 if $category ne 'C';
 	
 	return $allow;
