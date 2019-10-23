@@ -1413,12 +1413,11 @@ sub type_change_fail
 {
 	my ( $self, $app ) = @_;
 
-	my %type_c = map { $_ => 1 } split( /,/, '1,2,4,5,7,13,14,15,16,17' );
-	my %type_d = map { $_ => 1 } split( /,/, '3,6,8,9,10,11,12' );
-
-	return 1 if $type_c{ $app->{ VType } } and $type_d{ $app->{ FinishedVType } };
-
-	return 0;
+	return 1 if (
+		VCS::Site::autodata::this_is_c_type( $app->{ VType } )
+		and
+		VCS::Site::autodata::this_is_d_type( $app->{ FinishedVType } )
+	);
 }
 
 sub homology_fail
