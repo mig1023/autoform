@@ -199,18 +199,32 @@ sub get_app_visa_and_center
 	
 	return ( $app_data->{ center } ) if !$app_data->{ vtype };
 	
-	my $visa_category = $self->cached( 'autoform_vcategory_' . $app_data->{ vtype } );
-	
-	if ( !$visa_category ) {
+	my $visa_categories = $self->get_all_visa_categories();
+
+	return ( $app_data->{ center }, $visa_categories->{ $app_data->{ vtype } } );
+}
+
+sub get_all_visa_categories
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $category = $self->cached( 'autoform_all_vtypes' );
 		
-		$visa_category = $self->query( 'sel1', __LINE__, "
-			SELECT Category FROM VisaTypes WHERE ID = ?", $app_data->{ vtype }
+	if ( !$category  ) {
+
+		$category = {};
+
+		my $all_visas = $self->query( 'selallkeys', __LINE__, "
+			SELECT ID, Category FROM VisaTypes"
 		);
-		
-		$self->cached( 'autoform_vcategory_' . $app_data->{ vtype }, $visa_category  );
+
+		$category->{ $_->{ ID } } = $_->{ Category } for @$all_visas;
+
+		$self->cached( 'autoform_all_vtypes', $category );
 	}
 
-	return ( $app_data->{ center }, $visa_category );
+	return $category;
 }
 
 sub autoform
@@ -311,7 +325,7 @@ sub autoform
 	$tvars->{ biometric_data } = ( $self->{ biometric_data } ? 'yes' : 0 );
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
-	
+
 	$tvars->{ urgent_allowed } = ( $special->{ timeslots } ? $self->urgent_allowed() : 0 );
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
@@ -351,15 +365,9 @@ sub urgent_allowed
 		$allow = 0 if $_->{ Citizenship } != 70;
 	}
 	
-	my $vtype = $self->query( 'sel1', __LINE__, "
-		SELECT VisaTypes.category
-		FROM AutoToken
-		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
-		JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
-		WHERE Token = ?", $self->{ token }
-	);
-	
-	$allow = 0 if $vtype ne 'C';
+	my ( undef, $category ) = $self->get_app_visa_and_center();
+
+	$allow = 0 if $category ne 'C';
 	
 	return $allow;
 }
@@ -1413,11 +1421,15 @@ sub type_change_fail
 {
 	my ( $self, $app ) = @_;
 
+	my $category = $self->get_all_visa_categories();
+
 	return 1 if (
-		VCS::Site::autodata::this_is_c_type( $app->{ VType } )
+		$category->{ $app->{ VType } } eq 'C'
 		and
-		VCS::Site::autodata::this_is_d_type( $app->{ FinishedVType } )
+		$category->{ $app->{ FinishedVType } } eq 'D'
 	);
+
+	return 0;
 }
 
 sub homology_fail
@@ -1434,9 +1446,17 @@ sub homology_fail
 	
 	return 19 if $self->type_change_fail( $app );
 
-	return 19 if ( $app->{ FinishedVType } != $app->{ VType } ) and ( $old_visa_not_h or $new_visa_not_h );
+	return 19 if (
+		( $app->{ FinishedVType } != $app->{ VType } )
+		and
+		( $old_visa_not_h or $new_visa_not_h )
+	);
 
-	return 22 if ( $app->{ FinishedCenter } != $app->{ CenterID } ) and ( $old_center_not_h or $new_center_not_h );
+	return 22 if (
+		( $app->{ FinishedCenter } != $app->{ CenterID } )
+		and
+		( $old_center_not_h or $new_center_not_h )
+	);
 
 	return undef;
 }

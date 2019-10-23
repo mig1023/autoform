@@ -761,20 +761,4 @@ sub this_is_spb_center
 	return exists $spb_centers{ $_[0] };
 }
 
-sub this_is_c_type
-# //////////////////////////////////////////////////
-{
-	my %type_c = map { $_ => 1 } split /,\s?/, '1, 2, 4, 5, 7, 13, 14, 15, 16, 17';
-
-	return exists $type_c{ $_[0] };
-}
-
-sub this_is_d_type
-# //////////////////////////////////////////////////
-{
-	my %type_d = map { $_ => 1 } split /,\s?/, '3, 6, 8, 9, 10, 11, 12';
-
-	return exists $type_d{ $_[0] };
-}
-
 1;
