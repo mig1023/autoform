@@ -2720,7 +2720,7 @@ sub get_content_rules_hash
 			label => 'Дата начала',
 			comment => 'Укажите дату начала действия визы',
 			example => '31.12.1900',
-			check => $standart_date_check,
+			check => $standart_date_check_opt,
 			db => {
 				table => 'AppData',
 				name => 'PrevVisaFD',
@@ -2733,7 +2733,7 @@ sub get_content_rules_hash
 			label => 'Дата окончания',
 			comment => 'Укажите дату окончания действия визы',
 			example => '31.12.1900',
-			check => $standart_date_check,
+			check => $standart_date_check_opt,
 			check_logic => [
 				{
 					condition => 'now_or_later',
