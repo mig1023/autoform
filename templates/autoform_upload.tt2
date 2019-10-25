@@ -57,32 +57,45 @@
 <tr><td><table width="100%">
 [% FOREACH doc IN content_text.doc_list %]
 <tr>
-	<td>
+
+	<td class="mobil_hide">
 	[% IF doc.type != '' %]
 		<span class="uplsuccess">&#10003;</span>
 	[% END %]
 	&nbsp;</td>
-	<td class="info_list">
+	<td class="info_list mobil_hide">
 	[% langreq(doc.title) %]
 	[% IF doc.help != '' %]
 		<a target="_blank" class="nfc_link" href="[% doc.help %]">[?]</a>
 	[% END %]
 	</td>
-	<td class="middle">
+	<td class="middle mobil_hide">
 	<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
 	[% IF doc.type != '' %]
 		<img src="/vcs/static/images/type_[% doc.type %].png">
 	[% END %]
 	</td>
-	<td class="middle">
+	<td class="middle mobil_hide">
 	<span id="img_span_[% doc.id %]" class="ltl_text">[% doc.date %]</span>
 	</td>
+
+	<td class="hidden pc_hide">
+	[% IF doc.type != '' %]
+		<span class="uplsuccess">&#10003;</span>&nbsp;
+	[% END %]
+	[% langreq(doc.title) %]&nbsp;
+	[% IF doc.type != '' %]
+		<img src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
+	[% END %]
+	[% doc.date %]
+	&nbsp;</td>
+
 	<td class="m_right">
 	[% IF doc.type != '' %]
-		<input class="action_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
+		<input class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
 	[% ELSE %]
 		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input class="action_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
+		<input class="upload_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
 	[% END %]
 	</td>
 </tr>
@@ -95,7 +108,7 @@
 	</td>
 	<td class="m_right">
 	<input type="file" id="upfile_opt" class="hidden" name="upfile_opt" accept="image/*" capture="camera" onchange="upload('[% content_text.opt_doc_next %]', 'upfile_opt' )"/>
-	<input class="action_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_opt').click();" />
+	<input class="upload_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_opt').click();" />
 	</td>
 </tr>
 
@@ -106,9 +119,11 @@
 <tr><td class="left" colspan="5">
 	<span id="mobile_order_bottom">
 		<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
+		&nbsp;
 	</span>
 	<span id="mobile_order_top">
 		<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
+		&nbsp;
 	</span>
 </td></tr>
 <tr><td class="left" colspan="5"><br>
@@ -261,6 +276,8 @@ function mobileScreenCheck() {
 		$('#app_table').attr( "width", '590px' );
 		$('.input_width').css( "width", '20em' );
 
+		$('.pc_hide').css( "display", 'none' );
+
 		return;
 	}
 
@@ -269,6 +286,9 @@ function mobileScreenCheck() {
 	
 	$('.action_button').css( "height", '60px' );
 	$('.action_button').css( "width", '100%' );
+
+	$('.upload_button').css( "height", '35px' );
+	$('.upload_button').css( "width", '100%' );
 
 
 	$('#app_table').attr( "cellspacing", '10' );
@@ -297,6 +317,7 @@ function mobileScreenCheck() {
 	$('.input_width').css( "width", ( isIphone() ? '90%' : '100%' ) );
 
 	$('#comment_place').removeClass( "grayborder" );
+	$('.mobil_hide').css( "display", 'none' );
 
 	$('h2').css( "font-size", '20px' );
 	$('h2, .bold_text').css( "color", '#FF6666' );
