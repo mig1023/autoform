@@ -740,6 +740,8 @@ sub get_token
 	
 	my $token = lc( $self->param('t') );
 
+	$token =~ s/[^0-9a-z\-]//g;
+
 	return $token;
 }
 
@@ -759,7 +761,7 @@ sub get_token_and_create_new_form_if_need
 	return '06' if $self->{ autoform }->{ general }->{ technical_work };
 
 	return $self->token_generation() if $token eq '';
-	
+
 	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
 		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
 	);
