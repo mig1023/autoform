@@ -246,6 +246,154 @@ sub get_geo_branches
 	};
 };
 
+sub get_doc_list
+# //////////////////////////////////////////////////
+{
+	return [ 
+		{ 
+			id => 1,
+			title => 'Загранпаспорт',
+			visa => '1, 13, 9, 17, 15',
+			help => {
+				base => {
+					ru => '/zagranpasport/',
+					en => '/travel-document-passport/',
+					it => '/il-titolo-di-viaggio/',
+				},
+			},
+		},
+		{ 
+			id => 2,
+			title => 'Авиабилет',
+			visa => '13',
+			help => {
+				base => {
+					ru => '/documentformsk/dokumenty-na-turisticheskuyu-vizu-2/bilet-ili-bron-bileta-tuda-i-obratno/',
+					en => '/documents-for-moscow/document-requirements-for-tourist-visa/travel-vouchersreturn-tickets/',
+					it => '/i-documenti-per-il-visto-turistico/prenotazione-aerea-di-andata-e-ritorno/',
+				},
+			},
+		},
+		{
+			id => 3,
+			title => 'Подтверждение проживания',
+			visa => '1, 13',
+			help => {
+				base => {
+					ru => '/documentformsk/dokumenty-na-turisticheskuyu-vizu-2/priglashenie-ili-bron-otelya/',
+					en => '/documents-for-moscow/document-requirements-for-tourist-visa/invitation-letter-or-hotel-reservation/',
+					it => '/documentformskit/i-documenti-per-il-visto-turistico/lettera-di-invito-o-prenotazione-alberghiera/',
+				},
+			},
+		},
+		{ 
+			id => 4,
+			title => 'Медицинская страховка',
+			visa => '1, 13, 15',
+			help => {
+				base => {
+					ru => '/medicinskaya-straxovka/',
+					en => '/international-medical-insurance-valid-for-all-the-schengen-territory-3/',
+					it => '/assicurazione-medica-valida-per-i-paesi-dello-spazio-schengen-3/',
+				},
+			},
+		},
+		{
+			id => 5,
+			title => 'Справка с работы',
+			visa => '1, 13, 15',
+			help => {
+				base => {
+					ru => '/podtverzhdenie-zanyatosti/',
+					en => '/proof-of-employment/',
+					it => '/dichiarazione-del-datore-di-lavoro/',
+				},
+			},
+		},
+		{
+			id => 6,
+			title => 'Финансовая гарантия',
+			visa => '1, 13, 15, 2',
+			help => {
+				base => {
+					ru => '/finansovaya-garantiya-2/',
+					en => '/financial-guarantees-2/',
+					it => '/garanzie-finanziarie-3/',
+				},
+			},
+		},
+		{
+			id => 7,
+			title => 'Внутренний паспорт',
+			visa => '1, 13, 9, 17, 15',
+		},
+		{
+			id => 8,
+			title => 'Согласие на обработку ПД',
+			visa => '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17',
+			help => {
+				base => {
+					ru => '/soglasie-na-obrabotku-personalnyx-dannyx/',
+					en => '/consent-for-processing-the-personal-data/',
+					it => '/consenso-al-trattamento-dei-dati-personali/',
+				},
+			},
+		},
+		{
+			id => 9,
+			title => 'Приглашение от организации',
+			visa => '1, 9, 17, 15',
+			help => {
+				base => {
+					ru => '/priglashenie/',
+					en => '/invitation-letter/',
+					it => '/lettera-dinvito/',
+				},
+			},
+		},
+		{
+			id => 10,
+			title => 'Паспорт приглашающего',
+			visa => '1, 9, 17, 15',
+		},
+		{
+			id => 11,
+			title => 'Выписка из Торговой Палаты',
+			visa => '1, 15',
+		},
+		{
+			id => 12,
+			title => 'Свидетельство ЕГРЮЛ',
+			visa => '1, 15',
+		},
+		{
+			id => 13,
+			title => 'Подтверждение родства',
+			visa => '9, 17',
+		},
+		{
+			id => 14,
+			title => 'Пенсионное удостоверение',
+			visa => '9, 17',
+		},
+		{
+			id => 15,
+			title => 'Допуск МинТранса',
+			visa => '15',
+		},
+		{
+			id => 16,
+			title => 'Водительское удостоверение',
+			visa => '15',
+		},
+		{
+			id => 17,
+			title => 'Письмо транспортной компании',
+			visa => '15',
+		},
+	];
+}
+
 sub get_embedded_maps
 # //////////////////////////////////////////////////
 {

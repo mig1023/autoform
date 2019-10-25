@@ -2387,6 +2387,16 @@ sub get_content_rules_hash
 				page_db_id => 100028,
 			},
 		],
+				
+		'Загрузка документов' => [
+			{
+				page_ord => 2450,
+				progress => 8,
+				all_app_in_title => 1,
+				replacer => '[doc_uploading]',
+				page_db_id => 100037,
+			},
+		],
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
