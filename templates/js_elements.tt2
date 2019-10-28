@@ -430,7 +430,7 @@ function show_error_tip( last_error_name, last_error_text ) {
 		offset_y = ( mobilScreen ? 50 : 0 );
 	}
 	
-	window.scroll( 0,find_pos( document.getElementById( last_error_name ) ) );
+	window.scroll( 0, find_pos( document.getElementById( last_error_name ) ) );
 	
 	$( '#' + last_error_name ).poshytip({
 		className: 'tip-redsimple',

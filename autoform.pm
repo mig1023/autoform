@@ -336,7 +336,7 @@ sub autoform
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
-	
+
 	$tvars->{ appinfo } = $self->get_same_info_for_timeslots()
 		if ( 
 			( ( ref( $special->{ timeslots } ) eq 'ARRAY' ) and ( @{ $special->{ timeslots } } > 0 ) )
@@ -913,8 +913,7 @@ sub get_autoform_content
 {
 	my $self = shift;
 	
-	my $last_error;
-	my $title;
+	my ( $last_error, $title );
 	
 	my ( $id_page, $app_id ) = $self->query( 'sel1', __LINE__, "
 		SELECT Step, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
@@ -2656,8 +2655,10 @@ sub check_data_from_form
 	
 	my $tables_id = ( $tables_ids_edt ? $tables_ids_edt : $self->get_current_table_id() );
 
+	return $self->check_doc_uploaded() if $page_content eq '[doc_uploading]';
+
 	return if $page_content =~ /^\[/;
-	
+
 	my $first_error = '';
 	
 	for my $element ( @$page_content ) {
@@ -3942,12 +3943,11 @@ sub date_format
 	return $date;
 }
 
-sub get_doc_uploading
+
+sub doc_for_uploading
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	
-	my $conf = $self->{ vars }->getConfig('general');
 
 	my $doc_list = VCS::Site::autodata::get_doc_list();
 
@@ -3958,8 +3958,44 @@ sub get_doc_uploading
 	);
 	
 	my $all_docs = $self->query( 'selallkeys', __LINE__, "
-		SELECT DocType, Name, Ext FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
+		SELECT ID, DocType, Name, Ext FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
 	) if $appdata_id;
+	
+	return ( $doc_list, $appdata_id, $visa_type, $all_docs );
+}
+
+sub check_doc_uploaded
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $doc_list, $appdata_id, $visa_type, $all_docs ) = $self->doc_for_uploading();
+	
+	for my $doc ( @$doc_list ) {
+	
+		my %visas = map { $_ => 1 } split /,\s?/, $doc->{ visa };
+
+		next unless exists $visas{ $visa_type };
+		
+		my $uploaded = 0;
+		
+		for my $file ( @$all_docs ) {
+		
+			$uploaded = 1 if $file->{ DocType } == $doc->{ id };
+		}
+
+		return "doc_" . $doc->{ id } . "|Необходимо загрузить документ ID ".$doc->{ id };
+	}
+	
+	return undef;
+}
+
+sub get_doc_uploading
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $doc_list, $appdata_id, $visa_type, $all_docs ) = $self->doc_for_uploading();
 
 	my $index = 0;
 	
@@ -4002,9 +4038,13 @@ sub get_doc_uploading
 			
 		if ( $doc->{ DocType } < 0 ) {
 		
+			my $filename = $doc->{ Name };
+
+			$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
+		
 			push( @$doc_list, {
 				title 	=> $self->lang( "Дополнительный документ" ),
-				name 	=> $doc->{ Name },
+				name 	=> $filename,
 				type 	=> $doc->{ Ext },
 				id 	=> $doc->{ DocType },
 			} );

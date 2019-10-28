@@ -49,7 +49,7 @@
 	
 <tr><td colspan="2" align ="justify" id="add_info_block" class="grayborder">
 <span class="add_info_text">
-[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %]. [% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %]. [% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %]. [% langreq('Максимально допустимый размер загружаемого файла ') %] [% content_text.max_size_mb %] [% langreq('МБ') %].
+[% langreq('Всю необходимую информацию о наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %]. [% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %]. [% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %]. [% langreq('Максимально допустимый размер загружаемого файла ') %] [% content_text.max_size_mb %] [% langreq('МБ') %].
 <br></span></td></tr>
 
 <tr><td colspan="2">&nbsp;</td></tr>
@@ -93,10 +93,11 @@
 	</td>
 
 	<td class="m_right">
+	<input id="doc_[% doc.id %]" 
 	[% IF doc.type != '' %]
-		<input class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
+		class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
 	[% ELSE %]
-		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
+		type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
 		<input class="upload_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
 	[% END %]
 	</td>
@@ -149,6 +150,42 @@
 
 <script>
 
+[% IF last_error_name %]
+	
+	function show_error_tip( last_error_name, last_error_text ) {
+
+		var error_x = ( mobilScreen ? 'inner-left' : 'left' );
+		var error_y = ( mobilScreen ? 'bottom' : 'center' );
+		var offset_x = ( mobilScreen ? 0 : 5 );
+		var offset_y = ( mobilScreen ? 5 : 0 );
+		
+		window.scroll( 0, find_pos( document.getElementById( last_error_name ) ) );
+		
+		$( '#' + last_error_name ).poshytip({
+			className: 'tip-redsimple',
+			content: last_error_text,
+			showOn: 'none',
+			alignTo: 'target',
+			alignX: error_x,
+			alignY: error_y,
+			offsetX: offset_x,
+			offsetY: offset_y,
+		});
+		
+		$( '#' + last_error_name ).bind({
+		
+			click: function( e ) {
+			
+				$('#' + last_error_name ).poshytip( 'hide' );
+			}
+		});
+		
+		$( '#' + last_error_name ).poshytip( 'show' );
+		
+		return 1;
+	}
+[% END %]
+
 function go_button(where) {
 	$('#action').val(where);
 	document.dataform.submit();
@@ -160,6 +197,20 @@ function show_hide( doc_id, show, hide ) {
 	$('#' + show + doc_id).show();
 }
 
+function find_pos( obj ) {
+
+	var curtop = 0;
+
+	if ( obj.offsetParent ) {
+	
+		do {
+			curtop += obj.offsetTop;
+			
+		} while ( obj = obj.offsetParent );
+		
+		return [ curtop ];
+	}
+}
 
 function error_upload( line, doc_id ) {
 
@@ -273,13 +324,18 @@ function mobileScreenCheck() {
 	$('.edit_input').attr( "value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
 
 	if ( !mobilScreen ) {
+	
 		$('#progressbar').css( "display", 'table' );
 		$('#app_form').css( "margin", '50px' );
 		$('#app_table').attr( "width", '590px' );
 		$('.input_width').css( "width", '20em' );
 
 		$('.pc_hide').css( "display", 'none' );
-
+		
+		[% IF last_error_name %]
+			show_error_tip('[% last_error_name %]', '[% langreq(last_error_text) %]');
+		[% END %]
+		
 		return;
 	}
 
@@ -332,7 +388,7 @@ function mobileScreenCheck() {
 	$('#app_list_div').show();
 
 	[% IF last_error_name %]
-		show_error();
+		show_error_tip('[% last_error_name %]', '[% langreq(last_error_text) %]');
 	[% END %]
 }
 
