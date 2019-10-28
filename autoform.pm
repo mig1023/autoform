@@ -3214,7 +3214,7 @@ sub create_new_appointment
 		LOCK TABLES
 		AutoAppointments READ, Appointments WRITE, AutoAppData READ, AppData WRITE,
 		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
-		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ"
+		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ, DocUploaded WRITE"
 	);
 	
 	my $new_appid = $self->create_table(
@@ -3251,6 +3251,8 @@ sub create_new_appointment
 		$self->create_table(
 			'AutoSpbAlterAppData', 'SpbAlterAppData', $app->{ SpbID }, $db_rules, $appid
 		);
+		
+		$self->upload_file_binding( $app->{ ID }, $appid );
 	}
 	
 	$self->query( 'query', __LINE__, "UNLOCK TABLES");
@@ -4066,6 +4068,16 @@ sub get_doc_uploading
 	};
 
 	return ( $content, 'autoform_upload.tt2' );
+}
+
+sub upload_file_binding
+# //////////////////////////////////////////////////
+{
+	my ( $self, $from, $to ) = @_;
+	
+	$self->query( 'query', __LINE__, "
+		UPDATE DocUploaded SET AppDataID = ? WHERE AutoAppDataID = ?", {}, $to, $from
+	);
 }
 
 sub remove_file
