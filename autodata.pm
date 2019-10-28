@@ -177,9 +177,13 @@ sub get_html_elements
 		
 		free_line	=> '<tr class="mobil_hide"><td colspan="3">&nbsp;</td></tr>',
 		
-		biometric_data	=> '<div class="biometric_box"><div class="biometric_left"><div class="biometric_left_inner">'.
+		biometric_data	=> '<div class="biometric_box"><div class="biometric_left"><div class="biometric_left_inner">' .
 				'<img src="/vcs/static/images/biometric_pass.png">&nbsp;&nbsp;</div></div>'.
 				'<div class="biometric_right"><a href="/autoform/scan/" class="nfc_link">[text]</a></div></div><br>',
+				
+		edit_app_button => '<a moz-do-not-send="true" href="[%link_site%]/autoform/?t=[%app_token%]" style="width:177px;' .
+				'text-decoration:none;text-align:center;display:block;padding:1px 0px;border:1px solid #cad3d9;' .
+				'border-radius:4px;color: #33c3ba;background:#f7f9fa;margin-bottom: 7px;">[%edit_btn%]</a>',
 	}
 }
 

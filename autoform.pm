@@ -3663,10 +3663,11 @@ sub send_app_confirm
 	my $html = $self->get_file_content( $conf->{ tt } );
 
 	my $data = $self->query( 'selallkeys', __LINE__, "
-		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName
+		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName, Category
 		FROM Appointments
-		WHERE ID = ?
-		ORDER BY ID DESC LIMIT 1", $appid
+		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
+		WHERE Appointments.ID = ?
+		ORDER BY Appointments.ID DESC LIMIT 1", $appid
 	)->[ 0 ];
 	
 	$replacer->{ branch_addr } = $self->lang( 'Address-' . $data->{ CenterID } );
@@ -3704,6 +3705,11 @@ sub send_app_confirm
 	$replacer->{ link_site } = $conf->{ link_site };
 	$replacer->{ app_email } = $conf->{ $spb_center . "html_email" };
 	$replacer->{ app_website } = $conf->{ html_website };
+	
+	my $elements = VCS::Site::autodata::get_html_elements();
+	my $edit_app_button = ( $data->{ Category } eq "C" ? $elements->{ edit_app_button } : "" );
+	
+	$html =~ s/\[%edit_app_button%\]/$edit_app_button/;
 	
 	for ( keys %$replacer ) {
 		$html =~ s/\[%$_%\]/$replacer->{ $_ }/g;
