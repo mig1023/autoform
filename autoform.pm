@@ -3958,7 +3958,7 @@ sub get_doc_uploading
 	);
 	
 	my $all_docs = $self->query( 'selallkeys', __LINE__, "
-		SELECT DocType, UploadDate, Name, Ext FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
+		SELECT DocType, Name, Ext FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
 	) if $appdata_id;
 
 	my $index = 0;
@@ -3978,9 +3978,12 @@ sub get_doc_uploading
 			
 				if ( $doc_list->[ $index ]->{ id } == $doc->{ DocType } ) {
 				
-					$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}):\d{2}$/;
-					
-					$doc_list->[ $index ]->{ date } = "$4 $3.$2.$1";
+					my $filename = $doc->{ Name };
+
+					$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
+
+					$doc_list->[ $index ]->{ name } = $filename;
+
 					$doc_list->[ $index ]->{ type } = $doc->{ Ext };
 				}
 			}
@@ -3999,11 +4002,9 @@ sub get_doc_uploading
 			
 		if ( $doc->{ DocType } < 0 ) {
 		
-			$doc->{ UploadDate } =~ /^(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}:\d{2}):\d{2}$/;
-			
 			push( @$doc_list, {
-				title 	=> $doc->{ Name },
-				date 	=> "$4 $3.$2.$1",
+				title 	=> $self->lang( "Дополнительный документ" ),
+				name 	=> $doc->{ Name },
 				type 	=> $doc->{ Ext },
 				id 	=> $doc->{ DocType },
 			} );

@@ -243,19 +243,27 @@
 }
 
 .gray_line{
-    border: 1px solid #D3D3D3;
+	border: 1px solid #D3D3D3;
 }
 
 .hidden {
-    display:none;
+	display:none;
+}
+
+.pc_hide {
+	display:none;
+	height:40px;
+	text-align:center;
+	vertical-align:bottom;
+	padding-bottom:3px;
 }
 
 .middle{
-    vertical-align:middle;
+	vertical-align:middle;
 }
 
 .uplsuccess{
-    color: green;
-    font-size:25px;
-    line-height: 0.8;
+	color: green;
+	font-size:25px;
+	line-height: 0.8;
 }

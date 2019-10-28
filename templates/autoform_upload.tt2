@@ -47,9 +47,9 @@
 
 <tr><td class="left" colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
 	
-<tr><td colspan="2" align ="justify" class="grayborder">
+<tr><td colspan="2" align ="justify" id="add_info_block" class="grayborder">
 <span class="add_info_text">
-[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="https://italy-vms.ru/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %]. [% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %]. [% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %]. [% langreq('Максимально допустимый размер загружаемого файла ') %] [% content_text.max_size_mb %] [% langreq('МБ') %].
+[% langreq('Всю необходимую информацию о необходимом наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %]. [% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %]. [% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %]. [% langreq('Максимально допустимый размер загружаемого файла ') %] [% content_text.max_size_mb %] [% langreq('МБ') %].
 <br></span></td></tr>
 
 <tr><td colspan="2">&nbsp;</td></tr>
@@ -76,19 +76,21 @@
 	[% END %]
 	</td>
 	<td class="middle mobil_hide">
-	<span id="img_span_[% doc.id %]" class="ltl_text">[% doc.date %]</span>
+	<span id="img_span_[% doc.id %]" class="ltl_text">[% doc.name %]</span>
 	</td>
 
 	<td class="hidden pc_hide">
 	[% IF doc.type != '' %]
 		<span class="uplsuccess">&#10003;</span>&nbsp;
+	[% ELSE %]
+		<br>
 	[% END %]
 	[% langreq(doc.title) %]&nbsp;
+	<br><span class="up_doc_date">[% doc.name %]</span>&nbsp;
 	[% IF doc.type != '' %]
-		<img src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
+		<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
 	[% END %]
-	[% doc.date %]
-	&nbsp;</td>
+	</td>
 
 	<td class="m_right">
 	[% IF doc.type != '' %]
@@ -102,7 +104,7 @@
 [% END %]
 <tr>
 	<tr><td colspan="5"><hr class="gray_line"></td></tr>
-	<td colspan="4">
+	<td colspan="4" id="another_doc">
 	[% langreq('Загрузить дополнительный документ по вашему усмотрению') %]
 	<span id="tmp_span_opt" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
 	</td>
@@ -308,7 +310,12 @@ function mobileScreenCheck() {
 		});
 	});
 
+	$('.pc_hide').css( "display", 'table-cell' );
+
 	$('*').css( "font-size", '15px' );
+	$('.up_doc_date').css( "font-size", '20px' );
+	$('#another_doc').css( "text-align", "center" );
+	$('#add_info_block').css( "width", '95%' );
 	
 	$('.input_width').css( "line-height", '40px' );
 	$('.input_width').css( "height", '40px' );
