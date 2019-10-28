@@ -987,7 +987,7 @@ sub get_autoform_content
 	my $progress = $self->get_progressbar( $page->[ 0 ]->{ progress }, $self->get_progressbar_hash_opt() );
 	
 	my ( $special, $js_check ) = $self->get_specials_of_element( $self->get_content_rules( $step ) );
-	
+
 	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check );
 }
 
@@ -1386,12 +1386,12 @@ sub check_existing_id_in_token
 		JOIN $auto" . "AppData ON AutoToken.$created = $auto". "AppData.AppID
 		WHERE Token = ?", $self->{ token }
 	);
-	
+
 	for my $app ( @$list_of_app_in_token ) {
 	
 		$exist = 1 if ( $app->{ID} == $appdata_id );
 	}
-	
+
 	return $exist;
 }
 
@@ -3980,11 +3980,13 @@ sub check_doc_uploaded
 		my $uploaded = 0;
 		
 		for my $file ( @$all_docs ) {
-		
+
 			$uploaded = 1 if $file->{ DocType } == $doc->{ id };
 		}
 
-		return "doc_" . $doc->{ id } . "|Необходимо загрузить документ ID ".$doc->{ id };
+		return $self->text_error(
+			31, { name => "upfile_button_" . $doc->{ id } }, undef, $self->lang( $doc->{ title } )
+		) unless $uploaded;
 	}
 	
 	return undef;
@@ -4071,7 +4073,7 @@ sub remove_file
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my $self->{ token } = $self->get_token();
+	$self->{ token } = $self->get_token();
 	
 	my $appdata_id = $self->param( 'appdata' );
 	
@@ -4081,7 +4083,7 @@ sub remove_file
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
-	return print 'error' unless $self->check_existing_id_in_token( $appdata_id, "finished" );
+	return print 'error' unless $self->check_existing_id_in_token( $appdata_id );
 	
 	my ( $path_to_file, $md5 ) = $self->query( 'sel1', __LINE__, "
 		SELECT Folder, MD5 FROM DocUploaded WHERE AutoAppDataID = ? AND DocType = ?", $appdata_id, $doc_type

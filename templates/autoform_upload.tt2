@@ -27,7 +27,7 @@
 	var mobilScreen = isMobile();
 
 	if ( mobilScreen ) {
-		$('#app_form').hide();
+		$('#app_list_div').hide();
 	}
 
 </script>
@@ -93,12 +93,11 @@
 	</td>
 
 	<td class="m_right">
-	<input id="doc_[% doc.id %]" 
 	[% IF doc.type != '' %]
-		class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
+		<input id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
 	[% ELSE %]
-		type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input class="upload_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
+		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
+		<input class="upload_button" id="upfile_button_[% doc.id %]" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
 	[% END %]
 	</td>
 </tr>
