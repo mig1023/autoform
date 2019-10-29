@@ -4000,6 +4000,21 @@ sub check_doc_uploaded
 	return undef;
 }
 
+sub check_file_ext
+# //////////////////////////////////////////////////
+{
+	my ( $self, $ext ) = @_;
+	
+	return lc( $ext ) if $ext =~ /^(jpg|png|tiff|pdf)$/i;
+	
+	return "jpg" if $ext =~ /^jpeg$/i;
+	
+	return "tiff" if $ext =~ /^tif$/i;
+	
+	return "unk";
+	
+}
+
 sub get_doc_uploading
 # //////////////////////////////////////////////////
 {
@@ -4030,7 +4045,7 @@ sub get_doc_uploading
 
 					$doc_list->[ $index ]->{ name } = $filename;
 
-					$doc_list->[ $index ]->{ type } = $doc->{ Ext };
+					$doc_list->[ $index ]->{ type } = $self->check_file_ext( $doc->{ Ext } );
 				}
 			}
 			
@@ -4055,7 +4070,7 @@ sub get_doc_uploading
 			push( @$doc_list, {
 				title 	=> $self->lang( "Дополнительный документ" ),
 				name 	=> $filename,
-				type 	=> $doc->{ Ext },
+				type 	=> $self->check_file_ext( $doc->{ Ext } ),
 				id 	=> $doc->{ DocType },
 			} );
 			
