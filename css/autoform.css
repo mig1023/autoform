@@ -128,11 +128,6 @@
 	font-weight:normal;
 }
 
-.add_info_text{
-	font-size:11px;
-	font-weight:normal;
-}
-
 .big_button{
 	width:100%;
 	height:40px;
@@ -240,30 +235,4 @@
 	border: none;
 	border-spacing: 0;
 	border-collanse: collapse;
-}
-
-.gray_line{
-	border: 1px solid #D3D3D3;
-}
-
-.hidden {
-	display:none;
-}
-
-.pc_hide {
-	display:none;
-	height:40px;
-	text-align:center;
-	vertical-align:bottom;
-	padding-bottom:3px;
-}
-
-.middle{
-	vertical-align:middle;
-}
-
-.uplsuccess{
-	color: green;
-	font-size:25px;
-	line-height: 0.8;
 }

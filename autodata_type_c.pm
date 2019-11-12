@@ -2378,16 +2378,6 @@ sub get_content_rules_hash
 				format => 'capslock',
 			},
 		],
-
-		'Загрузка документов' => [
-			{
-				page_ord => 2450,
-				progress => 9,
-				all_app_in_title => 1,
-				replacer => '[doc_uploading]',
-				page_db_id => 100037,
-			},
-		],
 		
 		'Вы успешно добавили заявителя' => [	
 			{
