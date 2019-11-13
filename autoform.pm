@@ -730,14 +730,13 @@ sub get_token
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-    
+	
 	my $token = lc( $self->param('t') );
 
 	$token =~ s/[^0-9a-z\-]//g;
 
 	return $token;
 }
-
 
 sub get_token_and_create_new_form_if_need
 # //////////////////////////////////////////////////
@@ -749,7 +748,7 @@ sub get_token_and_create_new_form_if_need
 	return '02' if $token eq 'no_app';
 	
 	return '03' if $token eq 'no_field';
-	
+
 	return '05' if $token eq 'canceled';
 	
 	return '06' if $self->{ autoform }->{ general }->{ technical_work };
@@ -2973,6 +2972,17 @@ sub check_logic
 
 			return $self->text_error( 1, $element, undef, undef, undef, $rule->{ full_error } )
 				if ( $citizenship == 70 ) and $value =~ /[A-Za-z]/i;
+		}
+
+		if ( $rule->{ condition } =~ /^rf_pass_format$/ and $value ) {
+			
+			my $citizenship = $self->query( 'sel1', __LINE__, "
+				SELECT Citizenship FROM " . $prefix . "AppData WHERE ID = ?", 
+				$tables_id->{ $prefix.'AppData' }
+			);
+
+			return $self->text_error( 31, $element, undef, undef, undef, $rule->{ full_error } )
+				if ( $citizenship == 70 ) and $value !~ /[0-9]{9}/i;
 		}
 		
 		if ( $rule->{ condition } =~ /^(more|less)_than$/ ) {

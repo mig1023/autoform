@@ -446,6 +446,9 @@ sub get_content_rules_hash
 						table => 'AppData',
 						name => 'PassNum',
 					},
+					{
+						condition => 'rf_pass_format',
+					}
 				],
 				db => {
 					table => 'AppData',
