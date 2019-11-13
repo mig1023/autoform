@@ -2981,7 +2981,7 @@ sub check_logic
 				$tables_id->{ $prefix.'AppData' }
 			);
 
-			return $self->text_error( 31, $element, undef, undef, undef, $rule->{ full_error } )
+			return $self->text_error( undef, $element, undef, undef, undef, $rule->{ full_error } )
 				if ( $citizenship == 70 ) and $value !~ /[0-9]{9}/i;
 		}
 		
@@ -3706,7 +3706,7 @@ sub send_app_confirm
 	
 	my $elements = VCS::Site::autodata::get_html_elements();
 	my $edit_app_button = ( $data->{ Category } eq "C" ? $elements->{ edit_app_button } : "" );
-	
+
 	$html =~ s/\[%edit_app_button%\]/$edit_app_button/;
 
 	for ( keys %$replacer ) {

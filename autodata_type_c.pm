@@ -467,6 +467,7 @@ sub get_content_rules_hash
 					},
 					{
 						condition => 'rf_pass_format',
+						full_error => 'Неверный формат загранпаспорта. Номер загранпаспорта должен состоять из девяти цифр', 
 					}
 				],
 				db => {
