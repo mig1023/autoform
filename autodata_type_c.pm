@@ -453,6 +453,26 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'input',
+				name => 'rupassnum',
+				label => '№ загранпаспорта',
+				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				example => '650000001',
+				check => 'zWN',
+				complete_check => 'not_empty',
+				check_logic => [
+					{
+						condition => 'unique_in_pending',
+						table => 'AppData',
+						name => 'PassNum',
+					},
+				],
+				db => {
+					table => 'AppData',
+					name => 'PassNum',
+				},
+			},
+			{
+				type => 'input',
 				name => 'lname',
 				label => 'Фамилия',
 				comment => 'Введите фамилию на английском языке так, как она указана в загранпаспорте',
@@ -478,26 +498,6 @@ sub get_content_rules_hash
 					name => 'FName',
 				},
 				format => 'capslock'
-			},
-			{
-				type => 'input',
-				name => 'rupassnum',
-				label => '№ загранпаспорта',
-				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				example => '650000001',
-				check => 'zWN',
-				complete_check => 'not_empty',
-				check_logic => [
-					{
-						condition => 'unique_in_pending',
-						table => 'AppData',
-						name => 'PassNum',
-					},
-				],
-				db => {
-					table => 'AppData',
-					name => 'PassNum',
-				},
 			},
 			{
 				type => 'input',
