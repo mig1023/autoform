@@ -1366,7 +1366,7 @@ sub get_content_rules_hash
 				label => 'Название гостиницы или ФИО приглашающего',
 				comment => 'Укажите полное название гостиницы и данные приглашающего лица',
 				example => 'VMS',
-				check => 'zW\s\-\.',
+				check => 'zNW\s\-\.\&',
 				db => {
 					table => 'SpbAlterAppData',
 					name => 'HotelName',
@@ -1468,7 +1468,7 @@ sub get_content_rules_hash
 				label => 'Название гостиницы или ФИО приглашающего',
 				comment => 'Укажите полное название гостиницы и данные приглашающего лица',
 				example => 'VMS',
-				check => 'W\s\-\.',
+				check => 'NW\s\-\.\&',
 				db => {
 					table => 'AppData',
 					name => 'Hotels',
@@ -2571,7 +2571,7 @@ sub get_content_edit_rules_hash
 			label => 'Название гостиницы или ФИО приглашающего',
 			comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней- укажите первое.',
 			example => 'Via Esempio 1',
-			check => 'zW\s\-\.',
+			check => 'zNW\s\-\.\&',
 			db => {
 				table => 'AppData',
 				name => 'Hotels',
