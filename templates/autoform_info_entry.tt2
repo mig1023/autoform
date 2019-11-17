@@ -42,7 +42,11 @@
 
 <tr><td>
 
-<h2>[% langreq('Информация о записи') %]</h2><br></td></tr>
+<h2>[% langreq('Информация о записи') %]</h2></td></tr>
+
+<tr><td>
+<div class="ltl_text">[% langreq('Вы также можете войти по ссылке из письма, которое получили после начала записи') %].</div><br>	
+</td></tr>
 
 <tr><td><label id="appnum_text">[% langreq('Номер записи') %]</label></td></tr><tr>
 <td><input class="input_width input_gen" type="text" value="" name="appnum" id="appnum" title="Введите номер записи"></td></tr>
