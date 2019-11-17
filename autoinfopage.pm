@@ -284,6 +284,11 @@ sub edit
 		delete $symbols_error->{ "$_" };
 	}
 
+	
+	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+	);
+
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
@@ -293,6 +298,7 @@ sub edit
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'special'	=> $special,
 		'app_data'	=> $app_data,
+		'app_id'	=> $app_id,
 		'js_rules'	=> $js_rules,
 		'js_symbols'	=> $symbols_error,
 		'js_errors'	=> map { $self->{ af }->lang( $_ ) } VCS::Site::autodata::get_text_error(),

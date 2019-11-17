@@ -64,6 +64,11 @@
 
 	[% content_text %]
 
+	<td colspan="2"><br>
+	<div id="editFullOptionDiv" class="editFullOption">[% langreq('Вы можете <a class = "dotted_link_big" href = "javascript:openFullEdit()">отредактировать</a> все поля') %].</div>
+	<div id="editFullBlockDiv" class="editFullBlock"><input class="small_button action_button" type="button" value="[% langreq('Редактировать') %]" onclick="go_to_full_edit();">&nbsp;&nbsp;[% langreq('Пожалуйста, будьте внимательны при редактировании всех полей записи') %]</div>
+	</td></tr>
+
 	<tr><td colspan="2"><br>
 	<span id="mobile_order_bottom">
 	<input class="small_button action_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
@@ -80,6 +85,17 @@
 </form>
 
 <script>
+	function openFullEdit() {
+		$("#editFullOptionDiv").hide();
+		$("#editFullBlockDiv").show();
+	}
+
+	function go_to_full_edit() {
+
+		location.replace('/vcs/show_a.htm?appid=[% app_id %]&lang=ru&appsid=[% app_data %]&token=[% token %]');
+		return;
+	};
+
 	[% INCLUDE js_elements.tt2 %]
 </script>
 
