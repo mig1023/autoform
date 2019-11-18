@@ -36,6 +36,8 @@ function mobileScreenCheck() {
 		$('#app_table').attr( "width", '590px' );
 		$('.input_width').css( "width", '20em' );
 
+		$('#separator').html('&nbsp;&nbsp;');
+
 		[% IF (last_error_name && (last_error_name != 'timeslot')) %]
 			show_error_tip( '[% last_error_name %]', '[% langreq(last_error_text) %]' );
 		[% END %]
@@ -81,6 +83,8 @@ function mobileScreenCheck() {
 	
 	$(':checkbox, :radio').css( "height", "20px" );
 	$(':checkbox, :radio').css( "width", "20px" );
+
+	$('#separator').html('<br><br>');
 	
 	$('.mobil_hide').css( "display", 'none' );
 
