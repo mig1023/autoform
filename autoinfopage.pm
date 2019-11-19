@@ -44,7 +44,7 @@ sub autoinfopage
 	
 	return edit( @_ ) if /^(edit|save_edit_app)$/i;
 	
-	return edited( @_ ) if /^(edited)$/i;
+	return edited( @_ ) if /^edited$/i;
 
 	return reschedule( @_ ) if /^reschedule$/i;
 	
@@ -118,6 +118,8 @@ sub get_infopage
 		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
 		WHERE Token = ?", $self->{ token }
 	)->[0];
+
+	$self->{ vars }->get_system->log_action( $self->{ vars } , "autoinfo_view", "просмотр записи", $app_info->{ CreatedApp } );
 
 	my @new_date = split( /\-/, $app_info->{ new_app_date } );
 	
@@ -283,11 +285,13 @@ sub edit
 		
 		delete $symbols_error->{ "$_" };
 	}
-
 	
 	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
+
+	$self->{ vars }->get_system->log_action( $self->{ vars } , "autoinfo_edit",
+		"редактирование записи: appid $app_id, appdata $app_data" . ( $action_type eq "save_edit_app" ? " (сохранение)" : ""), $app_id );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -373,6 +377,13 @@ sub reschedule
 			and
 			Date::Calc::check_date( $3, $2, $1 )
 		) {
+			
+			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+			);
+
+			$self->{ vars }->get_system->log_action( $self->{ vars }, "autoinfo_resch",
+				"перенос записи на " . $new->{ appdate } . " таймслот " . $new->{ apptime }, $app_id );
 
 			$id_or_error = $self->set_new_appdate( $new );
 			
@@ -457,6 +468,8 @@ sub cancel
 		my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
 			SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 		);
+
+		$self->{ vars }->get_system->log_action( $self->{ vars }, "autoinfo_cancel", "отмена записи", $app_id );
 		
 		my $ncount = scalar @$list_after_cancel;
 		
