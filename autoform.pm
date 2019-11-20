@@ -2807,15 +2807,33 @@ sub check_logic
 		if ( $rule->{ condition } =~ /^(equal|now)_or_(later|earlier)$/ ) {
 		
 			$value = $self->date_format( $value, 'to_iso' );
-	
+
 			my $datediff = $self->get_datediff(
 				$value, $rule, $tables_id, ( $rule->{ condition } =~ /^equal/ ? 1 : 0 ), $prefix
 			);
 
 			my $offset = ( $rule->{ offset } ? $rule->{ offset } : 0 );
-				
-			$error = 6 if ( ( $datediff < $offset ) and ( $rule->{ condition } =~ /later$/ ) );
-			$error = 8 if ( ( $datediff > $offset ) and ( $rule->{ condition } =~ /earlier$/ ) );
+			
+			$error = 6 if (
+				(
+					( $datediff < $offset )
+					or
+					( ( $datediff == $offset ) and $rule->{ equality_is_also_fail } )
+				)
+				and
+				( $rule->{ condition } =~ /later$/ )
+			);
+
+			$error = 8 if (
+				(
+					( $datediff > $offset )
+					or
+					( ( $datediff == $offset ) and $rule->{ equality_is_also_fail } )
+				)
+				and
+				( $rule->{ condition } =~ /earlier$/ )
+			);
+
 			$error = 12 if ( $error and $rule->{ condition } =~ /^now/ );
 			
 			$error++ if ( $offset and ( $error == 6 or $error == 8 ) );
