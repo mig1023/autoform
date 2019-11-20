@@ -119,8 +119,6 @@ sub get_infopage
 		WHERE Token = ?", $self->{ token }
 	)->[0];
 
-	$self->{ vars }->get_system->log_action( $self->{ vars } , "autoinfo_view", "просмотр записи", $app_info->{ CreatedApp } );
-
 	my @new_date = split( /\-/, $app_info->{ new_app_date } );
 	
 	my $months = VCS::Site::autodata::get_months();
