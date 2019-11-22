@@ -63,7 +63,7 @@ sub get_content_rules
 {
 	my ( $self, $current_page, $full, $need_to_init ) = @_;
 
-	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
+	my ( $center ) = $self->get_app_visa_and_center();
 		
 	my $content = $self->get_content_rules_hash_opt();
 
@@ -169,7 +169,7 @@ sub get_app_visa_and_center
 {
 	my $self = shift;
 
-	return if !$self->{ token };
+	return ( 1, 'C' ) if !$self->{ token };
 
 	my $app_data = {};
 	
@@ -197,7 +197,7 @@ sub get_app_visa_and_center
 		$app_data->{ $_ } = undef if $app_data->{ $_ } eq 'X';
 	}
 	
-	return ( $app_data->{ center } ) if !$app_data->{ vtype };
+	return ( $app_data->{ center }, 'C' ) if !$app_data->{ vtype };
 	
 	my $visa_categories = $self->get_all_visa_categories();
 
