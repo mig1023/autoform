@@ -252,6 +252,7 @@ sub edit
 		
 			$self->{ vars }->setparam( 'edt_mezzi', $self->param_assembler( "mezzi", 7 ) );
 			$self->{ vars }->setparam( 'edt_purpose', $self->param_assembler( "edt_purpose", 17, "only_num" ) );
+			$self->{ vars }->setparam( 'edt_prevvisa', $self->{ vars }->getparam( "edt_prevvisa" ) - 1 );
 			
 			$self->{ af }->save_data_from_form( undef, $tables_ids, "finished", $editable_fields );
 		
@@ -263,6 +264,8 @@ sub edit
 	
 	$all_values->{ edt_mezzi } = $self->param_disassembler( $all_values->{ edt_mezzi }, "mezzi" );
 	$all_values->{ edt_purpose } = $self->param_disassembler( $all_values->{ edt_purpose }, "edt_purpose", "only_num" );
+	
+	$all_values->{ edt_prevvisa } += 1;
 	
 	my $content = '';
 

@@ -1759,13 +1759,11 @@ sub correct_values
 	
 	if ( exists $$current_values->{ 'new_app_timeslot' } ) {
 	
-		my ( $start, $end ) = $self->query( 'sel1', __LINE__, "
-			SELECT TStart, TEnd FROM TimeData WHERE SlotID = ?", $$current_values->{ 'new_app_timeslot' }
+		my $start = $self->query( 'sel1', __LINE__, "
+			SELECT TStart FROM TimeData WHERE SlotID = ?", $$current_values->{ 'new_app_timeslot' }
 		);
 		
-		$_ = $self->{ vars }->get_system->time_to_str( $_ ) for ( $start, $end );
-		
-		$$current_values->{ 'new_app_timeslot' } = "$start - $end";	
+		$$current_values->{ 'new_app_timeslot' } = $self->{ vars }->get_system->time_to_str( $start );	
 	}
 	
 	return $$current_values;
