@@ -255,7 +255,7 @@ sub autoform
 
 	if ( $finished and $doc_status and $self->{ token } !~ /^\d\d$/ ) {
 	
-		( $title, $page_content, $template_file ) = $self->doc_status( $self->{ token } );
+		( $title, $page_content, $template_file ) = $self->doc_status();
 	}
 	elsif ( $self->{ token } =~ /^\d\d$/ ) {
 	
@@ -755,6 +755,17 @@ sub get_token_and_create_new_form_if_need
 
 	return $self->token_generation() if $token eq '';
 	
+	if ( length( $token ) == 24 ) {
+	
+		my $found_docpack = $self->{ vars }->db->sel1("
+			SELECT DocPackID FROM DocPackOptional WHERE FeedbackKey = ?", $token
+		) || undef;
+		
+		return '01' unless $found_docpack;
+	
+		return ( $token, 'finished', 'docstatus' );
+	}
+	
 	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
 		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
 	);
@@ -852,15 +863,28 @@ sub token_generation
 sub doc_status
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my $self = shift;
 	
-	my ( $status, $shipping ) = $self->query( 'sel1', __LINE__, "
-		SELECT PStatus, DocPack.Shipping
-		FROM AutoToken
-		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
-		JOIN DocPack ON DocPack.ID = Appointments.PacketID
-		WHERE Token = ?", $self->{ token }
-	);
+	my ( $status, $shipping ) = ( 0, 0 );
+	
+	if ( length( $self->{ token } ) == 24 ) {
+	
+		( $status, $shipping ) = $self->query( 'sel1', __LINE__, "
+			SELECT PStatus, DocPack.Shipping
+			FROM DocPack
+			JOIN DocPackOptional ON DocPack.ID = DocPackOptional.DocPackID
+			WHERE FeedbackKey = ?", $self->{ token }
+		);
+	}
+	else {
+		( $status, $shipping ) = $self->query( 'sel1', __LINE__, "
+			SELECT PStatus, DocPack.Shipping
+			FROM AutoToken
+			JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
+			JOIN DocPack ON DocPack.ID = Appointments.PacketID
+			WHERE Token = ?", $self->{ token }
+		);
+	}
 	
 	my $public_status = {
 		7  => 0,
