@@ -757,11 +757,17 @@ sub get_token_and_create_new_form_if_need
 	
 	if ( length( $token ) == 24 ) {
 	
-		my $found_docpack = $self->{ vars }->db->sel1("
-			SELECT DocPackID FROM DocPackOptional WHERE FeedbackKey = ?", $token
+		my $doc_id = $self->param('doc') || undef;
+		
+		$doc_id =~ s/[^0-9]//g;
+	
+		my $found_docpack = $self->query( 'sel1', __LINE__, "
+			SELECT DocPack.ID FROM DocPack
+			JOIN DocPackOptional ON DocPack.ID = DocPackOptional.DocPackID
+			WHERE FeedbackKey = ?", $token
 		) || undef;
 		
-		return '01' unless $found_docpack;
+		return '01' if ( !$found_docpack or ( $doc_id and ( $doc_id != $found_docpack ) ) );
 	
 		return ( $token, 'finished', 'docstatus' );
 	}
