@@ -246,8 +246,12 @@ sub autoform
 	
 		$self->{ biometric_data } = 'yes' if lc( $self->param( $_ ) ) eq 'yes';
 	}
-
+	
 	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
+	
+	my $fingerprint = $self->param( 'fingerprint' ) || undef;
+	
+	$self->fingerprint_save( $fingerprint ) if $fingerprint;
 
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
@@ -395,6 +399,19 @@ sub get_current_apps
 	$max = 0 unless $max;
 	
 	return ( $all, $max );
+}
+
+sub fingerprint_save
+# //////////////////////////////////////////////////
+{
+	my ( $self, $fingerprint ) = @_;
+	
+	$fingerprint =~ s/[^A-Fa-f0-9]//g;
+
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET Fingerprint = ? WHERE Token = ?", {},
+		$fingerprint, $self->{ token }
+	);
 }
 
 sub mod_last_error_date
