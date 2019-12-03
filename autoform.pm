@@ -327,6 +327,7 @@ sub autoform
 	$tvars->{ biometric_data } = ( $self->{ biometric_data } ? 'yes' : 0 );
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
+	$tvars->{ fingerprint } = $self->{ autoform }->{ general }->{ fingerprint };
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 

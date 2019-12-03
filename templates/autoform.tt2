@@ -54,7 +54,7 @@
 					$('#app_form').hide();
 				}
 				
-				[% IF ( step == 1 ) %]
+				[% IF fingerprint && ( step == 1 ) %]
 					setTimeout(function () {
 						Fingerprint2.get(function (components) {
 							$.ajax({

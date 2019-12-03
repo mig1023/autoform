@@ -12,6 +12,7 @@ sub get_settings
 			maps_type => 'embedded', # <--- embedded / geo
 			technical_work => 0, 
 			anti_injection => 0,
+			fingerprint => 1,
 		},
 	
 		paths => {
