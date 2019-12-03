@@ -57,7 +57,14 @@
 				[% IF ( step == 1 ) %]
 					setTimeout(function () {
 						Fingerprint2.get(function (components) {
-							$('#fingerprint').val(Fingerprint2.x64hash128(components.map(function (pair) { return pair.value }).join(), 31));
+							$.ajax({
+								url: "/autoform/fingerprint.htm",
+								dataType: "text",
+								data: {
+									t: '[% token %]',
+									f: Fingerprint2.x64hash128(components.map(function (pair) { return pair.value }).join(), 31)
+								},
+							});
 						})  
 					}, 500);
 				[% END %]
@@ -71,7 +78,6 @@
 				<input type = "hidden" value = "[% biometric_data %]" name = "biometric_data" id = "biometric_data">
 				<input type = "hidden" value = "" name = "last_error_return" id = "last_error_return">
 				<input type = "hidden" value = "0" name = "urgent_slots" id = "urgent_slots">
-				<input type = "hidden" value = "" name = "fingerprint" id = "fingerprint">
 
 				<table style="width: 100%;">
 

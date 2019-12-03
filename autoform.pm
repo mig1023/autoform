@@ -55,6 +55,8 @@ sub getContent
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
 	
+	return fingerprint_save( @_ ) if /^fingerprint$/i;
+	
 	return $self->redirect();
 }
 
@@ -249,10 +251,6 @@ sub autoform
 	
 	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
 	
-	my $fingerprint = $self->param( 'fingerprint' ) || undef;
-	
-	$self->fingerprint_save( $fingerprint ) if $fingerprint;
-
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
@@ -404,14 +402,23 @@ sub get_current_apps
 sub fingerprint_save
 # //////////////////////////////////////////////////
 {
-	my ( $self, $fingerprint ) = @_;
+	my ( $self, $task, $id, $template ) = @_;
 	
+	my $token = $self->get_token() || '';
+
+	my $fingerprint = $self->param('f') || '';
+
 	$fingerprint =~ s/[^A-Fa-f0-9]//g;
+	
 
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET Fingerprint = ? WHERE Token = ?", {},
-		$fingerprint, $self->{ token }
+		$fingerprint, $token
 	);
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	print "ok";
 }
 
 sub mod_last_error_date
