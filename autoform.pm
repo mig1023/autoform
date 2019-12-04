@@ -4077,7 +4077,7 @@ sub algorithmic_key_generation
 	
 	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 	
-	my @algorythm = split( /\|/, $self->{ autoform }->{ algorithmic_key }->{ key } );
+	my @algorythm = split( /-/, $self->{ autoform }->{ algorithmic_key }->{ key } );
 	
 	my $token = '';
 
