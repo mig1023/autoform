@@ -13,6 +13,7 @@ sub get_settings
 			technical_work => 0, 
 			anti_injection => 0,
 			fingerprint => 1,
+			algorithmic_key => 1,
 		},
 	
 		paths => {
@@ -49,7 +50,11 @@ sub get_settings
 			html_website => '',
 			html_email => '',
 			spb_html_email => '',
-		}
+		},
+		
+		algorithmic_key => {
+			key => '',
+		},
 	};
 }
 

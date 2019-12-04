@@ -19,6 +19,9 @@ use HTTP::Tiny;
 use Encode qw(decode encode);
 use Math::Random::Secure qw(irand); 
 
+use Digest::SHA qw(sha1_hex);
+use Digest::MD5 qw(md5_hex);
+
 sub new
 # //////////////////////////////////////////////////
 {
@@ -328,6 +331,7 @@ sub autoform
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 	$tvars->{ fingerprint } = $self->{ autoform }->{ general }->{ fingerprint };
+	$tvars->{ a_key } = $self->algorithmic_key();
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 
@@ -1170,19 +1174,36 @@ sub get_forward
 		$current_table_id = $self->get_current_table_id();
 	}
 	
-	$self->save_data_from_form( $step, $current_table_id );
-	
-	$self->mod_last_change_date();
-	
-	my $last_error = $self->check_data_from_form( $step );
+	my $last_error = '';
 	
 	my ( $appnum, $appid ) = ( undef, undef );
 	
-	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
-		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
+	if ( $self->{ autoform }->{ general }->{ algorithmic_key } ) {
 	
-	( $last_error, $step ) = $self->check_mutex_for_creation( $step )
-		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
+		my $algorithmic_key = $self->param( 'a_key' );
+		
+		if ( !$self->algorithmic_key( $algorithmic_key ) ) {
+		
+			my $page_content = $self->get_content_rules( $step );
+		
+			$last_error = $self->text_error( 31, $page_content->[0], undef );
+		}
+	}
+
+	if ( !$last_error ) {
+	
+		$self->save_data_from_form( $step, $current_table_id );
+		
+		$self->mod_last_change_date();
+		
+		$last_error = $self->check_data_from_form( $step );
+	
+		( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
+			if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
+		
+		( $last_error, $step ) = $self->check_mutex_for_creation( $step )
+			if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
+	}
 
 	if ( $last_error ) {
 	
@@ -2355,7 +2376,7 @@ sub save_data_from_form
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step, $table_id, $app_finished, $content ) = @_;
-
+	
 	my $content_rules = ( $app_finished ? $content : $self->get_content_rules( $step ) );
 	
 	my $request_tables = $self->get_names_db_for_save_or_get( $content_rules, 'save', $app_finished );
@@ -4009,6 +4030,65 @@ sub redirect
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
 	
 	$self->{ vars }->get_system->redirect( $self->{ autoform }->{ paths }->{ addr } . $param );
+}
+
+sub algorithmic_key
+# //////////////////////////////////////////////////
+{
+	my ( $self, $key ) = @_;
+
+	if ( !$self->{ autoform }->{ general }->{ algorithmic_key } ) {
+	
+		return "" if $key;
+		
+		return 1;
+	}
+	
+	if ( $key ) {
+	
+		my ( $token_part, $algorithmic_part ) = split( /:/, $key );
+		
+		my ( undef, $checked_algorithm ) = $self->algorithmic_key_generation( $token_part );
+		
+		return $algorithmic_part eq $checked_algorithm;
+	}
+	
+	my ( $token_part, $algorithmic_part ) = $self->algorithmic_key_generation();
+	
+	return "$token_part:$algorithmic_part";
+}
+
+sub algorithmic_key_generation
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token_from_form ) = @_;
+	
+	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
+	
+	my @algorythm = split( /\|/, $self->{ autoform }->{ algorithmic_key }->{ key } );
+	
+	my $token = '';
+
+	if ( !$token_from_form ) {
+	
+		$token .= $alph[ int( irand( 36 ) ) ] for ( 1..10 );
+	}
+	else {
+		$token = $token_from_form;
+	}
+	
+	my $original_token = $token;
+	
+	for ( @algorythm ) {
+	
+		$token = md5_hex( $token ) if /^md5$/i;
+		
+		$token = sha1_hex( $token ) if /^sha1$/i;
+	
+		$token .= $_ unless /^(md5|sha1)$/i;
+	}
+	
+	return ( $original_token, $token );
 }
 
 sub param
