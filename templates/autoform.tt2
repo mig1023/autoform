@@ -10,8 +10,6 @@
 	<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>VMS - [% langreq('Новая запись') %]</title>
-	
-	<script src="[% static %]/fingerprint2.js"></script>
 
 	[% IF ( special.datepicker.0 || special.post_index.0 || special.mask.0 ) %]
 		<script src="[% static %]/jquery-ui.1.8.min.js"></script>
@@ -53,21 +51,6 @@
 				if ( mobilScreen ) {
 					$('#app_form').hide();
 				}
-				
-				[% IF fingerprint && ( step == 1 ) %]
-					setTimeout(function () {
-						Fingerprint2.get(function (components) {
-							$.ajax({
-								url: "/autoform/fingerprint.htm",
-								dataType: "text",
-								data: {
-									t: '[% token %]',
-									f: Fingerprint2.x64hash128(components.map(function (pair) { return pair.value }).join(), 31)
-								},
-							});
-						})  
-					}, 500);
-				[% END %]
 
 			</script>
 
@@ -78,7 +61,6 @@
 				<input type = "hidden" value = "[% biometric_data %]" name = "biometric_data" id = "biometric_data">
 				<input type = "hidden" value = "" name = "last_error_return" id = "last_error_return">
 				<input type = "hidden" value = "0" name = "urgent_slots" id = "urgent_slots">
-				<input type = "hidden" value = "[% a_key %]" name = "a_key" id = "a_key">
 
 				<table style="width: 100%;">
 

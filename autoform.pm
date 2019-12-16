@@ -19,9 +19,6 @@ use HTTP::Tiny;
 use Encode qw(decode encode);
 use Math::Random::Secure qw(irand); 
 
-use Digest::SHA qw(sha1_hex sha256_hex sha384_hex sha512_hex);
-use Digest::MD5 qw(md5_hex);
-
 sub new
 # //////////////////////////////////////////////////
 {
@@ -57,8 +54,6 @@ sub getContent
 	return autoinfopage( @_, 'entry' ) if /^info$/i;
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
-	
-	return fingerprint_save( @_ ) if /^fingerprint$/i;
 	
 	return $self->redirect();
 }
@@ -251,9 +246,9 @@ sub autoform
 	
 		$self->{ biometric_data } = 'yes' if lc( $self->param( $_ ) ) eq 'yes';
 	}
-	
+
 	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
-	
+
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
@@ -330,8 +325,6 @@ sub autoform
 	$tvars->{ biometric_data } = ( $self->{ biometric_data } ? 'yes' : 0 );
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
-	$tvars->{ fingerprint } = $self->{ autoform }->{ general }->{ fingerprint };
-	$tvars->{ a_key } = $self->algorithmic_key();
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 
@@ -402,28 +395,6 @@ sub get_current_apps
 	$max = 0 unless $max;
 	
 	return ( $all, $max );
-}
-
-sub fingerprint_save
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-	
-	my $token = $self->get_token() || '';
-
-	my $fingerprint = $self->param('f') || '';
-
-	$fingerprint =~ s/[^A-Fa-f0-9]//g;
-	
-
-	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Fingerprint = ? WHERE Token = ?", {},
-		$fingerprint, $token
-	);
-	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	print "ok";
 }
 
 sub mod_last_error_date
@@ -988,7 +959,7 @@ sub get_autoform_content
 	$step = $min_step if $step < $min_step;
 	$step = $max_step if $step > $max_step;
 
-	( $step, $last_error ) = $self->get_back( $step ) if ( $action eq 'back' ) and ( $step > 1 );
+	$step = $self->get_back( $step ) if ( $action eq 'back' ) and ( $step > 1 );
 	
 	( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
 		if ( $action eq 'forward' ) and ( $step < $max_step );
@@ -1057,11 +1028,11 @@ sub check_all_is_prepared
 
 	my $step = $self->set_step_by_content( '[list_of_applicants]' );
 	
-	return ( $step, $self->text_error( 27, { name => 'applist' }, undef, $pass_double ) ) if $pass_double;
+	return ( $step, $self->text_error( 27, { 'name' => 'applist' }, undef, $pass_double ) ) if $pass_double;
 
-	return ( $step, $self->text_error( $app_status, { name => 'applist' }, undef ) ) if $app_status;
+	return ( $step, $self->text_error( $app_status, { 'name' => 'applist' }, undef ) ) if $app_status;
 	
-	return ( $step, $self->text_error( 24, { name => 'applist' }, undef ) );
+	return ( $step, $self->text_error( 24, { 'name' => 'applist' }, undef ) );
 }
 
 sub check_relation
@@ -1174,9 +1145,19 @@ sub get_forward
 		$current_table_id = $self->get_current_table_id();
 	}
 	
+	$self->save_data_from_form( $step, $current_table_id );
+	
+	$self->mod_last_change_date();
+	
+	my $last_error = $self->check_data_from_form( $step );
+	
 	my ( $appnum, $appid ) = ( undef, undef );
 	
-	my $last_error = $self->algorithmic_key( 'check', $step );
+	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
+		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
+	
+	( $last_error, $step ) = $self->check_mutex_for_creation( $step )
+		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
 
 	if ( $last_error ) {
 	
@@ -1190,18 +1171,6 @@ sub get_forward
 		);
 		
 	} else {
-	
-		$self->save_data_from_form( $step, $current_table_id );
-		
-		$self->mod_last_change_date();
-		
-		$last_error = $self->check_data_from_form( $step );
-	
-		( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
-			if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
-		
-		( $last_error, $step ) = $self->check_mutex_for_creation( $step )
-			if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
 
 		$step += 1;
 
@@ -1722,10 +1691,6 @@ sub get_back
 {
 	my ( $self, $step ) = @_;
 	
-	my $last_error = $self->algorithmic_key( 'check', $step );
-	
-	return ( $step, $last_error ) if $last_error;
-	
 	$self->save_data_from_form( $step, $self->get_current_table_id() );
 	$self->mod_last_change_date();
 	
@@ -1738,7 +1703,7 @@ sub get_back
 	
 	$self->set_step( $step );
 	
-	return ( $step, undef );
+	return $step;
 }
 
 sub get_html_page
@@ -2365,7 +2330,7 @@ sub save_data_from_form
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step, $table_id, $app_finished, $content ) = @_;
-	
+
 	my $content_rules = ( $app_finished ? $content : $self->get_content_rules( $step ) );
 	
 	my $request_tables = $self->get_names_db_for_save_or_get( $content_rules, 'save', $app_finished );
@@ -4019,90 +3984,6 @@ sub redirect
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
 	
 	$self->{ vars }->get_system->redirect( $self->{ autoform }->{ paths }->{ addr } . $param );
-}
-
-sub algorithmic_key
-# //////////////////////////////////////////////////
-{
-	my ( $self, $key, $step ) = @_;
-
-	if ( !$self->{ autoform }->{ general }->{ algorithmic_key } ) {
-	
-		return 1 if $key;
-		
-		return undef;
-	}
-	
-	if ( !$key ) {
-	
-		my ( $token_part, $algorithmic_part ) = $self->algorithmic_key_generation();
-	
-		return "$token_part:$algorithmic_part";
-	}
-	
-	my $algorithmic_key = $self->param( 'a_key' );
-	
-	my ( $token_part, $algorithmic_part ) = split( /:/, $algorithmic_key );
-		
-	my ( undef, $checked_algorithm ) = $self->algorithmic_key_generation( $token_part );
-		
-	if ( $algorithmic_part ne $checked_algorithm ) {
-	
-		my $page_content = $self->get_content_rules( $step );
-		
-		my $element;
-		
-		if ( ref( $page_content ) eq 'HASH' ) {
-		
-			$element = $page_content->[0];
-		}
-		elsif ( $page_content eq '[list_of_applicants]' ) {
-		
-			$element = { name => 'applist' };
-		}
-		else {
-			$element = { name => 'timeslot' };
-		}
-	
-		return $self->text_error( 31, $element );
-	}
-	
-	return undef;
-}
-
-sub algorithmic_key_generation
-# //////////////////////////////////////////////////
-{
-	my ( $self, $token_from_form ) = @_;
-	
-	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
-	
-	my @algorythm = split( /-/, $self->{ autoform }->{ algorithmic_key }->{ key } );
-	
-	my $token = '';
-
-	if ( !$token_from_form ) {
-	
-		$token .= $alph[ int( irand( 36 ) ) ] for ( 1..10 );
-	}
-	else {
-		$token = $token_from_form;
-	}
-	
-	my $original_token = $token;
-	
-	for ( @algorythm ) {
-	
-		$token = md5_hex( $token ) if /^md5$/i;
-		$token = sha1_hex( $token ) if /^sha1$/i;
-		$token = sha256_hex( $token ) if /^sha256$/i;
-		$token = sha384_hex( $token ) if /^sha384$/i;
-		$token = sha512_hex( $token ) if /^sha512$/i;
-	
-		$token .= $_ unless /^(md5|sha1|sha256|sha384|sha512)$/i;
-	}
-	
-	return ( $original_token, $token );
 }
 
 sub param
