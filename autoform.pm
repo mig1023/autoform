@@ -2219,10 +2219,11 @@ sub add_rules_format
 			$self->lang( 'В поле допустимо вводить ' );
 	}
 	
+	$format_add_string .= $self->lang( 'буквы ' ) if $self->{ 'lang' } eq 'it' and ( $rules =~ /Ё/ or $rules =~ /W/ );
 	$format_add_string .= $self->lang( 'русские ' ) if $rules =~ /Ё/;
 	$format_add_string .= $self->lang( 'и ' ) if $rules =~ /Ё/ and $rules =~ /W/;
 	$format_add_string .= $self->lang( 'английские ' ) if $rules =~ /W/;
-	$format_add_string .= $self->lang( 'буквы, ' ) if $rules =~ /Ё/ or $rules =~ /W/;
+	$format_add_string .= $self->lang( ( $self->{ 'lang' } ne 'it' ? 'буквы' : '' ) . ', ' ) if $rules =~ /Ё/ or $rules =~ /W/;
 	$format_add_string .= $self->lang( 'цифры, ' ) if $rules =~ /N/;
 	
 	$rules =~ s/(\s|\n|z|W|Ё|N|'|\))//g;
