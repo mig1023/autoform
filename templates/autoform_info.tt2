@@ -41,7 +41,7 @@
 
 </script>
 
-<form action = "[% addr %]?t=[% token %]" method = "POST" name = "dataform">
+<form action = "[% addr %]?t=[% token %]&lang=[% lang_in_link %]" method = "POST" name = "dataform">
 <input type = "hidden" value = "nothing" name = "action" id = "action">
 <input type = "hidden" value = "" name = "appdata" id = "appdata">
 
@@ -63,7 +63,8 @@
 
 	<tr><td>
 
-	<table width="100%">
+	<table width="100%" style="font-size:
+	[% IF lang_in_link == 'en' %]0.85em[% ELSIF lang_in_link == 'it' %]0.75em[% ELSE %]1em[% END %]">
 	<tr>
 	<td><span class="spacer2"></span>[% langreq('Номер записи') %]</td>
 	<td class="m_left"><span class="m_info">[% app_info.new_app_num %]</span></td>
@@ -111,8 +112,8 @@
 		<td class="m_right"><span class="mobil_hide">[% person.BirthDate %]</span>&nbsp;</td>
 		<td class="m_right_m">
 		[% IF app_info.category == 'C' %]
-			<input class="small_button" type="button" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.ID %]');">
-			&nbsp;<input class="small_button" type="button" value="[% langreq('Распечатать') %]" onclick="go_button('print_a', '[% person.ID %]');">
+			<input class="small_button" type="button" style="min-width:110px;" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.ID %]');">
+			&nbsp;<input class="small_button" type="button" style="min-width:96px;" value="[% langreq('Распечатать') %]" onclick="go_button('print_a', '[% person.ID %]');">
 		[% END %]
 		</td>
 		</tr>
@@ -253,6 +254,20 @@
 	<tr><td colspan="2">&nbsp;</td></tr>	
 	
 [% END %]
+
+	<tr><td class="left" colspan="2">
+	[% IF lang_in_link != 'ru' %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>&nbsp;
+	[% END %]
+	
+	[% IF lang_in_link != 'en' %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to English</b></a>&nbsp;
+	[% END %]
+	
+	[% IF lang_in_link != 'it' %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
+	[% END %]
+	</td></tr>
 
 </table>
 

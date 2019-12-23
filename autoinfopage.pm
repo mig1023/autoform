@@ -30,8 +30,8 @@ sub autoinfopage
 	$self->{ vars }->{ session }->{ login } = 'website';
 	
 	$self->{ vars }->{ session }->{ langid } = $self->{ vars }->getparam( 'lang' )
-		if $self->{ vars }->getparam( 'lang' ) =~ /^(en|it)$/i ;
-		
+		if $self->{ vars }->getparam( 'lang' ) =~ /^(ru|en|it)$/i ;
+	
 	$_ = $self->{ vars }->getparam( 'action' );
 	
 	s/[^a-z_]//g;
@@ -146,6 +146,7 @@ sub get_infopage
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -306,6 +307,7 @@ sub edit
 		'app_id'	=> $app_id,
 		'js_rules'	=> $js_rules,
 		'js_symbols'	=> $symbols_error,
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 		'js_errors'	=> map { $self->{ af }->lang( $_ ) } VCS::Site::autodata::get_text_error(),
 	};
 	
@@ -344,6 +346,7 @@ sub edited
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -402,6 +405,7 @@ sub reschedule
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 		'error'		=> $id_or_error,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
@@ -438,6 +442,7 @@ sub rescheduled
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -494,6 +499,7 @@ sub cancel
 		'app_list'	=> $app_list,
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
