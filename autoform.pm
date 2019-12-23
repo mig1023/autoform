@@ -2198,6 +2198,30 @@ sub get_captcha_id
 	return 'recaptcha_' . substr( $key, 0, 10 );
 }
 
+sub get_letter_rules_lang_ver
+# //////////////////////////////////////////////////
+{
+	my ( $self, $lang, $rules ) = @_;
+	
+	my $letters = '';
+	
+	if ( $self->{ 'lang' } eq 'it' ) {
+	
+		$letters .= $self->lang( 'буквы ' ) if $rules =~ /Ё/ or $rules =~ /W/;
+		$letters .= $self->lang( 'английские ' ) if $rules =~ /W/;
+		$letters .= $self->lang( 'и ' ) if $rules =~ /Ё/ and $rules =~ /W/;
+		$letters .= $self->lang( 'русские ' ) if $rules =~ /Ё/;
+	}
+	else {
+		$letters .= $self->lang( 'русские ' ) if $rules =~ /Ё/;
+		$letters .= $self->lang( 'и ' ) if $rules =~ /Ё/ and $rules =~ /W/;
+		$letters .= $self->lang( 'английские ' ) if $rules =~ /W/;
+		$letters .= $self->lang( 'буквы, ' ) if $rules =~ /Ё/ or $rules =~ /W/;
+	}
+	
+	return $letters;
+}
+
 sub add_rules_format
 # //////////////////////////////////////////////////
 {
@@ -2219,11 +2243,8 @@ sub add_rules_format
 			$self->lang( 'В поле допустимо вводить ' );
 	}
 	
-	$format_add_string .= $self->lang( 'буквы ' ) if $self->{ 'lang' } eq 'it' and ( $rules =~ /Ё/ or $rules =~ /W/ );
-	$format_add_string .= $self->lang( 'русские ' ) if $rules =~ /Ё/;
-	$format_add_string .= $self->lang( 'и ' ) if $rules =~ /Ё/ and $rules =~ /W/;
-	$format_add_string .= $self->lang( 'английские ' ) if $rules =~ /W/;
-	$format_add_string .= $self->lang( ( $self->{ 'lang' } ne 'it' ? 'буквы' : '' ) . ', ' ) if $rules =~ /Ё/ or $rules =~ /W/;
+	$format_add_string .= $self->get_letter_rules_lang_ver( $self->{ 'lang' }, $rules );
+	
 	$format_add_string .= $self->lang( 'цифры, ' ) if $rules =~ /N/;
 	
 	$rules =~ s/(\s|\n|z|W|Ё|N|'|\))//g;
