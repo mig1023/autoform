@@ -897,7 +897,7 @@ sub get_content_rules_hash
 				label => 'Индекс',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => '119017',
-				check => 'N\s\-',
+				check => 'WN\s\-',
 				check_logic => [
 					{
 						condition => 'free_only_if_eq',
@@ -1004,7 +1004,7 @@ sub get_content_rules_hash
 				label => 'Адрес компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы',
 				example => 'Via Esempio 1',
-				check => 'WN\s\_\.\,\"\'\-\(\)\#\*',
+				check => 'WN\s\_\.\,\"\'\-\(\)\#\*\/',
 				check_logic => [
 					{
 						condition => 'free_only_if_eq',

@@ -786,7 +786,7 @@ sub get_content_rules_hash
 				label => 'Адрес нахождения компании',
 				comment => 'Данные заполняются в соответствии со справкой с места работы/учёбы. Для безработных/домохозяек поставьте дефис',
 				example => 'M.Tolmachevskiy pereulok 6 b.1',
-				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*',
+				check => 'zWN\s\_\.\,\"\'\-\(\)\#\*\/',
 				db => {
 					table => 'SpbAlterAppData',
 					name => 'JobAddr',
