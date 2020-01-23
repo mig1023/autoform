@@ -300,6 +300,9 @@ sub get_content_rules_hash
 				page_db_id => 100006,
 			},
 			{
+				type => 'free_line',
+			},
+			{
 				type => 'text',
 				name => 'rupass_text',
 				label => 'Данные внутреннего паспорта',
@@ -443,7 +446,7 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'text',
-				name => 'rupass_text',
+				name => 'pass_data',
 				label => 'Данные загранпаспорта',
 				font => 'bold',
 			},
@@ -455,7 +458,8 @@ sub get_content_rules_hash
 				type => 'select',
 				name => 'doctype',
 				label => 'Тип паспорта',
-				check => 'zN',
+				example => 'Обычный паспорт',
+				check => 'N',
 				db => {
 					table => 'AppData',
 					name => 'DocType',
@@ -609,6 +613,9 @@ sub get_content_rules_hash
 				type => 'free_line',
 			},
 			{
+				type => 'free_line',
+			},
+			{
 				type => 'text',
 				name => 'rupass_text',
 				label => 'Контактные данные',
@@ -617,9 +624,6 @@ sub get_content_rules_hash
 			{
 				type => 'free_line',
 			},
-			
-			
-			
 			{
 				type => 'select',
 				name => 'homeсitizenship',
@@ -1439,23 +1443,6 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'radiolist',
-				name => 'prevvisa',
-				label => 'Были ли визы за последние три года',
-				check => 'zN',
-				db => {
-					table => 'AppData',
-					name => 'PrevVisa',
-				},
-				param => { 
-					1 => 'нет', 
-					2 => 'да',
-				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'radiolist',
 				name => 'fingers',
 				label => 'Отпечатки предоставлены за последние 5 лет',
 				check => 'N',
@@ -1546,61 +1533,6 @@ sub get_content_rules_hash
 				db => {
 					table => 'AppData',
 					name => 'PermessoED',
-				},
-				special => 'mask',
-			},
-		],
-		
-		'Сроки действия последней визы' => [
-			{
-				page_ord => 1200,
-				progress => 6,
-				all_app_in_title => 1,
-				relation => {
-					only_if => {
-						table => 'AppData',
-						name => 'PrevVisa',
-						value => '2',
-					}
-				},
-				page_db_id => 100015,
-			},
-			{
-				type => 'input',
-				name => 'prevvisafd',
-				label => 'Дата начала',
-				comment => 'Укажите дату начала действия визы',
-				example => '31.12.1900',
-				check => $standart_date_check,
-				db => {
-					table => 'AppData',
-					name => 'PrevVisaFD',
-				},
-				special => 'mask',
-			},
-			{
-				type => 'input',
-				name => 'prevvised',
-				label => 'Дата окончания',
-				comment => 'Укажите дату окончания действия визы',
-				example => '31.12.1900',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'now_or_later',
-						offset => ( -3 * 365 ), # <--- 3 years
-						full_error => 'Допустимо указывать только визы, выданные за последние [offset]'
-					},
-					{
-						condition => 'equal_or_later',
-						table => 'AppData',
-						name => 'PrevVisaFD',
-						error => 'Дата начала действия визы',
-					},
-				],
-				db => {
-					table => 'AppData',
-					name => 'PrevVisaED',
 				},
 				special => 'mask',
 			},
@@ -1699,9 +1631,9 @@ sub get_content_rules_hash
 				type => 'input',
 				name => 'hotels',
 				label => 'Название гостиницы или ФИО приглашающего',
-				comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней- укажите первое.',
+				comment => 'Укажите полное название гостиницы или данные приглашающего лица. Укажите только одно место проживания, в котором планируете провести большее количество дней, при равном количестве дней - укажите первое.',
 				example => 'VMS',
-				check => 'zNW\s\-\.\&',
+				check => 'zWN\s\-\.\&',
 				db => {
 					table => 'AppData',
 					name => 'Hotels',
