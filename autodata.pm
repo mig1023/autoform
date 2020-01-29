@@ -36,8 +36,8 @@ sub get_settings
 		captcha => {
 			public_key => '',
 			private_key => '',
-			widget_api => 'https://www.google.com/recaptcha/api.js',
-			verify_api => 'https://www.google.com/recaptcha/api/siteverify',
+			widget_api => 'https://google.com/recaptcha/api.js',
+			verify_api => 'https://google.com/recaptcha/api/siteverify',
 		},
 		
 		confirm => {
