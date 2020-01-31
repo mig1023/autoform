@@ -150,7 +150,7 @@
 		[% ELSIF map_in_page.type == 'yandexconstructor' %]
 			src="https://yandex.ru/map-widget/v1/?um=constructor%[% map_in_page.code %]&amp;lang=ru_RU&amp;scroll=true&amp;source=constructor">
 		[% ELSE %]
-			src="https://www.google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
+			src="https://google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
 		[% END %]
 		</iframe></td></tr>
 	
