@@ -583,18 +583,19 @@ sub get_content_rules_hash
 				special => 'mask',
 			},
 			{
-				type => 'input',
+				type => 'select',
 				name => 'passwhere',
 				label => 'Кем выдан',
-				comment => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
-				example => 'FMS 12345',
-				check => 'zWN\s\-\_\.\,\;\'\"\/',
+				comment => 'Укажите название страны, выдавшей паспорт',
+				example => 'The Russian Federation',
+				check => 'zN',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AppData',
+					table => 'AppData_moreData',
 					name => 'PassWhom',
 				},
-				format => 'capslock'
+				param => '[citizenship_countries]',
+				first_elements => '70',
 			},
 			{
 				type => 'free_line',
@@ -1079,6 +1080,22 @@ sub get_content_rules_hash
 					10 => 'иная',
 				},
 				special => 'save_info_about_hastdatatype',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'input',
+				name => 'add_purpose',
+				label => 'Дополнительные сведения о цели поездки',
+				comment => 'Укажите латинскими буквами дополнительную информацию о цели вашей поездки',
+				example => 'participating in conference', 
+				check => 'zWN\s\.\,\"\-\(\)',
+				db => {
+					table => 'AppData_moreData',
+					name => 'AdditionalPurpose',
+				},
+				format => 'capslock'
 			},
 		],
 		
@@ -1569,6 +1586,19 @@ sub get_content_rules_hash
 					},
 				],
 				special => 'mask',
+			},
+			{
+				type => 'input',
+				name => 'prevvisanum',
+				label => 'Номер визовой марки, если известен',
+				comment => 'Укажите номер визовой марки, если он вам известен',
+				example => '123456789',
+				check => 'N',
+				db => {
+					table => 'AppData_moreData',
+					name => 'VisaAdeviso',
+				},
+				format => 'capslock',
 			},
 		],
 		

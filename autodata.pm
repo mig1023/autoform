@@ -195,6 +195,7 @@ sub get_tables_controled_by_AutoToken
 		AutoSchengenAppData => 'AutoSchengenAppDataID',
 		AutoSpbAlterAppData => 'AutoSpbDataID',
 		AutoSchengenExtData => 'AutoSchengenExtID',
+		AutoAppData_moreData => 'AutoAppDataMoreID',
 	};
 }
 

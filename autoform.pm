@@ -1333,10 +1333,12 @@ sub get_edit
 		
 		$step = $self->get_step_by_content( '[list_of_applicants]', 'next');
 		
-		my ( $sch_id, $spb_id, $ext_id ) = $self->query( 'sel1', __LINE__, "
-			SELECT SchengenAppDataID, AutoSpbAlterAppData.ID, AutoSchengenExtData.ID
+		my ( $sch_id, $spb_id, $ext_id, $more_id ) = $self->query( 'sel1', __LINE__, "
+			SELECT SchengenAppDataID, AutoSpbAlterAppData.ID,
+			AutoSchengenExtData.ID, AutoAppData_moreData.ID
 			FROM AutoAppData
 			JOIN AutoSpbAlterAppData ON AutoSpbAlterAppData.AppDataID = AutoAppData.ID
+			LEFT JOIN AutoAppData_moreData ON AutoAppData_moreData.AppDataID = AutoAppData.ID 
 			LEFT JOIN AutoSchengenExtData ON AutoSchengenExtData.AppDataID = AutoAppData.ID
 			WHERE AutoAppData.ID = ?", $appdata_id
 		);
@@ -1345,9 +1347,10 @@ sub get_edit
 
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSpbDataID = ?,
-			AutoSchengenAppDataID = ?, AutoSchengenExtID = ?
+			AutoSchengenAppDataID = ?, AutoSchengenExtID = ?, AutoAppDataMoreID = ?
 			WHERE Token = ?", {}, 
-			$self->get_id_by_step( $step ), $appdata_id, $spb_id, $sch_id, $ext_id, $self->{ token }
+			$self->get_id_by_step( $step ), $appdata_id, $spb_id, $sch_id, $ext_id, $more_id,
+			$self->{ token }
 		);
 
 		$self->query( 'query', __LINE__, "
@@ -1377,17 +1380,8 @@ sub get_delete
 			DELETE FROM AutoAppData WHERE ID = ?", {}, $appdata_id
 		);
 		
-		$result += $self->query( 'query', __LINE__, "
-			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, $sch_id
-		);
-		
-		$result += $self->query( 'query', __LINE__, "
-			DELETE FROM AutoSpbAlterAppData WHERE AppDataID = ?", {}, $appdata_id
-		);
-		
-		$result += $self->query( 'query', __LINE__, "
-			DELETE FROM AutoSchengenExtData WHERE AppDataID = ?", {}, $appdata_id
-		);
+		$result += $self->query( 'query', __LINE__, "DELETE FROM $_ WHERE AppDataID = ?", {}, $appdata_id )
+			for ( 'AutoSpbAlterAppData', 'AutoAppData_moreData', 'AutoSchengenExtData' );
 
 		$self->mod_last_change_date();
 	}
@@ -1558,6 +1552,13 @@ sub get_add
 	my $spb_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
 	
 	$self->query( 'query', __LINE__, "
+		INSERT INTO AutoAppData_moreData (AppDataID) VALUES (?)", {},
+		$appdata_id
+	);
+		
+	my $moreData_id = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
+	
+	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoSchengenExtData (AppDataID) VALUES (?)", {},
 		$appdata_id
 	);
@@ -1567,9 +1568,11 @@ sub get_add
 	my $step = $self->get_step_by_content( '[list_of_applicants]', 'next' );
 	
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?, AutoSpbDataID = ?, AutoSchengenExtID = ?
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSchengenAppDataID = ?,
+		AutoSpbDataID = ?, AutoSchengenExtID = ?, AutoAppDataMoreID = ?
 		WHERE Token = ?", {}, 
-		$self->get_id_by_step( $step ), $appdata_id, $sch_id, $spb_id, $ext_id, $self->{ token }
+		$self->get_id_by_step( $step ), $appdata_id, $sch_id, $spb_id, $ext_id, $moreData_id,
+		$self->{ token }
 	);
 	
 	$self->mod_last_change_date();
@@ -3282,7 +3285,8 @@ sub create_new_appointment
 		LOCK TABLES
 		AutoAppointments READ, Appointments WRITE, AutoAppData READ, AppData WRITE,
 		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
-		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ"
+		AutoAppData_moreData READ, AppData_moreData WRITE, SpbAlterAppData WRITE,
+		AutoSchengenExtData READ, Countries READ"
 	);
 	
 	my $new_appid = $self->create_table(
@@ -3298,8 +3302,10 @@ sub create_new_appointment
 	}
 
 	my $allapp = $self->query( 'selallkeys', __LINE__, "
-		SELECT AutoAppData.ID, SchengenAppDataID, AutoSpbAlterAppData.ID as SpbID
+		SELECT AutoAppData.ID, SchengenAppDataID, AutoSpbAlterAppData.ID as SpbID,
+		AutoAppData_moreData.ID as MoreID
 		FROM AutoAppData
+		LEFT JOIN AutoAppData_moreData ON AutoAppData_moreData.AppDataID = AutoAppData.ID
 		JOIN AutoSpbAlterAppData ON AutoSpbAlterAppData.AppDataID = AutoAppData.ID
 		WHERE AppID = ?", 
 		$tables_transfered_id->{ 'AutoAppointments' }
@@ -3318,6 +3324,10 @@ sub create_new_appointment
 		
 		$self->create_table(
 			'AutoSpbAlterAppData', 'SpbAlterAppData', $app->{ SpbID }, $db_rules, $appid
+		);
+		
+		$self->create_table(
+			'AutoAppData_moreData', 'AppData_moreData', $app->{ MoreID }, $db_rules, $appid
 		);
 	}
 	
