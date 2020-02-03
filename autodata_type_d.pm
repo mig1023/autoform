@@ -191,6 +191,12 @@ sub get_content_rules_hash
 						condition => 'now_or_later',
 						offset => '[collect_date_offset]',
 					},
+					{
+						condition => 'now_or_earlier',
+						offset => 180,
+						equality_is_also_fail => 1,
+						full_error => 'Действует ограничение на максимальную дату вылета: не более [offset] с текущей даты',
+					},
 				],
 				db => {
 					table => 'Appointments',
@@ -732,14 +738,6 @@ sub get_content_rules_hash
 				check_logic => [
 					{
 						condition => 'now_or_later',
-					},
-					{
-						condition => 'equal_or_later',
-						table => 'Appointments',
-						name => 'SDate',
-						offset => -90,
-						equality_is_also_fail => 1,
-						full_error => 'Запись в Визовый центр более чем за [offset] до начала поездки не осуществляется',
 					},
 					{
 						condition => 'now_or_earlier',
