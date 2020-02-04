@@ -591,7 +591,7 @@ sub get_content_rules_hash
 				check => 'zN',
 				complete_check => 'not_empty',
 				db => {
-					table => 'AppData_moreData',
+					table => 'AppData',
 					name => 'PassWhom',
 				},
 				param => '[citizenship_countries]',
@@ -1088,11 +1088,11 @@ sub get_content_rules_hash
 				type => 'input',
 				name => 'add_purpose',
 				label => 'Дополнительные сведения о цели поездки',
-				comment => 'Укажите латинскими буквами дополнительную информацию о цели вашей поездки',
+				comment => 'Укажите латинскими буквами дополнительную информацию о цели вашей поездки. При наличии нескольких поездок в рамках 2 месяцев  вносятся даты, страны и цели всех поездок за 2 месяца',
 				example => 'participating in conference', 
 				check => 'zWN\s\.\,\"\-\(\)',
 				db => {
-					table => 'AppData_moreData',
+					table => 'AppData',
 					name => 'AdditionalPurpose',
 				},
 				format => 'capslock'
@@ -1490,7 +1490,7 @@ sub get_content_rules_hash
 					1 => 'супруг',
 					2 => 'ребёнок',
 					3 => 'иные близкие родственники',
-					4 => 'иждивенец',
+					4 => 'экономически зависимый родственник по восходящей линии',
 				},
 			},
 		],
@@ -1595,7 +1595,7 @@ sub get_content_rules_hash
 				example => '123456789',
 				check => 'N',
 				db => {
-					table => 'AppData_moreData',
+					table => 'AppData',
 					name => 'VisaAdeviso',
 				},
 				format => 'capslock',
@@ -3310,7 +3310,7 @@ sub get_content_edit_rules_hash
 				1 => 'супруг',
 				2 => 'ребёнок',
 				3 => 'иные близкие родственники',
-				4 => 'иждивенец',
+				4 => 'экономически зависимый родственник по восходящей линии',
 			},
 		},
 		{
