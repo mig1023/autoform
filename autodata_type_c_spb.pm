@@ -542,18 +542,19 @@ sub get_content_rules_hash
 				special => 'mask',
 			},
 			{
-				type => 'input',
+				type => 'select',
 				name => 'passwhere',
 				label => 'Кем выдан',
-				comment => 'Укажите латинскими буквами орган, выдавший паспорт, в соответствии с информацией в загранпаспорте',
-				example => 'FMS 12345',
-				check => 'zWN\s\-\_\.\,\;\'\"\/',
+				comment => 'Укажите название страны, выдавшей паспорт',
+				example => 'The Russian Federation',
+				check => 'zN',
 				complete_check => 'not_empty',
 				db => {
 					table => 'AppData',
 					name => 'PassWhom',
 				},
-				format => 'capslock'
+				param => '[citizenship_countries]',
+				first_elements => '70',
 			},
 			{
 				type => 'free_line',
@@ -837,6 +838,20 @@ sub get_content_rules_hash
 				},
 				special => 'save_info_about_hastdatatype',
 			},
+			{
+				type => 'input',
+				name => 'add_purpose',
+				label => 'Дополнительные сведения о цели поездки',
+				comment => 'Укажите латинскими буквами дополнительную информацию о цели вашей поездки. При наличии нескольких поездок в рамках 2 месяцев  вносятся даты, страны и цели всех поездок за 2 месяца',
+				example => 'participating in conference', 
+				check => 'WN\s\.\,\"\-\(\)',
+				db => {
+					table => 'AppData',
+					name => 'AdditionalPurpose',
+				},
+				format => 'capslock'
+			},
+			
 		],
 		
 		'Информация о родителе / законном представителе' => [
@@ -1285,6 +1300,19 @@ sub get_content_rules_hash
 					},
 				],
 				special => 'mask',
+			},
+			{
+				type => 'input',
+				name => 'prevvisanum',
+				label => 'Номер визы, по которой сдавались отпечатки, если известе',
+				comment => 'Укажите номер соответствующей виз, если он вам известен',
+				example => '123456789',
+				check => 'N',
+				db => {
+					table => 'AppData',
+					name => 'VisaAdeviso',
+				},
+				format => 'capslock',
 			},
 		],
 		
@@ -2218,16 +2246,19 @@ sub get_content_rules_hash
 				special => 'mask',
 			},
 			{
-				type => 'input',
-				name => 'dovpasswhere',
+				type => 'select',
+				name => 'passwhere',
 				label => 'Кем выдан',
-				comment => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
-				example => 'ОВД по району Беговой города Москвы',
-				check => 'zWЁN\s\-\_\.\,\;\'\"',
+				comment => 'Укажите название страны, выдавшей паспорт',
+				example => 'The Russian Federation',
+				check => 'zN',
+				complete_check => 'not_empty',
 				db => {
-					table => 'Appointments',
+					table => 'AppData',
 					name => 'PassWhom',
 				},
+				param => '[citizenship_countries]',
+				first_elements => '70',
 			},
 			{
 				type => 'input',
