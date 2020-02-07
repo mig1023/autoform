@@ -151,7 +151,7 @@ sub get_html_elements
 		select		=> '<select class="input_width select_gen" size = "1" ' .
 				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 				
-		m_select	=> '<select class="select_gen" multiple="multiple" width="20em" ' .
+		m_select	=> '<select class="select_gen" multiple="multiple" width="20em" placeholder="[holder]" ' .
 				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 					
 		radiolist	=> '<div id="[name]">[options]</div>',

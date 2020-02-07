@@ -124,7 +124,7 @@ function go_button(where) {
 			return;
 		}
 	}
-	
+
 	$('#action').val(where);
 	
 	document.dataform.submit();
@@ -610,9 +610,16 @@ function check_input( field, type, check, label ) {
 	if ( ( field == '' ) || ( check == '' ) ) {
 		return 0;
 	}
-
-	var val = $( '#' + field ).val().replace(/^\s+|\s+$/g, '');
-
+	
+	var val;
+	
+	if ( type == 'm_select' ) {
+		val = $( '#' + field ).multipleSelect('getSelects');
+	}
+	else {
+		val = $( '#' + field ).val().replace(/^\s+|\s+$/g, '');
+	}
+	
 	if ( type == 'input' ) {
 		
 		if ( /z/.test( check ) && ( val == '' ) ) {
@@ -681,6 +688,13 @@ function check_input( field, type, check, label ) {
 	else if ( type == 'select' ) {
 
 		if ( /z/.test( check ) && /^0$|^$/.test( $('select[name=' + field + ']').val() ) ) {
+
+			return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
+		}
+	}
+	else if ( type == 'm_select' ) {
+
+		if ( /z/.test( check ) && /^0$|^$/.test( $('select[name=' + field + ']').multipleSelect('getSelects') ) ) {
 
 			return show_error_tip( field, '[% langreq( js_errors.3 ) %]'.replace( /\[name\]/, label ) );
 		}

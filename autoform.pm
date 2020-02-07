@@ -2067,6 +2067,14 @@ sub get_html_for_element
 			( $param->{ $opt } ? $param->{ $opt } : '--- ' . $self->lang( "выберите" ) . ' ---' ) .
 			'</option>'; 
 		}
+		
+		if ( $type eq 'm_select' ) {
+		
+			my $holder = '--- ' . $self->lang( "выберите" ) . ' ---';
+			
+			$content =~ s/\[holder\]/$holder/i;
+		}
+		
 
 		$content =~ s/\[u\]\>/data-timeslot="$value_original">/i if $name eq 'timeslot';
 		$content =~ s/\[options\]/$list/gi;
