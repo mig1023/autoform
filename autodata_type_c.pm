@@ -1340,7 +1340,7 @@ sub get_content_rules_hash
 				type => 'free_line',
 			},
 			{
-				type => 'select',
+				type => 'm_select',
 				name => 'nulla',
 				label => 'Страна первого въезда',
 				comment => 'Укажите страну первого въезда в шенгенскую зону в рамках запланированной поездки',
@@ -1351,7 +1351,8 @@ sub get_content_rules_hash
 					name => 'FirstCountry',
 				},
 				param => '[first_countries]',
-				first_elements => 'default_free, 133',
+				first_elements => '133',
+				special => 'multiple_select',
 			},
 			{
 				type => 'select',

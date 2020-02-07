@@ -1826,6 +1826,7 @@ sub get_specials_of_element
 		no_copypast	=> [],
 		min_date 	=> [],
 		phone_correct	=> [],
+		multiple_select	=> [],
 	};
 
 	my $js_rules = [];
@@ -1848,6 +1849,9 @@ sub get_specials_of_element
 		
 		push( @{ $special->{ min_date } }, { name => $element->{ name }, min => $element->{ minimal_date } } )
 			if $element->{ minimal_date };
+			
+		push( @{ $special->{ multiple_select } }, [ $element->{ name } ] )
+			if exists $element->{ multiple_select };
 
 		next unless $element->{ check };
 			
@@ -1918,7 +1922,7 @@ sub get_html_line
 				$self->check_comments_alter_version( $element->{ comment } ),
 				$element->{ check },
 			) . $label_for_need, undef, ( $element->{ type } eq 'input' ? 'bottom' : undef ),
-			'width=280px' . ( $element->{ full_line } ? ' colspan=2' : '' )
+			'width="280px"' . ( $element->{ full_line } ? ' colspan=2' : '' )
 		);
 	
 	$content .= $self->get_html_for_element( 'end_line' );
@@ -2047,7 +2051,7 @@ sub get_html_for_element
 		$content =~ s/\[close\]/$close/gi;
 	}
 	
-	if ( $type eq 'select' ) {
+	if ( $type =~ /^(m_)?select$/ ) {
 	
 		my $list = '';
 

@@ -150,6 +150,9 @@ sub get_html_elements
 		
 		select		=> '<select class="input_width select_gen" size = "1" ' .
 				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
+				
+		m_select	=> '<select class="select_gen" multiple="multiple" width="20em" ' .
+				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 					
 		radiolist	=> '<div id="[name]">[options]</div>',
 		
@@ -195,7 +198,6 @@ sub get_tables_controled_by_AutoToken
 		AutoSchengenAppData => 'AutoSchengenAppDataID',
 		AutoSpbAlterAppData => 'AutoSpbDataID',
 		AutoSchengenExtData => 'AutoSchengenExtID',
-		AutoAppData_moreData => 'AutoAppDataMoreID',
 	};
 }
 

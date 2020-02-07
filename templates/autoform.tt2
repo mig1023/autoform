@@ -5,11 +5,17 @@
 
 	<script src="[% static %]/jquery-1.7.2.min.js"></script>
 	<script src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+	
 	<link href="[% static %]/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
 	<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 	<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>VMS - [% langreq('Новая запись') %]</title>
+
+	[% IF special.multiple_select %]
+		<script src="[% static %]/jquery.multiple.select.js"></script>
+		<link href="[% static %]/multiple-select.css" rel="stylesheet" type="text/css">
+	[% END %]
 
 	[% IF ( special.datepicker.0 || special.post_index.0 || special.mask.0 ) %]
 		<script src="[% static %]/jquery-ui.1.8.min.js"></script>
