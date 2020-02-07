@@ -2170,6 +2170,7 @@ sub get_content_rules_hash
 			{
 				page_ord => 2900,
 				progress => 10,
+				param => 1,
 				relation => {
 					only_if => {
 						table => 'Appointments',
