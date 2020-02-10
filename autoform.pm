@@ -733,7 +733,7 @@ sub get_token
 	
 	my $token = lc( $self->param('t') );
 
-	$token =~ s/[^0-9a-z\-]//g;
+	$token =~ s/[^0-9a-z\-_]//g;
 
 	return $token;
 }
