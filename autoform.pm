@@ -2928,6 +2928,21 @@ sub check_logic
 			) if $error;
 		}
 		
+		if ( $rule->{ condition } =~ /^not_beyond_than$/ ) {
+		
+			$value = $self->date_format( $value, 'to_iso' );
+
+			my $datediff = $self->get_datediff( $value, $rule, $tables_id, 'use_date', $prefix );
+
+			return $self->text_error(
+				23, $element, undef, $rule->{ error }, $rule->{ offset }, $rule->{ full_error }
+			) if (
+				( ( $datediff > 0 ) and ( $datediff >= $rule->{ offset } ) )
+				or
+				( ( $datediff < 0 ) and ( $datediff <= ( $rule->{ offset } * -1 ) ) )
+			);
+		}
+		
 		if ( $rule->{ condition } =~ /^not_closer_than(_in_spb)?(_from_now)?$/ ) {
 		
 			my ( $spb, $from_now ) = ( $1, $2 );
