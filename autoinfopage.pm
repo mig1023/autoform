@@ -97,7 +97,7 @@ sub autoinfopage_entry
 	
 	my $tvars = {
 		'langreq' 	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
-		'addr' 		=> $self->{ vars }->getform('fullhost') . $self->{ autoform }->{ paths }->{ addr },
+		'addr' 		=> $self->{ autoform }->{ paths }->{ addr },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'widget_api'	=> $self->{ autoform }->{ captcha }->{ widget_api },
 		'public_key'	=> $self->{ autoform }->{ captcha }->{ public_key },
@@ -357,8 +357,41 @@ sub reschedule
 	my ( $self, $task, $id, $template ) = @_;
 	
 	my $new = {};
+	
+	my $date_pseudo_element = {
+		name => 'appdate',
+		check_logic => [
+			{
+				condition => 'now_or_later',
+			},
+			{
+				condition => 'now_or_earlier',
+				offset => 90,
+				equality_is_also_fail => 1,
+				full_error => 'Запись в Визовый центр более чем за [offset] не осуществляется',
+			},
+			{
+				condition => 'not_beyond_than',
+				table => 'AppData',
+				name => 'AppSDate',
+				offset => 180,
+				full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
+			},
+			{
+				condition => 'not_beyond_than',
+				table => 'Appointments',
+				name => 'SDate',
+				offset => 180,
+				full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
+			},
+		],
+		db => {
+			table => 'Appointments',
+			name => 'AppDate',
+		},
+	};
 
-	my $id_or_error;
+	my $id_or_error = undef;
 	
 	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
 
@@ -373,8 +406,19 @@ sub reschedule
 		$appinfo_for_timeslots->{ $_  } = $new->{ appdate } for ( 'appdate', 'appdate_iso' );
 
 		$appinfo_for_timeslots->{ appdate_iso } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
-
+		
+		$id_or_error = $self->{ af }->check_logic( $date_pseudo_element, $appinfo_for_timeslots, 'edt' );
+		
+		if ( $id_or_error ) {
+		
+			my @array = split( /\|/, $id_or_error );
+			
+			$id_or_error = $array[1];
+		}
+		
 		if (
+			!$id_or_error
+			and
 			$new->{ apptime } > 0
 			and
 			$self->check_timeslots_already_full( $appinfo_for_timeslots, $new->{ apptime } )
@@ -511,9 +555,11 @@ sub get_same_info_for_timeslots_from_app
 	
 	my $app = {};
 
-	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot }, $app->{ appdate } ) = 
+	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot },
+			$app->{ appdate }, $app->{ AppData }, $app->{ Appointments } ) = 
 		$self->{ af }->query( 'sel1', __LINE__, "
-			SELECT count(AppData.ID), CenterID, SDate, TimeslotID, AppDate
+			SELECT count(AppData.ID), CenterID, SDate, TimeslotID,
+			Appointments.AppDate, AppData.ID, Appointments.ID AS AppID
 			FROM AutoToken 
 			JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 			JOIN AppData ON AppData.AppID = Appointments.ID
