@@ -248,7 +248,7 @@ function get_date_from(date_id) {
 [% END %]
 
 [% FOREACH select IN special.multiple_select %]
-	$('#[% select %]').multipleSelect({width: '17em'});
+	$('#[% select %]').multipleSelect({width: '100%'});
 [% END %]
 
 
