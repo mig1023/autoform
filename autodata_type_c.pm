@@ -250,7 +250,7 @@ sub get_content_rules_hash
 					},
 					{
 						condition => 'now_or_earlier',
-						offset => 180,
+						offset => 270,
 						equality_is_also_fail => 1,
 						full_error => 'Действует ограничение на максимальную дату вылета: не более [offset] с текущей даты',
 					},
@@ -1341,6 +1341,21 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'm_select',
+				name => 'countries',
+				label => 'Страна назначения (и иные страны назначения, если имеются)',
+				comment => 'Укажите страны, которые посетите в запланированной поездки',
+				example => 'ITALY',
+				check => 'zN,',
+				db => {
+					table => 'AppData',
+					name => 'Countries',
+				},
+				param => '[first_countries]',
+				first_elements => '133',
+				special => 'multiple_select',
+			},
+			{
+				type => 'select',
 				name => 'nulla',
 				label => 'Страна первого въезда',
 				comment => 'Укажите страну первого въезда в шенгенскую зону в рамках запланированной поездки',
@@ -1351,8 +1366,7 @@ sub get_content_rules_hash
 					name => 'FirstCountry',
 				},
 				param => '[first_countries]',
-				first_elements => '133',
-				special => 'multiple_select',
+				first_elements => 'default_free, 133',
 			},
 			{
 				type => 'select',
@@ -1393,7 +1407,7 @@ sub get_content_rules_hash
 					},
 					{
 						condition => 'now_or_earlier',
-						offset => 180,
+						offset => 270,
 						equality_is_also_fail => 1,
 						full_error => 'Действует ограничение на максимальную дату вылета: не более [offset] с текущей даты',
 					},
@@ -2659,6 +2673,20 @@ sub get_content_rules_hash
 						offset => 90,
 						equality_is_also_fail => 1,
 						full_error => 'Запись в Визовый центр более чем за [offset] не осуществляется',
+					},
+					{
+						condition => 'not_beyond_than',
+						table => 'AppData',
+						name => 'AppSDate',
+						offset => 180,
+						full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
+					},
+					{
+						condition => 'not_beyond_than',
+						table => 'Appointments',
+						name => 'SDate',
+						offset => 180,
+						full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
 					},
 				],
 				db => {

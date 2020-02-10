@@ -2007,7 +2007,7 @@ sub get_html_for_element
 
 	my $content = $elements->{ $type };
 
-	if ( ref( $value ) eq 'ARRAY' ) {
+	if ( ( $type ne 'm_select' ) and ( ref( $value ) eq 'ARRAY' ) ) {
 	
 		my $value_line = '';
 		
@@ -2056,12 +2056,25 @@ sub get_html_for_element
 		my $list = '';
 
 		for my $opt ( $self->resort_with_first_elements( $param, $first_elements ) ) {
-
-			my $value_for_selected = $value_original;
 			
-			$value_for_selected =~ s/$_/$_/g for ('\/', '\(', '\)' );
+			my $selected = '';
 			
-			my $selected = ( $opt =~ /^$value_for_selected$/i ? 'selected' : '' );
+			if ( $type eq 'm_select' ) {
+			
+				my @value_for_selected = split( /,/, $value_original );
+				
+				for ( @value_for_selected ) {
+				
+					$selected = 'selected' if $opt =~ /^$_$/i;
+				}
+			}
+			else {
+				my $value_for_selected = $value_original;
+			
+				$value_for_selected =~ s/$_/$_/g for ('\/', '\(', '\)' );
+				
+				$selected = ( $opt =~ /^$value_for_selected$/i ? 'selected' : '' );
+			}
 			
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . 
 			( $param->{ $opt } ? $param->{ $opt } : '--- ' . $self->lang( "выберите" ) . ' ---' ) .
@@ -2074,7 +2087,6 @@ sub get_html_for_element
 			
 			$content =~ s/\[holder\]/$holder/i;
 		}
-		
 
 		$content =~ s/\[u\]\>/data-timeslot="$value_original">/i if $name eq 'timeslot';
 		$content =~ s/\[options\]/$list/gi;
@@ -2498,12 +2510,24 @@ sub get_all_values
 sub get_prepare_line
 # //////////////////////////////////////////////////
 {
-	my ( $self, $line ) = @_;
+	my ( $self, $line, $element ) = @_;
 	
-	$line =~ s/^\s+|\s+$//g;
+	if ( ( $element->{ type } eq 'm_select' ) and ( ref( $line ) eq 'ARRAY' ) ) {
 	
-	$line =~ s/\xc2\xa0/\x20/g;
+		my $new_line = '';
 	
+		$new_line .= "$_," for @$line;
+		
+		$new_line =~ s/,$//;
+
+		return $new_line;
+	}
+	else {
+		$line =~ s/^\s+|\s+$//g;
+		
+		$line =~ s/\xc2\xa0/\x20/g;
+	}
+
 	return $line;
 }
 
@@ -2526,7 +2550,7 @@ sub encode_data_for_db
 
 	my $element = $self->get_element_by_name( $content_rules, $element_name );
 	
-	$value = $self->get_prepare_line( $value );
+	$value = $self->get_prepare_line( $value, $element );
 	
 	$value = ( ( $value eq $element_name ) ? 1 : 0 )
 		if $element->{ type } =~ /checkbox|disclaimer|checklist/ and $element->{ name } ne 'edt_mezzi';
@@ -2764,11 +2788,11 @@ sub check_param
 # //////////////////////////////////////////////////
 {
 	my ( $self, $element ) = @_;
-	
+
 	my $value = $self->param( $element->{ name } );
 	my $rules = $element->{ check };
 
-	$value = $self->get_prepare_line( $value );
+	$value = $self->get_prepare_line( $value, $element );
 	
 	return $self->text_error( 30, $element )
 		if ( $element->{ example_not_for_copy } and $element->{ example } ne '' ) and ( $value eq $element->{ example } ); 
@@ -3404,9 +3428,9 @@ sub mod_hash
 		
 		$hash->{ PrevVisa }--;
 		
-		$hash->{ Countries } = 133; 
-
 		if ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
+		
+			$hash->{ Countries } = 133; 
 		
 			my $spb_hash = $self->get_hash_table( 'AutoSpbAlterAppData', 'AppDataID', $hash->{ ID } );
 
