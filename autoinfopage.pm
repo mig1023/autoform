@@ -76,18 +76,33 @@ sub autoinfopage_entry
 	elsif ( $param->{ action } ) {
 
 		my $appdata = $self->{ af }->query( 'selallkeys', __LINE__, "
-			SELECT Token, AppData.PassNum as passnum
-			FROM AutoToken
-			JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+			SELECT Appointments.ID as appid, Token, AppData.PassNum as passnum
+			FROM Appointments 
 			JOIN AppData ON Appointments.ID = AppData.AppID
-			WHERE AppNum = ?", $param->{ appnum }
+			LEFT JOIN AutoToken ON AutoToken.CreatedApp = Appointments.ID
+			WHERE AppNum = ? AND
+			Appointments.Status != 2 AND Appointments.Status != 3", $param->{ appnum }
 		);
 
 		for my $app ( @$appdata ) {
 		
 			my $passnum = $app->{ passnum };
 
-			return $self->{ af }->redirect( $app->{ Token } ) if $param->{ passnum } =~ /^$passnum$/i;
+			next unless $param->{ passnum } =~ /^$passnum$/i; 
+
+			if ( ( $app->{ Token } =~ /^[0-9a-z\-]+$/ ) and ( length( $app->{ Token } ) == 64 ) ) {
+
+				return $self->{ af }->redirect( $app->{ Token } )
+			}
+			else {
+				my $new_token = $self->{ af }->token_generation();
+
+				$self->{ af }->query( 'query', __LINE__, "
+					UPDATE AutoToken SET CreatedApp = ?, Finished = 1 WHERE Token = ?", {}, $app->{ appid }, $new_token
+				);
+
+				return $self->{ af }->redirect( $new_token );
+			}
 		}
 			
 		return $self->{ af }->redirect( 'no_app' );
