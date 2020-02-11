@@ -1920,7 +1920,7 @@ sub get_html_line
 				$element->{ type }, $element->{ name }, $current_value, $element->{ param }, 
 				$element->{ uniq_code }, $element->{ first_elements },
 				$self->check_comments_alter_version( $element->{ comment } ),
-				$element->{ check },
+				$element->{ check }, $element
 			) . $label_for_need, undef, ( $element->{ type } eq 'input' ? 'bottom' : undef ),
 			'width="280px"' . ( $element->{ full_line } ? ' colspan=2' : '' )
 		);
@@ -1996,7 +1996,7 @@ sub get_progressbar_hash_opt
 sub get_html_for_element
 # //////////////////////////////////////////////////
 {
-	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment, $check ) = @_;
+	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment, $check, $element ) = @_;
 
 	my $value = ( $type eq 'input' ? $value_original : $self->lang( $value_original ) );
 	my $param = $self->lang( $param );
@@ -2075,6 +2075,8 @@ sub get_html_for_element
 				
 				$selected = ( $opt =~ /^$value_for_selected$/i ? 'selected' : '' );
 			}
+			
+			$selected = 'selected disabled' if $opt eq $element->{ required_element };
 			
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . 
 			( $param->{ $opt } ? $param->{ $opt } : '--- ' . $self->lang( "выберите" ) . ' ---' ) .

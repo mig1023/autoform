@@ -1352,6 +1352,7 @@ sub get_content_rules_hash
 				},
 				param => '[first_countries]',
 				first_elements => '133',
+				required_element => '133',
 				special => 'multiple_select',
 			},
 			{
