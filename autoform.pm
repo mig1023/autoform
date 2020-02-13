@@ -2076,8 +2076,6 @@ sub get_html_for_element
 				$selected = ( $opt =~ /^$value_for_selected$/i ? 'selected' : '' );
 			}
 			
-			$selected = 'selected disabled' if $opt eq $element->{ required_element };
-			
 			$list .= '<option ' . $selected . ' value="' . $opt . '">' . 
 			( $param->{ $opt } ? $param->{ $opt } : '--- ' . $self->lang( "выберите" ) . ' ---' ) .
 			'</option>'; 
@@ -2392,7 +2390,7 @@ sub save_data_from_form
 			$request .=  "$row = ?, ";
 			
 			my $value = $self->param( $request_tables->{ $table }->{ $row } );
-		
+			
 			push ( @values, $self->encode_data_for_db( $content_rules, $request_tables->{ $table }->{ $row }, $value ) );
 			
 			$self->change_current_appdata( $value, $table_id ) if ( $app_finished ne "finished" ) and ( $row eq 'PersonForAgreements' );
@@ -2741,8 +2739,10 @@ sub check_data_from_form
 
 		$first_error = $self->check_captcha() if $element->{ type } =~ /captcha/;
 
+		last if $first_error;
+
 		$first_error = $self->check_logic( $element, $tables_id, ( $tables_ids_edt ? 1 : 0 ) )
-			if !$first_error and $element->{ check_logic };
+			if $element->{ check_logic };
 	}
 	
 	return $first_error;
@@ -2885,6 +2885,15 @@ sub check_logic
 
 			return $self->text_error( 26, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
 				if lc( $related_value ) ne lc( $value );
+		}
+		
+		if ( $rule->{ condition } =~ /^required_element$/ ) {
+			
+			my $required = $rule->{ value };
+			my $value_line = $self->get_prepare_line( $value, $element );
+			
+			return $self->text_error( 0, $element, undef, $rule->{ error }, undef, $rule->{ full_error } )
+				if $value_line !~ /(^|,)$required(,|$)/;
 		}
 
 		if ( $rule->{ condition } =~ /^(equal|now)_or_(later|earlier)$/ ) {

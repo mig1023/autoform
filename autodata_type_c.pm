@@ -1346,6 +1346,13 @@ sub get_content_rules_hash
 				comment => 'Укажите страны, которые посетите в запланированной поездки',
 				example => 'ITALY',
 				check => 'zN,',
+				check_logic => [
+					{
+						condition => 'required_element',
+						value => '133',
+						full_error => 'Италия обязательно должна быть в числе стран назначения'
+					},
+				],
 				db => {
 					table => 'AppData',
 					name => 'Countries',
