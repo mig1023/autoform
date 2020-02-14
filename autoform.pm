@@ -538,7 +538,7 @@ sub init_add_param
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
 				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
-				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU FROM Countries',
+				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU, Schengen FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
 			};
 			
@@ -546,14 +546,6 @@ sub init_add_param
 			
 				$info_from_db->{ $_ } = $self->query( 'selall', __LINE__, $info_from_sql->{ $_ } );
 			}
-			
-			my $add_eu_countries = [
-				[ 37, "BULGARIA" ],
-				[ 47, "CYPRUS" ],
-				[ 104, "IRELAND" ],
-				[ 201, "THE UNITED KINGDOM OF GREAT BRITAIN AND NORTHERN IRELAND" ],
-				[ 215, "ROMANIA" ],
-			];
 
 			for ( @{ $info_from_db->{ '[brh_countries]' } } ) {
 			
@@ -561,12 +553,9 @@ sub init_add_param
 				
 				push( @{ $info_from_db->{ '[citizenship_countries]' } }, $_ ) if $_->[ 2 ] == 0;
 				
-				push( @{ $info_from_db->{ '[first_countries]' } }, $_ ) if $_->[ 3 ] == 1;
-			}
-			
-			for ( @{ $info_from_db->{ '[first_countries]' } }, @$add_eu_countries ) {
-			
-				push( @{ $info_from_db->{ '[eu_countries]' } }, $_ );
+				push( @{ $info_from_db->{ '[eu_countries]' } }, $_ ) if $_->[ 3 ] == 1;
+				
+				push( @{ $info_from_db->{ '[schengen_countries]' } }, $_ ) if $_->[ 4 ] == 1;
 			}
 
 			$self->cached( 'autoform_addparam', $info_from_db );

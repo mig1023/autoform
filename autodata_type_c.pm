@@ -1357,7 +1357,7 @@ sub get_content_rules_hash
 					table => 'AppData',
 					name => 'Countries',
 				},
-				param => '[first_countries]',
+				param => '[schengen_countries]',
 				first_elements => '133',
 				required_element => '133',
 				special => 'multiple_select',
@@ -1373,7 +1373,7 @@ sub get_content_rules_hash
 					table => 'AppData',
 					name => 'FirstCountry',
 				},
-				param => '[first_countries]',
+				param => '[schengen_countries]',
 				first_elements => 'default_free, 133',
 			},
 			{

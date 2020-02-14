@@ -1009,7 +1009,7 @@ sub get_content_rules_hash
 					table => 'AppData',
 					name => 'FirstCountry',
 				},
-				param => '[first_countries]',
+				param => '[schengen_countries]',
 				first_elements => 'default_free, 133',
 			},
 			{
