@@ -28,10 +28,11 @@ sub autoinfopage
 	$self->{ $_ } = $self->{ af }->{ $_ } for ( 'vars', 'token' );
 	
 	$self->{ vars }->{ session }->{ login } = 'website';
-	
-	$self->{ vars }->{ session }->{ langid } = $self->{ vars }->getparam( 'lang' )
-		if $self->{ vars }->getparam( 'lang' ) =~ /^(ru|en|it)$/i ;
-	
+
+	my $lang_param = $self->{ vars }->getparam( 'lang' ) || 'ru';
+
+	$self->{ vars }->{ session }->{ langid } = $lang_param if $lang_param =~ /^(ru|en|it)$/i ;
+
 	$_ = $self->{ vars }->getparam( 'action' );
 	
 	s/[^a-z_]//g;
@@ -162,6 +163,7 @@ sub get_infopage
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
+		
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -197,7 +199,9 @@ sub print_appdata
 	
 	$self->{ vars }->setparam( 'appid', $appdata );
 	
-	$print->print_anketa();
+	my $lang_in_link = $self->{ vars }->{ session }->{ langid } || 'ru';
+
+	$print->print_anketa( $lang_in_link );
 }
 
 sub param_disassembler
