@@ -332,6 +332,20 @@ sub get_content_rules_hash
 				first_elements => '70',
 			},
 			{
+				type => 'm_select',
+				name => 'other_сitizenship',
+				label => 'Иное гражданство',
+				comment => 'Если у вас имеется второе гражданство, укажите его в данном поле',
+				example => 'The Russian Federation',
+				check => 'N,',
+				db => {
+					table => 'AppData',
+					name => 'OtherCitizenship',
+				},
+				param => '[citizenship_countries]',
+				special => 'multiple_select',
+			},
+			{
 				type => 'free_line',
 			},
 			{
