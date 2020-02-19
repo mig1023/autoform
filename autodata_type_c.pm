@@ -1373,7 +1373,6 @@ sub get_content_rules_hash
 				},
 				param => '[schengen_countries]',
 				first_elements => '133',
-				required_element => '133',
 				special => 'multiple_select',
 			},
 			{
@@ -1448,7 +1447,7 @@ sub get_content_rules_hash
 			{
 				type => 'input',
 				name => 'appf_date',
-				label => 'Дата окончания поездки',
+				label => 'Дата окончания запрашиваемой визы',
 				comment => 'Укажите дату окончания действия запрашиваемой визы',
 				example => '31.12.1900',
 				check => $standart_date_check,
@@ -1464,7 +1463,7 @@ sub get_content_rules_hash
 						table => 'AppData',
 						name => 'PassTill',
 						offset => -90,
-						full_error => 'Между окончанием срока действия паспорта и датой окончания поездки должно быть как минимум [offset]',
+						full_error => 'Между окончанием срока действия паспорта и датой окончания запрашиваемой визы должно быть как минимум [offset]',
 					},
 				],
 				db => {
@@ -1630,7 +1629,7 @@ sub get_content_rules_hash
 				label => 'Номер соответствующей визы, если известен',
 				comment => 'Укажите номер соответствующей виз, если он вам известен',
 				example => '123456789',
-				check => 'N',
+				check => 'WN',
 				db => {
 					table => 'AppData',
 					name => 'VisaAdeviso',
