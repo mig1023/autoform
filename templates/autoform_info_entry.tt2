@@ -107,4 +107,6 @@ function mobileScreenCheck() {
 
 </script>
 
+[% INCLUDE metrika.tt2 %]
+
 </div>

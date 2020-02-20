@@ -273,6 +273,8 @@
 
 </form>
 
+[% INCLUDE metrika.tt2 %]
+
 <script>
 
 [% IF title == 2 %]

@@ -100,6 +100,8 @@
 
 </form>
 
+[% INCLUDE metrika.tt2 %]
+
 <script>
 	function openFullEdit() {
 		$("#editFullOptionDiv").hide();

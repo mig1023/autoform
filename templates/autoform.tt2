@@ -156,5 +156,7 @@
 
 			</div>
 		</div>
+		
+		[% INCLUDE metrika.tt2 %]
 	</body>
 </html>
