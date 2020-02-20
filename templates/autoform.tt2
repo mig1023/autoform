@@ -13,8 +13,8 @@
 	<title>VMS - [% langreq('Новая запись') %]</title>
 
 	[% IF special.multiple_select %]
-		<script src="[% static %]/jquery.multiple.select.js"></script>
-		<link href="[% static %]/multiple-select.css" rel="stylesheet" type="text/css">
+		<script src="[% static %]/jscript/autoform.multiple-select.min.js"></script>
+		<link href="[% static %]/css/autoform.multiple-select.min.css" rel="stylesheet" type="text/css">	
 	[% END %]
 
 	[% IF ( special.datepicker.0 || special.post_index.0 || special.mask.0 ) %]
