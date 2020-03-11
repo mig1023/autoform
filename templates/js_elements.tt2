@@ -170,7 +170,7 @@ function init_comm() {
 
 [% FOREACH mask IN special.mask %]
 
-	$("#[% mask %]").mask("99.99.9999");
+	$("#[% mask %]").mask("99.99.9999", { placeholder: "__.__.____" });
 	
 	if ( mobilScreen ) {
 		create_datepicker("[% mask %]");

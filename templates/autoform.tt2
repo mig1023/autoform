@@ -24,7 +24,7 @@
 	[% END %]
 
 	[% IF ( special.mask.0 || (step == 1) ) %]
-		<script src="[% static %]/jquery.maskedinput.min.js"></script>
+		<script src="[% static %]/jquery.mask.min.js"></script>
 	[% END %]
 
 	[% IF javascript_check %]
