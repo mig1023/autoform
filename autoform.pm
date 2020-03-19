@@ -890,6 +890,8 @@ sub doc_status
 		12 => 3,
 		13 => 3,
 		14 => 3,
+		15 => 3,
+		16 => 3,
 	};
 	
 	$status = $public_status->{ $status } if exists $public_status->{ $status };
