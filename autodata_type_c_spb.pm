@@ -30,11 +30,22 @@ sub get_content_rules_hash
 
 	return {
 	
+		'Тип услуги' => [
+			{
+				page_ord => 90,
+				progress => 1,
+				param => 1,
+				replacer => '[service_type_change]',
+				page_db_id => 200000,
+			},
+		],
+		
 		'Начало записи' => [
 			{
 				page_ord => 100,
 				progress => 1,
 				param => 1,
+				goto_link => 'to_start',
 				page_db_id => 200001,
 			},
 			{

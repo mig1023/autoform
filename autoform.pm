@@ -6,6 +6,7 @@ use VCS::Site::autodata;
 use VCS::Site::autodata_type_c;
 use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
+use VCS::Site::autodata_type_checkdoc;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
 
@@ -152,7 +153,9 @@ sub get_content_rules_hash_opt
 {
 	my $self = shift;
 	
-	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
+	my ( $center, $visa_category, $service ) = $self->get_app_visa_and_center();
+	
+	return VCS::Site::autodata_type_checkdoc::get_content_rules_hash() if ( $service == 2 ) or ( $service == 3 );
 		
 	return VCS::Site::autodata_type_d::get_content_rules_hash() if $visa_category eq 'D';
 
@@ -174,24 +177,28 @@ sub availability_responder
 sub get_app_visa_and_center
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $recached_it ) = @_;
 
 	return ( 1, 'C' ) if !$self->{ token };
 
 	my $app_data = {};
 	
-	$app_data->{ $_ } = $self->cached( 'autoform_' . $self->{ token } . '_' . $_ ) for ( 'vtype', 'center' );
-		
-	if ( !$app_data->{ vtype } or !$app_data->{ center } ) {
-		
-		( $app_data->{ center }, $app_data->{ vtype } ) = $self->query( 'sel1', __LINE__, "
+	$app_data->{ $_ } = $self->cached( 'autoform_' . $self->{ token } . '_' . $_ ) for ( 'vtype', 'center', 'service' );
+
+	if ( !$app_data->{ vtype } or !$app_data->{ center } or !$app_data->{ service } or $recached_it ) {
+
+		( $app_data->{ center }, $app_data->{ vtype },  ) = $self->query( 'sel1', __LINE__, "
 			SELECT CenterID, VType
 			FROM AutoAppointments
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
 			WHERE Token = ?", $self->{ token }
 		);
+		
+		$app_data->{ service } = $self->query( 'sel1', __LINE__, "
+			SELECT ServiceType FROM AutoToken WHERE Token = ?", $self->{ token }
+		);
 
-		for ( 'vtype', 'center' ) {
+		for ( 'vtype', 'center', 'service' ) {
 
 			$app_data->{ $_ } = 'X' unless $app_data->{ $_ };
 
@@ -199,16 +206,16 @@ sub get_app_visa_and_center
 		}
 	}
 
-	for ( 'vtype', 'center' ) {
+	for ( 'vtype', 'center', 'service' ) {
 		
 		$app_data->{ $_ } = undef if $app_data->{ $_ } eq 'X';
 	}
 	
-	return ( $app_data->{ center }, 'C' ) if !$app_data->{ vtype };
+	return ( $app_data->{ center }, 'C', $app_data->{ service } ) if !$app_data->{ vtype };
 	
 	my $visa_categories = $self->get_all_visa_categories();
 
-	return ( $app_data->{ center }, $visa_categories->{ $app_data->{ vtype } } );
+	return ( $app_data->{ center }, $visa_categories->{ $app_data->{ vtype } }, $app_data->{ service } );
 }
 
 sub get_all_visa_categories
@@ -300,6 +307,8 @@ sub autoform
 	my $max_app = $self->query( 'sel1', __LINE__, "
 		SELECT NCount FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
 	);
+	
+	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
 
 	my $tvars = {
 		'langreq' 		=> sub { return $self->lang( @_ ) },
@@ -316,7 +325,6 @@ sub autoform
 		'special' 		=> $special,
 		'vcs_tools' 		=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'progress' 		=> $progress,
-		
 		'lang_in_link' 		=> $self->{ lang },
 		'js_rules'		=> $js_rules,
 		'js_symbols'		=> $symbols_error,
@@ -331,9 +339,11 @@ sub autoform
 	
 	$tvars->{ biometric_data } = ( $self->{ biometric_data } ? 'yes' : 0 );
 	$tvars->{ mobile_app } = ( $self->param( 'mobile_app' ) ? 1 : 0 );
+	
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
+	$tvars->{ service_type } = $service;
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
@@ -960,6 +970,8 @@ sub get_autoform_content
 	( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
 		if ( $action eq 'forward' ) and ( $step < $max_step );
 
+	$step = $self->get_service( $action, $step ) if $action =~ /(appointment|checkdoc|remoteapp)/;
+	
 	$step = $self->get_edit( $step, $appdata_id ) if ( $action eq 'edit' ) and $appdata_id;
 	
 	$self->get_delete( $appdata_id ) if ( $action eq 'delapp' ) and $appdata_id;
@@ -1127,6 +1139,33 @@ sub citizenship_check_fail
 	return 0;
 }
 
+sub get_service
+# //////////////////////////////////////////////////
+{
+	my ( $self, $action, $step ) = @_;
+	
+	my $service_code = {
+		'appointment' => 1,
+		'checkdoc' => 2,
+		'remoteapp' => 3,
+	};
+	
+	my $table_id = $self->get_current_table_id();
+
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET ServiceType = ? WHERE Token = ?", {},
+		$service_code->{ $action },  $self->{ token }
+	);
+	
+	$self->get_app_visa_and_center( 'need_to_recached_data' );
+
+	$step = $self->get_step_by_content( 'to_start' );
+
+	$self->set_step( $step );
+	
+	return $step;
+}
+
 sub get_forward
 # //////////////////////////////////////////////////
 {
@@ -1190,6 +1229,10 @@ sub set_current_app_finished
 	my ( $vtype, $center ) = $self->query( 'sel1', __LINE__, "
 		SELECT VType, CenterID FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
 	);
+	
+	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
+	
+	$center = 1 if ( ( $service == 2 ) or ( $service == 3 ) );
 
 	return $self->query( 'query', __LINE__, "
 		UPDATE AutoAppData SET FinishedVType = ?, FinishedCenter = ? WHERE ID = ?", {},
@@ -1708,9 +1751,11 @@ sub get_html_page
 	
 	my $page_content = $self->get_content_rules( $step, undef, 'init' );
 
+	return $self->get_service_buttons() if $page_content eq '[service_type_change]';
+
 	return $self->get_list_of_app() if $page_content eq '[list_of_applicants]';
 	
-	return $self->get_doc_uploading() if $page_content eq '[doc_uploading]';
+	return $self->get_doc_uploading() if $page_content eq '[doc_uploading]';	
 	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id() );
 
@@ -1760,6 +1805,12 @@ sub correct_values
 	}
 	
 	return $$current_values;
+}
+
+sub get_service_buttons
+# //////////////////////////////////////////////////
+{
+	return ( undef, 'autoform_service_type.tt2' );
 }
 
 sub get_list_of_app
@@ -1982,7 +2033,9 @@ sub get_progressbar_hash_opt
 {
 	my $self = shift;
 	
-	my ( $center, $visa_category ) = $self->get_app_visa_and_center();
+	my ( $center, $visa_category, $service ) = $self->get_app_visa_and_center();
+	
+	return VCS::Site::autodata_type_checkdoc::get_progressline() if ( $service == 2 ) or ( $service == 3 );
 		
 	return VCS::Site::autodata_type_d::get_progressline() if $visa_category eq 'D';
 	

@@ -23,7 +23,7 @@
 		<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 	[% END %]
 
-	[% IF ( special.mask.0 || (step == 1) ) %]
+	[% IF ( special.mask.0 || (step == 2) ) %]
 		<script src="[% static %]/jquery.mask.min.js"></script>
 	[% END %]
 
@@ -99,7 +99,9 @@
 
 							[% IF ( step == max_step ) %]
 
-								[% IF mobile_app %]
+								[% IF (service_type == 2) %]
+									<input class="action_button" type="button" value="[% langreq('Сделать ещё одну запись') %] &#9655;" onclick="go_to_new_appointment();">
+								[% ELSIF mobile_app %]
 									<input class="action_button" type="button" value="[% langreq('Завершить запись и вернуться в приложение') %] &#9655;" onclick="go_button('mobile_app');">
 								[% ELSE %]
 									<input class="action_button" type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('app');">

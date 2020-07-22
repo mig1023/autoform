@@ -1,4 +1,4 @@
-﻿package VCS::Site::autodata_type_d;
+﻿package VCS::Site::autodata_type_checkdoc;
 use strict;
 
 sub get_progressline
@@ -6,15 +6,12 @@ sub get_progressline
 {
 	return [ '',
 		{ big => 1, name => 'Начало', },
-		{ big => 0, name => 'Даты поездки', },
 		{ big => 1, name => 'Заявители', },
 		{ big => 0, name => 'Данные паспорта', },
 		{ big => 0, name => 'Данные загранпаспорта', },
+		{ big => 0, name => 'Загрузка документов', },
 		{ big => 1, name => 'Оформление', },
 		{ big => 0, name => 'Данные для договора', },
-		{ big => 0, name => 'Выбор даты записи', },
-		{ big => 0, name => 'Офис выдачи', },
-		{ big => 0, name => 'Подтверждение', },
 		{ big => 1, name => 'Готово!', },
 	];
 }
@@ -33,7 +30,7 @@ sub get_content_rules_hash
 				progress => 1,
 				param => 1,
 				replacer => '[service_type_change]',
-				page_db_id => 300000,
+				page_db_id => 400000,
 			},
 		],
 	
@@ -43,22 +40,7 @@ sub get_content_rules_hash
 				progress => 1,
 				param => 1,
 				goto_link => 'to_start',
-				page_db_id => 300001,
-			},
-			{
-				type => 'select',
-				name => 'center',
-				label => 'Визовый центр',
-				comment => 'Выберите визовый центр для подачи документов',
-				check => 'zN',
-				db => {
-					table => 'Appointments',
-					name => 'CenterID',
-				},
-				param => '[centers_from_db]',
-				uniq_code => 'onchange="update_nearest_date_free_date();"',
-				first_elements => 'default_free, 1, 44, 41',
-				special => 'cach_this_value',
+				page_db_id => 400001,
 			},
 			{
 				type => 'select',
@@ -92,16 +74,6 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'NCount',
 				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'info',
-				name => 'free_date',
-				label => 'Ближайшая доступная дата',
-				comment => 'Вы сможете выбрать удобную для Вас дату подачи документов во время оформления записи',
-				special => 'nearest_date',
 			},
 			{
 				type => 'free_line',
@@ -164,100 +136,30 @@ sub get_content_rules_hash
 				},
 			},
 			{
-				type => 'checkbox',
-				name => 'mobil_info',
-				label_for => 'я уведомлён о том, что на территории Визового центра <a target = "_blank" class = "dotted_link_big" href = "/vazhnaya-informaciya/">запрещается</a> пользоваться электронными мобильными устройствами',
-				check => 'true',
-				full_line => 1,
-				db => {
-					table => 'Appointments',
-					name => 'MobilPermission',
-					transfer => 'nope',
-				},
-				relation => {},
-			},
-			{
 				type => 'include',
 				place => 'out',
 				template => 'vip_form.tt2',
 			},
 		],
-		
-		'Даты поездки' => [
-			{
-				page_ord => 200,
-				progress => 2,
-				collect_date => 1,
-				page_db_id => 300002,
-			},
-			{
-				type => 'input',
-				name => 's_date',
-				label => 'Дата начала поездки',
-				comment => 'Введите предполагаемую дату начала поездки',
-				example => '31.12.1900',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'now_or_later',
-						offset => '[collect_date_offset]',
-					},
-					{
-						condition => 'now_or_earlier',
-						offset => 180,
-						equality_is_also_fail => 1,
-						full_error => 'Действует ограничение на максимальную дату вылета: не более [offset] с текущей даты',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'SDate',
-				},
-				special => 'datepicker, mask',
-				minimal_date => 'current',
-			},
-			{
-				type => 'input',
-				name => 'f_date',
-				label => 'Дата окончания поездки',
-				comment => 'Введите предполагаемую дату окончания поездки',
-				example => '31.12.1900',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'equal_or_later',
-						table => 'Appointments',
-						name => 'SDate',
-						error => 'Дата начала поездки',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'FDate',
-				},
-				special => 'datepicker, mask',
-				minimal_date => 's_date',
-			},
-		],
-		
+			
 		'Список заявителей' => [
 			{
 				page_ord => 300,
-				progress => 3,
+				progress => 2,
 				goto_link => 'back_to_appdata',
 				all_app_in_title => 1,
 				replacer => '[list_of_applicants]',
-				page_db_id => 300003,
+				page_db_id => 400003,
 			},
 		],
 		
 		'Данные паспорта' => [
 			{
 				page_ord => 400,
-				progress => 4,
+				progress => 3,
 				all_app_in_title => 1,
 				param => 1,
-				page_db_id => 300004,
+				page_db_id => 400004,
 			},
 			{
 				type => 'select',
@@ -378,8 +280,8 @@ sub get_content_rules_hash
 			{
 				page_ord => 500,
 				all_app_in_title => 1,
-				progress => 5,
-				page_db_id => 300005,
+				progress => 4,
+				page_db_id => 400005,
 			},
 			{
 				type => 'input',
@@ -455,22 +357,32 @@ sub get_content_rules_hash
 			},
 		],
 		
+		'Загрузка документов' => [
+			{
+				page_ord => 550,
+				progress => 5,
+				all_app_in_title => 1,
+				replacer => '[doc_uploading]',
+				page_db_id => 400014,
+			},
+		],
+		
 		'Вы успешно добавили заявителя' => [	
 			{
 				page_ord => 600,
 				progress => 6,
 				all_app_in_title => 1,
 				replacer => '[app_finish]',
-				page_db_id => 300006,
+				page_db_id => 400006,
 			},
 		],
 		
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
 				page_ord => 700,
-				progress => 6,
+				progress => 7,
 				persons_in_page => 1,
-				page_db_id => 300007,
+				page_db_id => 400007,
 			},
 			{
 				type => 'select',
@@ -498,7 +410,7 @@ sub get_content_rules_hash
 						value => '-1',
 					}
 				},
-				page_db_id => 300008,
+				page_db_id => 400008,
 			},
 			{
 				type => 'text',
@@ -618,7 +530,7 @@ sub get_content_rules_hash
 						value => '-1',
 					}
 				},
-				page_db_id => 300009,
+				page_db_id => 400009,
 			},
 			{
 				type => 'input',
@@ -723,250 +635,22 @@ sub get_content_rules_hash
 				},
 			},
 		],
-		
-		'Оформление записи' => [
+				
+		'Заявка на проверку успешно создана!' => [
 			{
 				page_ord => 1000,
 				progress => 8,
-				persons_in_page => 1,
-				page_db_id => 300010,
-			},
-			{
-				type => 'text',
-				name => 'appdate_text',
-				label => 'Дата записи',
-				font => 'bold',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'input',
-				name => 'app_date',
-				label => 'Дата записи в Визовый центр',
-				comment => 'Введите дату, когда собираетесь посетить Визовый центр для подачи документов',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'now_or_later',
-					},
-					{
-						condition => 'now_or_earlier',
-						offset => 90,
-						equality_is_also_fail => 1,
-						full_error => 'Запись в Визовый центр более чем за [offset] не осуществляется',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'AppDate',
-				},
-				special => 'datepicker, mask',
-				uniq_code => 'onchange="update_timeslots(1);"',
-			},
-			{
-				type => 'select',
-				name => 'timeslot',
-				label => 'Время',
-				check => 'zN',
-				db => {
-					table => 'Appointments',
-					name => 'TimeslotID',
-				},
-				param => '[free]',
-				special => 'timeslots',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'text',
-				name => 'services_text',
-				label => 'СМС-оповещение о готовности документов ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
-				font => 'bold',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'input',
-				name => 'sms',
-				label => 'Номер телефона для<br>SMS-уведомления',
-				comment => 'Введите номер сотового телефона для получения СМС о готовности документов; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				example => '79XXXXXXXXX',
-				check => 'N',
-				check_logic => [
-					{
-						condition => 'length_strict',
-						length => 11,
-						full_error => 'Неправильный формат телефонного номера',
-					}
-				],
-				db => {
-					table => 'Appointments',
-					name => 'Mobile',
-				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'text',
-				name => 'services_text',
-				label => 'Доставка документов DHL ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
-				font => 'bold',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'input',
-				name => 'ship_index',
-				label => 'Индекс доставки',
-				comment => 'Введите первые цифры индекса или первые буквы города для доставки документов; выберите из списка подходящий индекс и город; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				example => '119017, Москва',
-				check => 'ЁN\s\,\.\-\(\)',
-				check_logic => [
-					{
-						condition => 'free_only_if_not',
-						table => 'Appointments',
-						name => 'ShAddress',
-						error => 'Адрес доставки',
-					}
-				],
-				db => {
-					table => 'Appointments',
-					name => 'ShIndex',
-				},
-				special => 'post_index',
-			},
-			{
-				type => 'input',
-				name => 'shipping',
-				label => 'Адрес доставки',
-				comment => 'Введите адрес для доставки документов документов, без указания индекса и города; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				example => 'Малый Толмачёвский пер., д.6 стр.1',
-				check => 'ЁN\s\-\_\.\,\;\'\"',
-				check_logic => [
-					{
-						condition => 'free_only_if_not',
-						table => 'Appointments',
-						name => 'ShIndex',
-						error => 'Индекс доставки',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'ShAddress',
-				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'text',
-				name => 'services_text',
-				label => 'Страхование ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
-				font => 'bold',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'include',
-				place => 'in',
-				template => 'insurance_form.tt2',
-			}
-		],
-		
-		'Предпочтительный офис получения готовых документов' => [
-			{
-				page_ord => 1100,
-				progress => 9,
-				relation => {
-					only_if => {
-						table => 'Appointments',
-						name => 'CenterID',
-						value => '1',
-					}
-				},
-				page_db_id => 300011,
-			},
-			{
-				type => 'radiolist',
-				name => 'mezziwhom',
-				label => 'Выберите офис, в котором будет осуществляться выдачи готовых документов',
-				check => 'zN',
-				db => {
-					table => 'Appointments',
-					name => 'OfficeToReceive',
-				},
-				param => { 
-					1 => '<b>м.Третьяковская</b>, Малый Толмачёвский пер., д.6 стр.1',
-					2 => '<b>м.Киевская</b>, ул. Киевская, вл. 2, 3 этаж',
-				},
-			},
-		],
-		
-		'Подтвердить запись' => [
-			{
-				page_ord => 1200,
-				progress => 10,
-				page_db_id => 300012,
-			},
-			{
-				type => 'captcha',
-			},
-		],
-		
-		'Запись успешно создана!' => [
-			{
-				page_ord => 1300,
-				progress => 11,
-				page_db_id => 300013,
+				page_db_id => 400013,
 			},
 			{
 				type => 'text',
 				name => 'conf_mail_text',
-				label => 'На вашу почту отправлено письмо с подтверждением записи.',
+				label => 'Скоро на вашу почту придёт письмо с ответом по документом.',
 			},
 			{
-				type => 'free_line',
-			},
-			{
-				type => 'info',
-				name => 'new_app_num',
-				label => 'Номер записи',
-			},
-			{
-				type => 'info',
-				name => 'new_app_branch',
-				label => 'Визовый центр',
-				db => {
-					table => 'Appointments',
-					name => 'CenterID',
-				},
-			},
-			{
-				type => 'info',
-				name => 'new_app_timedate',
-				label => 'Дата',
-				db => {
-					table => 'Appointments',
-					name => 'AppDate',
-				},
-			},
-			{
-				type => 'info',
-				name => 'new_app_timeslot',
-				label => 'Время записи',
-				db => {
-					table => 'Appointments',
-					name => 'TimeslotID',
-				},
+				type => 'text',
+				name => 'conf_mail_text2',
+				label => 'Ждите.',
 			},
 		],
 	};

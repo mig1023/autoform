@@ -95,6 +95,10 @@ function mobileScreenCheck() {
 	[% END %]
 }
 
+function go_to_new_appointment() {
+	window.location.replace("/autoform/");
+}
+
 function go_button(where) {
 
 	[% IF ( step == max_step ) %]
