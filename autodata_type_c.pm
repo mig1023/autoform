@@ -13,6 +13,7 @@ sub get_progressline
 		{ big => 0, name => 'Данные о поездке', },
 		{ big => 0, name => 'Проживание', },
 		{ big => 0, name => 'Расходы', },
+		{ big => 0, name => 'Загрузка документов', },
 		{ big => 1, name => 'Оформление', },
 		{ big => 0, name => 'Данные для договора', },
 		{ big => 0, name => 'Выбор даты записи', },
@@ -265,8 +266,8 @@ sub get_content_rules_hash
 			{
 				type => 'input',
 				name => 'f_date',
-				label => 'Дата окончания поездки',
-				comment => 'Введите предполагаемую дату окончания поездки',
+				label => 'Дата окончания запрашиваемой визы',
+				comment => 'Введите предполагаемую дату окончания запрашиваемой визы',
 				example => '31.12.1900',
 				check => $standart_date_check,
 				check_logic => [
@@ -2394,10 +2395,21 @@ sub get_content_rules_hash
 			},
 		],
 		
+		
+		'Загрузка документов' => [
+			{
+				page_ord => 2450,
+				progress => 9,
+				all_app_in_title => 1,
+				replacer => '[doc_uploading]',
+				page_db_id => 100037,
+			},
+		],
+		
 		'Вы успешно добавили заявителя' => [	
 			{
 				page_ord => 2500,
-				progress => 9,
+				progress => 10,
 				all_app_in_title => 1,
 				replacer => '[app_finish]',
 				page_db_id => 100028,
@@ -2407,7 +2419,7 @@ sub get_content_rules_hash
 		'Выберите лицо на которое будет оформлен договор' => [
 			{
 				page_ord => 2600,
-				progress => 9,
+				progress => 10,
 				persons_in_page => 1,
 				page_db_id => 100029,
 			},
@@ -2429,7 +2441,7 @@ sub get_content_rules_hash
 		'Укажите данные документа, удостоверяющего личность' => [
 			{
 				page_ord => 2700,
-				progress => 10,
+				progress => 11,
 				relation => {
 					only_if_not => {
 						table => 'Appointments',
@@ -2549,7 +2561,7 @@ sub get_content_rules_hash
 		'Укажите данные доверенного лица' => [
 			{
 				page_ord => 2800,
-				progress => 10,
+				progress => 11,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -2666,7 +2678,7 @@ sub get_content_rules_hash
 		'Оформление записи' => [
 			{
 				page_ord => 2900,
-				progress => 11,
+				progress => 12,
 				persons_in_page => 1,
 				goto_link => 'back_to_appdate',
 				page_db_id => 100032,
@@ -2839,7 +2851,7 @@ sub get_content_rules_hash
 		'Предпочтительный офис получения готовых документов' => [
 			{
 				page_ord => 3000,
-				progress => 12,
+				progress => 13,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -2868,7 +2880,7 @@ sub get_content_rules_hash
 		'Оплата консульского сбора' => [
 			{
 				page_ord => 3050,
-				progress => 13,
+				progress => 14,
 				relation => {
 					only_if => {
 						table => 'Appointments',
@@ -2913,7 +2925,7 @@ sub get_content_rules_hash
 		'Подтвердить запись' => [
 			{
 				page_ord => 3100,
-				progress => 13,
+				progress => 14,
 				page_db_id => 100035,
 			},
 			{
@@ -2924,7 +2936,7 @@ sub get_content_rules_hash
 		'Запись успешно создана!' => [
 			{
 				page_ord => 3200,
-				progress => 14,
+				progress => 15,
 				page_db_id => 100036,
 			},
 			{

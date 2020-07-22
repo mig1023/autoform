@@ -17,7 +17,8 @@ use POSIX;
 use JSON;
 use HTTP::Tiny;
 use Encode qw(decode encode);
-use Math::Random::Secure qw(irand); 
+use Math::Random::Secure qw(irand);
+use Digest::MD5;
 
 sub new
 # //////////////////////////////////////////////////
@@ -54,6 +55,12 @@ sub getContent
 	return autoinfopage( @_, 'entry' ) if /^info$/i;
 	
 	return mobile_end( @_ ) if /^mobile_end$/i;
+	
+	return remove_file( @_ ) if /^remove_file$/i;
+
+	return upload_file( @_ ) if /^upload_file$/i;
+
+	return download_file( @_ ) if /^download_file$/i;
 	
 	return $self->redirect();
 }
@@ -890,8 +897,6 @@ sub doc_status
 		12 => 3,
 		13 => 3,
 		14 => 3,
-		15 => 3,
-		16 => 3,
 	};
 	
 	$status = $public_status->{ $status } if exists $public_status->{ $status };
@@ -1704,6 +1709,8 @@ sub get_html_page
 	my $page_content = $self->get_content_rules( $step, undef, 'init' );
 
 	return $self->get_list_of_app() if $page_content eq '[list_of_applicants]';
+	
+	return $self->get_doc_uploading() if $page_content eq '[doc_uploading]';
 	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id() );
 
@@ -2717,6 +2724,8 @@ sub check_data_from_form
 	my $page_content = ( $content ? $content : $self->get_content_rules( $step, undef, 'init' ) );
 	
 	my $tables_id = ( $tables_ids_edt ? $tables_ids_edt : $self->get_current_table_id() );
+	
+	return $self->check_doc_uploaded() if $page_content eq '[doc_uploading]';
 
 	return if $page_content =~ /^\[/;
 	
@@ -3330,7 +3339,7 @@ sub create_new_appointment
 		LOCK TABLES
 		AutoAppointments READ, Appointments WRITE, AutoAppData READ, AppData WRITE,
 		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
-		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ"
+		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ, DocUploaded WRITE"
 	);
 	
 	my $new_appid = $self->create_table(
@@ -3367,6 +3376,8 @@ sub create_new_appointment
 		$self->create_table(
 			'AutoSpbAlterAppData', 'SpbAlterAppData', $app->{ SpbID }, $db_rules, $appid
 		);
+		
+		$self->upload_file_binding( $app->{ ID }, $appid );
 	}
 	
 	$self->query( 'query', __LINE__, "UNLOCK TABLES");
@@ -3784,6 +3795,14 @@ sub send_app_confirm
 		ORDER BY Appointments.ID DESC LIMIT 1", $appid
 	)->[ 0 ];
 	
+	my $data = $self->query( 'selallkeys', __LINE__, "
+		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName, Category
+		FROM Appointments
+		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
+		WHERE Appointments.ID = ?
+		ORDER BY Appointments.ID DESC LIMIT 1", $appid
+	)->[ 0 ];
+	
 	$replacer->{ branch_addr } = $self->lang( 'Address-' . $data->{ CenterID } );
 	
 	$replacer->{ branch_addr } = $self->query( 'sel1', __LINE__, "
@@ -3867,6 +3886,29 @@ sub get_file_content
 	close $file;
 	
 	return $content;
+}
+
+sub set_file_content
+# //////////////////////////////////////////////////
+{
+	my ( $self, $name, $header ) = @_;
+
+	open( my $file, '>', $name ) or return;
+	
+	binmode $file;
+
+	my $md5 = Digest::MD5->new;
+	
+	while ( <$header> ) {
+
+		$md5->add( $_ );
+
+		print $file $_;
+	}
+	
+	close $file;
+	
+	return $md5->hexdigest;
 }
 
 sub age
@@ -4040,6 +4082,316 @@ sub date_format
 	$date =~ s/^([0-9]{4})\-([0-9]{2})\-([0-9]{2})$/$3.$2.$1/;
 	
 	return $date;
+}
+
+sub doc_for_uploading
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $doc_list = VCS::Site::autodata::get_doc_list();
+
+	my ( $appdata_id, $visa_type ) = $self->query( 'sel1', __LINE__, "
+		SELECT AutoAppDataID, VType FROM AutoAppointments
+		JOIN AutoToken ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $all_docs = $self->query( 'selallkeys', __LINE__, "
+		SELECT ID, DocType, Name, Ext FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
+	) if $appdata_id;
+	
+	return ( $doc_list, $appdata_id, $visa_type, $all_docs );
+}
+
+sub check_doc_uploaded
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $doc_list, $appdata_id, $visa_type, $all_docs ) = $self->doc_for_uploading();
+	
+	for my $doc ( @$doc_list ) {
+	
+		my %visas = map { $_ => 1 } split /,\s?/, $doc->{ visa };
+
+		next unless exists $visas{ $visa_type };
+		
+		my $uploaded = 0;
+		
+		for my $file ( @$all_docs ) {
+
+			$uploaded = 1 if $file->{ DocType } == $doc->{ id };
+		}
+
+		return $self->text_error(
+			31, { name => "upfile_button_" . $doc->{ id } }, undef, $self->lang( $doc->{ title } )
+		) unless $uploaded;
+	}
+	
+	return undef;
+}
+
+sub check_file_ext
+# //////////////////////////////////////////////////
+{
+	my ( $self, $ext ) = @_;
+	
+	return lc( $ext ) if $ext =~ /^(jpg|png|tiff|pdf)$/i;
+	
+	return "jpg" if $ext =~ /^jpeg$/i;
+	
+	return "tiff" if $ext =~ /^tif$/i;
+	
+	return "unk";
+	
+}
+
+sub get_doc_uploading
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $doc_list, $appdata_id, $visa_type, $all_docs ) = $self->doc_for_uploading();
+
+	my $index = 0;
+	
+	my $lang = $self->{ lang };
+	
+	for ( my $index = $#$doc_list; $index >= 0; --$index ) {
+	
+		my %visas = map { $_ => 1 } split /,\s?/, $doc_list->[ $index ]->{ visa };
+
+		if ( !exists $visas{ $visa_type } ) {
+
+			splice( @$doc_list, $index, 1 );
+		}
+		else {
+			for my $doc ( @$all_docs ) {
+			
+				if ( $doc_list->[ $index ]->{ id } == $doc->{ DocType } ) {
+				
+					my $filename = $doc->{ Name };
+
+					$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
+
+					$doc_list->[ $index ]->{ name } = $filename;
+
+					$doc_list->[ $index ]->{ type } = $self->check_file_ext( $doc->{ Ext } );
+				}
+			}
+			
+			my $help = $doc_list->[ $index ]->{ help };
+			
+			my $help_link = $help->{ ( exists $help->{ $visa_type } ? $visa_type : "base" ) }->{ $lang };
+			
+			$doc_list->[ $index ]->{ help } = $help_link;
+		}
+	}
+	
+	my $opt_doc_index = 0;
+	
+	for my $doc ( @$all_docs ) {
+			
+		if ( $doc->{ DocType } < 0 ) {
+		
+			my $filename = $doc->{ Name };
+
+			$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
+		
+			push( @$doc_list, {
+				title 	=> $self->lang( "Дополнительный документ" ),
+				name 	=> $filename,
+				type 	=> $self->check_file_ext( $doc->{ Ext } ),
+				id 	=> $doc->{ DocType },
+			} );
+			
+			$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
+		}
+	}
+
+	my $content = {
+		'app_id'	=> $appdata_id,
+		'doc_list'	=> $doc_list,
+		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
+		'max_size_mb'	=> ( $self->{ autoform }->{ general }->{ max_file_upload_size } / ( 1024 * 1024 ) ),
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'opt_doc_next'	=> $opt_doc_index - 1,
+	};
+
+	return ( $content, 'autoform_upload.tt2' );
+}
+
+sub upload_file_binding
+# //////////////////////////////////////////////////
+{
+	my ( $self, $from, $to ) = @_;
+	
+	$self->query( 'query', __LINE__, "
+		UPDATE DocUploaded SET AppDataID = ? WHERE AutoAppDataID = ?", {}, $to, $from
+	);
+}
+
+sub remove_file
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	$self->{ token } = $self->get_token();
+	
+	my $appdata_id = $self->param( 'appdata' );
+	
+	my $doc_type = $self->param( 'type' );
+	
+	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	return print 'error' unless $self->check_existing_id_in_token( $appdata_id );
+	
+	my ( $path_to_file, $md5 ) = $self->query( 'sel1', __LINE__, "
+		SELECT Folder, MD5 FROM DocUploaded WHERE AutoAppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+	);
+	
+	$self->query( 'query', __LINE__, "
+		DELETE FROM DocUploaded WHERE AutoAppDataID = ? AND DocType = ?", {}, $appdata_id, $doc_type
+	);
+	
+	my $file_name = $self->{ vars }->getConfig('general')->{ tmp_folder } . "doc/" . $path_to_file . $md5;
+	
+	unlink $file_name;
+	
+	return print 'ok';
+}
+
+sub upload_file
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $file_content;
+
+	$self->{ token } = $self->get_token();
+
+	my $appid = $self->query( 'sel1', __LINE__, "
+		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
+	);
+
+	my $appdata_id = $self->param( 'appdata' );
+	
+	my $doc_type = $self->param( 'type' );
+	
+	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
+	
+	my $file = $self->param( 'file' );
+	
+	$self->param( 'filename' ) =~ /(.+)\.([^\.]+)$/;
+
+	my ( $filename, $ext ) = ( $1, lc( $2 ) );
+
+	$ext =~ s/[^A-Za-z0-9_\-\.]//g;
+	$filename =~ s/\s/_/g;
+	$filename =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.]//g;
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+
+	return print 'error' if ( !$file or !$appdata_id or !$doc_type );
+
+	my ( $path_name, $date_name ) = $self->get_folder_name( $appid );
+	
+	my $file_name = $path_name . $appdata_id . "__" . $doc_type;
+
+	my $md5 = $self->set_file_content( $file_name, $file );
+
+	return $self->unlink_and_print( $file_name, 'error' )
+		unless $md5;
+
+	my $already_exist = $self->query( 'sel1', __LINE__, "
+		SELECT ID FROM DocUploaded WHERE AutoAppDataID = ? AND md5 = ?", $appdata_id, $md5
+	);
+
+	return $self->unlink_and_print( $file_name, 'already' )
+		if $already_exist;
+
+	return $self->unlink_and_print( $file_name, 'size' )
+		if -s $file_name > $self->{ autoform }->{ general }->{ max_file_upload_size };
+
+	rename $file_name, $path_name . $md5;
+		
+	$self->query( 'query', __LINE__, "
+		INSERT INTO DocUploaded (AutoAppDataID, DocType, MD5, UploadDate, Folder, Name, Ext)
+		VALUES (?, ?, ?, now(), ?, ?, ?)",
+		{}, $appdata_id, $doc_type, $md5, $date_name, $filename, $ext
+	);
+
+	return print 'ok';
+}
+
+sub unlink_and_print
+# //////////////////////////////////////////////////
+{
+	my ( $self, $file_name, $error ) = @_;
+
+	unlink $file_name;
+		
+	return print $error;
+}
+
+sub download_file
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $conf = $self->{ vars }->getConfig('general');
+	
+	my $appdata_id = $self->param( 'appdata' );
+	
+	my $doc_type = $self->param( 'type' );
+	
+	$_ =~ s/[^a-z0-9]//g for ( $appdata_id, $doc_type );
+	
+	my ( $folder, $auto_appdata_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT Folder, AutoAppDataID FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+	) . '/' unless $appdata_id eq 'simple';
+	
+	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $auto_appdata_id . '_' . $doc_type;
+	
+	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"preview.jpg\"\nContent-Disposition: attachment; filename=\"preview.jpg\"\n\n";
+	
+	my $file_content = $self->get_file_content( $file_name );
+	
+	print $file_content;
+}
+
+sub get_folder_name
+# //////////////////////////////////////////////////
+{
+	my ( $self, $appid ) = @_;
+
+	my $conf = $self->{ vars }->getConfig('general');
+
+	my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime( time );
+	
+	$year += 1900;
+	
+	$mon += 1;
+	
+	my $path_name = $conf->{ tmp_folder } . "doc/";
+
+	my $folder_name = '';
+	
+	for ( $year, $mon, $mday, $appid ) {
+		
+		$_ = "0$_" if $_ < 10;
+		
+		$folder_name .= $_ . '/';
+		$path_name .= $_ . '/';
+
+		mkdir $path_name unless-d $path_name;
+	};
+
+	return ( $path_name, $folder_name );
 }
 
 sub redirect

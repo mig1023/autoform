@@ -231,8 +231,54 @@
 	text-align:justify;
 }
 
+.editFullOption {
+	border:1px solid gray;
+	padding:15px;
+	font-size:12px;
+	font-color:gray;
+	text-align:justify;
+}
+.editFullBlock {
+	border:1px solid black;
+	display:none;
+	padding:15px;
+	font-size:12px;
+	text-align:justify;
+}
+
 .no_border {
 	border: none;
 	border-spacing: 0;
 	border-collanse: collapse;
+}
+
+.add_info_text{
+	font-size:11px;
+	font-weight:normal;
+}
+
+.gray_line{
+	border: 1px solid #D3D3D3;
+}
+
+.hidden {
+	display:none;
+}
+
+.pc_hide {
+	display:none;
+	height:40px;
+	text-align:center;
+	vertical-align:bottom;
+	padding-bottom:3px;
+}
+
+.middle {
+	vertical-align:middle;
+}
+
+.uplsuccess {
+	color: green;
+	font-size:25px;
+	line-height: 0.8;
 }
