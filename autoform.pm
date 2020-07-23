@@ -317,8 +317,6 @@ sub autoform
 	my $max_app = $self->query( 'sel1', __LINE__, "
 		SELECT NCount FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
 	);
-	
-	$self->send_checkdoc_mail_if_need( $step );
 
 	my $tvars = {
 		'langreq' 		=> sub { return $self->lang( @_ ) },
@@ -1226,8 +1224,8 @@ sub get_forward
 		$self->set_current_app_finished( $current_table_id )
 			if $step == $self->get_step_by_content( '[app_finish]');
 
-		( $appid, $appnum ) = $self->set_appointment_finished()
-			if $step == $self->get_content_rules( 'length' ) and !$checkdoc_service;
+		( $appid, $appnum ) = $self->set_appointment_finished( $checkdoc_service )
+			if $step == $self->get_content_rules( 'length' );
 	}
 
 	return ( $step, $last_error, $appnum, $appid );
@@ -1255,15 +1253,15 @@ sub set_current_app_finished
 sub set_appointment_finished
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $checkdoc ) = @_;
 	
-	my ( $new_appid, $ncount, $appnum, $error ) = $self->create_new_appointment();
+	my ( $new_appid, $ncount, $appnum, $error ) = $self->create_new_appointment( $checkdoc );
 	
 	if ( $error ) {
 	
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET EndDate = NULL, Finished = 0, CreatedApp = NULL, Step = ?
-			WHERE Token = ?", {}, $self->get_id_by_step( 1 ), $self->{ token }
+			WHERE Token = ?", {}, $self->get_id_by_step( 2 ), $self->{ token }
 		);
 	
 		return $self->redirect( 'current' );
@@ -1281,7 +1279,8 @@ sub set_appointment_finished
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
-	$self->send_app_confirm( $appnum, $new_appid );
+	$self->send_checkdoc_mail() if $checkdoc;
+	$self->send_app_confirm( $appnum, $new_appid ) if !$checkdoc;
 		
 	return ( $new_appid, $appnum );
 }
@@ -3372,7 +3371,7 @@ sub get_app_version
 sub create_new_appointment
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $checkdoc ) = @_;
 	
 	my $info_for_contract = "from_db";
 	
@@ -3389,7 +3388,7 @@ sub create_new_appointment
 		WHERE Token = ?", $self->{ token }
 	)->[ 0 ];
 	
-	if ( $data_for_contract->{ PersonForAgreements } != -1 ) {
+	if ( ( $data_for_contract->{ PersonForAgreements } != -1 ) and !$checkdoc ) {
 	
 		$info_for_contract = $self->query( 'selallkeys', __LINE__, "
 			SELECT RLName as LName, RFName as FName, RMName as MName, RPassNum as PassNum, 
@@ -3408,7 +3407,7 @@ sub create_new_appointment
 	);
 	
 	my $new_appid = $self->create_table(
-		'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
+		$checkdoc, 'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
 		$db_rules, undef, undef, $info_for_contract, undef, $ver
 	);
 	
@@ -3428,18 +3427,18 @@ sub create_new_appointment
 	);
 	
 	for my $app ( @$allapp ) {
-		
+
 		my $sch_appid = $self->create_table(
-			'AutoSchengenAppData', 'SchengenAppData', $app->{ SchengenAppDataID }, $db_rules
+			$checkdoc, 'AutoSchengenAppData', 'SchengenAppData', $app->{ SchengenAppDataID }, $db_rules
 		);
 		
 		my $appid = $self->create_table(
-			'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid, undef,
+			$checkdoc, 'AutoAppData', 'AppData', $app->{ ID }, $db_rules, $new_appid, $sch_appid, undef,
 			$data_for_contract->{ CenterID }, undef, $app->{ SchengenAppDataID }
 		);
 		
 		$self->create_table(
-			'AutoSpbAlterAppData', 'SpbAlterAppData', $app->{ SpbID }, $db_rules, $appid
+			$checkdoc, 'AutoSpbAlterAppData', 'SpbAlterAppData', $app->{ SpbID }, $db_rules, $appid
 		);
 		
 		$self->upload_file_binding( $app->{ ID }, $appid );
@@ -3460,13 +3459,13 @@ sub create_new_appointment
 sub create_table
 # //////////////////////////////////////////////////
 {
-	my ( $self, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid,
+	my ( $self, $checkdoc, $autoname, $name, $transfered_id, $db_rules, $new_appid, $sch_appid,
 		$info_for_contract, $center, $ver, $sch_auto ) = @_;
 
 	my $hash = $self->get_hash_table( $autoname, 'ID', $transfered_id );
 
 	$hash = $self->mod_hash(
-		$hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto
+		$checkdoc, $hash, $name, $db_rules, $new_appid, $sch_appid, $info_for_contract, $center, $ver, $sch_auto
 	);
 
 	return $self->insert_hash_table( $name, $hash );
@@ -3475,7 +3474,7 @@ sub create_table
 sub mod_hash
 # //////////////////////////////////////////////////
 {
-	my ( $self, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract,
+	my ( $self, $checkdoc, $hash, $table_name, $db_rules, $appid, $schappid, $info_for_contract,
 		$center, $ver, $sch_auto ) = @_;
 
 	for my $column ( keys %$hash ) {
@@ -3588,6 +3587,21 @@ sub mod_hash
 			}
 		}
 	}
+	
+	if ( $checkdoc ) {
+	
+		my ( $sec, $min, $hour, $day, $mon, $year ) = localtime( time );
+		
+		$year += 1900;
+		$mon += 1;
+		
+		for ( $day, $mon ) {
+			$_ = "0$_" if $_ < 10;
+		};
+	
+		$hash->{ CenterID } = 1;
+		$hash->{ AppDate } = "$year-$mon-$day";
+	}
 
 	if ( $table_name eq 'Appointments' ) {
 	
@@ -3612,6 +3626,10 @@ sub mod_hash
 	
 	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'FinishedVType', 'FinishedCenter', 'AppEMail',
 		'AppDataID', 'PrimetimeAlert', 'Copypasta' );
+	
+	if ( $checkdoc ) {
+		delete $hash->{ $_ } for ( 'PersonForAgreements', 'MobilPermission', 'RAddress' );
+	}
 		
 	return $hash;
 }
@@ -3795,16 +3813,10 @@ sub get_pcode
 	$template->process( 'autoform_pcode.tt2', $tvars );
 }
 
-sub send_checkdoc_mail_if_need()
+sub send_checkdoc_mail
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step ) = @_;
-	
-	return if $step < $self->get_content_rules( 'length' );
-	
-	my $service = $self->get_current_service();
-	
-	return if $service != 2;
 	
 	my ( $email, $sended_already ) = $self->query( 'sel1', __LINE__, "
 		SELECT AutoAppointments.EMail, AutoToken.CheckdocSended
