@@ -9,6 +9,7 @@ use VCS::Site::autodata_type_d;
 use VCS::Site::autodata_type_checkdoc;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
+use VCS::Site::autocheckdoc;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -271,9 +272,11 @@ sub autoform
 		$self->{ biometric_data } = 'yes' if lc( $self->param( $_ ) ) eq 'yes';
 	}
 
-	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
+	( $self->{ token }, my $finished, my $doc_status, my $service ) = $self->get_token_and_create_new_form_if_need();
 
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
+	
+	return $self->autocheckdoc( $task, $id, $template ) if $finished and $service and $self->{ token } !~ /^\d\d$/;
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 
@@ -447,6 +450,20 @@ sub get_mobile_api
 	return if ref( $api_response ) != /^(HASH|ARRAY)$/;
 	
 	print JSON->new->pretty->encode( $api_response );
+}
+
+sub autocheckdoc
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my $autoinfopage = VCS::Site::autocheckdoc->new('VCS::Site::autocheckdoc', $self->{ vars } );
+	
+	$autoinfopage->{ autoform } = VCS::Site::autodata::get_settings();
+	
+	$autoinfopage->{ af } = $self;
+	
+	$autoinfopage->autocheckdoc( $task, $id, $template );
 }
 
 sub autoinfopage
@@ -786,8 +803,8 @@ sub get_token_and_create_new_form_if_need
 		return ( $token, 'finished', 'docstatus' );
 	}
 	
-	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
-		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
+	my ( $token_exist, $finished, $deleted, $app, $service ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, Finished, Deleted, CreatedApp, ServiceType FROM AutoToken WHERE Token = ?", $token
 	);
 
 	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
@@ -810,7 +827,7 @@ sub get_token_and_create_new_form_if_need
 	
 	return ( $token, $finished, 'docstatus' ) if $status == 4;
 	
-	return ( ( $status == 1 ? $token : '02' ), $finished );
+	return ( ( $status == 1 ? $token : '02' ), $finished, undef, $service );
 }
 
 sub create_clear_form
@@ -3410,7 +3427,7 @@ sub create_new_appointment
 		$checkdoc, 'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
 		$db_rules, undef, undef, $info_for_contract, undef, $ver
 	);
-	
+
 	if ( !$new_appid ) {
 	
 		$self->query( 'query', __LINE__, "UNLOCK TABLES");
@@ -3588,7 +3605,7 @@ sub mod_hash
 		}
 	}
 	
-	if ( $checkdoc ) {
+	if ( $checkdoc and ( $table_name eq 'Appointments' ) ) {
 	
 		my ( $sec, $min, $hour, $day, $mon, $year ) = localtime( time );
 		

@@ -1,0 +1,244 @@
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMS - [% langreq('Проверка документов') %]</title>
+</head>
+
+<font face="arial">
+
+<center>
+<div id="info_form">
+
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+
+	var mobilScreen = isMobile();
+
+	if ( mobilScreen ) {
+		$('#info_form').hide();
+	}
+
+</script>
+
+<form action = "[% addr %]?t=[% token %]&lang=[% lang_in_link %]" method = "POST" name = "dataform">
+<input type = "hidden" value = "nothing" name = "action" id = "action">
+<input type = "hidden" value = "" name = "appdata" id = "appdata">
+
+<table width="100%">
+
+<tr><td align="center">
+
+<table width="600px" id="app_table">
+
+[% IF title == 1 %]
+
+	<tr><td colspan="2">
+
+	<br><br><img src="[% static %]/images/logoVMS.png"/><br><br><br></td></tr>
+
+	<tr><td colspan="2">
+
+	<h2>[% langreq('Информация о записи') %]</h2></td></tr>
+
+	<tr><td>
+
+	<table width="100%" style="font-size:
+	[% IF lang_in_link == 'en' %]0.85em[% ELSIF lang_in_link == 'it' %]0.75em[% ELSE %]1em[% END %]">
+	<tr>
+	<td><span class="spacer2"></span>[% langreq('Номер записи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_num %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_branch %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Тип визы') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_vname %]</span></td>
+	</tr>
+	</table>
+
+	</td><td>
+
+	<table width="100%">
+	<tr><td><span class="spacer2"></span>
+	<input class="big_button" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('print');"><br>
+	<input class="big_button" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
+	<input class="big_button" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
+	</td></tr>
+	</table>
+
+	</td></tr>
+
+	<tr><td colspan="2">&nbsp;<br></td></tr>
+
+	<tr><td colspan="2"><h2>[% langreq('Список заявителей') %]</h2></td></tr>
+
+	<tr><td colspan="2">
+	<table width="100%">
+	[% IF app_info.category == 'C' %]
+		<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
+	[% END %]
+	[% SET i = 0 %]
+	[% FOREACH person IN app_list %]
+		[% SET i = i + 1 %]
+		<tr>
+		<td class="info_list"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
+		<td class="m_right"><span class="mobil_hide">[% person.BirthDate %]</span>&nbsp;</td>
+		<td class="m_right_m">
+		[% IF app_info.category == 'C' %]
+			<input class="small_button" type="button" style="min-width:110px;" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.ID %]');">
+			&nbsp;<input class="small_button" type="button" style="min-width:96px;" value="[% langreq('Распечатать') %]" onclick="go_button('print_a', '[% person.ID %]');">
+		[% END %]
+		</td>
+		</tr>
+	[% END %]
+	</table>
+	</td></tr>
+
+	<tr><td colspan="3">&nbsp;</td></tr>
+	
+	[% IF map_type == 'geo' %]
+	
+	<tr class="ymap"><td colspan="3"><div id="map" class="yandex_map"></div></td></tr>
+	
+	<tr><td colspan="3">&nbsp;</td></tr>
+
+	<script type="text/javascript">
+	
+		var map;
+
+		function initMap() {
+
+		    map = new google.maps.Map(document.getElementById('map'), {
+			center: {lat: [% map_in_page.0 %], lng: [% map_in_page.1 %]},
+			zoom: 8
+		    });
+		}
+	</script>
+	
+	[% ELSE %]
+		
+		<tr class="ymap"><td colspan="3"><iframe width="100%" height="300" style="border-width: 0px; margin: 0px;"
+		[% IF map_in_page.type == 'yandexwidget' %]
+			src="https://yandex.ru/map-widget/v1/-/[% map_in_page.code %]" class="iframe-width-100" allowfullscreen="allowfullscreen">
+		[% ELSIF map_in_page.type == 'yandexconstructor' %]
+			src="https://yandex.ru/map-widget/v1/?um=constructor%[% map_in_page.code %]&amp;lang=ru_RU&amp;scroll=true&amp;source=constructor">
+		[% ELSE %]
+			src="https://google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
+		[% END %]
+		</iframe></td></tr>
+	
+	[% END %]
+	
+	<tr><td colspan="3"><br>
+	
+	[% IF center_msk %]
+		
+		<img src="[% static %]/images/vms_moscow.jpg" width="100%">
+		</td></tr>
+		<tr><td colspan="3"><br>&nbsp;<br></td></tr>
+	[% END %]
+
+	<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
+	<span class="suppl_text">
+	[% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
+	<br><br>[% langreq('C 14 сентября 2015 года, все заявители, запрашивающие визу, проходят обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждому заявителю необходимо явиться на подачу документов лично') %].
+	<br><br>[% langreq('Обращаем ваше внимание, что прием документов на оформление визы и прохождение процедуры "Биометрия" в Визовом центре проходит при предъявлении распечатанной записи и строго в назначенное время') %].
+	<br><br>[% langreq('Ознакомьтесь с положением об') %] <a target="_blank" class="dotted_link" href="https://www.italy-vms.ru/otkaz-ot-otvetstvennosti/">[% langreq('отказе от ответственности и политике конфиденциальности') %]</a>.
+	<br><br>[% langreq('Пожалуйста, будьте по указанному ниже адресу не более, чем за 10 минут до назначенного времени') %].
+	<br><br>[% langreq('Запись в Визовый центр на подачу документов осуществляется бесплатно') %].
+	</span></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
+
+	<tr><td colspan="2"><h2>[% langreq('Спасибо') %]<br>[% langreq('Итальянский визовый центр') %]</h2></td></tr>
+
+[% END %]
+
+	<tr><td class="left" colspan="2">
+	[% IF lang_in_link != 'ru' %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>&nbsp;
+	[% END %]
+	
+	[% IF lang_in_link != 'en' %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to English</b></a>&nbsp;
+	[% END %]
+	
+	[% IF lang_in_link != 'it' %]
+		<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
+	[% END %]
+	</td></tr>
+
+</table>
+
+</form>
+
+[% INCLUDE yandex_metrika.tt2 %]
+
+<script>
+
+$(document).ready( mobileScreenCheck() );
+
+function mobileScreenCheck() {
+
+	if ( !mobilScreen ) {
+		
+		$('#app_table').css( "width", '600px' );
+		$('.big_button').css( "height", '37px' );
+		$('.big_button, .small_button').css( "margin-bottom", '2px' );
+		$('.small_button').css( "height", '25px' );
+		$('.m_left').css( "text-align", 'right' );
+		$('.m_right_m').css( "white-space", 'nowrap' );
+		$('.suppl_text, .dotted_link').css( "font-size", '12px' );
+
+		return;
+	}
+	
+	$('#app_table').css( "width", '100%' );
+	$('.big_button').css( "height", '70px' );
+	$('.big_button, .small_button').css( "margin-bottom", '15px' );
+	$('.small_button').css( "height", '70px' );
+	$('.m_left').css( "text-align", 'left' );
+	$('.m_right_m').css( "white-space", 'normal' );
+	$('.suppl_text, .dotted_link').css( "font-size", '15px' );
+
+	$('*').css( "font-size", '15px' );
+	$('h2').css( "font-size", '20px' );
+	
+	$('.m_info').css( "font-size", '30px' );
+	
+	$('.spacer').html( '&nbsp;&nbsp;' );
+	$('.spacer2').html( '<br>' );
+	
+	$(':checkbox, :radio').css( "height", "20px" );
+	$(':checkbox, :radio').css( "width", "20px" );
+	
+	$('.mobil_hide').css( "display", 'none' );
+
+	$('#comment_place').removeClass( "grayborder" );
+
+	$('.small_button').css( "width", '100%' );
+
+	$('#info_form').show(); 
+}
+
+function go_button(where, who) {
+	$('#action').val(where);
+	$('#appdata').val(who);
+	document.dataform.submit();
+};
+
+</script>
+
+</div>
