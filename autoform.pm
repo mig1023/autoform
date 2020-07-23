@@ -187,7 +187,7 @@ sub get_app_visa_and_center
 
 	if ( !$app_data->{ vtype } or !$app_data->{ center } or !$app_data->{ service } or $recached_it ) {
 
-		( $app_data->{ center }, $app_data->{ vtype },  ) = $self->query( 'sel1', __LINE__, "
+		( $app_data->{ center }, $app_data->{ vtype } ) = $self->query( 'sel1', __LINE__, "
 			SELECT CenterID, VType
 			FROM AutoAppointments
 			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
@@ -309,6 +309,8 @@ sub autoform
 	);
 	
 	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
+	
+	$self->send_checkdoc_mail_if_need( $step );
 
 	my $tvars = {
 		'langreq' 		=> sub { return $self->lang( @_ ) },
@@ -3783,6 +3785,46 @@ sub get_pcode
 	$template->process( 'autoform_pcode.tt2', $tvars );
 }
 
+sub send_checkdoc_mail_if_need()
+# //////////////////////////////////////////////////
+{
+	my ( $self, $step ) = @_;
+	
+	return if $step < $self->get_content_rules( 'length' );
+	
+	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
+	
+	return if $service != 2;
+	
+	my $email = $self->query( 'sel1', __LINE__, "
+		SELECT utoAppointments.EMail
+		FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $self->{ token }
+	)->[ 0 ];
+		
+	my $subject = $self->lang( 'Проверка документов в итальянском ВЦ' );
+	
+	my $htmls = VCS::Site::autodata::get_checkdoc_text();
+	
+	my $body;
+	
+	my $token_with_lang = $self->{ token } . '&lang=' . ( $self->{ 'lang' } || 'ru' );
+	
+	for my $html ( sort { $a <=> $b } keys %$htmls ) {
+		
+		$htmls->{ $html } =~ s/\[token\]/$token_with_lang/;
+		
+		$body .= $self->lang( $htmls->{ $html } );
+	}
+	
+	$self->{ vars }->get_system->send_mail( $self->{ vars }, $email, $subject, $body, 1 );
+
+	return $self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET CheckdocSended = now() WHERE Token = ?", {}, $self->{ token }
+	);
+}
+
 sub send_link
 # //////////////////////////////////////////////////
 {
@@ -3840,14 +3882,6 @@ sub send_app_confirm
 	
 	my $html = $self->get_file_content( $conf->{ tt } );
 
-	my $data = $self->query( 'selallkeys', __LINE__, "
-		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName, Category
-		FROM Appointments
-		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
-		WHERE Appointments.ID = ?
-		ORDER BY Appointments.ID DESC LIMIT 1", $appid
-	)->[ 0 ];
-	
 	my $data = $self->query( 'selallkeys', __LINE__, "
 		SELECT EMail, CenterID, TimeslotID, AppDate, dwhom, FName, LName, MName, Category
 		FROM Appointments

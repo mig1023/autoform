@@ -692,6 +692,19 @@ sub get_link_text
 	};
 };
 
+sub get_checkdoc_text
+# //////////////////////////////////////////////////
+{
+	return {
+		1 => 'Уважаемый заявитель!<br>Вы заказали услугу проверки документов <b>Итальянского Визового центра</b>.<br>Вы в любой момент можете проверить статус проверки документов:',
+		2 => '<br><br><a href="/autoform/?t=[token]" style="display: inline-block; font-family: arial,sans-serif; font-size: 14px; font-weight: bold; color: #444444; text-decoration: none; user-select: none; padding: .2em 1.2em; outline: none; border: 1px solid #c0c0c0; border-radius: 2px; background: #F5F5F5; target="_blank">',
+		3 => 'Узнать статус проверки доументов',
+		4 => '</a><br><br>',
+		5 => '<b>Внимание! Это письмо сформировано автоматически, пожалуйста, не отвечайте на него.</b><br><br>',
+		6 => 'С уважением,<br>Итальянский визовый центр',
+	};
+};
+
 sub get_appointment_text
 # //////////////////////////////////////////////////
 {

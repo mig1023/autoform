@@ -10,8 +10,7 @@ sub get_progressline
 		{ big => 0, name => 'Данные паспорта', },
 		{ big => 0, name => 'Данные загранпаспорта', },
 		{ big => 0, name => 'Загрузка документов', },
-		{ big => 1, name => 'Оформление', },
-		{ big => 0, name => 'Данные для договора', },
+		{ big => 1, name => 'Оплата', },
 		{ big => 1, name => 'Готово!', },
 	];
 }
@@ -363,7 +362,7 @@ sub get_content_rules_hash
 				progress => 5,
 				all_app_in_title => 1,
 				replacer => '[doc_uploading]',
-				page_db_id => 400014,
+				page_db_id => 400006,
 			},
 		],
 		
@@ -373,274 +372,28 @@ sub get_content_rules_hash
 				progress => 6,
 				all_app_in_title => 1,
 				replacer => '[app_finish]',
-				page_db_id => 400006,
+				page_db_id => 400007,
 			},
 		],
 		
-		'Выберите лицо на которое будет оформлен договор' => [
+		'Оплата' => [
 			{
 				page_ord => 700,
 				progress => 7,
-				persons_in_page => 1,
-				page_db_id => 400007,
-			},
-			{
-				type => 'select',
-				name => 'visa_text',
-				label => 'Выберите на кого оформляется',
-				check => 'zN-',
-				db => {
-					table => 'Appointments',
-					name => 'PersonForAgreements',
-					transfer => 'nope',
-				},
-				param => '[persons_in_app]',
-				first_elements => 'default_free',
-			},
-		],
-		
-		'Укажите данные документа, удостоверяющего личность' => [
-			{
-				page_ord => 800,
-				progress => 7,
-				relation => {
-					only_if_not => {
-						table => 'Appointments',
-						name => 'PersonForAgreements',
-						value => '-1',
-					}
-				},
 				page_db_id => 400008,
 			},
 			{
 				type => 'text',
-				name => 'rupass_text',
-				label => 'Для граждан РФ необходимо указать данные внутреннего паспорта',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'info',
-				name => 'info_rulname',
-				label => 'Фамилия',
-				db => {
-					table => 'AppData',
-					name => 'RLName',
-				},
-			},
-			{
-				type => 'info',
-				name => 'info_rufname',
-				label => 'Имя',
-				db => {
-					table => 'AppData',
-					name => 'RFName',
-				},
-			},
-			{
-				type => 'info',
-				name => 'info_rumname',
-				label => 'Отчество',
-				db => {
-					table => 'AppData',
-					name => 'RMName',
-				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'input',
-				name => 'info_passnum',
-				label => '№ паспорта',
-				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				example => '4510ХХХХХХ',
-				check => 'zNW',
-				db => {
-					table => 'AppData',
-					name => 'RPassNum',
-				},
-			},
-			{
-				type => 'input',
-				name => 'info_passdate',
-				label => 'Дата выдачи',
-				comment => 'Введите дату выдачи, указанную в паспорте',
-				example => '31.12.1900',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'now_or_earlier',
-					},
-				],
-				db => {
-					table => 'AppData',
-					name => 'RPWhen',
-				},
-				special => 'mask',
-			},
-			{
-				type => 'input',
-				name => 'info_rupasswhere',
-				label => 'Кем выдан',
-				comment => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
-				example => 'ОВД по району Беговой города Москвы',
-				check => 'zWЁN\s\-\_\.\,\;\'\"',
-				db => {
-					table => 'AppData',
-					name => 'RPWhere',
-				},
-			},
-			{
-				type => 'input',
-				name => 'info_address',
-				label => 'Адрес регистрации',
-				comment => 'Укажите адрес регистрации',
-				example => 'г.Москва, М.Толмачевский пер., д. 6, стр.1',
-				check => 'zWЁN\s\-\_\.\,\;\'\"',
-				db => {
-					table => 'AppData',
-					name => 'RAddress',
-					transfer => 'nope',
-				},
-			},
-			{
-				type => 'input',
-				name => 'info_phone',
-				label => 'Телефон',
-				comment => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
-				example => '79XXXXXXXXX',
-				check => 'zN',
-				db => {
-					table => 'AppData',
-					name => 'AppPhone',
-				},
-			},
-		],
-		
-		'Укажите данные доверенного лица' => [
-			{
-				page_ord => 900,
-				progress => 7,
-				relation => {
-					only_if => {
-						table => 'Appointments',
-						name => 'PersonForAgreements',
-						value => '-1',
-					}
-				},
-				page_db_id => 400009,
-			},
-			{
-				type => 'input',
-				name => 'dovlname',
-				label => 'Фамилия',
-				comment => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
-				example => 'Иванов',
-				check => 'zWЁ\s\-',
-				db => {
-					table => 'Appointments',
-					name => 'LName',
-				},
-			},
-			{
-				type => 'input',
-				name => 'dovfname',
-				label => 'Имя',
-				comment => 'Введите имя на русском языке так, как оно указана во внутреннем паспорте',
-				example => 'Иван',
-				check => 'zWЁ\s\-',
-				db => {
-					table => 'Appointments',
-					name => 'FName',
-				},
-			},
-			{
-				type => 'input',
-				name => 'dovmname',
-				label => 'Отчество',
-				comment => 'Введите отчество на русском языке так, как оно указана во внутреннем паспорте',
-				example => 'Иванович',
-				check => 'zWЁ\s\-',
-				db => {
-					table => 'Appointments',
-					name => 'MName',
-				},
-			},
-			{
-				type => 'input',
-				name => 'dovpassnum',
-				label => '№ паспорта',
-				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
-				example => '4510ХХХХХХ',
-				check => 'zNW',
-				db => {
-					table => 'Appointments',
-					name => 'PassNum',
-				},
-			},
-			{
-				type => 'input',
-				name => 'dovpassdate',
-				label => 'Дата выдачи',
-				comment => 'Введите дату выдачи, указанную в паспорте',
-				example => '31.12.1900',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'now_or_earlier',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'PassDate',
-				},
-				special => 'mask',
-			},
-			{
-				type => 'input',
-				name => 'dovpasswhere',
-				label => 'Кем выдан',
-				comment => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
-				example => 'ОВД по району Беговой города Москвы',
-				check => 'zWЁN\s\-\_\.\,\;\'\"',
-				db => {
-					table => 'Appointments',
-					name => 'PassWhom',
-				},
-			},
-			{
-				type => 'input',
-				name => 'dovaddress',
-				label => 'Адрес',
-				comment => 'Полный адрес, включая индекс',
-				example => '119017, г.Москва, М.Толмачевский пер., д. 6, стр.1',
-				check => 'zWЁN\s\-\_\.\,\;\'\"',
-				db => {
-					table => 'Appointments',
-					name => 'Address',
-				},
-			},
-			{
-				type => 'input',
-				name => 'dovphone',
-				label => 'Телефон',
-				comment => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
-				example => '79161234567',
-				check => 'zN',
-				db => {
-					table => 'Appointments',
-					name => 'Phone',
-				},
+				name => 'payment_text',
+				label => 'Здесь кнопка оплаты.',
 			},
 		],
 				
 		'Заявка на проверку успешно создана!' => [
 			{
-				page_ord => 1000,
+				page_ord => 800,
 				progress => 8,
-				page_db_id => 400013,
+				page_db_id => 400009,
 			},
 			{
 				type => 'text',
