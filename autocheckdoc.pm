@@ -98,15 +98,44 @@ sub get_app_list
 	my $self = shift;
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppData.ID, AppData.AppID, AppData.FName, AppData.LName, AppData.BirthDate
+		SELECT AppData.ID, AppData.FName, AppData.LName, AppData.BirthDate,
+		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
 		WHERE Token = ? AND AppData.Status = 1", $self->{ token }
 	);
 
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
+	
+	my $doc_list = {};
+	
+	for( @$app_list ) {
+		
+		my $file = {
+			DocType => $_->{ DocType },
+			Name => $_->{ Name },
+			Ext => $_->{ Ext },
+			CheckStatus => $_->{ CheckStatus },
+		};		
+		
+		if ( exists $doc_list->{ $_->{ ID } } ) {
+			
+			push( @{ $doc_list->{ $_->{ ID } }->{ files } }, $file  );
+		}
+		else {
+			$doc_list->{ $_->{ ID } } = {
+				FName => $_->{ FName },
+				LName => $_->{ LName },
+				BirthDate => $_->{ BirthDate },
+				files => [ $file ],
+			};
+		};
+	}
+	
+	# warn Dumper( $doc_list );
 
-	return $app_list;
+	return $doc_list;
 }
 	
 1;

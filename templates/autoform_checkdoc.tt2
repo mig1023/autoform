@@ -38,13 +38,13 @@
 
 [% IF title == 1 %]
 
-	<tr><td colspan="2">
+	<tr><td>
 
 	<br><br><img src="[% static %]/images/logoVMS.png"/><br><br><br></td></tr>
 
-	<tr><td colspan="2">
+	<tr><td>
 
-	<h2>[% langreq('Информация о записи') %]</h2></td></tr>
+	<h2>[% langreq('Проверка документов') %]</h2></td></tr>
 
 	<tr><td>
 
@@ -57,99 +57,39 @@
 	<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
 	<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
 	</tr><tr>
-	<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
-	<td class="m_left"><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
-	</tr><tr>
-	<td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
-	<td class="m_left"><span class="m_info">[% app_info.new_app_branch %]</span></td>
-	</tr><tr>
 	<td><span class="spacer2"></span>[% langreq('Тип визы') %]</td>
 	<td class="m_left"><span class="m_info">[% app_info.new_app_vname %]</span></td>
 	</tr>
 	</table>
 
-	</td><td>
-
-	<table width="100%">
-	<tr><td><span class="spacer2"></span>
-	<input class="big_button" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('print');"><br>
-	<input class="big_button" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
-	<input class="big_button" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
-	</td></tr>
-	</table>
-
 	</td></tr>
 
-	<tr><td colspan="2">&nbsp;<br></td></tr>
+	<tr><td>&nbsp;<br></td></tr>
 
-	<tr><td colspan="2"><h2>[% langreq('Список заявителей') %]</h2></td></tr>
+	<tr><td><h2>[% langreq('Список заявителей') %]</h2></td></tr>
 
-	<tr><td colspan="2">
+	<tr><td>
 	<table width="100%">
-	[% IF app_info.category == 'C' %]
-		<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
-	[% END %]
 	[% SET i = 0 %]
 	[% FOREACH person IN app_list %]
 		[% SET i = i + 1 %]
 		<tr>
-		<td class="info_list"><nobr>[% i %]. [% person.FName %] [% person.LName %]</nobr></td>
-		<td class="m_right"><span class="mobil_hide">[% person.BirthDate %]</span>&nbsp;</td>
-		<td class="m_right_m">
-		[% IF app_info.category == 'C' %]
-			<input class="small_button" type="button" style="min-width:110px;" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.ID %]');">
-			&nbsp;<input class="small_button" type="button" style="min-width:96px;" value="[% langreq('Распечатать') %]" onclick="go_button('print_a', '[% person.ID %]');">
-		[% END %]
-		</td>
+		<td class="info_list"><nobr>[% i %]. [% person.value.FName %] [% person.value.LName %]</nobr></td>
+		<td class="m_right"><span class="mobil_hide">[% person.value.BirthDate %]</span>&nbsp;</td>
 		</tr>
+		
+		[% FOREACH file IN person.value.files %]
+		<tr>
+		<td class="info_list"><nobr>[% file.Name %] [% file.Ext %]</nobr></td>
+		<td class="m_right">[% file.DocType %] [% file.CheckStatus %]</td>
+		</tr>
+		[% END %]
 	[% END %]
 	</table>
 	</td></tr>
 
-	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr><td>&nbsp;</td></tr>
 	
-	[% IF map_type == 'geo' %]
-	
-	<tr class="ymap"><td colspan="3"><div id="map" class="yandex_map"></div></td></tr>
-	
-	<tr><td colspan="3">&nbsp;</td></tr>
-
-	<script type="text/javascript">
-	
-		var map;
-
-		function initMap() {
-
-		    map = new google.maps.Map(document.getElementById('map'), {
-			center: {lat: [% map_in_page.0 %], lng: [% map_in_page.1 %]},
-			zoom: 8
-		    });
-		}
-	</script>
-	
-	[% ELSE %]
-		
-		<tr class="ymap"><td colspan="3"><iframe width="100%" height="300" style="border-width: 0px; margin: 0px;"
-		[% IF map_in_page.type == 'yandexwidget' %]
-			src="https://yandex.ru/map-widget/v1/-/[% map_in_page.code %]" class="iframe-width-100" allowfullscreen="allowfullscreen">
-		[% ELSIF map_in_page.type == 'yandexconstructor' %]
-			src="https://yandex.ru/map-widget/v1/?um=constructor%[% map_in_page.code %]&amp;lang=ru_RU&amp;scroll=true&amp;source=constructor">
-		[% ELSE %]
-			src="https://google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
-		[% END %]
-		</iframe></td></tr>
-	
-	[% END %]
-	
-	<tr><td colspan="3"><br>
-	
-	[% IF center_msk %]
-		
-		<img src="[% static %]/images/vms_moscow.jpg" width="100%">
-		</td></tr>
-		<tr><td colspan="3"><br>&nbsp;<br></td></tr>
-	[% END %]
-
 	<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
 	<span class="suppl_text">
 	[% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
