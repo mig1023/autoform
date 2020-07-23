@@ -174,6 +174,16 @@ sub availability_responder
 	print "all-is-ok";
 }
 
+sub get_current_service
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
+	
+	return $service;
+}	
+
 sub get_app_visa_and_center
 # //////////////////////////////////////////////////
 {
@@ -308,8 +318,6 @@ sub autoform
 		SELECT NCount FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
 	);
 	
-	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
-	
 	$self->send_checkdoc_mail_if_need( $step );
 
 	my $tvars = {
@@ -345,7 +353,7 @@ sub autoform
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
-	$tvars->{ service_type } = $service;
+	$tvars->{ service_type } = $self->get_current_service();
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
@@ -1188,10 +1196,12 @@ sub get_forward
 	
 	my $last_error = $self->check_data_from_form( $step );
 	
+	my $checkdoc_service = ( $self->get_current_service() == 2 ? 1 : 0 ); 
+	
 	my ( $appnum, $appid ) = ( undef, undef );
 	
 	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
-		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
+		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) and !$checkdoc_service );
 	
 	( $last_error, $step ) = $self->check_mutex_for_creation( $step )
 		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
@@ -1217,7 +1227,7 @@ sub get_forward
 			if $step == $self->get_step_by_content( '[app_finish]');
 
 		( $appid, $appnum ) = $self->set_appointment_finished()
-			if $step == $self->get_content_rules( 'length' );
+			if $step == $self->get_content_rules( 'length' ) and !$checkdoc_service;
 	}
 
 	return ( $step, $last_error, $appnum, $appid );
@@ -1232,7 +1242,7 @@ sub set_current_app_finished
 		SELECT VType, CenterID FROM AutoAppointments WHERE ID = ?", $tables_id->{ AutoAppointments }
 	);
 	
-	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
+	my $service = $self->get_current_service();
 	
 	$center = 1 if ( ( $service == 2 ) or ( $service == 3 ) );
 
@@ -3792,16 +3802,18 @@ sub send_checkdoc_mail_if_need()
 	
 	return if $step < $self->get_content_rules( 'length' );
 	
-	my ( undef, undef, $service ) = $self->get_app_visa_and_center();
+	my $service = $self->get_current_service();
 	
 	return if $service != 2;
 	
-	my $email = $self->query( 'sel1', __LINE__, "
-		SELECT utoAppointments.EMail
+	my ( $email, $sended_already ) = $self->query( 'sel1', __LINE__, "
+		SELECT AutoAppointments.EMail, AutoToken.CheckdocSended
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
-	)->[ 0 ];
+	);
+	
+	return if $sended_already;
 		
 	my $subject = $self->lang( 'Проверка документов в итальянском ВЦ' );
 	

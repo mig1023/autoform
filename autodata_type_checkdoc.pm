@@ -379,7 +379,7 @@ sub get_content_rules_hash
 		'Оплата' => [
 			{
 				page_ord => 700,
-				progress => 7,
+				progress => 6,
 				page_db_id => 400008,
 			},
 			{
@@ -392,7 +392,7 @@ sub get_content_rules_hash
 		'Заявка на проверку успешно создана!' => [
 			{
 				page_ord => 800,
-				progress => 8,
+				progress => 7,
 				page_db_id => 400009,
 			},
 			{
