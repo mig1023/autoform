@@ -98,7 +98,7 @@
 			[% IF (file.comments.size > 0) %]
 			
 				<tr id="show_comments[% i %]-[% n %]">
-					<td colspan="2"><span class="show_comment" onclick="show_comments('[% i %]-[% n %]')">! показать комментарии к документу</span></td>
+					<td colspan="2"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
 				</tr>
 				[% FOREACH comment IN file.comments %]
 					
@@ -106,9 +106,15 @@
 					<td colspan="2"><span class="doc_comment">[% comment.text %] | [% comment.date %]</span></td>
 					</tr>
 				[% END %]
-				<tr class="hidden" name="comments[% i %]-[% n %]">
-					<td colspan="2"><span class="add_comment" onclick="show_add_comment('[% i %]-[% n %]')">+ добавить собственный комментарий</span></td>
+				
+				<tr class="hidden" name="show_add_comment[% i %]-[% n %]">
+					<td colspan="2"><span class="add_comment" onclick="javascript:show_addcomment('[% i %]-[% n %]')">[% langreq('+ добавить собственный комментарий') %]</span></td>
 				</tr>
+				<tr class="hidden" name="add_comment[% i %]-[% n %]">
+				<td colspan="2"><span class="add_comment_block">
+					<input type="text" id="new_comment[% i %]-[% n %]" size="35">&nbsp;<input type="button" value="добавить" style="height: 23px;" onclick="javascript:add_comment('[% i %]-[% n %]', [%  %]);"></span></td>
+				</tr>
+				
 				<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
 			[% END %]
 		[% END %]
@@ -160,8 +166,32 @@ $(document).ready( mobileScreenCheck() );
 
 function show_comments(id) {
 
-	$('#show_comments' + id).hide();
+	$('#show_comment' + id).hide();
 	$('tr[name="comments' + id + '"]').show();
+	$('tr[name="show_add_comment' + id + '"]').show();
+}
+
+function show_addcomment(id) {
+
+	$('tr[name="show_add_comment' + id+ '"]').hide();
+	$('tr[name="add_comment' + id + '"]').show();
+}
+
+function add_comment(id) {
+
+	$.ajax({
+		url:'/autoform/add_comment.htm',
+		data: { new_comment: $('#new_comment' + id).val() },
+		dataType: "html",
+		success : function (data) {
+			if (data == 'ok' ) {
+				alert("Ваш комментарий успешно добавлен!");
+				location.reload();
+			} else {
+				alert("Произошла ошибка добавления комментария!");
+			}
+		}
+	});
 }
 
 function mobileScreenCheck() {

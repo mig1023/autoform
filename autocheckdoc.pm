@@ -135,7 +135,7 @@ sub get_app_list
 		
 		my $file = {};
 
-		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus' );
+		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID' );
 		
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
 		

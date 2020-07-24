@@ -320,3 +320,8 @@
 	color:black;
 	font-size:10px;
 }
+
+.add_comment_block {
+	display:inline-block;
+	margin-left:35px;
+}
