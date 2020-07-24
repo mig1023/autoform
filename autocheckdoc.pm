@@ -126,7 +126,7 @@ sub get_app_list
 		
 		$doc_comments->{ $_->{ DocID } } = [] unless exists $doc_comments->{ $_->{ DocID } };
 		
-		push( @{ $doc_comments->{ $_->{ DocID } } }, { id => $_->{ DocID }, text => $_->{ CommentText }, date => $_->{ CommentDate } } );
+		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate } } );
 	}
 
 	my $doc_list = {};

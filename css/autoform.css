@@ -305,3 +305,18 @@
 	background-color:#FFCCCC;
 	font-size:11px;
 }
+
+.show_comment {
+	display:inline-block;
+	margin-left:20px;
+	color:red;
+	font-size:10px;
+	font-weight:bold;
+}
+
+.add_comment {
+	display:inline-block;
+	margin-left:20px;
+	color:black;
+	font-size:10px;
+}

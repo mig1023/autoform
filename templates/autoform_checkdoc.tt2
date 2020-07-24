@@ -95,10 +95,21 @@
 			</td>
 			</tr>
 			
-			[% FOREACH comment IN file.comments %]
-				<tr class="hidden">
-				<td colspan="2"><span class="doc_comment">[% comment.text %] | [% comment.date %]</span></td>
+			[% IF (file.comments.size > 0) %]
+			
+				<tr id="show_comments[% i %]-[% n %]">
+					<td colspan="2"><span class="show_comment" onclick="show_comments('[% i %]-[% n %]')">! показать комментарии к документу</span></td>
 				</tr>
+				[% FOREACH comment IN file.comments %]
+					
+					<tr class="hidden" name="comments[% i %]-[% n %]">
+					<td colspan="2"><span class="doc_comment">[% comment.text %] | [% comment.date %]</span></td>
+					</tr>
+				[% END %]
+				<tr class="hidden" name="comments[% i %]-[% n %]">
+					<td colspan="2"><span class="add_comment" onclick="show_add_comment('[% i %]-[% n %]')">+ добавить собственный комментарий</span></td>
+				</tr>
+				<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
 			[% END %]
 		[% END %]
 	[% END %]
@@ -146,6 +157,12 @@
 <script>
 
 $(document).ready( mobileScreenCheck() );
+
+function show_comments(id) {
+
+	$('#show_comments' + id).hide();
+	$('tr[name="comments' + id + '"]').show();
+}
 
 function mobileScreenCheck() {
 
