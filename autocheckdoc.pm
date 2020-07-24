@@ -91,7 +91,6 @@ sub get_checkdocpage
 	$template->process( 'autoform_checkdoc.tt2', $tvars );
 }
 
-
 sub get_app_list
 # //////////////////////////////////////////////////
 {
@@ -108,32 +107,34 @@ sub get_app_list
 
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
 	
+	my $doc_types_tmp = VCS::Site::autodata::get_doc_list();
+	
+	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_tmp;
+	
 	my $doc_list = {};
 	
-	for( @$app_list ) {
+	for my $app ( @$app_list ) {
 		
-		my $file = {
-			DocType => $_->{ DocType },
-			Name => $_->{ Name },
-			Ext => $_->{ Ext },
-			CheckStatus => $_->{ CheckStatus },
-		};		
+		my $file = {};
+
+		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus' );
 		
-		if ( exists $doc_list->{ $_->{ ID } } ) {
+		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
+		
+		if ( exists $doc_list->{ $app->{ ID } } ) {
 			
-			push( @{ $doc_list->{ $_->{ ID } }->{ files } }, $file  );
+			push( @{ $doc_list->{ $app->{ ID } }->{ files } }, $file  );
 		}
 		else {
-			$doc_list->{ $_->{ ID } } = {
-				FName => $_->{ FName },
-				LName => $_->{ LName },
-				BirthDate => $_->{ BirthDate },
-				files => [ $file ],
-			};
+			$doc_list->{ $app->{ ID } } = {};
+			
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate' );
+
+			$doc_list->{ $app->{ ID } }->{ files } => [ $file ];
 		};
 	}
 	
-	# warn Dumper( $doc_list );
+	warn Dumper( $doc_list );
 
 	return $doc_list;
 }

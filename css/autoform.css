@@ -282,3 +282,16 @@
 	font-size:25px;
 	line-height: 0.8;
 }
+
+.nope_doc {
+	color:gray;
+}
+
+.ok_doc {
+	color:green;
+}
+
+.err_doc {
+	color:red;
+	font-weight:bold;
+}
