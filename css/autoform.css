@@ -296,13 +296,23 @@
 	font-weight:bold;
 }
 
-.doc_comment  {
+.doc_support_comment  {
 	display:inline-block;
 	margin-left:20px;
 	padding:10px;
 	border-collapse:collapse;
 	border:1px solid red;
 	background-color:#FFCCCC;
+	font-size:11px;
+}
+
+.doc_app_comment  {
+	display:inline-block;
+	margin-left:20px;
+	padding:10px;
+	border-collapse:collapse;
+	border:1px solid #3366FF;
+	background-color:#6699FF;
 	font-size:11px;
 }
 

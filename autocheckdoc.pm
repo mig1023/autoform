@@ -112,7 +112,7 @@ sub get_app_list
 	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_tmp;
 	
 	my $doc_comments_tmp = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT DocID, CommentText, CommentDate
+		SELECT DocID, CommentText, CommentDate, DocUploadedComment.Login
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
@@ -126,7 +126,7 @@ sub get_app_list
 		
 		$doc_comments->{ $_->{ DocID } } = [] unless exists $doc_comments->{ $_->{ DocID } };
 		
-		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate } } );
+		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate }, login => $_->{ Login } } );
 	}
 
 	my $doc_list = {};
@@ -154,7 +154,7 @@ sub get_app_list
 		};
 	}
 	
-	#warn Dumper( $doc_list );
+	warn Dumper( $doc_list );
 
 	return $doc_list;
 }

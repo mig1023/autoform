@@ -64,6 +64,8 @@ sub getContent
 
 	return download_file( @_ ) if /^download_file$/i;
 	
+	return add_comment( @_ ) if /^add_comment$/i;
+	
 	return $self->redirect();
 }
 
@@ -3422,14 +3424,14 @@ sub create_new_appointment
 		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
 		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ, DocUploaded WRITE"
 	);
-	
+
 	my $new_appid = $self->create_table(
 		$checkdoc, 'AutoAppointments', 'Appointments', $tables_transfered_id->{ AutoAppointments },
 		$db_rules, undef, undef, $info_for_contract, undef, $ver
 	);
 
 	if ( !$new_appid ) {
-	
+
 		$self->query( 'query', __LINE__, "UNLOCK TABLES");
 		
 		return ( 0, 0, 0, "new appointment error" );
@@ -3442,7 +3444,7 @@ sub create_new_appointment
 		WHERE AppID = ?", 
 		$tables_transfered_id->{ 'AutoAppointments' }
 	);
-	
+
 	for my $app ( @$allapp ) {
 
 		my $sch_appid = $self->create_table(
@@ -3460,9 +3462,9 @@ sub create_new_appointment
 		
 		$self->upload_file_binding( $app->{ ID }, $appid );
 	}
-	
+
 	$self->query( 'query', __LINE__, "UNLOCK TABLES");
-	
+
 	# my $milliseconds = $self->time_interval_calculate( $time_start );
 	# warn 'lock (line ' . __LINE__ . ") - $milliseconds ms"; 
 	
@@ -4272,7 +4274,6 @@ sub check_file_ext
 	return "tiff" if $ext =~ /^tif$/i;
 	
 	return "unk";
-	
 }
 
 sub get_doc_uploading
@@ -4520,6 +4521,32 @@ sub get_folder_name
 	};
 
 	return ( $path_name, $folder_name );
+}
+
+sub add_comment
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	$self->{ token } = $self->get_token();
+
+	my $comment = $self->param( 'new_comment' );
+	
+	$comment =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.]//g;
+
+	my $docid = $self->param( 'docid' );
+	
+	$docid =~ s/[^0-9\-]//g;
+		
+	$self->query( 'query', __LINE__, "
+		INSERT INTO DocUploadedComment (DocID, Login, CommentDate, Commenttext)
+		VALUES (?, 'website', now(), ?)", {},
+		$docid, $comment 
+	);
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+
+	return print 'ok';
 }
 
 sub redirect
