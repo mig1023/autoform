@@ -301,7 +301,6 @@
 	margin-left:20px;
 	padding:10px;
 	border-collapse:collapse;
-	border:1px solid red;
 	background-color:#FFCCCC;
 	font-size:11px;
 }
@@ -311,7 +310,6 @@
 	margin-left:20px;
 	padding:10px;
 	border-collapse:collapse;
-	border:1px solid #3366FF;
 	background-color:#6699FF;
 	font-size:11px;
 }
@@ -333,5 +331,5 @@
 
 .add_comment_block {
 	display:inline-block;
-	margin-left:35px;
+	margin-left:20;
 }
