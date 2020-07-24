@@ -295,3 +295,13 @@
 	color:red;
 	font-weight:bold;
 }
+
+.doc_comment  {
+	display:inline-block;
+	margin-left:20px;
+	padding:10px;
+	border-collapse:collapse;
+	border:1px solid red;
+	background-color:#FFCCCC;
+	font-size:11px;
+}

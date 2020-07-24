@@ -97,20 +97,38 @@ sub get_app_list
 	my $self = shift;
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppData.ID, AppData.FName, AppData.LName, AppData.BirthDate,
+		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
 		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
 		WHERE Token = ? AND AppData.Status = 1", $self->{ token }
 	);
-
+	
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
 	
 	my $doc_types_tmp = VCS::Site::autodata::get_doc_list();
 	
 	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_tmp;
 	
+	my $doc_comments_tmp = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT DocID, CommentText, CommentDate
+		FROM AutoToken 
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
+		JOIN DocUploadedComment ON DocUploaded.ID = DocUploadedComment.DocID
+		WHERE Token = ? AND AppData.Status = 1", $self->{ token }
+	);
+	
+	my $doc_comments = {};
+	
+	for ( @$doc_comments_tmp ) {
+		
+		$doc_comments->{ $_->{ DocID } } = [] unless exists $doc_comments->{ $_->{ DocID } };
+		
+		push( @{ $doc_comments->{ $_->{ DocID } } }, { id => $_->{ DocID }, text => $_->{ CommentText }, date => $_->{ CommentDate } } );
+	}
+
 	my $doc_list = {};
 	
 	for my $app ( @$app_list ) {
@@ -121,6 +139,8 @@ sub get_app_list
 		
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
 		
+		$file->{ comments } = $doc_comments->{ $app->{ DocID } };
+		
 		if ( exists $doc_list->{ $app->{ ID } } ) {
 			
 			push( @{ $doc_list->{ $app->{ ID } }->{ files } }, $file  );
@@ -130,11 +150,11 @@ sub get_app_list
 			
 			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate' );
 
-			$doc_list->{ $app->{ ID } }->{ files } => [ $file ];
+			$doc_list->{ $app->{ ID } }->{ files } = [ $file ];
 		};
 	}
 	
-	warn Dumper( $doc_list );
+	#warn Dumper( $doc_list );
 
 	return $doc_list;
 }

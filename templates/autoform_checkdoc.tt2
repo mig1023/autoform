@@ -94,6 +94,12 @@
 			[% END %]
 			</td>
 			</tr>
+			
+			[% FOREACH comment IN file.comments %]
+				<tr class="hidden">
+				<td colspan="2"><span class="doc_comment">[% comment.text %] | [% comment.date %]</span></td>
+				</tr>
+			[% END %]
 		[% END %]
 	[% END %]
 	</table>
