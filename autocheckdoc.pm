@@ -23,8 +23,8 @@ sub new
 sub autocheckdoc
 # //////////////////////////////////////////////////
 {
-	my ( $self, $task, $id, $template, $entry ) = @_;
-		
+	my ( $self, $task, $id, $template ) = @_;
+	
 	$self->{ $_ } = $self->{ af }->{ $_ } for ( 'vars', 'token' );
 	
 	$self->{ vars }->{ session }->{ login } = 'website';
@@ -32,16 +32,8 @@ sub autocheckdoc
 	my $lang_param = $self->{ vars }->getparam( 'lang' ) || 'ru';
 
 	$self->{ vars }->{ session }->{ langid } = $lang_param if $lang_param =~ /^(ru|en|it)$/i ;
-
-	$_ = $self->{ vars }->getparam( 'action' );
 	
-	s/[^a-z_]//g;
-	
-	# return $self->print_appointment() if /^print$/i;
-	
-	# return autoinfopage_entry( @_ ) if $entry;
-	
-	return get_checkdocpage( @_ );
+	return $self->get_checkdocpage( $task, $id, $template );
 }
 
 sub get_checkdocpage
@@ -96,13 +88,21 @@ sub get_app_list
 {
 	my $self = shift;
 	
+	return $self->get_app_list_by_token( $self->{ token } );
+}
+
+sub get_app_list_by_token
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
 		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
-		WHERE Token = ? AND AppData.Status = 1", $self->{ token }
+		WHERE Token = ? AND AppData.Status = 1", $token
 	);
 	
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
@@ -117,7 +117,7 @@ sub get_app_list
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
 		JOIN DocUploadedComment ON DocUploaded.ID = DocUploadedComment.DocID
-		WHERE Token = ? AND AppData.Status = 1", $self->{ token }
+		WHERE Token = ? AND AppData.Status = 1", $token
 	);
 	
 	my $doc_comments = {};
@@ -153,8 +153,6 @@ sub get_app_list
 			$doc_list->{ $app->{ ID } }->{ files } = [ $file ];
 		};
 	}
-	
-	warn Dumper( $doc_list );
 
 	return $doc_list;
 }
