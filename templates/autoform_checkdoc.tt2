@@ -85,12 +85,12 @@
 			<td><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;[% file.TypeStr %] 
 				<span class="ltl_text">([% file.Name %].[% file.Ext %])</span></nobr></td>
 			<td class="m_right">
-			[% IF (file.CheckStatus == 0) %]
-				<span class="nope_doc">не проверен</span>
+			[% IF (file.CheckStatus == 2) %]
+				<span class="ok_doc">всё хорошо</span>
 			[% ELSIF (file.CheckStatus == 1) %]
 				<span class="err_doc">некорректен</span>
 			[% ELSE %]
-				<span class="ok_doc">всё хорошо</span>
+				<span class="nope_doc">не проверен</span>
 			[% END %]
 			</td>
 			</tr>
