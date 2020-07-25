@@ -144,6 +144,10 @@
 	text-overflow:ellipsis;
 }
 
+.optional_line{
+	color:gray;
+}
+
 .m_right{
 	text-align:right;
 }

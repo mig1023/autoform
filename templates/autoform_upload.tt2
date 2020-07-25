@@ -67,7 +67,7 @@
 		<span class="uplsuccess">&#10003;</span>
 	[% END %]
 	&nbsp;</td>
-	<td class="info_list mobil_hide">
+	<td class="info_list mobil_hide [% IF (doc.optional == 1) %]optional_line[% END %]">
 	[% langreq(doc.title) %]
 	[% IF doc.help != '' %]
 		<a target="_blank" class="nfc_link" href="[% doc.help %]">[?]</a>

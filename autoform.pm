@@ -4258,7 +4258,7 @@ sub check_doc_uploaded
 
 		return $self->text_error(
 			31, { name => "upfile_button_" . $doc->{ id } }, undef, $self->lang( $doc->{ title } )
-		) unless $uploaded;
+		) unless $uploaded or $doc->{ optional };
 	}
 	
 	return undef;
@@ -4309,6 +4309,8 @@ sub get_doc_uploading
 					$doc_list->[ $index ]->{ name } = $filename;
 
 					$doc_list->[ $index ]->{ type } = $self->check_file_ext( $doc->{ Ext } );
+					
+					$doc_list->[ $index ]->{ optional } = ( $doc->{ optional } ? 1 : 0 );
 				}
 			}
 			
