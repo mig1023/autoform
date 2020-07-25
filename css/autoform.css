@@ -333,3 +333,8 @@
 	display:inline-block;
 	margin-left:20;
 }
+
+.very_important {
+	color:red;
+	font-weight:bold;
+}

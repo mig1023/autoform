@@ -190,7 +190,7 @@ sub get_current_service
 sub get_app_visa_and_center
 # //////////////////////////////////////////////////
 {
-	my ( $self, $recached_it ) = @_;
+	my ( $self, $recached_it, $vtype ) = @_;
 
 	return ( 1, 'C' ) if !$self->{ token };
 
@@ -223,6 +223,8 @@ sub get_app_visa_and_center
 		
 		$app_data->{ $_ } = undef if $app_data->{ $_ } eq 'X';
 	}
+	
+	return $vtype if $vtype;
 	
 	return ( $app_data->{ center }, 'C', $app_data->{ service } ) if !$app_data->{ vtype };
 	
@@ -4338,9 +4340,18 @@ sub get_doc_uploading
 			$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
 		}
 	}
+	
+	my $vtype = $self->query( 'sel1', __LINE__, "
+		SELECT VisaTypes.VName
+		FROM AutoToken
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
+		WHERE Token = ?", $self->{ token }
+	);
 
 	my $content = {
 		'app_id'	=> $appdata_id,
+		'visatype'	=> $vtype,
 		'doc_list'	=> $doc_list,
 		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
 		'max_size_mb'	=> ( $self->{ autoform }->{ general }->{ max_file_upload_size } / ( 1024 * 1024 ) ),

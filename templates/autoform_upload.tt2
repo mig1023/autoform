@@ -46,7 +46,11 @@
 <table width="600px" id="app_table">
 
 <tr><td class="left" colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
-	
+
+<tr><td class="left" colspan="5">[% langreq('Тип визы') %]: <span class="very_important">[% content_text.visatype%]</span></td></tr>
+
+<tr><td colspan="2">&nbsp;</td></tr>
+
 <tr><td colspan="2" align ="justify" id="add_info_block" class="grayborder">
 <span class="add_info_text">
 [% langreq('Всю необходимую информацию о наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="https://italy-vms.ru/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %]. [% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %]. [% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %]. [% langreq('Максимально допустимый размер загружаемого файла ') %] [% content_text.max_size_mb %] [% langreq('МБ') %].
