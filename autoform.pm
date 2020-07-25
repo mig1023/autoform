@@ -4531,18 +4531,20 @@ sub add_comment
 	
 	$self->{ token } = $self->get_token();
 
-	my $comment = $self->param( 'new_comment' );
+	my $comment = $self->param( 'new_comment' ) || undef;
 	
-	$comment =~ s/[^0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.]//g;
+	$comment =~ s/[^\s0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.,!\?:\\\/\(\)]//g;
 
-	my $docid = $self->param( 'docid' );
+	my $docid = $self->param( 'docid' ) || 0;
 	
 	$docid =~ s/[^0-9\-]//g;
+	
+	my $login = $self->param( 'login_key' ) || 'website';
 		
 	$self->query( 'query', __LINE__, "
 		INSERT INTO DocUploadedComment (DocID, Login, CommentDate, Commenttext)
-		VALUES (?, 'website', now(), ?)", {},
-		$docid, $comment 
+		VALUES (?, ?, now(), ?)", {},
+		$docid, $login, $comment
 	);
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
