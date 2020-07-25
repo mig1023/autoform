@@ -4480,13 +4480,14 @@ sub download_file
 	
 	$_ =~ s/[^a-z0-9]//g for ( $appdata_id, $doc_type );
 	
-	my ( $folder, $auto_appdata_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT Folder, AutoAppDataID FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
-	) . '/' unless $appdata_id eq 'simple';
+	my ( $folder, $md5, $name, $ext ) = $self->query( 'sel1', __LINE__, "
+		SELECT Folder, MD5, Name, Ext FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+	);
 	
-	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $auto_appdata_id . '_' . $doc_type;
-	
-	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"preview.jpg\"\nContent-Disposition: attachment; filename=\"preview.jpg\"\n\n";
+	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $md5;	
+	my $dl_name = $name . '.' . $ext;
+
+	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"$dl_name\"\nContent-Disposition: attachment; filename=\"$dl_name\"\n\n";
 	
 	my $file_content = $self->get_file_content( $file_name );
 	
