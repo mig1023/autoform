@@ -283,7 +283,7 @@ sub autoform
 
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
-	return $self->autocheckdoc( $task, $id, $template ) if $finished and $service and $self->{ token } !~ /^\d\d$/;
+	return $self->autocheckdoc( $task, $id, $template ) if $finished and ( $service > 1 ) and $self->{ token } !~ /^\d\d$/;
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 
@@ -813,7 +813,7 @@ sub get_token_and_create_new_form_if_need
 	my ( $token_exist, $finished, $deleted, $app, $service ) = $self->query( 'sel1', __LINE__, "
 		SELECT ID, Finished, Deleted, CreatedApp, ServiceType FROM AutoToken WHERE Token = ?", $token
 	);
-
+	
 	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 	
 	return '02' if $deleted;
