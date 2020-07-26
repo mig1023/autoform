@@ -1350,7 +1350,7 @@ sub get_content_rules_hash
 		
 		'Данные о поездке' => [
 			{
-				page_ord => 5000,
+				page_ord => 1000,
 				progress => 6,
 				all_app_in_title => 1,
 				param => 1,
