@@ -84,7 +84,11 @@
 			<tr>
 			<td><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
 				[% IF (file.CheckStatus == 1) %]<b>[% END %]
-					[% file.TypeStr %] 
+					[% IF (file.DocType < 0) %]
+						[% langreq('Дополнительный документ') %]
+					[% ELSE %]	
+						[% file.TypeStr %]
+					[% END %]
 				[% IF (file.CheckStatus == 1) %]</b>[% END %]
 				
 				<input type="file" id="upfile_[% file.DocType  %]" class="hidden" name="upfile_[% file.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.DocType %]', 'upfile_[% file.DocType %]', [% person.key %] )"/>
