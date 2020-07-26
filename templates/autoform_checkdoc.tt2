@@ -168,10 +168,20 @@ $(document).ready( mobileScreenCheck() );
 
 function show_comments(id) {
 
-	$('#show_comment' + id).hide();
-	$('tr[name="comments' + id + '"]').show();
-	$('tr[name="show_add_comment' + id + '"]').show();
+	
+		if ( $('tr[name="comments' + id + '"]').first().is(":hidden") ) {
+		
+			$('tr[name="comments' + id + '"]').show();
+			$('tr[name="show_add_comment' + id + '"]').show();
+		}
+		else {
+			$('tr[name="comments' + id + '"]').hide();
+			$('tr[name="show_add_comment' + id + '"]').hide();
+			$('tr[name="add_comment' + id + '"]').hide();
+		}
 }
+
+
 
 function show_addcomment(id) {
 
