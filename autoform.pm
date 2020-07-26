@@ -4426,6 +4426,8 @@ sub upload_file
 	
 	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
 	
+	my $replace = ( $self->param( 'replace' ) ? 1 : 0 );
+	
 	my $file = $self->param( 'file' );
 	
 	$self->param( 'filename' ) =~ /(.+)\.([^\.]+)$/;
@@ -4450,7 +4452,7 @@ sub upload_file
 		unless $md5;
 
 	my $already_exist = $self->query( 'sel1', __LINE__, "
-		SELECT ID FROM DocUploaded WHERE AutoAppDataID = ? AND md5 = ?", $appdata_id, $md5
+		SELECT ID FROM DocUploaded WHERE AutoAppDataID = ? AND MD5 = ?", $appdata_id, $md5
 	);
 
 	return $self->unlink_and_print( $file_name, 'already' )
@@ -4460,12 +4462,30 @@ sub upload_file
 		if -s $file_name > $self->{ autoform }->{ general }->{ max_file_upload_size };
 
 	rename $file_name, $path_name . $md5;
+	
+	if ( $replace ) {
 		
-	$self->query( 'query', __LINE__, "
-		INSERT INTO DocUploaded (AutoAppDataID, DocType, MD5, UploadDate, Folder, Name, Ext)
-		VALUES (?, ?, ?, now(), ?, ?, ?)",
-		{}, $appdata_id, $doc_type, $md5, $date_name, $filename, $ext
-	);
+		my $conf = $self->{ vars }->getConfig('general');
+		
+		my ( $existing_id, $folder ) = $self->query( 'sel1', __LINE__, "
+			SELECT ID, Folder FROM DocUploaded WHERE AppDataID = ?", $appdata_id,
+		);
+		
+		# unlink $conf->{ tmp_folder } . 'doc/' . $folder . $md5;
+		
+		$self->query( 'query', __LINE__, "
+			UPDATE DocUploaded SET MD5 = ?, UploadDate = now(), Folder =?, Name = ?, Ext = ?, CheckStatus = 0 WHERE ID = ?", {},
+			$md5, $date_name, $filename, $ext, $existing_id
+		);
+	}
+	else {
+			
+		$self->query( 'query', __LINE__, "
+			INSERT INTO DocUploaded (AutoAppDataID, DocType, MD5, UploadDate, Folder, Name, Ext)
+			VALUES (?, ?, ?, now(), ?, ?, ?)",
+			{}, $appdata_id, $doc_type, $md5, $date_name, $filename, $ext
+		);
+	}
 
 	return print 'ok';
 }
@@ -4496,7 +4516,7 @@ sub download_file
 	my ( $folder, $md5, $name, $ext ) = $self->query( 'sel1', __LINE__, "
 		SELECT Folder, MD5, Name, Ext FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
 	);
-	
+
 	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $md5;	
 	my $dl_name = $name . '.' . $ext;
 

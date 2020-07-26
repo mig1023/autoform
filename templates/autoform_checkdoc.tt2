@@ -238,7 +238,7 @@ function upload( doc_id, upfile_field, app_id ) {
 		return error_upload( '[% langreq('У файла недопустимый графический формат') %]', doc_id );
 	}
 	
-	var addr = '?t=[% token %]&filename='+file.name+'&appdata=' + app_id + '&type=' + doc_id;
+	var addr = '?t=[% token %]&filename='+file.name+'&appdata=' + app_id + '&type=' + doc_id + '&replace=1';
 	var ajaxData = new FormData();
 	ajaxData.append('file', file);
 	
@@ -254,6 +254,7 @@ function upload( doc_id, upfile_field, app_id ) {
 			if (data.indexOf('ok')+1) {
 			
 				alert( '[% langreq('Файл успешно заменён!') %]' );
+				location.reload();
 			}
 			else if (data.indexOf('already')+1) {
 				
