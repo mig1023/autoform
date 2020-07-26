@@ -63,7 +63,7 @@ sub get_checkdocpage
 	$self->{ af }->correct_values( \$app_info );
 	
 	$app_info->{ new_app_timeslot } =~ s/\s.+//g;
-
+	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
 	my $tvars = {
@@ -75,11 +75,12 @@ sub get_checkdocpage
 		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
-		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
+		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
-		
+		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
 	};
+	
 	$template->process( 'autoform_checkdoc.tt2', $tvars );
 }
 
