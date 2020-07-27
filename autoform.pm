@@ -158,7 +158,7 @@ sub get_content_rules_hash_opt
 	my $self = shift;
 	
 	my ( $center, $visa_category, $service ) = $self->get_app_visa_and_center();
-	
+
 	return VCS::Site::autodata_type_checkdoc::get_content_rules_hash() if $service == 2;
 	
 	return VCS::Site::autodata_type_remote::get_content_rules_hash() if $service == 3;
@@ -283,7 +283,7 @@ sub autoform
 
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
-	return $self->autocheckdoc( $task, $id, $template ) if $finished and ( $service > 1 ) and $self->{ token } !~ /^\d\d$/;
+	return $self->autocheckdoc( $task, $id, $template ) if $finished and ( $service == 1 ) and $self->{ token } !~ /^\d\d$/;
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 
@@ -1050,7 +1050,7 @@ sub get_autoform_content
 	my $progress = $self->get_progressbar( $page->[ 0 ]->{ progress }, $self->get_progressbar_hash_opt() );
 	
 	my ( $special, $js_check ) = $self->get_specials_of_element( $self->get_content_rules( $step ) );
-	
+
 	return ( $step, $title, $content, $last_error, $template, $special, $progress, $appid, $js_check );
 }
 
@@ -1266,7 +1266,7 @@ sub set_current_app_finished
 	
 	my $service = $self->get_current_service();
 	
-	$center = 1 if ( ( $service == 2 ) or ( $service == 3 ) );
+	$center = 1 if $service == 2;
 
 	return $self->query( 'query', __LINE__, "
 		UPDATE AutoAppData SET FinishedVType = ?, FinishedCenter = ? WHERE ID = ?", {},
@@ -1278,7 +1278,7 @@ sub set_appointment_finished
 # //////////////////////////////////////////////////
 {
 	my ( $self, $checkdoc ) = @_;
-	
+
 	my ( $new_appid, $ncount, $appnum, $error ) = $self->create_new_appointment( $checkdoc );
 	
 	if ( $error ) {
