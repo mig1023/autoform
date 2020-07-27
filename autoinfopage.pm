@@ -125,9 +125,9 @@ sub get_infopage
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
-
+	
 	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
+		SELECT ServiceType, CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
 		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname, category
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
@@ -150,19 +150,40 @@ sub get_infopage
 	$app_info->{ new_app_timeslot } =~ s/\s.+//g;
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my ( $app_list, $app_type );
+	
+	if ( $app_info->{ ServiceType } == 1 ) {
+		
+		$app_list = $self->get_app_list();
+		$app_type = 1;
+	}
+	else {
+
+		my $autocheckdoc = VCS::Site::autocheckdoc->new( 'VCS::Site::autocheckdoc', $self->{ vars } );
+		
+		$autocheckdoc->{ af } = $self->{ af };	
+		$autocheckdoc->{ af }->{ vars } = $self->{ 'VCS::Vars' };
+		
+		$app_list = $autocheckdoc->get_app_list_by_token( $self->{ token } );
+		
+		$app_type = 2;
+	}
 
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 1,
 		'yandex_key'	=> $self->{ autoform }->{ yandex_map }->{ api_key },
 		'app_info'	=> $app_info,
-		'app_list'	=> $self->get_app_list(),
+		'app_list'	=> $app_list,
+		'app_type'	=> $app_type,
 		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
+		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
 		
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
