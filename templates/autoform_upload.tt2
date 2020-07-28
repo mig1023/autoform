@@ -98,10 +98,10 @@
 
 	<td class="m_right">
 	[% IF doc.type != '' %]
-		<input id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
+		<input name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
 	[% ELSE %]
 		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input class="upload_button" id="upfile_button_[% doc.id %]" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
+		<input class="upload_button" name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
 	[% END %]
 	</td>
 </tr>
@@ -114,7 +114,7 @@
 	</td>
 	<td class="m_right">
 	<input type="file" id="upfile_opt" class="hidden" name="upfile_opt" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% content_text.opt_doc_next %]', 'upfile_opt' )"/>
-	<input class="upload_button" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_opt').click();" />
+	<input class="upload_button" name="upfile_button_additional" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_opt').click();" />
 	</td>
 </tr>
 
@@ -200,6 +200,12 @@ function show_hide( doc_id, show, hide ) {
 	$('#' + show + doc_id).show();
 }
 
+function block_buttons(new_status) {
+	
+	$('input[name^="upfile_button_"]').prop('disabled', new_status);
+	
+}
+
 function find_pos( obj ) {
 
 	var curtop = 0;
@@ -256,9 +262,13 @@ function upload( doc_id, upfile_field ) {
 		show_hide( doc_id, 'tmp_span_', 'img_span_' );
 	}
 	
+	block_buttons( true );
+	
 	var file = document.getElementById(upfile_field).files[0];
 	
 	if ( file.size > [% content_text.max_size %] ) {
+	
+		block_buttons( false );
 
 		return error_upload( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]', doc_id );
 	}
@@ -267,12 +277,16 @@ function upload( doc_id, upfile_field ) {
 	
 	if ( parts.length <= 1 ) {
 
+		block_buttons( false );
+		
 		return error_upload( '[% langreq('У файла неверно указан формат') %]', doc_id );
 	}
 	
 	var ext = parts.pop().toLowerCase();
 
 	if ( !(/^(jpg|jpeg|png|tif|tiff|pdf)$/i).test(ext) ) {
+	
+		block_buttons( false );
 	
 		return error_upload( '[% langreq('У файла недопустимый графический формат') %]', doc_id );
 	}
@@ -305,6 +319,8 @@ function upload( doc_id, upfile_field ) {
 			else {
 				alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно, файл в неправильном формате.') %]' );
 			}
+			
+			block_buttons( false );
 			
 			show_hide( doc_id, 'img_span_', 'tmp_span_' );
 			
