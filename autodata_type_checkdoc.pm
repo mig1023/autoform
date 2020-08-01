@@ -375,7 +375,7 @@ sub get_content_rules_hash
 				page_db_id => 400007,
 			},
 		],
-		
+			
 		'Оплата' => [
 			{
 				page_ord => 700,
@@ -383,9 +383,8 @@ sub get_content_rules_hash
 				page_db_id => 400008,
 			},
 			{
-				type => 'text',
-				name => 'payment_text',
-				label => 'Здесь кнопка оплаты.',
+				type => 'payment',
+				full_line => 1,
 			},
 		],
 				

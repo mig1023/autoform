@@ -165,22 +165,22 @@
 				[% IF (file.comments.size > 0) %]
 				
 					<tr id="show_comments[% i %]-[% n %]">
-						<td colspan="2"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
+						<td colspan="3"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
 					</tr>
 					[% FOREACH comment IN file.comments %]
 						
 						<tr class="hidden [% IF (comment.login == "website") %]m_right[% END %]" name="comments[% i %]-[% n %]">
-						<td colspan="2"><span
+						<td colspan="3"><span
 						[% IF (comment.login == "website") %]class="doc_app_comment"[% ELSE %]class="doc_support_comment"[% END %]
 						>[% comment.text %] | [% comment.date %]</span></td>
 						</tr>
 					[% END %]
 					
 					<tr class="hidden" name="show_add_comment[% i %]-[% n %]">
-						<td colspan="2"><span class="add_comment" onclick="javascript:show_addcomment('[% i %]-[% n %]')">[% langreq('+ добавить собственный комментарий') %]</span></td>
+						<td colspan="3"><span class="add_comment" onclick="javascript:show_addcomment('[% i %]-[% n %]')">[% langreq('+ добавить собственный комментарий') %]</span></td>
 					</tr>
 					<tr class="hidden" name="add_comment[% i %]-[% n %]">
-					<td colspan="2"><span class="add_comment_block">
+					<td colspan="3"><span class="add_comment_block">
 						<input type="text" id="new_comment[% i %]-[% n %]" size="35">&nbsp;<input type="button" value="добавить" style="height: 23px;" onclick="javascript:add_comment('[% i %]-[% n %]', [% file.DocID %]);"></span></td>
 					</tr>
 					
@@ -406,6 +406,110 @@
 			}
 	    }, 'xml');
 	};
+[% END %]
+
+[% IF ( app_type != 1 ) %]
+
+	function show_comments(id) {
+
+		
+			if ( $('tr[name="comments' + id + '"]').first().is(":hidden") ) {
+			
+				$('tr[name="comments' + id + '"]').show();
+				$('tr[name="show_add_comment' + id + '"]').show();
+			}
+			else {
+				$('tr[name="comments' + id + '"]').hide();
+				$('tr[name="show_add_comment' + id + '"]').hide();
+				$('tr[name="add_comment' + id + '"]').hide();
+			}
+	}
+
+	function show_addcomment(id) {
+
+		$('tr[name="show_add_comment' + id+ '"]').hide();
+		$('tr[name="add_comment' + id + '"]').show();
+	}
+
+	function add_comment(id, docid) {
+
+		$.ajax({
+			url:'/autoform/add_comment.htm',
+			data: { new_comment: $('#new_comment' + id).val(), docid: docid },
+			dataType: "html",
+			success : function (data) {
+				if (data == 'ok' ) {
+					alert("Ваш комментарий успешно добавлен!");
+					location.reload();
+				} else {
+					alert("Произошла ошибка добавления комментария!");
+				}
+			}
+		});
+	}
+
+	function error_upload( line, doc_id ) {
+
+		alert( line );
+	}
+
+	function upload( doc_id, upfile_field, app_id ) {
+		
+		var file = document.getElementById(upfile_field).files[0];
+		
+		if ( file.size > [% max_size %] ) {
+
+			return error_upload( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]', doc_id );
+		}
+		
+		var parts = file.name.split('.');
+		
+		if ( parts.length <= 1 ) {
+
+			return error_upload( '[% langreq('У файла неверно указан формат') %]', doc_id );
+		}
+		
+		var ext = parts.pop().toLowerCase();
+
+		if ( !(/^(jpg|jpeg|png|tif|tiff|pdf)$/i).test(ext) ) {
+		
+			return error_upload( '[% langreq('У файла недопустимый графический формат') %]', doc_id );
+		}
+		
+		var addr = '?t=[% token %]&filename='+file.name+'&appdata=' + app_id + '&type=' + doc_id + '&replace=1';
+		var ajaxData = new FormData();
+		ajaxData.append('file', file);
+		
+		$.ajax({
+			url: '/autoform/upload_file.htm' + addr,
+			type: 'POST',
+			data: ajaxData,
+			encoding: 'utf8',
+			contentType: false,
+			processData: false,
+			success: function(data) {
+			
+				if (data.indexOf('ok')+1) {
+				
+					alert( '[% langreq('Файл успешно заменён!') %]' );
+					location.reload();
+				}
+				else if (data.indexOf('already')+1) {
+					
+					alert( '[% langreq('Данный файл уже загружен для этого заявителя.') %]' );
+				}
+				else if (data.indexOf('size')+1) {
+					
+					alert( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]' );
+				}
+				else {
+					alert( '[% langreq('В процессе загрузки произошла ошибка\nВозможно, файл в неправильном формате.') %]' );
+				}
+			}
+		});
+	};
+
+
 [% END %]
 
 $(document).ready( mobileScreenCheck() );

@@ -187,6 +187,8 @@ sub get_html_elements
 		edit_app_button => '<a moz-do-not-send="true" href="[%link_site%]/autoform/?t=[%app_token%]" style="width:177px;' .
 				'text-decoration:none;text-align:center;display:block;padding:1px 0px;border:1px solid #cad3d9;' .
 				'border-radius:4px;color: #33c3ba;background:#f7f9fa;margin-bottom: 7px;">[%edit_btn%]</a>',
+				
+		payment => 	'<div class="captcha_container">к оплате [summ] руб</div>',
 	}
 }
 

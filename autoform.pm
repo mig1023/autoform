@@ -283,7 +283,7 @@ sub autoform
 
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
-	return $self->autocheckdoc( $task, $id, $template ) if $finished and ( $service == 1 ) and $self->{ token } !~ /^\d\d$/;
+	return $self->autocheckdoc( $task, $id, $template ) if $finished and ( $service == 2 ) and $self->{ token } !~ /^\d\d$/;
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 
@@ -324,8 +324,8 @@ sub autoform
 	my $current_table_id = $self->get_current_table_id(); 
 
 
-	my $max_app = $self->query( 'sel1', __LINE__, "
-		SELECT NCount FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
+	my ( $max_app, $app_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT NCount, ID FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
 	);
 
 	my $tvars = {
@@ -371,6 +371,13 @@ sub autoform
 			or
 			( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) )
 		);
+		
+	if ( $special->{ payment } ) {
+
+		$tvars->{ back_url } = decode( 'utf8', 'http://127.0.0.1' . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token } );
+		$tvars->{ ammount } = decode( 'utf8', 150 );
+		$tvars->{ order_number } = $app_id . '_' . time();
+	}
 
 	$tvars->{ map_type } = $self->{ vars }->getConfig( 'general' )->{ maps_type };
 		
@@ -996,6 +1003,15 @@ sub get_autoform_content
 	
 	$step = $min_step if $step < $min_step;
 	$step = $max_step if $step > $max_step;
+	
+	
+		# //////////////
+		my $orderId = $self->param('orderId') || 0;
+		if ( $orderId ) {
+				( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
+		};
+	
+	
 
 	$step = $self->get_back( $step ) if ( $action eq 'back' ) and ( $step > 1 );
 	
@@ -1911,6 +1927,7 @@ sub get_specials_of_element
 		min_date 	=> [],
 		phone_correct	=> [],
 		multiple_select	=> [],
+		payment		=> [],
 	};
 
 	my $js_rules = [];
@@ -1924,6 +1941,9 @@ sub get_specials_of_element
 		
 		push( @{ $special->{ full_mask } }, [ $element->{ name }, $element->{ mask } ] )
 			if exists $element->{ mask };
+
+		push( @{ $special->{ payment } }, '1' )
+			if $element->{ type } eq 'payment';
 
 		push( @{ $special->{ captcha } }, $self->get_captcha_id() )
 			if $element->{ type } eq 'captcha';
@@ -2236,6 +2256,10 @@ sub get_html_for_element
 		$content =~ s/\[lang\]/$lang/gi;
 	}
 	
+	if ( $type eq 'payment' ) {
+	
+		$content =~ s/\[summ\]/1.50/gi;
+	}
 	
 	if ( $type eq 'progress' ) {
 		

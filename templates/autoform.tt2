@@ -91,7 +91,9 @@
 							[% END %]
 							</span>
 							<span id="mobile_order_top">
-							[% IF ( step < max_step ) && ( step > 0 ) %]
+							[% IF ( special.payment.0) %]
+								<input class="action_button" id="payment" type="button" value="[% langreq('Оплатить') %] &#9655;">
+							[% ELSIF ( step < max_step ) && ( step > 0 ) %]
 								<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
 								&nbsp;
 							[% END %]
@@ -159,6 +161,6 @@
 			</div>
 		</div>
 		
-		[% INCLUDE metrika.tt2 %]
+		
 	</body>
 </html>

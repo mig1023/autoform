@@ -199,6 +199,102 @@ function init_comm() {
 	);
 [% END %]
 
+[% IF ( special.payment.0) %]
+
+	const API_URL = "http://127.0.0.1"
+
+	$('document').ready(() => {
+		const $orderNumber = '[% order_number %]'
+		const $amount = '[% ammount %]'
+		const $orderId = $('[data-name=orderId')
+		const $orderStatus = $('[data-name=orderStatus')
+
+		const order = {
+			orderId: null,
+			status: null
+		}
+
+
+		$('#payment').on('click', () => {
+			$.ajax({
+			    url: API_URL,
+			    jsonp: "callback",
+			    dataType: "jsonp",
+			    data: {
+				type: 'pay',
+				orderNumber: $orderNumber,
+				amount: $amount,
+				backUrl: '[% back_url %]'
+			    },
+			    success(res) {
+				if (res.orderId) {
+					order.orderId = res.orderId
+					$orderId.html(order.orderId)
+					window.open(res.formUrl);
+				} else if (1) {
+					alert(res.errorMessage)
+				}
+			    }
+			})
+
+			orderNumber: $orderNumber,
+			amount: $amount
+		    })	
+			return false
+		})
+
+		var params = new ParamsHash()
+
+		if (params.get('orderId')) {
+			order.orderId = params.get('orderId')
+			$orderId.html(order.orderId)
+
+			if (!order.status) {
+				getOrderStatus()
+			}
+		}
+
+		function getOrderStatus() {		
+			$.ajax({
+			    url: API_URL,
+			    jsonp: "callback",
+			    dataType: "jsonp",
+			    data: {
+				type: 'status',
+				orderId: order.orderId
+			    },
+			    success(res) {
+				order.status = res
+				$orderStatus.html(JSON.stringify(order.status))
+			    }
+			})
+		}
+
+	})
+
+	function ParamsHash() {
+	    this.data = __getParams__();
+	    this.delete = e => { delete this.data[e]; return this; }
+	    this.put = (k, v) => { this.data[k] = v; return this; }
+	    this.set = (k, v) => { this.data[k] = v; return this; }
+	    this.get = k => k ? this.data[k] : this.data;
+	    this.toString = () => Object.keys(this.data).map(e => this.data[e] ? `${e}=${this.data[e]}` : e).join('&');
+	    this.getUri = (l) => [l ? l : document.location.pathname, this.toString()].filter(e => e != '').join('?');
+
+	    function __getParams__() {
+		var result = {},
+		    tokens,
+		    re = /[?&]?([^=]+)=([^&]*)/g;
+		while (tokens = re.exec(document.location.search)) {
+		    result[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+		}
+		return result;
+	    }
+	}
+
+[% END %]
+
+
 [% IF ( special.datepicker.0 || special.mask.0 ) %]
 
 function create_datepicker(date_id) {
