@@ -325,9 +325,9 @@ sub edit
 	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
-
-	$self->{ vars }->get_system->log_action( $self->{ vars } , "autoinfo_edit",
-		"редактирование записи: appid $app_id, appdata $app_data" . ( $action_type eq "save_edit_app" ? " (сохранение)" : ""), $app_id );
+	
+	my $saving = ( $action_type eq "save_edit_app" ? " (сохранение)" : "" );
+	$self->{ af }->log( "autoinfo_edit", "редактирование appid $app_id, appdata $app_data$saving", $app_id );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -464,8 +464,9 @@ sub reschedule
 				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 			);
 
-			$self->{ vars }->get_system->log_action( $self->{ vars }, "autoinfo_resch",
-				"перенос записи на " . $new->{ appdate } . " таймслот " . $new->{ apptime }, $app_id );
+			$self->{ af }->log(
+				"autoinfo_resch", "перенос записи на " . $new->{ appdate } . " таймслот " . $new->{ apptime }, $app_id
+			);
 
 			$id_or_error = $self->set_new_appdate( $new );
 			
@@ -554,6 +555,8 @@ sub cancel
 		);
 
 		$self->{ vars }->get_system->log_action( $self->{ vars }, "autoinfo_cancel", "отмена записи", $app_id );
+		
+		$self->{ af }->log( "autoinfo_cancel", "отмена записи", $app_id );
 		
 		my $ncount = scalar @$list_after_cancel;
 		
