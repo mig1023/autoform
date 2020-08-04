@@ -125,7 +125,7 @@ sub get_infopage
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
-	
+
 	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT ServiceType, CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
 		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname, category
@@ -152,7 +152,7 @@ sub get_infopage
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my ( $app_list, $title );
-	
+
 	if ( $app_info->{ ServiceType } <= 1 ) {
 		
 		$app_list = $self->get_app_list();

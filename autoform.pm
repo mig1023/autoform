@@ -278,7 +278,7 @@ sub autoform
 		$self->{ biometric_data } = 'yes' if lc( $self->param( $_ ) ) eq 'yes';
 	}
 
-	( $self->{ token }, my $finished, my $doc_status, my $service ) = $self->get_token_and_create_new_form_if_need();
+	( $self->{ token }, my $finished, my $doc_status ) = $self->get_token_and_create_new_form_if_need();
 
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
@@ -814,8 +814,8 @@ sub get_token_and_create_new_form_if_need
 		return ( $token, 'finished', 'docstatus' );
 	}
 	
-	my ( $token_exist, $finished, $deleted, $app, $service ) = $self->query( 'sel1', __LINE__, "
-		SELECT ID, Finished, Deleted, CreatedApp, ServiceType FROM AutoToken WHERE Token = ?", $token
+	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
 	);
 	
 	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
@@ -838,7 +838,7 @@ sub get_token_and_create_new_form_if_need
 	
 	return ( $token, $finished, 'docstatus' ) if $status == 4;
 	
-	return ( ( $status == 1 ? $token : '02' ), $finished, undef, $service );
+	return ( ( $status =~ /^(1|10)$/ ? $token : '02' ), $finished );
 }
 
 sub create_clear_form
@@ -3647,7 +3647,10 @@ sub mod_hash
 		};
 	
 		$hash->{ CenterID } = 1;
+		
 		$hash->{ AppDate } = "$year-$mon-$day";
+		
+		$hash->{ Status } = 10; 
 	}
 
 	if ( $table_name eq 'Appointments' ) {
