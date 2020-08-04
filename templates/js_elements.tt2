@@ -204,6 +204,7 @@ function init_comm() {
 	const API_URL = "http://127.0.0.1"
 
 	$('document').ready(() => {
+
 		const $orderNumber = '[% order_number %]'
 		const $amount = '[% ammount %]'
 		const $orderId = $('[data-name=orderId')
@@ -214,8 +215,10 @@ function init_comm() {
 			status: null
 		}
 
-
 		$('#payment').on('click', () => {
+		
+			$('#payment').prop('disabled', true);
+		
 			$.ajax({
 			    url: API_URL,
 			    jsonp: "callback",
@@ -227,6 +230,7 @@ function init_comm() {
 				backUrl: '[% back_url %]'
 			    },
 			    success(res) {
+
 				if (res.orderId) {
 					order.orderId = res.orderId
 					$orderId.html(order.orderId)
@@ -237,9 +241,6 @@ function init_comm() {
 			    }
 			})
 
-			orderNumber: $orderNumber,
-			amount: $amount
-		    })	
 			return false
 		})
 
