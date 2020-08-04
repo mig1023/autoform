@@ -105,7 +105,7 @@
 		<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
 	[% END %]
 	
-	[% IF ( app_type == 1 ) %]
+	[% IF ( app_info.ServiceType <= 1 ) %]
 		[% SET i = 0 %]
 		[% FOREACH person IN app_list %]
 			[% SET i = i + 1 %]
@@ -176,13 +176,13 @@
 						</tr>
 					[% END %]
 					
-					<tr class="hidden" name="show_add_comment[% i %]-[% n %]">
+					<!--<tr class="hidden" name="show_add_comment[% i %]-[% n %]">
 						<td colspan="3"><span class="add_comment" onclick="javascript:show_addcomment('[% i %]-[% n %]')">[% langreq('+ добавить собственный комментарий') %]</span></td>
 					</tr>
 					<tr class="hidden" name="add_comment[% i %]-[% n %]">
 					<td colspan="3"><span class="add_comment_block">
 						<input type="text" id="new_comment[% i %]-[% n %]" size="35">&nbsp;<input type="button" value="добавить" style="height: 23px;" onclick="javascript:add_comment('[% i %]-[% n %]', [% file.DocID %]);"></span></td>
-					</tr>
+					</tr>-->
 					
 					<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
 				[% END %]
@@ -323,7 +323,120 @@
 	<tr><td colspan="2"><input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');"><br></td></tr>
 
 	<tr><td colspan="2">&nbsp;</td></tr>	
+
+[% ELSIF title == 6 %]
+
+	<tr><td>
+
+	<br><br><img src="[% static %]/images/logoVMS.png"/><br><br><br></td></tr>
+
+	<tr><td>
+
+	<h2>[% langreq('Проверка документов') %]</h2></td></tr>
+
+	<tr><td>
+
+	<table width="100%" style="font-size:
+	[% IF lang_in_link == 'en' %]0.85em[% ELSIF lang_in_link == 'it' %]0.75em[% ELSE %]1em[% END %]">
+	<tr>
+	<td><span class="spacer2"></span>[% langreq('Номер записи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_num %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Тип визы') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_vname %]</span></td>
+	</tr>
+	</table>
+
+	</td></tr>
+
+	<tr><td>&nbsp;<br></td></tr>
+
+	<tr><td><h2>[% langreq('Список заявителей') %]</h2></td></tr>
+
+	<tr><td>
+	<table width="100%">
+	[% SET i = 0 %]
+	[% FOREACH person IN app_list %]
+		[% SET i = i + 1 %]
+		<tr>
+		<td class="info_list"><nobr>[% i %]. [% person.value.FName %] [% person.value.LName %]</nobr></td>
+		<td class="m_right"><span class="mobil_hide">[% person.value.BirthDate %]</span>&nbsp;</td>
+		</tr>
+		
+		[% SET n = 0 %]
+		[% FOREACH file IN person.value.files %]
+			[% SET n = n + 1 %]
+			<tr>
+			<td><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
+				[% IF (file.CheckStatus == 1) %]<b>[% END %]
+					[% IF (file.DocType < 0) %]
+						[% langreq('Дополнительный документ') %]
+					[% ELSE %]	
+						[% file.TypeStr %]
+					[% END %]
+				[% IF (file.CheckStatus == 1) %]</b>[% END %]
+				
+				<input type="file" id="upfile_[% file.DocType  %]" class="hidden" name="upfile_[% file.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.DocType %]', 'upfile_[% file.DocType %]', [% person.key %] )"/>
+				<span class="ltl_link" id="upfile_button_[% file.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.DocType %]').click();">[% langreq('заменить') %]</span>			
+				</nobr></td>
+			<td class="m_right">
+			[% IF (file.CheckStatus == 2) %]
+				<span class="ok_doc">[% langreq('всё хорошо') %]</span>
+			[% ELSIF (file.CheckStatus == 1) %]
+				<span class="err_doc">[% langreq('некорректен') %]</span>
+			[% ELSE %]
+				<span class="nope_doc">[% langreq('не проверен') %]</span>
+			[% END %]
+			</td>
+			</tr>
+			
+			[% IF (file.comments.size > 0) %]
+			
+				<tr id="show_comments[% i %]-[% n %]">
+					<td colspan="2"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
+				</tr>
+				[% FOREACH comment IN file.comments %]
+					
+					<tr class="hidden [% IF (comment.login == "website") %]m_right[% END %]" name="comments[% i %]-[% n %]">
+					<td colspan="2"><span
+					[% IF (comment.login == "website") %]class="doc_app_comment"[% ELSE %]class="doc_support_comment"[% END %]
+					>[% comment.text %] | [% comment.date %]</span></td>
+					</tr>
+				[% END %]
+				
+				<!--<tr class="hidden" name="show_add_comment[% i %]-[% n %]">
+					<td colspan="2"><span class="add_comment" onclick="javascript:show_addcomment('[% i %]-[% n %]')">[% langreq('+ добавить собственный комментарий') %]</span></td>
+				</tr>
+				<tr class="hidden" name="add_comment[% i %]-[% n %]">
+				<td colspan="2"><span class="add_comment_block">
+					<input type="text" id="new_comment[% i %]-[% n %]" size="35">&nbsp;<input type="button" value="добавить" style="height: 23px;" onclick="javascript:add_comment('[% i %]-[% n %]', [% file.DocID %]);"></span></td>
+				</tr>-->
+				
+				<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
+			[% END %]
+		[% END %]
+	[% END %]
+	</table>
+	</td></tr>
+
+	<tr><td>&nbsp;</td></tr>
 	
+	<tr><td colspan="2" align ="justify" id="comment_place" class="grayborder">
+	<span class="suppl_text">
+	[% langreq('Подтверждение записи необходимо распечатать и предъявить при входе в Визовый центр') %].
+	<br><br>[% langreq('C 14 сентября 2015 года, все заявители, запрашивающие визу, проходят обязательную процедуру сканирования отпечатков пальцев. В связи с этим каждому заявителю необходимо явиться на подачу документов лично') %].
+	<br><br>[% langreq('Обращаем ваше внимание, что прием документов на оформление визы и прохождение процедуры "Биометрия" в Визовом центре проходит при предъявлении распечатанной записи и строго в назначенное время') %].
+	<br><br>[% langreq('Ознакомьтесь с положением об') %] <a target="_blank" class="dotted_link" href="/otkaz-ot-otvetstvennosti/">[% langreq('отказе от ответственности и политике конфиденциальности') %]</a>.
+	<br><br>[% langreq('Пожалуйста, будьте по указанному ниже адресу не более, чем за 10 минут до назначенного времени') %].
+	<br><br>[% langreq('Запись в Визовый центр на подачу документов осуществляется бесплатно') %].
+	</span></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
+
+	<tr><td colspan="2"><h2>[% langreq('Спасибо') %]<br>[% langreq('Итальянский визовый центр') %]</h2></td></tr>
 [% END %]
 
 	<tr><td class="left" colspan="2">
@@ -344,7 +457,7 @@
 
 </form>
 
-[% INCLUDE metrika.tt2 %]
+[% INCLUDE yandex_metrika.tt2 %]
 
 <script>
 
@@ -408,7 +521,7 @@
 	};
 [% END %]
 
-[% IF ( app_type != 1 ) %]
+[% IF ( app_info.ServiceType > 1 ) %]
 
 	function show_comments(id) {
 
@@ -416,19 +529,19 @@
 			if ( $('tr[name="comments' + id + '"]').first().is(":hidden") ) {
 			
 				$('tr[name="comments' + id + '"]').show();
-				$('tr[name="show_add_comment' + id + '"]').show();
+				//$('tr[name="show_add_comment' + id + '"]').show();
 			}
 			else {
 				$('tr[name="comments' + id + '"]').hide();
-				$('tr[name="show_add_comment' + id + '"]').hide();
-				$('tr[name="add_comment' + id + '"]').hide();
+				//$('tr[name="show_add_comment' + id + '"]').hide();
+				//$('tr[name="add_comment' + id + '"]').hide();
 			}
 	}
 
 	function show_addcomment(id) {
 
-		$('tr[name="show_add_comment' + id+ '"]').hide();
-		$('tr[name="add_comment' + id + '"]').show();
+		//$('tr[name="show_add_comment' + id+ '"]').hide();
+		//$('tr[name="add_comment' + id + '"]').show();
 	}
 
 	function add_comment(id, docid) {

@@ -10,7 +10,6 @@ use VCS::Site::autodata_type_checkdoc;
 use VCS::Site::autodata_type_remote;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
-use VCS::Site::autocheckdoc;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -282,8 +281,6 @@ sub autoform
 	( $self->{ token }, my $finished, my $doc_status, my $service ) = $self->get_token_and_create_new_form_if_need();
 
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
-	
-	return $self->autocheckdoc( $task, $id, $template ) if $finished and ( $service == 2 ) and $self->{ token } !~ /^\d\d$/;
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 

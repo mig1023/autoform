@@ -151,32 +151,26 @@ sub get_infopage
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
-	my ( $app_list, $app_type );
+	my ( $app_list, $title );
 	
-	if ( $app_info->{ ServiceType } == 1 ) {
+	if ( $app_info->{ ServiceType } <= 1 ) {
 		
 		$app_list = $self->get_app_list();
-		$app_type = 1;
+		
+		$title = 1;
 	}
 	else {
-
-		my $autocheckdoc = VCS::Site::autocheckdoc->new( 'VCS::Site::autocheckdoc', $self->{ vars } );
+		$app_list = $self->get_app_file_list_by_token( $self->{ token } );
 		
-		$autocheckdoc->{ af } = $self->{ af };	
-		$autocheckdoc->{ af }->{ vars } = $self->{ 'VCS::Vars' };
-		
-		$app_list = $autocheckdoc->get_app_list_by_token( $self->{ token } );
-		
-		$app_type = 2;
+		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
 	}
 
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
-		'title' 	=> 1,
+		'title' 	=> $title,
 		'yandex_key'	=> $self->{ autoform }->{ yandex_map }->{ api_key },
 		'app_info'	=> $app_info,
 		'app_list'	=> $app_list,
-		'app_type'	=> $app_type,
 		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
@@ -671,6 +665,72 @@ sub set_new_appdate
 	) unless $error;
 
 	return ( $error ? $error : $new_app_id );
+}
+
+sub get_app_file_list_by_token
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+	
+	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
+		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus
+		FROM AutoToken 
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
+		WHERE Token = ? AND AppData.Status = 1", $token
+	);
+	
+	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
+	
+	my $doc_types_tmp = VCS::Site::autodata::get_doc_list();
+	
+	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_tmp;
+	
+	my $doc_comments_tmp = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT DocID, CommentText, CommentDate, DocUploadedComment.Login
+		FROM AutoToken 
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
+		JOIN DocUploadedComment ON DocUploaded.ID = DocUploadedComment.DocID
+		WHERE Token = ? AND AppData.Status = 1", $token
+	);
+	
+	my $doc_comments = {};
+	
+	for ( @$doc_comments_tmp ) {
+		
+		$doc_comments->{ $_->{ DocID } } = [] unless exists $doc_comments->{ $_->{ DocID } };
+		
+		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate }, login => $_->{ Login } } );
+	}
+
+	my $doc_list = {};
+	
+	for my $app ( @$app_list ) {
+		
+		my $file = {};
+
+		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID' );
+		
+		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
+		
+		$file->{ comments } = $doc_comments->{ $app->{ DocID } };
+		
+		if ( exists $doc_list->{ $app->{ ID } } ) {
+			
+			push( @{ $doc_list->{ $app->{ ID } }->{ files } }, $file  );
+		}
+		else {
+			$doc_list->{ $app->{ ID } } = {};
+			
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate' );
+
+			$doc_list->{ $app->{ ID } }->{ files } = [ $file ];
+		};
+	}
+
+	return $doc_list;
 }
 	
 1;
