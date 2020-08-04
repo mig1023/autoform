@@ -4433,6 +4433,8 @@ sub remove_file
 	
 	unlink $file_name;
 	
+	$self->log( "документы [тип $doc_type] удалён", $appdata_id );
+	
 	return print 'ok';
 }
 
@@ -4506,6 +4508,8 @@ sub upload_file
 			UPDATE DocUploaded SET MD5 = ?, UploadDate = now(), Folder =?, Name = ?, Ext = ?, CheckStatus = 0 WHERE ID = ?", {},
 			$md5, $date_name, $filename, $ext, $existing_id
 		);
+		
+		$self->log( "документы [тип $doc_type] заменён $filename.$ext", $appdata_id );
 	}
 	else {
 			
@@ -4514,6 +4518,8 @@ sub upload_file
 			VALUES (?, ?, ?, now(), ?, ?, ?)",
 			{}, $appdata_id, $doc_type, $md5, $date_name, $filename, $ext
 		);
+		
+		$self->log( "документы [тип $doc_type] загружен $filename.$ext", $appdata_id );
 	}
 
 	return print 'ok';
@@ -4548,6 +4554,8 @@ sub download_file
 
 	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $md5;	
 	my $dl_name = $name . '.' . $ext;
+	
+	$self->log( "документы [тип $doc_type] скачан $name.$ext", $appdata_id );
 
 	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"$dl_name\"\nContent-Disposition: attachment; filename=\"$dl_name\"\n\n";
 	
@@ -4612,6 +4620,14 @@ sub add_comment
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 
 	return print 'ok';
+}
+
+sub log
+# //////////////////////////////////////////////////
+{
+	my ( $self, $message, $app_id ) = @_;
+	
+	$self->{ vars }->get_system->log_action( $self->{ vars }, "autoform", $message, $app_id );
 }
 
 sub redirect
