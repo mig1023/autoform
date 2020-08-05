@@ -29,6 +29,12 @@ sub get_settings
 			mutex_exptime => 30,
 		},
 		
+		payment => {
+			url => '',
+			user_name => '',
+			password => '',
+		},
+		
 		yandex_map => {
 			api_key => '',
 		},
