@@ -67,8 +67,8 @@ sub status {
 	return -1 unless $response->is_success;
 	
 	my $status = JSON->new->pretty->decode( $response->decoded_content );
-	
-	return $status;
+
+	return $status->{ OrderStatus };
 }
 
 1;

@@ -405,8 +405,14 @@ sub payment_check
 			my $order_id = '';
 
 	my $status = VCS::Site::autopayment::status( $self, $order_id );
-	
-	return ( $status == 2 ? 1 : 0 );
+
+	my $pay_status_ok = ( $status == 2 ? 1 : 0 );
+
+	my $errors_code = VCS::Site::autodata::get_payment_error();
+
+	my $pay_error = ( $pay_status_ok ? "" : $errors_code->[ $status ] );
+
+	return ( $pay_status_ok, $pay_error );
 }
 
 sub urgent_allowed
@@ -1028,16 +1034,14 @@ sub get_autoform_content
 	
 		# //////////////
 		my $order_id = $self->param('orderId') || 0;
+		
 		if ( $order_id ) {
 			
-			my $pay_status_ok = payment_check( $appid );
+			my ( $pay_status_ok, $payment_error ) = payment_check( $appid );
 			
-			if ( $pay_status_ok ) {
-				( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
-			}
-			else {
-				 $last_error = "payment_container|Ошибка оплаты";
-			}
+			( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step ) if $pay_status_ok;
+			
+			$last_error = "payment_container|$payment_error" unless $pay_status_ok;
 		};
 	
 	
