@@ -10,6 +10,7 @@ use VCS::Site::autodata_type_checkdoc;
 use VCS::Site::autodata_type_remote;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
+use VCS::Site::autopayment;		
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -368,13 +369,9 @@ sub autoform
 			or
 			( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) )
 		);
-		
-	if ( $special->{ payment } ) {
 
-		$tvars->{ back_url } = decode( 'utf8', 'http://127.0.0.1' . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token } );
-		$tvars->{ ammount } = decode( 'utf8', 150 );
-		$tvars->{ order_number } = $app_id . '_' . time();
-	}
+	$tvars->{ payment } = $self->payment_prepare( $app_id )
+		if ( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ payment } } > 0 ) );
 
 	$tvars->{ map_type } = $self->{ vars }->getConfig( 'general' )->{ maps_type };
 		
@@ -383,6 +380,33 @@ sub autoform
 	}
 
 	$template->process( $template_file, $tvars );
+}
+
+sub payment_prepare
+# //////////////////////////////////////////////////
+{
+	my ( $self, $app_id ) = @_;
+	
+			# /////////////////////
+			my $amount = decode( 'utf8', 150 );
+			my $order_number = $app_id . '_' . time();
+
+	my ( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount );
+	
+	return { amount => $amount, form_url => $form_url };
+}
+
+sub payment_check
+# //////////////////////////////////////////////////
+{
+	my ( $self, $app_id ) = @_;
+	
+			# /////////////////////
+			my $order_id = '';
+
+	my $status = VCS::Site::autopayment::status( $self, $order_id );
+	
+	return ( $status == 2 ? 1 : 0 );
 }
 
 sub urgent_allowed
@@ -1003,9 +1027,17 @@ sub get_autoform_content
 	
 	
 		# //////////////
-		my $orderId = $self->param('orderId') || 0;
-		if ( $orderId ) {
-				( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
+		my $order_id = $self->param('orderId') || 0;
+		if ( $order_id ) {
+			
+			my $pay_status_ok = payment_check( $appid );
+			
+			if ( $pay_status_ok ) {
+				( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
+			}
+			else {
+				 $last_error = "payment_container|Ошибка оплаты";
+			}
 		};
 	
 	
@@ -1231,12 +1263,12 @@ sub get_forward
 	
 	my $last_error = $self->check_data_from_form( $step );
 	
-	my $checkdoc_service = ( $self->get_current_service() == 2 ? 1 : 0 ); 
+	my $checkdoc_service = $self->get_current_service(); 
 	
 	my ( $appnum, $appid ) = ( undef, undef );
 	
 	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
-		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) and !$checkdoc_service );
+		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) and ( $checkdoc_service != 2 ));
 	
 	( $last_error, $step ) = $self->check_mutex_for_creation( $step )
 		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
@@ -1316,8 +1348,8 @@ sub set_appointment_finished
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
-	$self->send_checkdoc_mail() if $checkdoc;
-	$self->send_app_confirm( $appnum, $new_appid ) if !$checkdoc;
+	$self->send_checkdoc_mail() if ( $checkdoc == 2 );
+	$self->send_app_confirm( $appnum, $new_appid ) if ( $checkdoc != 2 );
 		
 	return ( $new_appid, $appnum );
 }
@@ -3435,7 +3467,7 @@ sub create_new_appointment
 		WHERE Token = ?", $self->{ token }
 	)->[ 0 ];
 	
-	if ( ( $data_for_contract->{ PersonForAgreements } != -1 ) and !$checkdoc ) {
+	if ( ( $data_for_contract->{ PersonForAgreements } != -1 ) and ( $checkdoc < 2 ) ) {
 	
 		$info_for_contract = $self->query( 'selallkeys', __LINE__, "
 			SELECT RLName as LName, RFName as FName, RMName as MName, RPassNum as PassNum, 
@@ -3635,7 +3667,7 @@ sub mod_hash
 		}
 	}
 	
-	if ( $checkdoc and ( $table_name eq 'Appointments' ) ) {
+	if ( ( $checkdoc == 2 ) and ( $table_name eq 'Appointments' ) ) {
 	
 		my ( $sec, $min, $hour, $day, $mon, $year ) = localtime( time );
 		
@@ -3651,6 +3683,11 @@ sub mod_hash
 		$hash->{ AppDate } = "$year-$mon-$day";
 		
 		$hash->{ Status } = 10; 
+	}
+	
+	if ( ( $checkdoc == 1 ) and ( $table_name eq 'Appointments' ) ) {
+	
+		$hash->{ CenterID } = 1;
 	}
 
 	if ( $table_name eq 'Appointments' ) {
@@ -3677,7 +3714,7 @@ sub mod_hash
 	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'FinishedVType', 'FinishedCenter', 'AppEMail',
 		'AppDataID', 'PrimetimeAlert', 'Copypasta' );
 	
-	if ( $checkdoc ) {
+	if ( $checkdoc == 2 ) {
 		delete $hash->{ $_ } for ( 'PersonForAgreements', 'MobilPermission', 'RAddress' );
 	}
 		

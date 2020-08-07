@@ -1,4 +1,4 @@
-package VCS::Site::autoinfopage;
+package VCS::Site::autopayment;
 use strict;
 use utf8;
 
@@ -6,6 +6,7 @@ use LWP::UserAgent;
 use Data::Dumper;
 use Date::Calc;
 use JSON;
+use Encode qw(decode encode);
 
 sub new
 # //////////////////////////////////////////////////
@@ -23,41 +24,30 @@ sub return_url {
 	
 	my $self = shift;
 	
-	return "127.0.0.1/" . $self->{ token };
+	return decode( 'utf8', '127.0.0.1' . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token } );
 }
 	
 sub payment {
 	
-	my ( $self, $order_number ) = @_;
+	my ( $self, $order_number, $amount ) = @_;
 	
 	my $config = VCS::Site::autodata::get_settings();
-	
-	my $tmp_amount = 100;
 	
 	my $data = {
 		userName	=>  $config->{ payment }->{ user_name },
 		password	=> $config->{ payment }->{ password },
 		orderNumber 	=> $order_number,
-		amount 		=> $tmp_amount,
-		returnUrl 	=> return_url(),
+		amount 		=> $amount,
+		returnUrl 	=> return_url( $self ),
 	};
 	
-	my $res = LWP::UserAgent->new( timeout => 30 )->post( join( '/', $config->{ payment }->{ url } , 'register.do' ), $data );
+	my $response = LWP::UserAgent->new( timeout => 30 )->post( join( '/', $config->{ payment }->{ url } , 'register.do' ), $data );
+
+	return ( undef, undef ) unless $response->is_success;
 	
-	if ($res->is_success) {
-		return $res->decoded_content;
-	} else {
-		$res = '{}';
-		print "ERR";
-	}
+	my $payment = JSON->new->pretty->decode( $response->decoded_content );
 	
-	my $result = JSON->new->pretty->decode( $res );
-	
-	print "orderId: " . $result->{ orderId } . "\n";
-	print "link: " . $result->{ formUrl } . "\n";
-	print "ErrorCode: " . ( $result->{ errorCode } ? $result->{ errorCode } : 'nope' ) . "\n";
-	
-	return $res;
+	return ( $payment->{ orderId }, $payment->{ formUrl } );
 }
 
 sub status {
@@ -72,20 +62,13 @@ sub status {
 		orderId 	=> $order_id,
 	};
 	
-	my $res = LWP::UserAgent->new(timeout => 30)->post( join( '/', $url , 'getOrderStatus.do' ), $data );
+	my $response = LWP::UserAgent->new(timeout => 30)->post( join( '/', $config->{ payment }->{ url }, 'getOrderStatus.do' ), $data );
 	
-	if ($res->is_success) {
-		$res = $res->decoded_content;
-	} else {
-		$res = '{}';
-		print "ERR";
-	}
-
-	my $result = JSON->new->pretty->decode( $res );
+	return -1 unless $response->is_success;
 	
-	print "STATUS: " . $result->{ OrderStatus } . "\n";
-	print "RESULT: " . ( $result->{ OrderStatus } == 2 ? 'success' : 'ERR' ) . "\n";
-	print "ErrorCode: " . $result->{ ErrorCode } . "\n";
+	my $status = JSON->new->pretty->decode( $response->decoded_content );
 	
-	return $res;
+	return $status;
 }
+
+1;

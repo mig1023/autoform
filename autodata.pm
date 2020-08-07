@@ -194,7 +194,7 @@ sub get_html_elements
 				'text-decoration:none;text-align:center;display:block;padding:1px 0px;border:1px solid #cad3d9;' .
 				'border-radius:4px;color: #33c3ba;background:#f7f9fa;margin-bottom: 7px;">[%edit_btn%]</a>',
 				
-		payment => 	'<div class="captcha_container">к оплате [summ] руб</div>',
+		payment => 	'<div class="captcha_container" id="payment_container">к оплате [summ] руб</div>',
 	}
 }
 
