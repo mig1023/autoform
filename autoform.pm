@@ -264,7 +264,7 @@ sub autoform
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my ( $step, $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules );
+	my ( $step, $page_content, $template_file, $title, $progress, $appid, $last_error, $js_rules, $payment );
 
 	my $special = {};
 
@@ -284,7 +284,13 @@ sub autoform
 	return $self->get_mobile_api() if $self->param( 'mobile_api' );
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
+	
+	my $current_table_id = $self->get_current_table_id(); 
 
+	my ( $max_app, $app_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT NCount, ID FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
+	);
+	
 	if ( $finished and $doc_status and $self->{ token } !~ /^\d\d$/ ) {
 	
 		( $title, $page_content, $template_file ) = $self->doc_status();
@@ -319,11 +325,8 @@ sub autoform
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
-	my $current_table_id = $self->get_current_table_id(); 
-
-	my ( $max_app, $app_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT NCount, ID FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
-	);
+	$payment = $self->payment_prepare( $app_id )
+		if ( ( ref( $special->{ payment } ) eq 'ARRAY' ) and ( @{ $special->{ payment } } > 0 ) ? 1 : 0 );
 
 	my $tvars = {
 		'langreq' 		=> sub { return $self->lang( @_ ) },
@@ -349,6 +352,8 @@ sub autoform
 	
 	my ( $all, $max ) = $self->get_current_apps();
 	
+	$tvars->{ payment } = $payment;
+	
 	$tvars->{ app_all } = $all || 0;
 	$tvars->{ app_max } = $max || 0;
 	
@@ -368,9 +373,6 @@ sub autoform
 			or
 			( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ post_index } } > 0 ) )
 		);
-
-	$tvars->{ payment } = $self->payment_prepare( $app_id )
-		if ( ( ref( $special->{ post_index } ) eq 'ARRAY' ) and ( @{ $special->{ payment } } > 0 ) );
 
 	$tvars->{ map_type } = $self->{ vars }->getConfig( 'general' )->{ maps_type };
 		
@@ -395,9 +397,11 @@ sub payment_prepare
 
 	if ( !$order or !$form_url or !$order_number) {
 		
+		$order_number = $app_id . '-' . time();
+		
 		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount );
 		
-		$order_number = $app_id . '_' . time();
+		return undef unless $order and $form_url;
 	
 		$self->query( 'query', __LINE__, "
 			INSERT INTO AutoPayment (AutoID, OrderNumber, OrderID, OrderLink, StartDate) VALUES (?, ?, ?, ?, now())", {}, 
@@ -411,14 +415,16 @@ sub payment_prepare
 sub payment_check
 # //////////////////////////////////////////////////
 {
-	my ( $self, $app_id ) = @_;
+	my $self = shift;
 	
 	my ( $pay_id, $order_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT OrderID FROM AutoPayment WHERE AutoID = ?", $app_id
+		SELECT AutoPayment.ID, OrderID FROM AutoPayment
+		JOIN AutoToken ON AutoPayment.AutoID = AutoToken.AutoAppID
+		WHERE Token = ?", $self->{ token }
 	);		
 
 	my $status = VCS::Site::autopayment::status( $self, $order_id );
-	
+
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoPayment SET PaymentStatus = ?, PaymentDate = now() WHERE ID = ?", {}, 
 		$status, $pay_id
@@ -1055,7 +1061,7 @@ sub get_autoform_content
 		
 		if ( $order_id ) {
 			
-			my ( $pay_status_ok, $payment_error ) = payment_check( $appid );
+			my ( $pay_status_ok, $payment_error ) =  $self->payment_check();
 			
 			( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step ) if $pay_status_ok;
 			

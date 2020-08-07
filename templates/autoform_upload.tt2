@@ -303,7 +303,7 @@ function upload( doc_id, upfile_field ) {
 		contentType: false,
 		processData: false,
 		success: function(data) {
-		
+
 			if (data.indexOf('ok')+1) {
 			
 				window.location = '/autoform/?t=[% content_text.token %]&appdata=[% content_text.app_id %]';

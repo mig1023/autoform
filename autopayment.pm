@@ -40,7 +40,7 @@ sub payment {
 		amount 		=> $amount,
 		returnUrl 	=> return_url( $self ),
 	};
-	
+
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( join( '/', $config->{ payment }->{ url } , 'register.do' ), $data );
 
 	return ( undef, undef ) unless $response->is_success;
@@ -63,7 +63,7 @@ sub status {
 	};
 	
 	my $response = LWP::UserAgent->new(timeout => 30)->post( join( '/', $config->{ payment }->{ url }, 'getOrderStatus.do' ), $data );
-	
+
 	return -1 unless $response->is_success;
 	
 	my $status = JSON->new->pretty->decode( $response->decoded_content );
