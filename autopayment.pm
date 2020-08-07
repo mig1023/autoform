@@ -46,7 +46,7 @@ sub payment {
 	return ( undef, undef ) unless $response->is_success;
 	
 	my $payment = JSON->new->pretty->decode( $response->decoded_content );
-	
+
 	return ( $payment->{ orderId }, $payment->{ formUrl } );
 }
 
@@ -67,6 +67,8 @@ sub status {
 	return -1 unless $response->is_success;
 	
 	my $status = JSON->new->pretty->decode( $response->decoded_content );
+	
+	$status->{ OrderStatus } =~ s/[^0-9]+//g;
 
 	return $status->{ OrderStatus };
 }

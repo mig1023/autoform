@@ -321,7 +321,6 @@ sub autoform
 	
 	my $current_table_id = $self->get_current_table_id(); 
 
-
 	my ( $max_app, $app_id ) = $self->query( 'sel1', __LINE__, "
 		SELECT NCount, ID FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
 	);
@@ -389,10 +388,23 @@ sub payment_prepare
 	
 			# /////////////////////
 			my $amount = decode( 'utf8', 150 );
-			my $order_number = $app_id . '_' . time();
+		
+	my ( $order, $form_url, $order_number ) = $self->query( 'sel1', __LINE__, "
+		SELECT OrderID, OrderLink, OrderNumber FROM AutoPayment WHERE AutoID = ?", $app_id
+	);
 
-	my ( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount );
+	if ( !$order or !$form_url or !$order_number) {
+		
+		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount );
+		
+		$order_number = $app_id . '_' . time();
 	
+		$self->query( 'query', __LINE__, "
+			INSERT INTO AutoPayment (AutoID, OrderNumber, OrderID, OrderLink, StartDate) VALUES (?, ?, ?, ?, now())", {}, 
+			$app_id, $order_number, $order, $form_url
+		);	
+	}
+
 	return { amount => $amount, form_url => $form_url };
 }
 
@@ -401,10 +413,16 @@ sub payment_check
 {
 	my ( $self, $app_id ) = @_;
 	
-			# /////////////////////
-			my $order_id = '';
+	my ( $pay_id, $order_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT OrderID FROM AutoPayment WHERE AutoID = ?", $app_id
+	);		
 
 	my $status = VCS::Site::autopayment::status( $self, $order_id );
+	
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoPayment SET PaymentStatus = ?, PaymentDate = now() WHERE ID = ?", {}, 
+		$status, $pay_id
+	);
 
 	my $pay_status_ok = ( $status == 2 ? 1 : 0 );
 
