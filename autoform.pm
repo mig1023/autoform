@@ -1280,7 +1280,7 @@ sub get_forward
 	
 	if ( !$current_table_id->{ AutoAppointments } ) {
 	
-		$self->create_clear_form( $self->param( 'center' ) );
+		$self->create_clear_form();
 		
 		$current_table_id = $self->get_current_table_id();
 	}
@@ -1296,7 +1296,7 @@ sub get_forward
 	my ( $appnum, $appid ) = ( undef, undef );
 	
 	( $last_error, $step ) = $self->check_timeslots_already_full_or_not_actual( $step )
-		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) and ( $checkdoc_service != 2 ));
+		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) and ( $checkdoc_service <= 1 ));
 	
 	( $last_error, $step ) = $self->check_mutex_for_creation( $step )
 		if ( !$last_error and ( ( $step + 1 ) == $self->get_content_rules( 'length' ) ) );
@@ -1339,7 +1339,7 @@ sub set_current_app_finished
 	
 	my $service = $self->get_current_service();
 	
-	$center = 1 if $service == 2;
+	$center = 1 if $service > 1;
 
 	return $self->query( 'query', __LINE__, "
 		UPDATE AutoAppData SET FinishedVType = ?, FinishedCenter = ? WHERE ID = ?", {},
@@ -1404,6 +1404,9 @@ sub check_timeslots_already_full_or_not_actual
 	my $app = $self->get_same_info_for_timeslots();
 
 	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } );
+	
+	return ( $self->text_error( 20, { name => 'timeslot' } ), $step )
+		if !$app->{ center } or !$app->{ persons } or !$app->{ appdate };
 	
 	my $timeslots = $appobj->get_timeslots_arr(
 		$app->{ center }, $app->{ persons }, $app->{ appdate }, 0, $app->{ urgent }
@@ -3695,7 +3698,7 @@ sub mod_hash
 		}
 	}
 	
-	if ( ( $checkdoc == 2 ) and ( $table_name eq 'Appointments' ) ) {
+	if ( ( $checkdoc > 1 ) and ( $table_name eq 'Appointments' ) ) {
 	
 		my ( $sec, $min, $hour, $day, $mon, $year ) = localtime( time );
 		
@@ -3710,14 +3713,9 @@ sub mod_hash
 		
 		$hash->{ AppDate } = "$year-$mon-$day";
 		
-		$hash->{ Status } = 10; 
+		$hash->{ Status } = 10 if $checkdoc == 2; 
 	}
 	
-	if ( ( $checkdoc == 1 ) and ( $table_name eq 'Appointments' ) ) {
-	
-		$hash->{ CenterID } = 1;
-	}
-
 	if ( $table_name eq 'Appointments' ) {
 	
 		my $appointments = VCS::Docs::appointments->new('VCS::Docs::appointments', $self->{ vars } );
