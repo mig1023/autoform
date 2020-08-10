@@ -52,21 +52,6 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'select',
-				name => 'center',
-				label => 'Визовый центр',
-				comment => 'Выберите визовый центр для подачи документов',
-				check => 'zN',
-				db => {
-					table => 'Appointments',
-					name => 'CenterID',
-				},
-				param => '[centers_from_db]',
-				uniq_code => 'onchange="update_nearest_date_free_date();"',
-				first_elements => 'default_free, 1, 44, 41',
-				special => 'cach_this_value',
-			},
-			{
-				type => 'select',
 				name => 'vtype',
 				label => 'Тип визы',
 				comment => 'Выберите тип запрашиваемой визы',
@@ -97,15 +82,6 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'NCount',
 				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'info',
-				name => 'free_date',
-				label => 'Ближайшая доступная дата',
-				special => 'nearest_date',
 			},
 			{
 				type => 'free_line',
@@ -183,61 +159,6 @@ sub get_content_rules_hash
 				type => 'include',
 				place => 'out',
 				template => 'vip_form.tt2',
-			},
-		],
-		
-		'Обращаем Ваше внимание' => [
-			{
-				page_ord => 140,
-				progress => 2,
-				relation => {
-					only_if => {
-						table => 'Appointments',
-						name => 'CenterID',
-						value => '3, 6, 14',
-					}
-				},
-				page_db_id => 500002,
-			},
-			{
-				type => 'text',
-				name => 'booking_warning',
-				label => 'Заявителям, запрашивающим шенгенскую визу впервые, необходимо предоставить предоплаченное/полностью оплаченное подтверждение проживания.',
-			},
-		],
-		
-		'Услуга Primetime' => [
-			{
-				page_ord => 150,
-				progress => 2,
-				primetime_price => 1,
-				relation => {
-					only_if => {
-						table => 'Appointments',
-						name => 'CenterID',
-						value => '41',
-					}
-				},
-				page_db_id => 500003,
-			},
-			{
-				type => 'text',
-				name => 'primetime_text',
-				label => 'Стоимость услуги «Прайм-тайм» составляет: [primetime_price] рублей за каждого заявителя и не включает в себя стоимость сервисного и консульского сборов, а также <a target = "_blank" class = "dotted_link_big" href = "/dopolnitelnye-uslugi/">дополнительных услуг</a>',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'checkbox',
-				name => 'pers_info',
-				label_for => 'я ознакомлен со стоимостью дополнительных услуг',
-				check => 'true',
-				full_line => 1,
-				db => {
-					table => 'Appointments',
-					name => 'PrimetimeAlert',
-				},
 			},
 		],
 		
@@ -2695,71 +2616,6 @@ sub get_content_rules_hash
 			},
 			{
 				type => 'text',
-				name => 'appdate_text',
-				label => 'Дата записи',
-				font => 'bold',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'input',
-				name => 'app_date',
-				label => 'Дата записи в Визовый центр',
-				comment => 'Введите дату, когда собираетесь посетить Визовый центр для подачи документов',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'now_or_later',
-					},
-					{
-						condition => 'now_or_earlier',
-						offset => 90,
-						equality_is_also_fail => 1,
-						full_error => 'Запись в Визовый центр более чем за [offset] не осуществляется',
-					},
-					{
-						condition => 'not_beyond_than',
-						table => 'AppData',
-						name => 'AppSDate',
-						offset => 180,
-						full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
-					},
-					{
-						condition => 'not_beyond_than',
-						table => 'Appointments',
-						name => 'SDate',
-						offset => 180,
-						full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'AppDate',
-				},
-				special => 'datepicker, mask, save_urgent_info',
-				uniq_code => 'onchange="update_timeslots(1);"',
-			},
-			{
-				type => 'select',
-				name => 'timeslot',
-				label => 'Время',
-				check => 'zN',
-				db => {
-					table => 'Appointments',
-					name => 'TimeslotID',
-				},
-				param => '[free]',
-				special => 'timeslots',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'text',
 				name => 'services_text',
 				label => 'СМС-оповещение о готовности документов ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				font => 'bold',
@@ -2792,59 +2648,6 @@ sub get_content_rules_hash
 			{
 				type => 'text',
 				name => 'services_text',
-				label => 'Доставка документов DHL ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
-				font => 'bold',
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'input',
-				name => 'ship_index',
-				label => 'Индекс доставки',
-				comment => 'Введите первые цифры индекса или первые буквы города для доставки документов; выберите из списка подходящий индекс и город; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				example => '119017, Москва',
-				check => 'ЁN\s\,\.\-\(\)',
-				check_logic => [
-					{
-						condition => 'free_only_if_not',
-						table => 'Appointments',
-						name => 'ShAddress',
-						error => 'Адрес доставки',
-					}
-				],
-				db => {
-					table => 'Appointments',
-					name => 'ShIndex',
-				},
-				special => 'post_index',
-			},
-			{
-				type => 'input',
-				name => 'shipping',
-				label => 'Адрес доставки',
-				comment => 'Введите адрес для доставки документов документов, без указания индекса и города; услуга платная, оставьте поле пустым, если в ней нет необходимости',
-				example => 'Малый Толмачёвский пер., д.6 стр.1',
-				check => 'ЁN\s\-\_\.\,\;\'\"',
-				check_logic => [
-					{
-						condition => 'free_only_if_not',
-						table => 'Appointments',
-						name => 'ShIndex',
-						error => 'Индекс доставки',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'ShAddress',
-				},
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'text',
-				name => 'services_text',
 				label => 'Страхование ( <a target = "_blank" class = "dotted_link_big" href="/dopolnitelnye-uslugi/">платная услуга</a> )',
 				font => 'bold',
 			},
@@ -2856,80 +2659,6 @@ sub get_content_rules_hash
 				place => 'in',
 				template => 'insurance_form.tt2',
 			}
-		],
-		
-		'Предпочтительный офис получения готовых документов' => [
-			{
-				page_ord => 3000,
-				progress => 13,
-				relation => {
-					only_if => {
-						table => 'Appointments',
-						name => 'CenterID',
-						value => '1',
-					}
-				},
-				page_db_id => 500033,
-			},
-			{
-				type => 'radiolist',
-				name => 'mezziwhom',
-				label => 'Выберите офис, в котором будет осуществляться выдачи готовых документов',
-				check => 'zN',
-				db => {
-					table => 'Appointments',
-					name => 'OfficeToReceive',
-				},
-				param => { 
-					1 => '<b>м.Третьяковская</b>, Малый Толмачёвский пер., д.6 стр.1',
-					2 => '<b>м.Киевская</b>, ул. Киевская, вл. 2, 3 этаж',
-				},
-			},
-		],
-		
-		'Оплата консульского сбора' => [
-			{
-				page_ord => 3050,
-				progress => 14,
-				relation => {
-					only_if => {
-						table => 'Appointments',
-						name => 'VType',
-						value => '1, 2, 5, 7, 13, 14, 15',
-					},
-					only_if => {
-						table => 'Appointments',
-						name => 'CenterID',
-						value => '41, 44',
-					},
-					only_if_citizenship => {
-						value => '70, 76, 268, 16, 20', 
-					}
-				},
-				page_db_id => 500034,
-			},
-			{
-				type => 'text',
-				name => 'concil1_text',
-				label => 'Для Вашего удобства Вы можете оплатить консульский сбор онлайн на сайте банка, следуя инструкциям Банка. Документ с кодом проверки платежа, отправленный Банком на указанный адрес электронной почты, необходимо распечатать и предоставить при подаче документов.', 
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'text',
-				name => 'concil2_text',
-				label => '<a target = "_blank" class = "dotted_link_big" href="127.0.0.1">Для продолжения оплаты нажмите здесь</a>', 
-			},
-			{
-				type => 'free_line',
-			},
-			{
-				type => 'text',
-				name => 'concil3_text',
-				label => 'Пожалуйста, ознакомьтесь со <a target = "_blank" class = "dotted_link_middle" href="/lgotnye-kategorii/">льготными категориями граждан</a>, освобождаемых от оплаты консульского сбора.', 
-			},
-			
 		],
 		
 		'Подтвердить запись' => [
@@ -2961,33 +2690,6 @@ sub get_content_rules_hash
 				type => 'info',
 				name => 'new_app_num',
 				label => 'Номер записи',
-			},
-			{
-				type => 'info',
-				name => 'new_app_branch',
-				label => 'Визовый центр',
-				db => {
-					table => 'Appointments',
-					name => 'CenterID',
-				},
-			},
-			{
-				type => 'info',
-				name => 'new_app_timedate',
-				label => 'Дата',
-				db => {
-					table => 'Appointments',
-					name => 'AppDate',
-				},
-			},
-			{
-				type => 'info',
-				name => 'new_app_timeslot',
-				label => 'Время записи',
-				db => {
-					table => 'Appointments',
-					name => 'TimeslotID',
-				},
 			},
 		],
 	};
