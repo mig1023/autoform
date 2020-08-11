@@ -38,7 +38,6 @@ sub new
 sub getContent 
 # //////////////////////////////////////////////////
 {
-
 	my ( $self ) = @_;
 	
 	$_ = @_[2];
@@ -4334,7 +4333,7 @@ sub doc_for_uploading
 	my $all_docs = $self->query( 'selallkeys', __LINE__, "
 		SELECT ID, DocType, Name, Ext FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
 	) if $appdata_id;
-	
+
 	return ( $doc_list, $appdata_id, $visa_type, $all_docs );
 }
 
@@ -4394,27 +4393,38 @@ sub get_doc_uploading
 	for ( my $index = $#$doc_list; $index >= 0; --$index ) {
 	
 		my %visas = map { $_ => 1 } split /,\s?/, $doc_list->[ $index ]->{ visa };
-
+		
 		if ( !exists $visas{ $visa_type } ) {
 
 			splice( @$doc_list, $index, 1 );
 		}
 		else {
-			for my $doc ( @$all_docs ) {
+			my $files = $doc_list->[ $index ];
 			
-				if ( $doc_list->[ $index ]->{ id } == $doc->{ DocType } ) {
+			for my $doc ( @$all_docs ) {
+
+				next unless $files->{ id } == $doc->{ DocType };
+		
+				my $file = {};
 				
-					my $filename = $doc->{ Name };
+				my $filename = decode( 'utf8', $doc->{ Name } );
 
-					$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
-
-					$doc_list->[ $index ]->{ name } = $filename;
-
-					$doc_list->[ $index ]->{ type } = $self->check_file_ext( $doc->{ Ext } );
+				$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
 					
-					$doc_list->[ $index ]->{ optional } = ( $doc->{ optional } ? 1 : 0 );
-				}
+				$file->{ name } = $filename;
+
+				$file->{ type } = $self->check_file_ext( $doc->{ Ext } );
+				
+				$file->{ optional } = ( $doc->{ optional } ? 1 : 0 );
+				
+				$files->{ files } = [] unless ref( $files->{ files } ) eq 'ARRAY';
+				
+				push( @{ $files->{ files } }, $file );
 			}
+
+			$files->{ uploaded } = ( @{ $files->{ files } } > 1 ? 2 : 1 ) if ref( $files->{ files } ) eq 'ARRAY';
+			
+			$files->{ uploaded } = 0 unless $files->{ uploaded };
 			
 			my $help = $doc_list->[ $index ]->{ help };
 			
@@ -4428,23 +4438,22 @@ sub get_doc_uploading
 	
 	for my $doc ( @$all_docs ) {
 			
-		if ( $doc->{ DocType } < 0 ) {
+		next if $doc->{ DocType } >= 0;
 		
-			my $filename = $doc->{ Name };
+		my $filename = decode( 'utf8', $doc->{ Name } );
 
-			$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
-		
-			push( @$doc_list, {
-				title 	=> $self->lang( "Дополнительный документ" ),
-				name 	=> $filename,
-				type 	=> $self->check_file_ext( $doc->{ Ext } ),
-				id 	=> $doc->{ DocType },
-			} );
-			
-			$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
-		}
-	}
+		$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
 	
+		push( @$doc_list, {
+			title 	=> $self->lang( "Дополнительный документ" ),
+			name 	=> $filename,
+			type 	=> $self->check_file_ext( $doc->{ Ext } ),
+			id 	=> $doc->{ DocType },
+		} );
+		
+		$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
+	}
+
 	my $vtype = $self->query( 'sel1', __LINE__, "
 		SELECT VisaTypes.VName
 		FROM AutoToken

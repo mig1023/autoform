@@ -53,58 +53,94 @@
 
 <tr><td colspan="2" align ="justify" id="add_info_block" class="grayborder">
 <span class="add_info_text">
-[% langreq('Всю необходимую информацию о наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="https://italy-vms.ru/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %]. [% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %]. [% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %]. [% langreq('Максимально допустимый размер загружаемого файла ') %] [% content_text.max_size_mb %] [% langreq('МБ') %].
+[% langreq('Всю необходимую информацию о наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="/neobxodimye-dokumenty/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Вы можете использовать фотоаппарат своего телефона, чтобы сфотографировать и загрузить изображения') %]. [% langreq('Обратите внимание на то, что все загружаемые изображения должны быть читаемыми') %]. [% langreq('Допустимы к загрузки изображения в формате JPEG, PNG, TIFF, а также файлы PDF') %]. [% langreq('Максимально допустимый размер загружаемого файла ') %] [% content_text.max_size_mb %] [% langreq('МБ') %].
 <br></span></td></tr>
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
 <tr><td><table width="100%">
 [% FOREACH doc IN content_text.doc_list %]
-<tr>
+	<tr>
+		<td class="mobil_hide">
+		[% IF ( doc.uploaded > 0 ) %]
+			<span class="uplsuccess">&#10003;</span>
+		[% END %]
+		&nbsp;</td>
+		<td class="info_list mobil_hide [% IF (doc.optional == 1) %]optional_line[% END %]">
+		[% langreq(doc.title) %]
+		[% IF doc.help != '' %]
+			<a target="_blank" class="nfc_link" href="[% doc.help %]">[?]</a>
+		[% END %]
+		</td>
+		
+		
+		[% IF ( doc.uploaded != 1 ) %]
+			<td class="middle" colspan="2">&nbsp;</td>
+		[% ELSE %]
+			<td class="middle mobil_hide">
+			<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
+			[% IF doc.files.0.type != '' %]
+				<img src="/vcs/static/images/type_[% doc.files.0.type %].png">
+			[% END %]
+			</td>
+			<td class="middle mobil_hide">
+			<span id="img_span_[% doc.id %]" class="ltl_text">[% doc.files.0.name %]</span>
+			</td>
 
-	<td class="mobil_hide">
-	[% IF doc.type != '' %]
-		<span class="uplsuccess">&#10003;</span>
-	[% END %]
-	&nbsp;</td>
-	<td class="info_list mobil_hide [% IF (doc.optional == 1) %]optional_line[% END %]">
-	[% langreq(doc.title) %]
-	[% IF doc.help != '' %]
-		<a target="_blank" class="nfc_link" href="[% doc.help %]">[?]</a>
-	[% END %]
-	</td>
-	<td class="middle mobil_hide">
-	<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
-	[% IF doc.type != '' %]
-		<img src="/vcs/static/images/type_[% doc.type %].png">
-	[% END %]
-	</td>
-	<td class="middle mobil_hide">
-	<span id="img_span_[% doc.id %]" class="ltl_text">[% doc.name %]</span>
-	</td>
+			<td class="hidden pc_hide">
+			[% IF doc.files.0.type != '' %]
+				<span class="uplsuccess">&#10003;</span>&nbsp;
+			[% ELSE %]
+				<br>
+			[% END %]
+			
+			[% langreq(doc.title) %]&nbsp;
+			<br><span class="up_doc_date">[% doc.files.0.name %]</span>&nbsp;
+			[% IF doc.files.0.type != '' %]
+				<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
+			[% END %]
+			</td>
+		[% END %]
 
-	<td class="hidden pc_hide">
-	[% IF doc.type != '' %]
-		<span class="uplsuccess">&#10003;</span>&nbsp;
-	[% ELSE %]
-		<br>
-	[% END %]
-	[% langreq(doc.title) %]&nbsp;
-	<br><span class="up_doc_date">[% doc.name %]</span>&nbsp;
-	[% IF doc.type != '' %]
-		<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
-	[% END %]
-	</td>
+		<td class="m_right">
+		[% IF ( doc.uploaded == 1 ) %]
+			<input name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove_file('[% doc.id %]');" />
+		[% ELSE %]
+			<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
+			<input class="upload_button" name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
+		[% END %]
+		</td>
+	</tr>
+	[% IF ( doc.uploaded > 1 ) %]
+		[% FOREACH file IN doc.files %]
+			<tr>
+				<td class="mobil_hide">&nbsp;</td>
+				<td class="m_right ltl_text info_list mobil_hide [% IF (doc.optional == 1) %]optional_line[% END %]">
+				[% langreq(doc.title) %]&nbsp;&nbsp;</td>
+						
+				<td class="middle mobil_hide">
+				[% IF file.type != '' %]
+					<img src="/vcs/static/images/type_[% file.type %].png">
+				[% END %]
+				</td>
+				<td class="middle mobil_hide">
+				<span id="img_span_[% doc.id %]" class="ltl_text">[% file.name %]</span>
+				</td>
 
-	<td class="m_right">
-	[% IF doc.type != '' %]
-		<input name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove_file('[% doc.id %]');" />
-	[% ELSE %]
-		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
-		<input class="upload_button" name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
+				<td class="hidden pc_hide">
+				<span class="uplsuccess">&#10003;</span>&nbsp;
+				[% langreq(doc.title) %]&nbsp;
+				<br><span class="up_doc_date">[% file.name %]</span>&nbsp;
+				<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
+				</td>
+
+				<td class="m_right">
+					<input name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove_file('[% doc.id %]');" />
+				</td>
+			</tr>
+		[% END %]
 	[% END %]
-	</td>
-</tr>
+
 [% END %]
 <tr>
 	<tr><td colspan="5"><hr class="gray_line"></td></tr>

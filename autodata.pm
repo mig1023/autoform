@@ -464,6 +464,7 @@ sub get_doc_list
 			id => 1,
 			title => 'Загранпаспорт',
 			visa => '1, 13, 9, 17, 15',
+			multiple => 10,
 			help => {
 				base => {
 					ru => '/zagranpasport/',
