@@ -98,7 +98,7 @@
 
 	<td class="m_right">
 	[% IF doc.type != '' %]
-		<input name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove('[% doc.id %]')" />
+		<input name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" class="upload_button" type="button" value="[% langreq('Удалить') %]" onclick="remove_file('[% doc.id %]');" />
 	[% ELSE %]
 		<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
 		<input class="upload_button" name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
@@ -228,7 +228,7 @@ function error_upload( line, doc_id ) {
 	show_hide( doc_id, 'img_span_', 'tmp_span_' );
 }
 
-function remove( doc_id ) {
+function remove_file( doc_id ) {
 
 	var addr = '?t=[% content_text.token %]&appdata=[% content_text.app_id %]&type=' + doc_id;
 	
@@ -307,6 +307,7 @@ function upload( doc_id, upfile_field ) {
 			if (data.indexOf('ok')+1) {
 			
 				window.location = '/autoform/?t=[% content_text.token %]&appdata=[% content_text.app_id %]';
+				return;
 			}
 			else if (data.indexOf('already')+1) {
 				
