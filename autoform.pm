@@ -285,12 +285,6 @@ sub autoform
 	
 	return $self->autoinfopage( $task, $id, $template ) if $finished and !$doc_status and $self->{ token } !~ /^\d\d$/;
 	
-	my $current_table_id = $self->get_current_table_id(); 
-
-	my ( $max_app, $app_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT NCount, ID FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
-	);
-	
 	if ( $finished and $doc_status and $self->{ token } !~ /^\d\d$/ ) {
 	
 		( $title, $page_content, $template_file ) = $self->doc_status();
@@ -324,6 +318,8 @@ sub autoform
 	$self->mod_last_error_date( $self->param( 'last_error_return' ) ) if $self->param( 'last_error_return' );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my ( $max_app, $app_id ) = $self->get_current_max_app();
 	
 	$payment = $self->payment_prepare( $app_id )
 		if ( ( ref( $special->{ payment } ) eq 'ARRAY' ) and ( @{ $special->{ payment } } > 0 ) ? 1 : 0 );
@@ -381,6 +377,20 @@ sub autoform
 	}
 
 	$template->process( $template_file, $tvars );
+}
+
+sub get_current_max_app
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $current_table_id = $self->get_current_table_id(); 
+
+	my ( $max_app, $app_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT NCount, ID FROM AutoAppointments WHERE ID = ?", $current_table_id->{ AutoAppointments }
+	);
+	
+	return ( $max_app, $app_id );
 }
 
 sub payment_prepare
