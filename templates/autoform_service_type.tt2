@@ -48,7 +48,7 @@
 	<br>
 	<input class="action_button big_button" type="button" value="[% langreq('Онлайн проверка документов') %]" onclick="go_button('checkdoc');"><br><br>
 	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза.') %]<br><br>
-	<input class="action_button big_button" type="button" value="[% langreq('Дистанционная подача документов') %]" onclick="go_button('remoteapp');"><br><br>[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза.') %]<br><br>
+	<input class="action_button big_button" disabled type="button" value="[% langreq('Дистанционная подача документов') %]" onclick="go_button('remoteapp');"><br><br>[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза.') %]<br><br>
 	</td></tr>
 
 <tr><td class="left" colspan="5"><br>
