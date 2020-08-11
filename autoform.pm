@@ -4417,6 +4417,8 @@ sub get_doc_uploading
 				
 				$file->{ optional } = ( $doc->{ optional } ? 1 : 0 );
 				
+				$file->{ file_id } = $doc->{ ID };
+				
 				$files->{ files } = [] unless ref( $files->{ files } ) eq 'ARRAY';
 				
 				push( @{ $files->{ files } }, $file );
@@ -4453,7 +4455,7 @@ sub get_doc_uploading
 		
 		$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
 	}
-
+	
 	my $vtype = $self->query( 'sel1', __LINE__, "
 		SELECT VisaTypes.VName
 		FROM AutoToken
@@ -4493,29 +4495,29 @@ sub remove_file
 
 	$self->{ token } = $self->get_token();
 	
-	my $appdata_id = $self->param( 'appdata' );
+	my $appdata_id = $self->param( 'appdata' ) || 0;
 	
-	my $doc_type = $self->param( 'type' );
+	my $file_id = $self->param( 'f' ) || 0;
 	
-	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $doc_type );
+	$_ =~ s/[^0-9\-]//g for ( $appdata_id, $file_id );
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	return print 'error' unless $self->check_existing_id_in_token( $appdata_id );
 	
-	my ( $path_to_file, $md5 ) = $self->query( 'sel1', __LINE__, "
-		SELECT Folder, MD5 FROM DocUploaded WHERE AutoAppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+	my ( $path_to_file, $md5, $type ) = $self->query( 'sel1', __LINE__, "
+		SELECT Folder, MD5 FROM DocUploaded WHERE AutoAppDataID = ? AND ID = ?", $appdata_id, $file_id
 	);
 	
 	$self->query( 'query', __LINE__, "
-		DELETE FROM DocUploaded WHERE AutoAppDataID = ? AND DocType = ?", {}, $appdata_id, $doc_type
+		DELETE FROM DocUploaded WHERE AutoAppDataID = ? AND ID = ?", {}, $appdata_id, $file_id
 	);
 	
 	my $file_name = $self->{ vars }->getConfig('general')->{ tmp_folder } . "doc/" . $path_to_file . $md5;
 	
 	unlink $file_name;
 	
-	$self->log( undef, "документы [тип $doc_type] удалён", $appdata_id );
+	$self->log( undef, "документы [тип $type] удалён", $appdata_id );
 	
 	return print 'ok';
 }
