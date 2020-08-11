@@ -677,7 +677,7 @@ sub get_app_file_list_by_token
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
-		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus
+		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus, Token
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
@@ -714,7 +714,7 @@ sub get_app_file_list_by_token
 		
 		my $file = {};
 
-		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID' );
+		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID', 'Token' );
 		
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
 		

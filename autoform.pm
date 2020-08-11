@@ -4531,8 +4531,8 @@ sub upload_file
 
 	$self->{ token } = $self->get_token();
 
-	my $appid = $self->query( 'sel1', __LINE__, "
-		SELECT AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
+	my ( $token_id, $appid ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	my $appdata_id = $self->param( 'appdata' );
@@ -4598,9 +4598,9 @@ sub upload_file
 	else {
 			
 		$self->query( 'query', __LINE__, "
-			INSERT INTO DocUploaded (AutoAppDataID, DocType, MD5, UploadDate, Folder, Name, Ext)
+			INSERT INTO DocUploaded (AutoAppDataID, AutoToken, DocType, MD5, UploadDate, Folder, Name, Ext)
 			VALUES (?, ?, ?, now(), ?, ?, ?)",
-			{}, $appdata_id, $doc_type, $md5, $date_name, $filename, $ext
+			{}, $appdata_id, $token_id, $doc_type, $md5, $date_name, $filename, $ext
 		);
 		
 		$self->log( undef, "документы [тип $doc_type] загружен $filename.$ext", $appdata_id );
@@ -4626,20 +4626,23 @@ sub download_file
 	
 	my $conf = $self->{ vars }->getConfig('general');
 	
-	my $appdata_id = $self->param( 'appdata' );
+	my $file_id = $self->param( 'f' );
 	
-	my $doc_type = $self->param( 'type' );
+	my $token = $self->param( 'token' );
 	
-	$_ =~ s/[^a-z0-9]//g for ( $appdata_id, $doc_type );
+	$_ =~ s/[^a-z0-9]//g for ( $file_id, $token );
 	
 	my ( $folder, $md5, $name, $ext ) = $self->query( 'sel1', __LINE__, "
-		SELECT Folder, MD5, Name, Ext FROM DocUploaded WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+		SELECT Folder, MD5, Name, Ext
+		FROM DocUploaded
+		JOIN AutoToken ON DocUploaded.AutoToken = AutoToken.ID
+		WHERE DocUploaded.ID = ? AND Token = ?", $file_id, $token
 	);
 
 	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $md5;	
 	my $dl_name = $name . '.' . $ext;
 	
-	$self->log( undef, "документы [тип $doc_type] скачан $name.$ext", $appdata_id );
+	$self->log( undef, "документы [тип $doc_type] скачан $name.$ext", $file_id );
 
 	print "HTTP/1.1 200 Ok\nContent-Type: image/jpeg name=\"$dl_name\"\nContent-Disposition: attachment; filename=\"$dl_name\"\n\n";
 	
