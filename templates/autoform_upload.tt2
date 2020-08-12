@@ -73,7 +73,6 @@
 		[% END %]
 		</td>
 		
-		
 		[% IF ( ( doc.uploaded != 1 ) || ( doc.multiple > 0 ) ) %]
 			<td class="middle" colspan="2">&nbsp;</td>
 		[% ELSE %]

@@ -144,34 +144,71 @@
 				[% SET n = n + 1 %]
 				<tr>
 				<td colspan="2"><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
-					[% IF (file.CheckStatus == 1) %]<b>[% END %]
-						[% IF (file.DocType < 0) %]
+					[% IF (file.value.0.CheckStatus == 1) %]<b>[% END %]
+						[% IF (file.value.0.DocType < 0) %]
 							[% langreq('Дополнительный документ') %]
 						[% ELSE %]	
-							[% file.TypeStr %]
+							[% file.value.0.TypeStr %]
 						[% END %]
-					[% IF (file.CheckStatus == 1) %]</b>[% END %]
+					[% IF (file.value.0.CheckStatus == 1) %]</b>[% END %]
 					
-					<input type="file" id="upfile_[% file.DocType  %]" class="hidden" name="upfile_[% file.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.DocType %]', 'upfile_[% file.DocType %]', [% person.key %] )"/>
-					<span class="ltl_link" id="upfile_button_[% file.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.DocType %]').click();">[% langreq('заменить') %]</span>			
+					[% IF (file.value.0.multiple != 1) %]
+						<input type="file" id="upfile_[% file.value.0.DocType  %]" class="hidden" name="upfile_[% file.value.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.value.0.DocType %]', 'upfile_[% file.value.0.DocType %]', [% person.key %] )"/>
+						<span class="ltl_link" id="upfile_button_[% file.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.value.0.DocType %]').click();">[% langreq('заменить') %]</span>
+					[% END %]
 					</nobr></td>
 				<td class="m_right">
-				[% IF (file.CheckStatus == 2) %]
-					<span class="ok_doc">[% langreq('всё хорошо') %]</span>
-				[% ELSIF (file.CheckStatus == 1) %]
-					<span class="err_doc">[% langreq('некорректен') %]</span>
+				[% IF (file.value.0.multiple != 1) %]
+					[% IF (file.value.0.CheckStatus == 2) %]
+						<span class="ok_doc">[% langreq('всё хорошо') %]</span>
+					[% ELSIF (file.value.0.CheckStatus == 1) %]
+						<span class="err_doc">[% langreq('некорректен') %]</span>
+					[% ELSE %]
+						<span class="nope_doc">[% langreq('не проверен') %]</span>
+					[% END %]
 				[% ELSE %]
-					<span class="nope_doc">[% langreq('не проверен') %]</span>
+					&nbsp;
 				[% END %]
 				</td>
 				</tr>
 				
-				[% IF (file.comments.size > 0) %]
+				[% IF (file.value.0.multiple == 1) %]
+					
+					[% SET k = 0 %]
+					[% FOREACH page IN file.value %]
+						[% SET k = k + 1 %]
+						<tr>
+						<td colspan="2"><nobr>&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
+							[% IF (fpage.CheckStatus == 1) %]<b>[% END %]
+								[% IF (page.DocType < 0) %]
+									[% langreq('Дополнительный документ') %]
+								[% ELSE %]	
+									[% page.TypeStr %]
+								[% END %]
+							[% IF (page.CheckStatus == 1) %]</b>[% END %]
+							
+							<input type="file" id="upfile_[% page.DocType  %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
+							<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
+							</nobr></td>
+						<td class="m_right">
+						[% IF (page.CheckStatus == 2) %]
+							<span class="ok_doc">[% langreq('всё хорошо') %]</span>
+						[% ELSIF (page.CheckStatus == 1) %]
+							<span class="err_doc">[% langreq('некорректен') %]</span>
+						[% ELSE %]
+							<span class="nope_doc">[% langreq('не проверен') %]</span>
+						[% END %]
+						</td>
+						</tr>
+					[% END %]
+				[% END %]
+				
+				[% IF (file.value.0.comments.size > 0) %]
 				
 					<tr id="show_comments[% i %]-[% n %]">
 						<td colspan="3"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
 					</tr>
-					[% FOREACH comment IN file.comments %]
+					[% FOREACH comment IN file.value.0.comments %]
 						
 						<tr class="hidden [% IF (comment.login == "website") %]m_right[% END %]" name="comments[% i %]-[% n %]">
 						<td colspan="3"><span
@@ -179,14 +216,6 @@
 						>[% comment.text %] | [% comment.date %]</span></td>
 						</tr>
 					[% END %]
-					
-					<!--<tr class="hidden" name="show_add_comment[% i %]-[% n %]">
-						<td colspan="3"><span class="add_comment" onclick="javascript:show_addcomment('[% i %]-[% n %]')">[% langreq('+ добавить собственный комментарий') %]</span></td>
-					</tr>
-					<tr class="hidden" name="add_comment[% i %]-[% n %]">
-					<td colspan="3"><span class="add_comment_block">
-						<input type="text" id="new_comment[% i %]-[% n %]" size="35">&nbsp;<input type="button" value="добавить" style="height: 23px;" onclick="javascript:add_comment('[% i %]-[% n %]', [% file.DocID %]);"></span></td>
-					</tr>-->
 					
 					<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
 				[% END %]
@@ -375,16 +404,18 @@
 			[% SET n = n + 1 %]
 			<tr>
 			<td><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
-				[% IF (file.CheckStatus == 1) %]<b>[% END %]
-					[% IF (file.DocType < 0) %]
+				[% IF (file.value.0.CheckStatus == 1) %]<b>[% END %]
+					[% IF (file.value.0.DocType < 0) %]
 						[% langreq('Дополнительный документ') %]
 					[% ELSE %]	
-						[% file.TypeStr %]
+						[% file.value.0.TypeStr %]
 					[% END %]
-				[% IF (file.CheckStatus == 1) %]</b>[% END %]
+				[% IF (file.value.0.CheckStatus == 1) %]</b>[% END %]
 				
-				<input type="file" id="upfile_[% file.DocType  %]" class="hidden" name="upfile_[% file.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.DocType %]', 'upfile_[% file.DocType %]', [% person.key %] )"/>
-				<span class="ltl_link" id="upfile_button_[% file.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.DocType %]').click();">[% langreq('заменить') %]</span>			
+				[% IF (file.value.0.multiple != 1) %]
+					<input type="file" id="upfile_[% file.value.0.DocType  %]" class="hidden" name="upfile_[% file.value.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.value.0.DocType %]', 'upfile_[% file.value.0.DocType %]', [% person.key %] )"/>
+					<span class="ltl_link" id="upfile_button_[% file.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.value.0.DocType %]').click();">[% langreq('заменить') %]</span>
+				[% END %]			
 				</nobr></td>
 			<td class="m_right">
 			[% IF (file.CheckStatus == 2) %]
@@ -397,27 +428,50 @@
 			</td>
 			</tr>
 			
-			[% IF (file.comments.size > 0) %]
+			[% IF (file.value.0.multiple == 1) %]
+					
+				[% SET k = 0 %]
+				[% FOREACH page IN file.value %]
+					[% SET k = k + 1 %]
+					<tr>
+					<td><nobr>&nbsp;&nbsp;&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
+						[% IF (fpage.CheckStatus == 1) %]<b>[% END %]
+							[% IF (page.DocType < 0) %]
+								[% langreq('Дополнительный документ') %]
+							[% ELSE %]	
+								[% page.TypeStr %]
+							[% END %]
+						[% IF (page.CheckStatus == 1) %]</b>[% END %]
+						
+						<input type="file" id="upfile_[% page.DocType  %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
+						<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
+						</nobr></td>
+					<td class="m_right">
+					[% IF (page.CheckStatus == 2) %]
+						<span class="ok_doc">[% langreq('всё хорошо') %]</span>
+					[% ELSIF (page.CheckStatus == 1) %]
+						<span class="err_doc">[% langreq('некорректен') %]</span>
+					[% ELSE %]
+						<span class="nope_doc">[% langreq('не проверен') %]</span>
+					[% END %]
+					</td>
+					</tr>
+				[% END %]
+			[% END %]
 			
+			[% IF (file.value.0.comments.size > 0) %]
+				
 				<tr id="show_comments[% i %]-[% n %]">
-					<td colspan="2"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
+					<td colspan="3"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
 				</tr>
-				[% FOREACH comment IN file.comments %]
+				[% FOREACH comment IN file.value.0.comments %]
 					
 					<tr class="hidden [% IF (comment.login == "website") %]m_right[% END %]" name="comments[% i %]-[% n %]">
-					<td colspan="2"><span
+					<td colspan="3"><span
 					[% IF (comment.login == "website") %]class="doc_app_comment"[% ELSE %]class="doc_support_comment"[% END %]
 					>[% comment.text %] | [% comment.date %]</span></td>
 					</tr>
 				[% END %]
-				
-				<!--<tr class="hidden" name="show_add_comment[% i %]-[% n %]">
-					<td colspan="2"><span class="add_comment" onclick="javascript:show_addcomment('[% i %]-[% n %]')">[% langreq('+ добавить собственный комментарий') %]</span></td>
-				</tr>
-				<tr class="hidden" name="add_comment[% i %]-[% n %]">
-				<td colspan="2"><span class="add_comment_block">
-					<input type="text" id="new_comment[% i %]-[% n %]" size="35">&nbsp;<input type="button" value="добавить" style="height: 23px;" onclick="javascript:add_comment('[% i %]-[% n %]', [% file.DocID %]);"></span></td>
-				</tr>-->
 				
 				<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
 			[% END %]
