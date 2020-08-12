@@ -64,8 +64,6 @@ sub getContent
 
 	return download_file( @_ ) if /^download_file$/i;
 	
-	return add_comment( @_ ) if /^add_comment$/i;
-	
 	return $self->redirect();
 }
 
@@ -4686,34 +4684,6 @@ sub get_folder_name
 	};
 
 	return ( $path_name, $folder_name );
-}
-
-sub add_comment
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-	
-	$self->{ token } = $self->get_token();
-
-	my $comment = $self->param( 'new_comment' ) || undef;
-
-	$comment =~ s/[^\s0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.,!\?:\\\/\(\)]\n\r//g;
-
-	my $docid = $self->param( 'docid' ) || 0;
-	
-	$docid =~ s/[^0-9\-]//g;
-	
-	my $login = $self->param( 'login_key' ) || 'website';
-		
-	$self->query( 'query', __LINE__, "
-		INSERT INTO DocUploadedComment (DocID, Login, CommentDate, Commenttext)
-		VALUES (?, ?, now(), ?)", {},
-		$docid, $login, $comment
-	);
-	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-
-	return print 'ok';
 }
 
 sub log

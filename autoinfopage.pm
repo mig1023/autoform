@@ -729,7 +729,7 @@ sub get_app_file_list_by_token
 		else {
 			$doc_list->{ $app->{ ID } } = {};
 			
-			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token'  );
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token' );
 
 			$doc_list->{ $app->{ ID } }->{ files } = {};
 			
