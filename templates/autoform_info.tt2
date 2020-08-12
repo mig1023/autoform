@@ -180,11 +180,7 @@
 						<tr>
 						<td colspan="2"><nobr>&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
 							[% IF (fpage.CheckStatus == 1) %]<b>[% END %]
-								[% IF (page.DocType < 0) %]
-									[% langreq('Дополнительный документ') %]
-								[% ELSE %]	
-									[% page.TypeStr %]
-								[% END %]
+							[% langreq('Страница') %] [% k %]
 							[% IF (page.CheckStatus == 1) %]</b>[% END %]
 							
 							<input type="file" id="upfile_[% page.DocType  %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
@@ -436,11 +432,7 @@
 					<tr>
 					<td><nobr>&nbsp;&nbsp;&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
 						[% IF (fpage.CheckStatus == 1) %]<b>[% END %]
-							[% IF (page.DocType < 0) %]
-								[% langreq('Дополнительный документ') %]
-							[% ELSE %]	
-								[% page.TypeStr %]
-							[% END %]
+							[% langreq('Страница') %] [% k %]
 						[% IF (page.CheckStatus == 1) %]</b>[% END %]
 						
 						<input type="file" id="upfile_[% page.DocType  %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
@@ -469,7 +461,7 @@
 					<tr class="hidden [% IF (comment.login == "website") %]m_right[% END %]" name="comments[% i %]-[% n %]">
 					<td colspan="3"><span
 					[% IF (comment.login == "website") %]class="doc_app_comment"[% ELSE %]class="doc_support_comment"[% END %]
-					>[% comment.text %] | [% comment.date %]</span></td>
+					>[% comment.text %]<br><br>[% comment.date %]</span></td>
 					</tr>
 				[% END %]
 				
