@@ -4630,14 +4630,21 @@ sub download_file
 	
 	my $token = $self->param( 'token' );
 	
-	$_ =~ s/[^a-z0-9]//g for ( $file_id, $token );
-	
+	$_ =~ s/[^a-z0-9\-]//g for ( $file_id, $token );
+
 	my ( $folder, $md5, $name, $ext, $doc_type ) = $self->query( 'sel1', __LINE__, "
 		SELECT Folder, MD5, Name, Ext, DocType
 		FROM DocUploaded
 		JOIN AutoToken ON DocUploaded.AutoToken = AutoToken.ID
 		WHERE DocUploaded.ID = ? AND Token = ?", $file_id, $token
 	);
+	
+	if ( !$md5 or !$folder) {
+		
+		$self->{ vars }->get_system->pheader( $self->{ vars } );
+
+		return print 'file download error';
+	}
 
 	my $file_name = $conf->{ tmp_folder } . 'doc/' . $folder . $md5;	
 	my $dl_name = $name . '.' . $ext;
