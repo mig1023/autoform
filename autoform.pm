@@ -4632,8 +4632,8 @@ sub download_file
 	
 	$_ =~ s/[^a-z0-9]//g for ( $file_id, $token );
 	
-	my ( $folder, $md5, $name, $ext ) = $self->query( 'sel1', __LINE__, "
-		SELECT Folder, MD5, Name, Ext
+	my ( $folder, $md5, $name, $ext, $doc_type ) = $self->query( 'sel1', __LINE__, "
+		SELECT Folder, MD5, Name, Ext, DocType
 		FROM DocUploaded
 		JOIN AutoToken ON DocUploaded.AutoToken = AutoToken.ID
 		WHERE DocUploaded.ID = ? AND Token = ?", $file_id, $token

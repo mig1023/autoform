@@ -673,7 +673,7 @@ sub set_new_appdate
 sub get_app_file_list_by_token
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my ( $self, $token, $client_form ) = @_;
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
@@ -714,7 +714,7 @@ sub get_app_file_list_by_token
 		
 		my $file = {};
 
-		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID', 'Token' );
+		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID');
 		
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
 		
@@ -722,16 +722,29 @@ sub get_app_file_list_by_token
 		
 		if ( exists $doc_list->{ $app->{ ID } } ) {
 			
-			push( @{ $doc_list->{ $app->{ ID } }->{ files } }, $file  );
+			push( @{ $doc_list->{ $app->{ ID } }->{ files }->{ $file->{ DocType } } }, $file );
 		}
 		else {
 			$doc_list->{ $app->{ ID } } = {};
 			
-			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate' );
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token'  );
 
-			$doc_list->{ $app->{ ID } }->{ files } = [ $file ];
-		};
+			$doc_list->{ $app->{ ID } }->{ files } = {};
+			
+			$doc_list->{ $app->{ ID } }->{ files }->{ $file->{ DocType } } = [ $file ];
+		}
 	}
+	
+	for my $app ( keys %$doc_list ) {
+	
+		for my $doc_type ( keys %{ $doc_list->{ $app }->{ files } } ) {
+		
+			for my $file ( @{ $doc_list->{ $app }->{ files }->{ $doc_type } } ) {
+			
+				$file->{ multiple } = 1 if @{ $doc_list->{ $app }->{ files }->{ $doc_type } } > 1;
+			};
+		};
+	};
 
 	return $doc_list;
 }
