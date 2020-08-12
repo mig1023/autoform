@@ -705,6 +705,8 @@ sub get_app_file_list_by_token
 		
 		$doc_comments->{ $_->{ DocID } } = [] unless exists $doc_comments->{ $_->{ DocID } };
 		
+		$_->{ CommentText } =~ s/\n/<br>/g;
+		
 		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate }, login => $_->{ Login } } );
 	}
 

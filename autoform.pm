@@ -4696,8 +4696,8 @@ sub add_comment
 	$self->{ token } = $self->get_token();
 
 	my $comment = $self->param( 'new_comment' ) || undef;
-	
-	$comment =~ s/[^\s0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.,!\?:\\\/\(\)]//g;
+
+	$comment =~ s/[^\s0-9A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя_\-\.,!\?:\\\/\(\)]\n\r//g;
 
 	my $docid = $self->param( 'docid' ) || 0;
 	
