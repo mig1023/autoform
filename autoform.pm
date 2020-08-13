@@ -318,7 +318,7 @@ sub autoform
 	
 	my ( $max_app, $app_id ) = $self->get_current_max_app();
 	
-	$payment = $self->payment_prepare( $app_id, $special->{ payment } )
+	$payment = $self->payment_prepare( $app_id )
 		if ( ( ref( $special->{ payment } ) eq 'ARRAY' ) and ( @{ $special->{ payment } } > 0 ) ? 1 : 0 );
 
 	my $tvars = {
@@ -393,10 +393,9 @@ sub get_current_max_app
 sub payment_prepare
 # //////////////////////////////////////////////////
 {
-	my ( $self, $app_id, $special_payment ) = @_;
+	my ( $self, $app_id ) = @_;
 	
-			# /////////////////////
-			my $amount_kopek = decode( 'utf8', 150 );
+	my $amount_kopek = decode( 'utf8', $self->get_payment_price_kopek( 2 ) );
 		
 	my ( $order, $form_url, $order_number ) = $self->query( 'sel1', __LINE__, "
 		SELECT OrderID, OrderLink, OrderNumber FROM AutoPayment WHERE AutoID = ?", $app_id
@@ -444,6 +443,26 @@ sub payment_check
 	my $pay_error = ( $pay_status_ok ? "" : $errors_code->[ $status ] );
 
 	return ( $pay_status_ok, $pay_error );
+}
+
+sub get_payment_price_kopek
+# //////////////////////////////////////////////////
+{
+	my ( $self, $service ) = @_;
+	
+	my $services_id = {
+		2 => 17,
+	};
+	
+	my $payment_price = $self->query( 'sel1', __LINE__, "
+		SELECT Price FROM PriceRate
+		JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
+		WHERE BranchID = 1 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = ?
+		ORDER by PriceRate.ID DESC LIMIT 1",
+		$services_id->{ $service }
+	);
+
+	return $payment_price;
 }
 
 sub urgent_allowed
@@ -639,7 +658,7 @@ sub init_add_param
 {
 	my ( $self, $content_rules, $keys ) = @_;
 	
-	my ( $info_from_db, $ussr_first, $primetime_price, $payment_price ) = ( undef, 0, 0, {} );
+	my ( $info_from_db, $ussr_first, $primetime_price ) = ( undef, 0, 0 );
 	
 	if ( $keys->{ param } ) {
 	
@@ -725,16 +744,6 @@ sub init_add_param
 		);
 	}
 	
-	if ( $keys->{ payment_price } ) {
-		
-		$payment_price->{ 'check_doc' } = $self->query( 'sel1', __LINE__, "
-			SELECT Price FROM PriceRate
-			JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
-			WHERE BranchID = 1 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = 17
-			ORDER by PriceRate.ID DESC LIMIT 1"
-		);
-	}
-	
 	if ( $keys->{ primetime_spb_price } ) {
 	
 		$primetime_price = $self->query( 'sel1', __LINE__, "
@@ -744,7 +753,7 @@ sub init_add_param
 			ORDER by PriceRate.ID DESC LIMIT 1"
 		);
 	}
-	
+
 	if (
 		$keys->{ param }
 		or
@@ -757,8 +766,6 @@ sub init_add_param
 		$keys->{ primetime_price }
 		or
 		$keys->{ primetime_spb_price }
-		or
-		$keys->{ checkdoc_price }
 	) {
 	
 		for my $page ( keys %$content_rules ) {
@@ -796,18 +803,6 @@ sub init_add_param
 					$element->{ label } =~ /\[primetime_price\]/
 				) {
 					$element->{ label } =~ s/\[primetime_price\]/$primetime_price/;
-				}
-				
-				if ( $element->{ payment } ) {
-					
-					my $pay = 0;
-					
-					$pay = $payment_price->{ 'check_doc' } if $element->{ payment_type };
-					
-					my $pay_text = $self->lang( 'К оплате за услугу:' );
-					
-					$element->{ payment } =~ s/\[pay_text\]/$pay_text/;
-					$element->{ payment } =~ s/\[pay_amount\]/$pay/;
 				}
 			}
 		}
@@ -2025,7 +2020,7 @@ sub get_specials_of_element
 		push( @{ $special->{ full_mask } }, [ $element->{ name }, $element->{ mask } ] )
 			if exists $element->{ mask };
 
-		push( @{ $special->{ payment } }, $element->{ payment_type })
+		push( @{ $special->{ payment } }, 'pay' )
 			if $element->{ type } eq 'payment';
 
 		push( @{ $special->{ captcha } }, $self->get_captcha_id() )
@@ -2341,7 +2336,12 @@ sub get_html_for_element
 	
 	if ( $type eq 'payment' ) {
 	
-		$content =~ s/\[summ\]/1.50/gi;
+		my $pay = $self->get_payment_price_kopek( 2 );
+		
+		my $pay_text = $self->lang( 'К оплате за услугу:' );
+					
+		$content =~ s/\[pay_text\]/$pay_text/;
+		$content =~ s/\[pay_amount\]/$pay/;
 	}
 	
 	if ( $type eq 'progress' ) {
