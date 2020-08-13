@@ -74,10 +74,10 @@
 		</td>
 		
 		[% IF ( ( doc.uploaded != 1 ) || ( doc.multiple > 0 ) ) %]
-			<td class="middle" colspan="2">&nbsp;</td>
+			<td class="middle" colspan="2"><span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>&nbsp;</td>
 		[% ELSE %]
 			<td class="middle mobil_hide">
-			<span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>
+			
 			[% IF doc.files.0.type != '' %]
 				<img src="/vcs/static/images/type_[% doc.files.0.type %].png">
 			[% END %]
@@ -102,7 +102,7 @@
 		[% END %]
 
 		<td class="m_right">
-		[% IF ( ( doc.uploaded < 1 ) || ( doc.multiple > 0 ) ) %]
+		[% IF ( ( ( doc.uploaded < 1 ) || ( doc.multiple > 0 ) ) && !( doc.id < 0 ) ) %]
 			<input type="file" id="upfile_[% doc.id %]" class="hidden" name="upfile_[% doc.id %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% doc.id %]', 'upfile_[% doc.id %]' )"/>
 			<input class="upload_button" name="upfile_button_[% doc.id %]" id="upfile_button_[% doc.id %]" type="button" value="[% langreq('Загрузить') %]" onclick="document.getElementById('upfile_[% doc.id %]').click();" />
 		[% ELSE %]
@@ -230,7 +230,7 @@ function go_button(where) {
 };
 
 function show_hide( doc_id, show, hide ) {
-		
+	
 	$('#' + hide + doc_id).hide();
 	$('#' + show + doc_id).show();
 }
@@ -361,8 +361,6 @@ function upload( doc_id, upfile_field ) {
 			}
 			
 			block_buttons( false );
-			
-			show_hide( doc_id, 'img_span_', 'tmp_span_' );
 			
 			if ( upfile_field == 'upfile_opt' ) {
 				show_hide( 'opt', 'img_span_', 'tmp_span_' );
