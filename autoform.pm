@@ -4422,8 +4422,8 @@ sub get_doc_uploading
 				next unless $files->{ id } == $doc->{ DocType };
 		
 				my $file = {};
-				
-				my $filename = decode( 'utf8', $doc->{ Name } );
+
+				my $filename = $self->{ vars }->get_system->transliteration( decode( 'utf8', $doc->{ Name } ) );
 
 				$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
 					

@@ -689,6 +689,7 @@ sub get_app_file_list_by_token
 	my $doc_types_tmp = VCS::Site::autodata::get_doc_list();
 	
 	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_tmp;
+	my %doc_ords = map { $_->{ id } => $_->{ doc_ord } } @$doc_types_tmp;
 	
 	my $doc_comments_tmp = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT DocID, CommentText, CommentDate, DocUploadedComment.Login
@@ -754,6 +755,8 @@ sub get_app_file_list_by_token
 
 		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID');
 		
+		$file->{ file_ord } = $doc_ords{ $file->{ DocType } }; 		
+
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
 		
 		$file->{ comments } = $doc_comments->{ $app->{ DocID } };
@@ -783,6 +786,7 @@ sub get_app_file_list_by_token
 			};
 		};
 	};
+
 
 	return $doc_list;
 }
