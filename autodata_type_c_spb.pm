@@ -114,7 +114,7 @@ sub get_content_rules_hash
 				name => 'email',
 				label => 'Email',
 				comment => 'Введите существующий адрес почты. На него будет выслано подтверждение записи в визовый центр. Пожалуйста, проверьте правильность каждой буквы/символа, из которых состоит адрес Вашей электронной почты',
-				example => 'info@italyvms.ru',
+				example => 'info@example.ru',
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -134,7 +134,7 @@ sub get_content_rules_hash
 				name => 'emailcheck',
 				label => 'Подтвердите email',
 				comment => 'Обратите внимание, что адрес электронной почты необходимо вводить вручную, не копируя его из предыдущего поля. Это поможет Вам избежать ошибки и возможной отправки подтверждения Вашей записи не тому адресату. ',
-				example => 'info@italyvms.ru',
+				example => 'info@example.ru',
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -631,7 +631,7 @@ sub get_content_rules_hash
 				name => 'appemail',
 				label => 'Email',
 				comment => 'Введите существующий адрес почты, по которому можно будет связаться с заявителем',
-				example => 'info@italyvms.ru',
+				example => 'info@example.ru',
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -1655,7 +1655,7 @@ sub get_content_rules_hash
 				name => 'p_email',
 				label => 'Email',
 				comment => 'Укажите адрес электронной почты',
-				example => 'info@italyvms.ru',
+				example => 'info@example.ru',
 				check => 'zWN\@\s\-\_\.',
 				check_logic => [
 					{
@@ -1785,7 +1785,7 @@ sub get_content_rules_hash
 				name => 'a_person',
 				label => 'ФИО, адрес, телефон, email контактного лица',
 				comment => 'Укажите данные кантактного лица приглашающей организации',
-				example => 'Ivanov Ivan, Via Esempio 10, Milano, 39XXXXXXXX, info@italyvms.ru',
+				example => 'Ivanov Ivan, Via Esempio 10, Milano, 39XXXXXXXX, info@example.ru',
 				check => 'zWN\@\s\-\.\,\;',
 				db => {
 					table => 'AppData',

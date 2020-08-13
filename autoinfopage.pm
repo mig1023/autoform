@@ -739,6 +739,12 @@ sub get_app_file_list_by_token
 		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate }, login => $_->{ Login } } );
 	}
 	
+	for my $doc ( keys %$doc_comments ) {
+		
+		my @new_ord_comments = sort { $a->{ date } cmp $b->{date } } @{ $doc_comments->{ $doc } };
+		
+		$doc_comments->{ $doc } = \@new_ord_comments;
+	}
 
 	my $doc_list = {};
 	

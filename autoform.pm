@@ -4662,10 +4662,11 @@ sub insist
 	
 	$_ =~ s/[^a-z0-9\-]//g for ( $doc_type, $token, $app );
 
-	my $token_ok = $self->query( 'sel1', __LINE__, "
-		SELECT AutoToken.ID FROM DocUploaded
+	my ( $token_ok, $doc_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT AutoToken.ID, DocUploaded.ID FROM DocUploaded
 		JOIN AutoToken ON DocUploaded.AutoToken = AutoToken.ID
-		WHERE AppDataID = ? AND Token = ?", $app, $token
+		WHERE AppDataID = ? AND Token = ? AND DocType = ?
+		ORDER BY DocUploaded.ID LIMIT 1", $app, $token, $doc_type
 	);
 
 	if ( !$token_ok ) {
@@ -4679,6 +4680,12 @@ sub insist
 		UPDATE DocUploaded SET CheckStatus = 3
 		WHERE AppDataID = ? AND DocType = ?", {}, 
 		$app, $doc_type
+	);
+	
+	$self->query( 'query', __LINE__, "
+		INSERT INTO DocUploadedLog (AppID, DocID, LogDate, Login, LogType, LogText)
+		VALUES (?, ?, now(), ?, ?, ?)",
+		{}, $app, $doc_id, 'website', 1, "заявитель принял решение оставить документ как он есть"
 	);
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );

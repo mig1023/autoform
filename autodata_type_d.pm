@@ -111,7 +111,7 @@ sub get_content_rules_hash
 				name => 'email',
 				label => 'Email',
 				comment => 'Введите существующий адрес почты. На него будет выслано подтверждение записи в визовый центр. Пожалуйста, проверьте правильность каждой буквы/символа, из которых состоит адрес Вашей электронной почты',
-				example => 'info@italyvms.ru',
+				example => 'info@example.ru',
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{
@@ -131,7 +131,7 @@ sub get_content_rules_hash
 				name => 'emailcheck',
 				label => 'Подтвердите email',
 				comment => 'Обратите внимание, что адрес электронной почты необходимо вводить вручную, не копируя его из предыдущего поля. Это поможет Вам избежать ошибки и возможной отправки подтверждения Вашей записи не тому адресату. ',
-				example => 'info@italyvms.ru',
+				example => 'info@example.ru',
 				check => 'zWN\@\-\_\.',
 				check_logic => [
 					{

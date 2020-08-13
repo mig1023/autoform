@@ -471,9 +471,6 @@
 					<td colspan="3"><span class="[% IF (comment.log == 1) %]log_comment[% ELSE %]doc_support_comment[% END %]">[% comment.text %] | [% comment.date %]</span></td>
 					</tr>
 				[% END %]
-					
-				
-				<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
 			[% END %]
 			
 			[% IF ( (file.value.0.multiple != 1) && (file.value.0.CheckStatus == 1) ) %]
@@ -481,7 +478,7 @@
 					<input type="file" id="upfile_[% file.value.0.DocType %]" class="hidden" name="upfile_[% file.value.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.value.0.DocType %]', 'upfile_[% file.value.0.DocType %]', [% person.key %] )"/>
 					<span class="show_replace_option ltl_link" id="upfile_button_[% file.value.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.value.0.DocType %]').click();">[% langreq('заменить') %]</span>
 					<span class="show_other_option ltl_text">[% langreq('или') %]</span>
-					<span class="show_other_option ltl_link" onclick="insist([% person.key %], [% file.value.0.DocType %]);">[% langreq('оставить как есть') %]</span>
+					<span class="show_other_option ltl_link" onclick="insist([% person.key %], [% file.value.0.DocType %]);">[% langreq('оставить как есть') %]</span><br><br>
 				</td></tr>
 			[% END %]
 		[% END %]
