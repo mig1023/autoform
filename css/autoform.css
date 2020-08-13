@@ -133,6 +133,7 @@
 	color:#999999;
 	font-weight:normal;
 	border-bottom: 1px dotted #999999;
+	cursor:pointer;
 }
 
 .big_button{
@@ -307,6 +308,10 @@
 	font-weight:bold;
 }
 
+.insist_doc {
+	color:blue;
+}
+
 .doc_support_comment  {
 	display:inline-block;
 	margin-left:20px;
@@ -329,8 +334,18 @@
 	display:inline-block;
 	margin-left:20px;
 	color:red;
-	font-size:10px;
+	font-size:12px;
 	font-weight:bold;
+	cursor:pointer;
+}
+
+.show_replace_option {
+	display:inline-block;
+	margin-left:20px;
+}
+
+.show_other_option {
+	display:inline-block;
 }
 
 .add_comment {

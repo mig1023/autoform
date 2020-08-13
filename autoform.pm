@@ -64,6 +64,8 @@ sub getContent
 
 	return download_file( @_ ) if /^download_file$/i;
 	
+	return insist( @_ ) if /^insist$/i;
+	
 	return $self->redirect();
 }
 
@@ -395,7 +397,7 @@ sub payment_prepare
 {
 	my ( $self, $app_id ) = @_;
 	
-	my $amount_kopek = decode( 'utf8', $self->get_payment_price_kopek( 2 ) );
+	my $amount = decode( 'utf8', $self->get_payment_price( 2 ) );
 		
 	my ( $order, $form_url, $order_number ) = $self->query( 'sel1', __LINE__, "
 		SELECT OrderID, OrderLink, OrderNumber FROM AutoPayment WHERE AutoID = ?", $app_id
@@ -405,17 +407,17 @@ sub payment_prepare
 		
 		$order_number = $app_id . '-' . time();
 		
-		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount_kopek );
+		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount );
 		
 		return undef unless $order and $form_url;
 	
 		$self->query( 'query', __LINE__, "
-			INSERT INTO AutoPayment (AutoID, OrderNumber, AmountKopek, OrderID, OrderLink, StartDate) VALUES (?, ?, ?, ?, ?, now())", {}, 
-			$app_id, $order_number, $amount_kopek, $order, $form_url
+			INSERT INTO AutoPayment (AutoID, OrderNumber, Amount, OrderID, OrderLink, StartDate) VALUES (?, ?, ?, ?, ?, now())", {}, 
+			$app_id, $order_number, $amount, $order, $form_url
 		);	
 	}
 
-	return { amount => $amount_kopek, form_url => $form_url };
+	return { amount => $amount, form_url => $form_url };
 }
 
 sub payment_check
@@ -445,7 +447,7 @@ sub payment_check
 	return ( $pay_status_ok, $pay_error );
 }
 
-sub get_payment_price_kopek
+sub get_payment_price
 # //////////////////////////////////////////////////
 {
 	my ( $self, $service ) = @_;
@@ -2336,7 +2338,7 @@ sub get_html_for_element
 	
 	if ( $type eq 'payment' ) {
 	
-		my $pay = $self->get_payment_price_kopek( 2 );
+		my $pay = $self->get_payment_price( 2 );
 		
 		my $pay_text = $self->lang( 'К оплате за услугу:' );
 					
@@ -4600,9 +4602,10 @@ sub upload_file
 	if ( $replace ) {
 		
 		my $conf = $self->{ vars }->getConfig('general');
-		
+
 		my ( $existing_id, $folder ) = $self->query( 'sel1', __LINE__, "
-			SELECT ID, Folder FROM DocUploaded WHERE AppDataID = ?", $appdata_id,
+			SELECT ID, Folder FROM DocUploaded
+			WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
 		);
 		
 		# unlink $conf->{ tmp_folder } . 'doc/' . $folder . $md5;
@@ -4636,6 +4639,45 @@ sub unlink_and_print
 	unlink $file_name;
 		
 	return print $error;
+}
+
+sub insist
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $conf = $self->{ vars }->getConfig('general');
+	
+	my $doc_type = $self->param( 'type' ) || 0;
+	
+	my $token = $self->param( 't' ) || undef;
+	
+	my $app = $self->param( 'app' ) || 0;
+	
+	$_ =~ s/[^a-z0-9\-]//g for ( $doc_type, $token, $app );
+
+	my $token_ok = $self->query( 'sel1', __LINE__, "
+		SELECT AutoToken.ID FROM DocUploaded
+		JOIN AutoToken ON DocUploaded.AutoToken = AutoToken.ID
+		WHERE AppDataID = ? AND Token = ?", $app, $token
+	);
+
+	if ( !$token_ok ) {
+		
+		$self->{ vars }->get_system->pheader( $self->{ vars } );
+
+		return print 'error';
+	}
+
+	$self->query( 'query', __LINE__, "
+		UPDATE DocUploaded SET CheckStatus = 3
+		WHERE AppDataID = ? AND DocType = ?", {}, 
+		$app, $doc_type
+	);
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	return print 'ok';
 }
 
 sub download_file

@@ -33,11 +33,13 @@ sub payment {
 	
 	my $config = VCS::Site::autodata::get_settings();
 	
+	my $amount_in_kopek = $amount * 100;
+	
 	my $data = {
 		userName	=>  $config->{ payment }->{ user_name },
 		password	=> $config->{ payment }->{ password },
 		orderNumber 	=> $order_number,
-		amount 		=> $amount,
+		amount 		=> $amount_in_kopek,
 		returnUrl 	=> return_url( $self ),
 	};
 
