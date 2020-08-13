@@ -699,16 +699,46 @@ sub get_app_file_list_by_token
 		WHERE Token = ? AND AppData.Status = 1", $token
 	);
 	
-	my $doc_comments = {};
+	my $doc_upload_log = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT DocID, LogDate, LogText
+		FROM AutoToken
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		JOIN DocUploadedLog ON AppData.ID = DocUploadedLog.AppID
+		WHERE Token = ?", $token
+	);
 	
+	my $logs = {};
+	
+	for ( @$doc_upload_log ) {
+		
+		$logs->{ $_->{ DocID } } = {} unless ref( $logs->{ $_->{ DocID } } ) eq 'HASH';
+		
+		$logs->{ $_->{ DocID } }->{ $_->{ LogDate } } = $_->{ LogText };
+	}
+	
+	my $doc_comments = {};
+
 	for ( @$doc_comments_tmp ) {
 		
-		$doc_comments->{ $_->{ DocID } } = [] unless exists $doc_comments->{ $_->{ DocID } };
+		unless ( exists $doc_comments->{ $_->{ DocID } } ) {
+
+			$doc_comments->{ $_->{ DocID } } = [];
+
+			if ( ref( $logs->{ $_->{ DocID } } ) eq 'HASH' ) {
+
+				for my $date ( keys %{ $logs->{ $_->{ DocID } } } ) {
+
+					push( @{ $doc_comments->{ $_->{ DocID } } },
+						{ text => $logs->{ $_->{ DocID } }->{ $date }, date => $date, login => 'website', log => 1 } );
+				}
+			}
+		}		
 		
 		$_->{ CommentText } =~ s/\n/<br>/g;
 		
 		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate }, login => $_->{ Login } } );
 	}
+	
 
 	my $doc_list = {};
 	

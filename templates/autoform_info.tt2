@@ -209,12 +209,10 @@
 						<td colspan="3"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
 					</tr>
 					[% FOREACH comment IN file.value.0.comments %]
-						
-						<tr class="hidden [% IF (comment.login == "website") %]m_right[% END %]" name="comments[% i %]-[% n %]">
-						<td colspan="3"><span
-						[% IF (comment.login == "website") %]class="doc_app_comment"[% ELSE %]class="doc_support_comment"[% END %]
-						>[% comment.text %] | [% comment.date %]</span></td>
-						</tr>
+
+						<tr class="hidden" name="comments[% i %]-[% n %]">
+						<td colspan="3"><span class="[% IF (comment.log == 1) %]log_comment[% ELSE %]doc_support_comment[% END %]">[% comment.text %] | [% comment.date %]</span></td>
+					</tr>
 					[% END %]
 					
 					<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
@@ -469,10 +467,8 @@
 				</tr>
 				[% FOREACH comment IN file.value.0.comments %]
 					
-					<tr class="hidden [% IF (comment.login == "website") %]m_right[% END %]" name="comments[% i %]-[% n %]">
-					<td colspan="3"><span
-					[% IF (comment.login == "website") %]class="doc_app_comment"[% ELSE %]class="doc_support_comment"[% END %]
-					>[% comment.text %]<br><br>[% comment.date %]</span></td>
+					<tr class="hidden" name="comments[% i %]-[% n %]">
+					<td colspan="3"><span class="[% IF (comment.log == 1) %]log_comment[% ELSE %]doc_support_comment[% END %]">[% comment.text %] | [% comment.date %]</span></td>
 					</tr>
 				[% END %]
 					
@@ -624,7 +620,7 @@
 	}
 
 	function upload( doc_id, upfile_field, app_id ) {
-
+	
 		var file = document.getElementById(upfile_field).files[0];
 		
 		if ( file.size > [% max_size %] ) {

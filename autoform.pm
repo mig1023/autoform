@@ -4615,6 +4615,12 @@ sub upload_file
 			$md5, $date_name, $filename, $ext, $existing_id
 		);
 		
+		$self->query( 'query', __LINE__, "
+			INSERT INTO DocUploadedLog (AppID, DocID, LogDate, Login, LogType, LogText)
+			VALUES (?, ?, now(), ?, ?, ?)",
+			{}, $appdata_id, $existing_id, 'website', 1, "заявителем загружен новый файл $filename.$ext"
+		);
+		
 		$self->log( undef, "документы [тип $doc_type] заменён $filename.$ext", $appdata_id );
 	}
 	else {
