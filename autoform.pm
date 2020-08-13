@@ -318,7 +318,7 @@ sub autoform
 	
 	my ( $max_app, $app_id ) = $self->get_current_max_app();
 	
-	$payment = $self->payment_prepare( $app_id )
+	$payment = $self->payment_prepare( $app_id, $special->{ payment } )
 		if ( ( ref( $special->{ payment } ) eq 'ARRAY' ) and ( @{ $special->{ payment } } > 0 ) ? 1 : 0 );
 
 	my $tvars = {
@@ -393,10 +393,10 @@ sub get_current_max_app
 sub payment_prepare
 # //////////////////////////////////////////////////
 {
-	my ( $self, $app_id ) = @_;
+	my ( $self, $app_id, $special_payment ) = @_;
 	
 			# /////////////////////
-			my $amount = decode( 'utf8', 150 );
+			my $amount_kopek = decode( 'utf8', 150 );
 		
 	my ( $order, $form_url, $order_number ) = $self->query( 'sel1', __LINE__, "
 		SELECT OrderID, OrderLink, OrderNumber FROM AutoPayment WHERE AutoID = ?", $app_id
@@ -406,17 +406,17 @@ sub payment_prepare
 		
 		$order_number = $app_id . '-' . time();
 		
-		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount );
+		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount_kopek );
 		
 		return undef unless $order and $form_url;
 	
 		$self->query( 'query', __LINE__, "
-			INSERT INTO AutoPayment (AutoID, OrderNumber, OrderID, OrderLink, StartDate) VALUES (?, ?, ?, ?, now())", {}, 
-			$app_id, $order_number, $order, $form_url
+			INSERT INTO AutoPayment (AutoID, OrderNumber, AmountKopek, OrderID, OrderLink, StartDate) VALUES (?, ?, ?, ?, ?, now())", {}, 
+			$app_id, $order_number, $amount_kopek, $order, $form_url
 		);	
 	}
 
-	return { amount => $amount, form_url => $form_url };
+	return { amount => $amount_kopek, form_url => $form_url };
 }
 
 sub payment_check
@@ -639,9 +639,7 @@ sub init_add_param
 {
 	my ( $self, $content_rules, $keys ) = @_;
 	
-	my $info_from_db = undef;
-	my $ussr_first = 0;
-	my $primetime_price = 0;
+	my ( $info_from_db, $ussr_first, $primetime_price, $payment_price ) = ( undef, 0, 0, {} );
 	
 	if ( $keys->{ param } ) {
 	
@@ -727,6 +725,16 @@ sub init_add_param
 		);
 	}
 	
+	if ( $keys->{ payment_price } ) {
+		
+		$payment_price->{ 'check_doc' } = $self->query( 'sel1', __LINE__, "
+			SELECT Price FROM PriceRate
+			JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
+			WHERE BranchID = 1 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = 17
+			ORDER by PriceRate.ID DESC LIMIT 1"
+		);
+	}
+	
 	if ( $keys->{ primetime_spb_price } ) {
 	
 		$primetime_price = $self->query( 'sel1', __LINE__, "
@@ -749,6 +757,8 @@ sub init_add_param
 		$keys->{ primetime_price }
 		or
 		$keys->{ primetime_spb_price }
+		or
+		$keys->{ checkdoc_price }
 	) {
 	
 		for my $page ( keys %$content_rules ) {
@@ -786,6 +796,18 @@ sub init_add_param
 					$element->{ label } =~ /\[primetime_price\]/
 				) {
 					$element->{ label } =~ s/\[primetime_price\]/$primetime_price/;
+				}
+				
+				if ( $element->{ payment } ) {
+					
+					my $pay = 0;
+					
+					$pay = $payment_price->{ 'check_doc' } if $element->{ payment_type };
+					
+					my $pay_text = $self->lang( 'К оплате за услугу:' );
+					
+					$element->{ payment } =~ s/\[pay_text\]/$pay_text/;
+					$element->{ payment } =~ s/\[pay_amount\]/$pay/;
 				}
 			}
 		}
@@ -1062,20 +1084,14 @@ sub get_autoform_content
 	$step = $min_step if $step < $min_step;
 	$step = $max_step if $step > $max_step;
 	
-	
-		# //////////////
-		my $order_id = $self->param('orderId') || 0;
+	if ( $self->param('orderId') ) {
 		
-		if ( $order_id ) {
-			
-			my ( $pay_status_ok, $payment_error ) =  $self->payment_check();
-			
-			( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step ) if $pay_status_ok;
-			
-			$last_error = "payment_container|$payment_error" unless $pay_status_ok;
-		};
-	
-	
+		my ( $pay_status_ok, $payment_error ) =  $self->payment_check();
+		
+		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step ) if $pay_status_ok;
+		
+		$last_error = "payment_container|$payment_error" unless $pay_status_ok;
+	};
 
 	$step = $self->get_back( $step ) if ( $action eq 'back' ) and ( $step > 1 );
 	
@@ -2009,7 +2025,7 @@ sub get_specials_of_element
 		push( @{ $special->{ full_mask } }, [ $element->{ name }, $element->{ mask } ] )
 			if exists $element->{ mask };
 
-		push( @{ $special->{ payment } }, '1' )
+		push( @{ $special->{ payment } }, $element->{ payment_type })
 			if $element->{ type } eq 'payment';
 
 		push( @{ $special->{ captcha } }, $self->get_captcha_id() )
@@ -4446,9 +4462,14 @@ sub get_doc_uploading
 	
 		push( @$doc_list, {
 			title 	=> $self->lang( "Дополнительный документ" ),
-			name 	=> $filename,
-			type 	=> $self->check_file_ext( $doc->{ Ext } ),
 			id 	=> $doc->{ DocType },
+			files => [
+					{
+						name 	=> $filename,
+						type 	=> $self->check_file_ext( $doc->{ Ext } ),
+						file_id => $doc->{ ID },
+					}
+			],
 		} );
 		
 		$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
@@ -4597,7 +4618,7 @@ sub upload_file
 			
 		$self->query( 'query', __LINE__, "
 			INSERT INTO DocUploaded (AutoAppDataID, AutoToken, DocType, MD5, UploadDate, Folder, Name, Ext)
-			VALUES (?, ?, ?, now(), ?, ?, ?)",
+			VALUES (?, ?, ?, ?, now(), ?, ?, ?)",
 			{}, $appdata_id, $token_id, $doc_type, $md5, $date_name, $filename, $ext
 		);
 		

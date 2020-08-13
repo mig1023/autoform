@@ -673,7 +673,7 @@ sub set_new_appdate
 sub get_app_file_list_by_token
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token, $client_form ) = @_;
+	my ( $self, $token ) = @_;
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
@@ -729,7 +729,7 @@ sub get_app_file_list_by_token
 		else {
 			$doc_list->{ $app->{ ID } } = {};
 			
-			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token' );
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token',   );
 
 			$doc_list->{ $app->{ ID } }->{ files } = {};
 			
