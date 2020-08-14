@@ -1396,7 +1396,7 @@ sub set_appointment_finished
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
-	$self->send_checkdoc_mail() if ( $checkdoc == 2 );
+	$self->send_checkdoc_mail( 1 ) if ( $checkdoc == 2 );
 	$self->send_app_confirm( $appnum, $new_appid ) if ( $checkdoc != 2 );
 		
 	return ( $new_appid, $appnum );
@@ -1959,13 +1959,13 @@ sub get_list_of_app
 	);
 	
 	my $link = $self->query( 'selallkeys', __LINE__, "
-		SELECT LinkSended, AutoAppointments.EMail
+		SELECT LinkSended, AutoAppointments.EMail, ServiceType
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
 	)->[ 0 ];
 
-	$self->send_link( $link->{ EMail } ) unless $link->{ LinkSended } or !$link->{ EMail };
+	$self->send_link( $link->{ EMail }, $link->{ ServiceType } ) unless $link->{ LinkSended } or !$link->{ EMail };
 	
 	if ( scalar(@$content) < 1 ) {
 	
@@ -3954,7 +3954,7 @@ sub get_pcode
 sub send_checkdoc_mail
 # //////////////////////////////////////////////////
 {
-	my ( $self, $step ) = @_;
+	my ( $self, $type ) = @_;
 	
 	my ( $email, $sended_already ) = $self->query( 'sel1', __LINE__, "
 		SELECT AutoAppointments.EMail, AutoToken.CheckdocSended
@@ -3963,13 +3963,15 @@ sub send_checkdoc_mail
 		WHERE Token = ?", $self->{ token }
 	);
 	
-	return if $sended_already;
+	return if $sended_already and ( $type == 1 );
 		
 	my $subject = $self->lang( 'Проверка документов в итальянском ВЦ' );
 	
-	my $htmls = VCS::Site::autodata::get_checkdoc_text();
+	my $htmls_by_types = VCS::Site::autodata::get_checkdoc_text();
 	
-	my $body;
+	my $htmls = $htmls_by_types->{ $type };
+	
+	my $body = undef;
 	
 	my $token_with_lang = $self->{ token } . '&lang=' . ( $self->{ 'lang' } || 'ru' );
 	
@@ -3990,13 +3992,17 @@ sub send_checkdoc_mail
 sub send_link
 # //////////////////////////////////////////////////
 {
-	my ( $self, $email ) = @_;
+	my ( $self, $email, $service ) = @_;
 	
-	my $subject = $self->lang( 'Вы начали запись на подачу документов на визу' );
+	my $heads_texts = VCS::Site::autodata::get_link_text_head();
 	
-	my $htmls = VCS::Site::autodata::get_link_text();
+	my $subject = $self->lang( $heads_texts->{ $service } );
 	
-	my $body;
+	my $htmls_texts = VCS::Site::autodata::get_link_text();
+	
+	my $htmls = $htmls_texts->{ $service };
+	
+	my $body = undef;
 	
 	my $token_with_lang = $self->{ token } . '&lang=' . ( $self->{ 'lang' } || 'ru' );
 	
@@ -4443,6 +4449,10 @@ sub get_doc_uploading
 			$files->{ uploaded } = ( @{ $files->{ files } } > 1 ? 2 : 1 ) if ref( $files->{ files } ) eq 'ARRAY';
 			
 			$files->{ uploaded } = 0 unless $files->{ uploaded };
+			
+			if ( ref( $files->{ files } ) eq 'ARRAY' ) {
+				$files->{ total_uploaded } = 0 + @{ $files->{ files } };
+			};
 			
 			my $help = $doc_list->[ $index ]->{ help };
 			
