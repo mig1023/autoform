@@ -4677,7 +4677,7 @@ sub insist
 	
 	my $doc_type = $self->param( 'type' ) || 0;
 	
-	my $token = $self->param( 't' ) || undef;
+	my $token = $self->get_token();
 	
 	my $app = $self->param( 'app' ) || 0;
 	
@@ -4709,9 +4709,42 @@ sub insist
 		{}, $app, $doc_id, 'website', 1, "заявитель принял решение оставить документ как он есть"
 	);
 	
+	$self->check_all_app_and_close( $token );
+	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	return print 'ok';
+}
+
+sub check_all_app_and_close
+# //////////////////////////////////////////////////
+{
+	my ( $self, $token ) = @_;
+
+	my $app_docs = $self->query( 'selallkeys', __LINE__, "
+		SELECT CheckStatus FROM AutoToken
+		JOIN DocUploaded ON AutoToken.ID = DocUploaded.AutoToken
+		WHERE Token = ?", $token
+	);
+
+	my $all_doc_is_ok = 1;
+	
+	for ( @$app_docs ) {
+	
+		$all_doc_is_ok = 0 unless $_->{ CheckStatus } =~ /^(2|3)$/;
+	}
+
+	return unless $all_doc_is_ok;
+	
+	my $app_id = $self->query( 'sel1', __LINE__, "
+		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $token
+	);
+
+	$self->{ vars }->get_system->log_action( $self->{ vars }, "checkdoc", "Завершено обслуживание: все документы в порядке/по настоянию", $app_id );
+	
+	$self->query( 'query', __LINE__, "
+		UPDATE Appointments SET Status = 12 WHERE ID = ?", {}, $app_id
+	);
 }
 
 sub download_file
