@@ -53,6 +53,8 @@ sub autoinfopage
 	
 	return cancel( @_ ) if /^cancel$/i;
 	
+	return close_check( @_ ) if /^close_check$/i;
+	
 	return get_infopage( @_ );
 }
 
@@ -128,7 +130,8 @@ sub get_infopage
 
 	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT ServiceType, CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
-		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname, category
+		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname,
+		category, Appointments.Status as app_status
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
@@ -164,6 +167,8 @@ sub get_infopage
 		
 		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
 	}
+	
+	my $closed_app = ( $app_info->{ app_status } == 12 ? 1 : 0 );
 
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
@@ -178,6 +183,7 @@ sub get_infopage
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
+		'closed_app'	=> $closed_app,
 		
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
@@ -524,6 +530,24 @@ sub rescheduled
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub close_check
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+	);
+
+	$self->{ vars }->get_system->log_action( $self->{ vars }, "checkdoc", "Завершено обслуживание", $app_id );
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE Appointments SET Status = 12 WHERE ID = ?", {}, $app_id
+	);
+	
+	$self->{ af }->redirect( $self->{ token } );
 }
 
 sub cancel

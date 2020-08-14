@@ -152,7 +152,7 @@
 						[% END %]
 					[% IF (file.value.0.CheckStatus == 1) %]</b>[% END %]
 					
-					[% IF (file.value.0.multiple != 1) %]
+					[% IF ((file.value.0.multiple != 1) && !closed_app) %]
 						<input type="file" id="upfile_[% file.value.0.DocType %]" class="hidden" name="upfile_[% file.value.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.value.0.DocType %]', 'upfile_[% file.value.0.DocType %]', [% person.key %] )"/>
 						<span class="ltl_link" id="upfile_button_[% file.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.value.0.DocType %]').click();">[% langreq('заменить') %]</span>
 					[% END %]
@@ -185,8 +185,10 @@
 							[% langreq('Страница') %] [% k %]
 							[% IF (page.CheckStatus == 1) %]</b>[% END %]
 							
-							<input type="file" id="upfile_[% page.DocType  %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
-							<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
+							[% IF !closed_app %]
+								<input type="file" id="upfile_[% page.DocType  %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
+								<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
+							[% END %]
 							</nobr></td>
 						<td class="m_right">
 						[% IF (page.CheckStatus == 3) %]
@@ -438,7 +440,7 @@
 							[% langreq('Страница') %] [% k %]
 						[% IF (page.CheckStatus == 1) %]</b>[% END %]
 						&nbsp;
-						[% IF (page.CheckStatus == 1) %]
+						[% IF ((page.CheckStatus == 1) && !closed_app) %]
 							<input type="file" id="upfile_[% page.DocType %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
 							<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
 							<span class="ltl_text">[% langreq('или') %]</span>
@@ -473,7 +475,7 @@
 				[% END %]
 			[% END %]
 			
-			[% IF ( (file.value.0.multiple != 1) && (file.value.0.CheckStatus == 1) ) %]
+			[% IF ( (file.value.0.multiple != 1) && (file.value.0.CheckStatus == 1) && !closed_app) %]
 				<tr><td colspan="3">
 					<input type="file" id="upfile_[% file.value.0.DocType %]" class="hidden" name="upfile_[% file.value.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.value.0.DocType %]', 'upfile_[% file.value.0.DocType %]', [% person.key %] )"/>
 					<span class="show_replace_option ltl_link" id="upfile_button_[% file.value.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.value.0.DocType %]').click();">[% langreq('заменить') %]</span>
@@ -485,6 +487,16 @@
 	[% END %]
 	</table>
 	</td></tr>
+	
+	[% IF (!closed_app) %]
+		<tr>
+		<td colspan="2"><br><input class="big_button" type="button" value="[% langreq('Завершить обслуживание') %]" onclick="close_app();"><br></td>
+		</tr>
+	[% ELSE %]
+		<tr>
+		<td colspan="2"><br><h2>[% langreq('Услуга завершена') %]</h2></td>
+		</tr>
+	[% END %]
 
 	<tr><td>&nbsp;</td></tr>
 	
@@ -673,6 +685,13 @@
 	};
 
 
+[% END %]
+
+[% IF title == 6 %]
+	function close_app() {
+		if (confirm('[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]'))
+			go_button('close_check');
+	}
 [% END %]
 
 $(document).ready( mobileScreenCheck() );

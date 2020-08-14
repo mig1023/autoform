@@ -918,7 +918,7 @@ sub get_token_and_create_new_form_if_need
 	
 	return ( $token, $finished, 'docstatus' ) if $status == 4;
 	
-	return ( ( $status =~ /^(1|10)$/ ? $token : '02' ), $finished );
+	return ( ( $status =~ /^(1|10|11|12)$/ ? $token : '02' ), $finished );
 }
 
 sub create_clear_form
@@ -4562,8 +4562,8 @@ sub upload_file
 
 	$self->{ token } = $self->get_token();
 
-	my ( $token_id, $appid ) = $self->query( 'sel1', __LINE__, "
-		SELECT ID, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
+	my ( $token_id, $appid, $created ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, AutoAppID, CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	my $appdata_id = $self->param( 'appdata' );
@@ -4642,6 +4642,17 @@ sub upload_file
 		);
 		
 		$self->log( undef, "документы [тип $doc_type] загружен $filename.$ext", $appdata_id );
+	}
+	
+	if ( $created ) {
+		
+		my $current_status = $self->query( 'sel1', __LINE__, "
+			SELECT Status FROM Appointments WHERE ID = ?", $created
+		);
+		
+		$self->query( 'query', __LINE__, "
+			UPDATE Appointments SET Status = 10 WHERE ID = ?", {}, $created
+		) if ( $current_status == 11 )
 	}
 
 	return print 'ok';
