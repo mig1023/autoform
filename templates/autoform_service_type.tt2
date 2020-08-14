@@ -44,11 +44,10 @@
 
 	<tr><td class="left" colspan="5" id = "applist">
 	<input class="action_button big_button" type="button" value="[% langreq('Запись на подачу документов') %]" onclick="go_button('appointment');"><br><br>
-	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза. Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
-	<br>
+	<span class="ltl_text">[% langreq('Запись в визовый центр') %].</span><br><br>
 	<input class="action_button big_button" type="button" value="[% langreq('Онлайн проверка документов') %]" onclick="go_button('checkdoc');"><br><br>
-	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза.') %]<br><br>
-	<input class="action_button big_button" disabled type="button" value="[% langreq('Дистанционная подача документов') %]" onclick="go_button('remoteapp');"><br><br>[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. Обратите внимание, что необходимо внести всех заявителей, которым необходима виза.') %]<br><br>
+	<span class="ltl_text">[% langreq('Данная услуга представляет собой предварительную проверку документов, которая позволяет сократить время обслуживания клиента на момент подачи документов в Визовом центре.<br><br>Период оказания услуги <b>3 рабочих дня</b>.<br><br>Ознакомиться со стоимостью услуги Вы можете <a href="/dopolnitelnye-uslugi/" class="dotted_link">здесь</a>') %].</span><br><br>
+	<input class="action_button big_button" disabled type="button" value="[% langreq('Дистанционная подача документов') %]" onclick="go_button('remoteapp');"><br><br><span class="ltl_text">[% langreq('Удалённая запись в визовый центр.') %].</span><br><br>
 	</td></tr>
 
 <tr><td class="left" colspan="5"><br>
