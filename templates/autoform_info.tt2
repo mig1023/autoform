@@ -488,7 +488,9 @@
 	</table>
 	</td></tr>
 	
-	[% IF (!closed_app) %]
+	[% IF not_checked_yet %]
+		<tr><td>&nbsp;</td></tr>
+	[% ELSIF (!closed_app) %]
 		<tr>
 		<td colspan="2"><br><input class="big_button" type="button" value="[% langreq('Завершить обслуживание') %]" onclick="close_app();"><br></td>
 		</tr>

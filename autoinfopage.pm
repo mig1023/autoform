@@ -155,6 +155,8 @@ sub get_infopage
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my ( $app_list, $title );
+	
+	my $not_checked_yet = 1;
 
 	if ( $app_info->{ ServiceType } <= 1 ) {
 		
@@ -166,10 +168,14 @@ sub get_infopage
 		$app_list = $self->get_app_file_list_by_token( $self->{ token } );
 		
 		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
+		
+		for my $app ( keys %$app_list ) {
+			$not_checked_yet = 0 if $app_list->{ $app }->{ checked_already } == 1;
+		}
 	}
-	
-	my $closed_app = ( $app_info->{ app_status } == 12 ? 1 : 0 );
 
+	my $closed_app = ( $app_info->{ app_status } == 12 ? 1 : 0 );
+	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> $title,
@@ -184,7 +190,7 @@ sub get_infopage
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
 		'closed_app'	=> $closed_app,
-		
+		'not_checked_yet' => $not_checked_yet,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -754,7 +760,13 @@ sub get_app_file_list_by_token
 				for my $date ( keys %{ $logs->{ $_->{ DocID } } } ) {
 
 					push( @{ $doc_comments->{ $_->{ DocID } } },
-						{ text => $logs->{ $_->{ DocID } }->{ $date }, date => $date, login => 'website', log => 1 } );
+						{
+							text => $logs->{ $_->{ DocID } }->{ $date },
+							date => $date,
+							login => 'website',
+							log => 1
+						}
+					);
 				}
 			}
 		}		
@@ -800,6 +812,8 @@ sub get_app_file_list_by_token
 		}
 	}
 	
+	my $checked_already = 0;
+	
 	for my $app ( keys %$doc_list ) {
 	
 		for my $doc_type ( keys %{ $doc_list->{ $app }->{ files } } ) {
@@ -807,10 +821,14 @@ sub get_app_file_list_by_token
 			for my $file ( @{ $doc_list->{ $app }->{ files }->{ $doc_type } } ) {
 			
 				$file->{ multiple } = 1 if @{ $doc_list->{ $app }->{ files }->{ $doc_type } } > 1;
+
+				$checked_already = 1 if !$checked_already and $file->{ CheckStatus } > 0;
 			};
 		};
+		
+		$doc_list->{ $app }->{ checked_already } = $checked_already;
 	};
-	
+
 	return $doc_list;
 }
 	
