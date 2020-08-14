@@ -74,7 +74,7 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'VType',
 				},
-				param => '[visas_from_db]',
+				param => '[visas_from_db_checkdoc]',
 				first_elements => '13',
 				special => 'cach_this_value',
 			},

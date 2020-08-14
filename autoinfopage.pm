@@ -777,7 +777,7 @@ sub get_app_file_list_by_token
 		
 		my $file = {};
 
-		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID');
+		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID' );
 		
 		$file->{ file_ord } = $doc_ords{ $file->{ DocType } }; 		
 
@@ -792,7 +792,7 @@ sub get_app_file_list_by_token
 		else {
 			$doc_list->{ $app->{ ID } } = {};
 			
-			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token',   );
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token' );
 
 			$doc_list->{ $app->{ ID } }->{ files } = {};
 			
@@ -810,8 +810,7 @@ sub get_app_file_list_by_token
 			};
 		};
 	};
-
-
+	
 	return $doc_list;
 }
 	

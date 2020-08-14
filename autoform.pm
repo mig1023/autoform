@@ -671,6 +671,7 @@ sub init_add_param
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
 				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
+				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID = 1',
 				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU, Schengen FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
 			};
@@ -3962,13 +3963,13 @@ sub send_checkdoc_mail
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
 	);
-	
+
 	return if $sended_already and ( $type == 1 );
 		
 	my $subject = $self->lang( 'Проверка документов в итальянском ВЦ' );
 	
 	my $htmls_by_types = VCS::Site::autodata::get_checkdoc_text();
-	
+
 	my $htmls = $htmls_by_types->{ $type };
 	
 	my $body = undef;
@@ -4745,6 +4746,10 @@ sub check_all_app_and_close
 	$self->query( 'query', __LINE__, "
 		UPDATE Appointments SET Status = 12 WHERE ID = ?", {}, $app_id
 	);
+	
+	$self->{ token } = $token;
+	
+	$self->send_checkdoc_mail( 3 );
 }
 
 sub download_file
