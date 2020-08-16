@@ -826,6 +826,10 @@ sub get_app_file_list_by_token
 			};
 		};
 		
+		my @files = sort { $a->[0]->{ file_ord } <=> $b->[0]->{ file_ord } } values %{ $doc_list->{ $app }->{ files } };
+			
+		$doc_list->{ $app }->{ files } = \@files;
+		
 		$doc_list->{ $app }->{ checked_already } = $checked_already;
 	};
 
