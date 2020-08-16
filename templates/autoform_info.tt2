@@ -401,13 +401,16 @@
 		
 		[% SET n = 0 %]
 		[% FOREACH file IN person.value.files %]
+		
+			[% NEXT IF file.0.empty %]
+			
 			[% SET n = n + 1 %]
 			<tr>
 			<td>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
 				[% IF (file.0.CheckStatus == 1) %]<b>[% END %]
 					[% IF (file.0.DocType < 0) %]
 						[% langreq('Дополнительный документ') %]
-					[% ELSE %]	
+					[% ELSE %]
 						[% file.0.TypeStr %]
 					[% END %]
 				[% IF (file.0.CheckStatus == 1) %]</b>[% END %]

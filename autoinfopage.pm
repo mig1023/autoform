@@ -716,10 +716,10 @@ sub get_app_file_list_by_token
 	
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
 	
-	my $doc_types_tmp = VCS::Site::autodata::get_doc_list();
+	my $doc_types_list = VCS::Site::autodata::get_doc_list();
 	
-	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_tmp;
-	my %doc_ords = map { $_->{ id } => $_->{ doc_ord } } @$doc_types_tmp;
+	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_list;
+	my %doc_ords = map { $_->{ id } => $_->{ doc_ord } } @$doc_types_list;
 	
 	my $doc_comments_tmp = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT DocID, CommentText, CommentDate, DocUploadedComment.Login
@@ -812,6 +812,39 @@ sub get_app_file_list_by_token
 		}
 	}
 	
+	my $visa_type = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT VType FROM AutoToken
+		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
+		WHERE Token = ?", $token
+	);
+	
+	for my $empty ( @$doc_types_list ) {
+		
+		my %visas = map { $_ => 1 } split /,\s?/, $empty->{ visa };
+		
+		next unless exists $visas{ $visa_type };
+		
+		next unless $empty->{ optional };
+		
+		for my $app ( keys %$doc_list ) {
+			
+			if ( !exists $doc_list->{ $app }->{ files }->{ $empty->{ id } } ) {
+			
+				$doc_list->{ $app }->{ files }->{ $empty->{ id } } = [];
+				
+				my $file = {};
+				
+				$file->{ file_ord } = $empty->{ doc_ord }; 		
+
+				$file->{ TypeStr } = $empty->{ title };
+				
+				$file->{ empty } = 1;
+				
+				push( @{ $doc_list->{ $app }->{ files }->{ $empty->{ id } } }, $file );
+			}
+		}
+	}
+	
 	my $checked_already = 0;
 	
 	for my $app ( keys %$doc_list ) {
@@ -832,7 +865,7 @@ sub get_app_file_list_by_token
 		
 		$doc_list->{ $app }->{ checked_already } = $checked_already;
 	};
-
+	
 	return $doc_list;
 }
 	
