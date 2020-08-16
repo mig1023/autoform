@@ -729,7 +729,7 @@ sub get_app_file_list_by_token
 		JOIN DocUploadedComment ON DocUploaded.ID = DocUploadedComment.DocID
 		WHERE Token = ? AND AppData.Status = 1", $token
 	);
-	
+
 	my $doc_upload_log = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT DocID, LogDate, LogText
 		FROM AutoToken
@@ -794,9 +794,9 @@ sub get_app_file_list_by_token
 		$file->{ file_ord } = $doc_ords{ $file->{ DocType } }; 		
 
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
-		
+	
 		$file->{ comments } = $doc_comments->{ $app->{ DocID } };
-		
+	
 		$file->{ no_file_yet } = ( $file->{ Name } ? 0 : 1 );
 		
 		if ( exists $doc_list->{ $app->{ ID } } ) {
@@ -850,9 +850,36 @@ sub get_app_file_list_by_token
 			}
 		}
 	}
+		
+	for my $app ( keys %$doc_list ) {
+		
+		if ( exists $doc_list->{ $app }->{ files }->{ 9999 } ) {
+			
+			$doc_list->{ $app }->{ files }->{ 9999 }->[ 0 ]->{ TypeStr } = $self->{ af }->lang( "Анкета (генерируется автоматически)" );
+			
+			$doc_list->{ $app }->{ files }->{ 9999 }->[ 0 ]->{ form_auto } = 1;
+			
+			$doc_list->{ $app }->{ files }->{ 9999 }->[ 0 ]->{ file_ord } = 999; 
+		}
+		else {
+			my $file = {};
+						
+			$file->{ file_ord } = 999; 
+
+			$file->{ DocID } = "form";
+			
+			$file->{ DocType } = 9999; 
+
+			$file->{ TypeStr } = $self->{ af }->lang( "Анкета (генерируется автоматически)" );
+			
+			$file->{ form_auto } = 1;
+			
+			push( @{ $doc_list->{ $app }->{ files }->{ 9999 } }, $file );
+		}
+	}
 	
 	my $checked_already = 0;
-	
+
 	for my $app ( keys %$doc_list ) {
 	
 		for my $doc_type ( keys %{ $doc_list->{ $app }->{ files } } ) {
@@ -871,6 +898,8 @@ sub get_app_file_list_by_token
 		
 		$doc_list->{ $app }->{ checked_already } = $checked_already;
 	};
+	
+	
 	
 	return $doc_list;
 }

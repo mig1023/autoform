@@ -408,7 +408,9 @@
 			<tr class="files_uploaded">
 			<td colspan="4">&nbsp;&nbsp;[% i %].[% n %].&nbsp;
 				[% IF (file.0.CheckStatus == 1) %]<b>[% END %]
-					[% IF (file.0.DocType < 0) %]
+					[% IF (file.0.form_auto == 1) %]
+						<a href="javascript:go_button('print_a', '[% person.key %]');" class="dotted_link">[% file.0.TypeStr %]</a>
+					[% ELSIF (file.0.DocType < 0) %]
 						[% langreq('Дополнительный документ') %]
 					[% ELSE %]
 						[% file.0.TypeStr %]
@@ -480,11 +482,15 @@
 			
 			[% IF ( (file.0.multiple != 1) && (file.0.CheckStatus == 1) && !closed_app) %]
 				<tr class="files_uploaded"><td colspan="5">
-					<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %] )"/>
-					<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">
-					[% IF (file.0.no_file_yet == 1) %][% langreq('загрузить') %][% ELSE %][% langreq('заменить') %][% END %]
-					</span>
-					<span class="show_other_option ltl_text">[% langreq('или') %]</span>
+					[% IF (file.0.form_auto != 1) %]
+						<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %] )"/>
+						<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">
+						[% IF (file.0.no_file_yet == 1) %][% langreq('загрузить') %][% ELSE %][% langreq('заменить') %][% END %]
+						</span>
+						<span class="show_other_option ltl_text">[% langreq('или') %]</span>
+					[% ELSE %]
+						<span class="show_replace_option ltl_link"></span>
+					[% END %]
 					<span class="show_other_option ltl_link" onclick="insist([% person.key %], [% file.0.DocType %]);">[% langreq('оставить как есть') %]</span><br><br>
 				</td></tr>
 			[% END %]
