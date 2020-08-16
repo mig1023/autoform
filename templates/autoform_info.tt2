@@ -395,7 +395,7 @@
 	[% FOREACH person IN app_list %]
 		[% SET i = i + 1 %]
 		<tr>
-		<td class="info_list"><nobr>[% i %]. [% person.value.FName %] [% person.value.LName %]</nobr></td>
+		<td colspan="4" class="info_list" width="80%"><nobr>[% i %]. [% person.value.FName %] [% person.value.LName %]</nobr></td>
 		<td class="m_right"><span class="mobil_hide">[% person.value.BirthDate %]</span>&nbsp;</td>
 		</tr>
 		
@@ -405,8 +405,8 @@
 			[% NEXT IF file.0.empty %]
 			
 			[% SET n = n + 1 %]
-			<tr>
-			<td>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
+			<tr class="files_uploaded">
+			<td colspan="4">&nbsp;&nbsp;[% i %].[% n %].&nbsp;
 				[% IF (file.0.CheckStatus == 1) %]<b>[% END %]
 					[% IF (file.0.DocType < 0) %]
 						[% langreq('Дополнительный документ') %]
@@ -437,8 +437,8 @@
 				[% SET k = 0 %]
 				[% FOREACH page IN file.value %]
 					[% SET k = k + 1 %]
-					<tr>
-					<td width="450px">&nbsp;&nbsp;&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
+					<tr class="files_uploaded">
+					<td colspan="4" width="450px">&nbsp;&nbsp;&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
 						[% IF (page.CheckStatus == 1) %]<b>[% END %]
 							[% langreq('Страница') %] [% k %]
 						[% IF (page.CheckStatus == 1) %]</b>[% END %]
@@ -467,21 +467,23 @@
 			
 			[% IF (file.0.comments.size > 0) %]
 				
-				<tr id="show_comments[% i %]-[% n %]">
-					<td colspan="3"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
+				<tr id="show_comments[% i %]-[% n %]" class="files_uploaded">
+					<td colspan="5"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
 				</tr>
 				[% FOREACH comment IN file.0.comments %]
 					
 					<tr class="hidden" name="comments[% i %]-[% n %]">
-					<td colspan="3"><span class="[% IF (comment.log == 1) %]log_comment[% ELSE %]doc_support_comment[% END %]">[% comment.text %] | [% comment.date %]</span></td>
+					<td colspan="5"><span class="[% IF (comment.log == 1) %]log_comment[% ELSE %]doc_support_comment[% END %]">[% comment.text %] | [% comment.date %]</span></td>
 					</tr>
 				[% END %]
 			[% END %]
 			
 			[% IF ( (file.0.multiple != 1) && (file.0.CheckStatus == 1) && !closed_app) %]
-				<tr><td colspan="3">
+				<tr class="files_uploaded"><td colspan="5">
 					<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %] )"/>
-					<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">[% langreq('заменить') %]</span>
+					<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">
+					[% IF (file.0.no_file_yet == 1) %][% langreq('загрузить') %][% ELSE %][% langreq('заменить') %][% END %]
+					</span>
 					<span class="show_other_option ltl_text">[% langreq('или') %]</span>
 					<span class="show_other_option ltl_link" onclick="insist([% person.key %], [% file.0.DocType %]);">[% langreq('оставить как есть') %]</span><br><br>
 				</td></tr>

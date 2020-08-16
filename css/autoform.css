@@ -321,6 +321,15 @@
 	font-size:11px;
 }
 
+.log_comment  {
+	display:inline-block;
+	margin-left:20px;
+	padding:10px;
+	border-collapse:collapse;
+	background-color:#CCCCCC;
+	font-size:11px;
+}
+
 .doc_app_comment  {
 	display:inline-block;
 	margin-left:20px;
@@ -334,7 +343,6 @@
 	display:inline-block;
 	margin-left:20px;
 	color:red;
-	font-size:12px;
 	font-weight:bold;
 	cursor:pointer;
 }
@@ -363,4 +371,8 @@
 .very_important {
 	color:red;
 	font-weight:bold;
+}
+
+.files_uploaded {
+	font-size:12px;
 }

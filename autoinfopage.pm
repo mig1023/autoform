@@ -797,6 +797,8 @@ sub get_app_file_list_by_token
 		
 		$file->{ comments } = $doc_comments->{ $app->{ DocID } };
 		
+		$file->{ no_file_yet } = ( $file->{ Name } ? 0 : 1 );
+		
 		if ( exists $doc_list->{ $app->{ ID } } ) {
 			
 			push( @{ $doc_list->{ $app->{ ID } }->{ files }->{ $file->{ DocType } } }, $file );
@@ -834,7 +836,11 @@ sub get_app_file_list_by_token
 				
 				my $file = {};
 				
-				$file->{ file_ord } = $empty->{ doc_ord }; 		
+				$file->{ file_ord } = $empty->{ doc_ord }; 
+
+				$file->{ DocID } = "empty_" . $empty->{ id };
+				
+				$file->{ DocType } = $empty->{ id }; 
 
 				$file->{ TypeStr } = $empty->{ title };
 				
