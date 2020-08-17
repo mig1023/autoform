@@ -437,7 +437,7 @@
 			[% IF (file.0.multiple == 1) %]
 					
 				[% SET k = 0 %]
-				[% FOREACH page IN file.value %]
+				[% FOREACH page IN file %]
 					[% SET k = k + 1 %]
 					<tr class="files_uploaded">
 					<td colspan="4" width="450px">&nbsp;&nbsp;&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
