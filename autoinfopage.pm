@@ -850,31 +850,33 @@ sub get_app_file_list_by_token
 			}
 		}
 	}
+	
+	my $tmp_id = 9999;
 		
 	for my $app ( keys %$doc_list ) {
 		
-		if ( exists $doc_list->{ $app }->{ files }->{ 9999 } ) {
+		if ( exists $doc_list->{ $app }->{ files }->{ $tmp_id } ) {
 			
-			$doc_list->{ $app }->{ files }->{ 9999 }->[ 0 ]->{ TypeStr } = $self->{ af }->lang( "Анкета (генерируется автоматически)" );
+			$doc_list->{ $app }->{ files }->{ $tmp_id }->[ 0 ]->{ TypeStr } = $self->{ af }->lang( "Анкета (генерируется автоматически)" );
 			
-			$doc_list->{ $app }->{ files }->{ 9999 }->[ 0 ]->{ form_auto } = 1;
+			$doc_list->{ $app }->{ files }->{ $tmp_id }->[ 0 ]->{ form_auto } = 1;
 			
-			$doc_list->{ $app }->{ files }->{ 9999 }->[ 0 ]->{ file_ord } = 999; 
+			$doc_list->{ $app }->{ files }->{ $tmp_id }->[ 0 ]->{ file_ord } = $tmp_id; 
 		}
 		else {
 			my $file = {};
 						
-			$file->{ file_ord } = 999; 
+			$file->{ file_ord } = $tmp_id; 
 
-			$file->{ DocID } = "form";
+			$file->{ DocID } = "empty_$tmp_id";
 			
-			$file->{ DocType } = 9999; 
+			$file->{ DocType } = $tmp_id; 
 
 			$file->{ TypeStr } = $self->{ af }->lang( "Анкета (генерируется автоматически)" );
 			
 			$file->{ form_auto } = 1;
 			
-			push( @{ $doc_list->{ $app }->{ files }->{ 9999 } }, $file );
+			push( @{ $doc_list->{ $app }->{ files }->{ $tmp_id } }, $file );
 		}
 	}
 	
@@ -898,8 +900,6 @@ sub get_app_file_list_by_token
 		
 		$doc_list->{ $app }->{ checked_already } = $checked_already;
 	};
-	
-	
 	
 	return $doc_list;
 }
