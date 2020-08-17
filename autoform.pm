@@ -3735,7 +3735,7 @@ sub mod_hash
 			$_ = "0$_" if $_ < 10;
 		};
 	
-		$hash->{ CenterID } = 1;
+		$hash->{ CenterID } = ( $checkdoc == 2 ? 46 : 1 );
 		
 		$hash->{ AppDate } = "$year-$mon-$day";
 		

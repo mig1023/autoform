@@ -44,7 +44,7 @@
 
 	<tr><td class="left" colspan="5" id = "applist">
 	<input class="action_button big_button" type="button" value="[% langreq('Запись на подачу документов') %]" onclick="go_button('appointment');"><br><br>
-	<span class="ltl_text">[% langreq('Запись в визовый центр') %].</span><br><br>
+	<span class="ltl_text">[% langreq('Запись на подачу в визовый центр. Обратите внимание, что необходимо внести всех заявителей, которым потребуется виза') %].</span><br><br>
 	<input class="action_button big_button" type="button" value="[% langreq('Онлайн проверка документов') %]" onclick="go_button('checkdoc');"><br><br>
 	<span class="ltl_text">[% langreq('Данная услуга представляет собой предварительную проверку документов.<br>Период оказания услуги <b>3 рабочих дня</b>.<br>Ознакомиться со стоимостью услуги Вы можете <a href="/dopolnitelnye-uslugi/" class="dotted_link">здесь</a>') %].</span>
 	</td></tr>
