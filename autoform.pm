@@ -789,7 +789,7 @@ sub init_add_param
 				if ( exists $element->{ check_logic } and $self->{ token } and $keys->{ collect_date } ) {
 				
 					for ( @{ $element->{ check_logic } } ) {
-					
+
 						$_->{ offset } = $self->get_collect_date()	
 							if $_->{ offset } =~ /\[collect_date_offset\]/;
 					}
@@ -822,11 +822,11 @@ sub get_collect_date
 	my $collect_dates = $self->cached( 'autoform_collectdates' );
 		
 	if ( !$collect_dates ) {
-	
+
 		my $collect_dates_array = $self->query( 'selallkeys', __LINE__, "
-			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD
-			FROM Branches where isDeleted = 0 and Display = 1"
+			SELECT ID, CollectDate, cdSimpl, cdUrgent, cdCatD FROM Branches"
 		);
+		
 		$collect_dates = {};
 		
 		for my $date ( @$collect_dates_array ) {
@@ -940,6 +940,16 @@ sub create_clear_form
 		UPDATE AutoToken SET AutoAppID = ?, StartDate = now(), LastIP = ? WHERE Token = ?", {}, 
 		$app_id, $ENV{ HTTP_X_REAL_IP }, $self->{ token }
 	);
+	
+	my $checkdoc_service = $self->get_current_service();
+
+	return if $checkdoc_service <= 1;
+
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoAppointments SET CenterID = 46 WHERE ID = ?", {}, $app_id
+	);
+	
+	$self->get_app_visa_and_center( 'need_to_recached_data' );
 }
 	
 sub token_generation
@@ -3735,8 +3745,6 @@ sub mod_hash
 			$_ = "0$_" if $_ < 10;
 		};
 	
-		$hash->{ CenterID } = ( $checkdoc == 2 ? 46 : 1 );
-		
 		$hash->{ AppDate } = "$year-$mon-$day";
 		
 		$hash->{ Status } = 10 if $checkdoc == 2; 
