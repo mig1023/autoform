@@ -459,7 +459,7 @@ sub get_payment_price
 	my $payment_price = $self->query( 'sel1', __LINE__, "
 		SELECT Price FROM PriceRate
 		JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
-		WHERE BranchID = 1 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = ?
+		WHERE BranchID = 46 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = ?
 		ORDER by PriceRate.ID DESC LIMIT 1",
 		$services_id->{ $service }
 	);
@@ -589,8 +589,8 @@ sub get_same_info_for_timeslots
 	my $app = {};
 
 	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot }, 
-			$app->{ appdate }, $app->{ urgent } ) = $self->query( 'sel1', __LINE__, "
-		SELECT count(AutoAppData.ID), CenterID, SDate, TimeslotID, AppDate, Urgent
+			$app->{ appdate }, $app->{ urgent }, $app->{ vtype } ) = $self->query( 'sel1', __LINE__, "
+		SELECT count(AutoAppData.ID), CenterID, SDate, TimeslotID, AppDate, Urgent, VType
 		FROM AutoToken 
 		JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
@@ -3745,6 +3745,8 @@ sub mod_hash
 			$_ = "0$_" if $_ < 10;
 		};
 	
+		$hash->{ CenterID } = ( $checkdoc == 2 ? 46 : 1 );
+		
 		$hash->{ AppDate } = "$year-$mon-$day";
 		
 		$hash->{ Status } = 10 if $checkdoc == 2; 
