@@ -131,7 +131,7 @@ sub get_content_rules_hash
 				type => 'disclaimer',
 				name => 'pers_info',
 				label_for => 'я согласен с <a class = "dotted_link_big" href = "javascript:openDisclaimer()">условиями</a> обработки персональных данных визовым центром',
-				comment => 'disclaimer_text',
+				comment => 'disclaimer_text_checkdoc',
 				check => 'true',
 				full_line => 1,
 				db => {

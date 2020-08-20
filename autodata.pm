@@ -465,9 +465,24 @@ sub get_doc_list
 	return [ 
 		{ 
 			id => 1,
-			title => 'Загранпаспорт',
-			visa => '1, 13, 9, 17, 15',
-			multiple => 10,
+			doc_ord => 1,
+			title => 'Действующий загранпаспорт',
+			visa => '1, 13',
+			help => {
+				base => {
+					ru => '/zagranpasport/',
+					en => '/travel-document-passport/',
+					it => '/il-titolo-di-viaggio/',
+				},
+			},
+			comment => 'Загружается СТРОГО одним файлом',
+		},
+		{ 
+			id => 2,
+			doc_ord => 2,
+			title => 'Второй действующий загранпаспорт',
+			visa => '1',
+			optional => 1,
 			help => {
 				base => {
 					ru => '/zagranpasport/',
@@ -477,45 +492,25 @@ sub get_doc_list
 			},
 		},
 		{ 
-			id => 2,
-			title => 'Авиабилет',
-			visa => '13',
-			help => {
-				base => {
-					ru => '/documentformsk/dokumenty-na-turisticheskuyu-vizu-2/bilet-ili-bron-bileta-tuda-i-obratno/',
-					en => '/documents-for-moscow/document-requirements-for-tourist-visa/travel-vouchersreturn-tickets/',
-					it => '/i-documenti-per-il-visto-turistico/prenotazione-aerea-di-andata-e-ritorno/',
-				},
-			},
-		},
-		{
 			id => 3,
-			title => 'Подтверждение проживания',
-			visa => '1, 13',
+			doc_ord => 3,
+			title => 'Аннулированный загранпаспорт',
+			visa => '1',
+			optional => 1,
 			help => {
 				base => {
-					ru => '/documentformsk/dokumenty-na-turisticheskuyu-vizu-2/priglashenie-ili-bron-otelya/',
-					en => '/documents-for-moscow/document-requirements-for-tourist-visa/invitation-letter-or-hotel-reservation/',
-					it => '/documentformskit/i-documenti-per-il-visto-turistico/lettera-di-invito-o-prenotazione-alberghiera/',
-				},
-			},
-		},
-		{ 
-			id => 4,
-			title => 'Медицинская страховка',
-			visa => '1, 13, 15',
-			help => {
-				base => {
-					ru => '/medicinskaya-straxovka/',
-					en => '/international-medical-insurance-valid-for-all-the-schengen-territory-3/',
-					it => '/assicurazione-medica-valida-per-i-paesi-dello-spazio-schengen-3/',
+					ru => '/zagranpasport/',
+					en => '/travel-document-passport/',
+					it => '/il-titolo-di-viaggio/',
 				},
 			},
 		},
 		{
-			id => 5,
+			id => 4,
+			doc_ord => 4,
 			title => 'Справка с работы',
-			visa => '1, 13, 15',
+			visa => '1',
+			multiple => 3,
 			help => {
 				base => {
 					ru => '/podtverzhdenie-zanyatosti/',
@@ -525,9 +520,19 @@ sub get_doc_list
 			},
 		},
 		{
+			id => 5,
+			doc_ord => 5,
+			title => 'Свидетельство ЕГРЮЛ/ЕГРИП',
+			visa => '1',
+			multiple => 2,
+			optional => 1,
+		},
+		{
 			id => 6,
+			doc_ord => 6,
 			title => 'Финансовая гарантия',
-			visa => '1, 13, 15, 2',
+			visa => '1',
+			multiple => 10,
 			help => {
 				base => {
 					ru => '/finansovaya-garantiya-2/',
@@ -538,25 +543,18 @@ sub get_doc_list
 		},
 		{
 			id => 7,
+			doc_ord => 7,
 			title => 'Внутренний паспорт',
-			visa => '1, 13, 9, 17, 15',
+			visa => '1',
+			
+			comment => 'Для граждан РФ: страница с личными данными и прописка. Для иностранных граждан: регистрация/РВП/ВНЖ, действующая виза РФ.',
 		},
 		{
 			id => 8,
-			title => 'Согласие на обработку ПД',
-			visa => '1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17',
-			help => {
-				base => {
-					ru => '/soglasie-na-obrabotku-personalnyx-dannyx/',
-					en => '/consent-for-processing-the-personal-data/',
-					it => '/consenso-al-trattamento-dei-dati-personali/',
-				},
-			},
-		},
-		{
-			id => 9,
+			doc_ord => 8,
 			title => 'Приглашение от организации',
-			visa => '1, 9, 17, 15',
+			visa => '1',
+			multiple => 10,
 			help => {
 				base => {
 					ru => '/priglashenie/',
@@ -566,47 +564,75 @@ sub get_doc_list
 			},
 		},
 		{
+			id => 9,
+			doc_ord => 9,
+			title => 'Документы приглашающего лица ',
+			multiple => 2,
+			visa => '1',
+		},
+		{
 			id => 10,
-			title => 'Паспорт приглашающего',
-			visa => '1, 9, 17, 15',
+			doc_ord => 10,
+			title => 'Выписка из Торговой Палаты',
+			optional => 1,
+			visa => '1',
+			comment => 'Загружается СТРОГО одним файлом',
 		},
 		{
 			id => 11,
-			title => 'Выписка из Торговой Палаты',
-			visa => '1, 15',
+			doc_ord => 11,
+			title => 'Подтверждение проживания',
+			multiple => 10,
+			optional => 1,
+			visa => '1',
+			help => {
+				base => {
+					ru => '/documentformsk/dokumenty-na-turisticheskuyu-vizu-2/priglashenie-ili-bron-otelya/',
+					en => '/documents-for-moscow/document-requirements-for-tourist-visa/invitation-letter-or-hotel-reservation/',
+					it => '/documentformskit/i-documenti-per-il-visto-turistico/lettera-di-invito-o-prenotazione-alberghiera/',
+				},
+			},
+			comment => 'Необходимо предоставить, если не указано в приглашении от организации',
 		},
-		{
+		{ 
 			id => 12,
-			title => 'Свидетельство ЕГРЮЛ',
-			visa => '1, 15',
+			doc_ord => 12,
+			title => 'Медицинская страховка',
+			visa => '1',
+			help => {
+				base => {
+					ru => '/medicinskaya-straxovka/',
+					en => '/international-medical-insurance-valid-for-all-the-schengen-territory-3/',
+					it => '/assicurazione-medica-valida-per-i-paesi-dello-spazio-schengen-3/',
+				},
+			},
 		},
-		{
+		{ 
 			id => 13,
-			title => 'Подтверждение родства',
-			visa => '9, 17',
+			doc_ord => 13,
+			title => 'Документы подтверждающие льготную категорию по оплате консульского сбора',
+			visa => '1',
+			optional => 1,
+			multiple => 10,
+			help => {
+				base => {
+					ru => '/lgotnye-kategorii/',
+					en => '/lgotnye-kategorii/',
+					it => '/lgotnye-kategorii/',
+				},
+			},
 		},
 		{
 			id => 14,
-			title => 'Пенсионное удостоверение',
-			visa => '9, 17',
-		},
-		{
-			id => 15,
-			title => 'Допуск МинТранса',
-			visa => '15',
-		},
-		{
-			id => 16,
-			title => 'Водительское удостоверение',
-			visa => '15',
-		},
-		{
-			id => 17,
-			title => 'Письмо транспортной компании',
-			visa => '15',
+			doc_ord => 14,
+			title => 'Доверенность на подачу',
+			visa => '1',
+			optional => 1,
+			multiple => 3,
 		},
 	];
 }
+
 
 sub get_blocked_emails
 # //////////////////////////////////////////////////

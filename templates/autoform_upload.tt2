@@ -5,6 +5,7 @@
 <script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
 <link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
 <link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/tip-yellowsimple.css" rel="stylesheet" type="text/css">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>VMS - [% langreq('Новая запись') %]</title>
 </head>
@@ -67,8 +68,10 @@
 		&nbsp;</td>
 		<td class="info_list mobil_hide [% IF (doc.optional == 1) %]optional_line[% END %]">
 		[% langreq(doc.title) %]
-		[% IF doc.help != '' %]
-			<a target="_blank" class="nfc_link" href="[% doc.help %]">[?]</a>
+		[% IF (doc.help != '') %]
+			<a target="_blank" class="nfc_link" href="[% doc.help %]" [% IF (doc.comment != '') %]title="[% doc.comment %]"[% END %]>[?]</a>
+		[% ELSIF (doc.comment != '') %]
+			<a class="nfc_link" href="" title="[% doc.comment %]" onclick="return false;">[?]</a>
 		[% END %]
 		</td>
 		
@@ -372,6 +375,35 @@ function upload( doc_id, upfile_field ) {
 
 $(document).ready(mobileScreenCheck);
 
+
+function init_poshytip(cls, fcs, aTo, aX, aY, ofX, ofY) {
+
+	$(cls).poshytip({
+		className: 'tip-yellowsimple',
+		showOn: fcs,
+		alignTo: aTo,
+		alignX: aX,
+		alignY: aY,
+		offsetX: ofX,
+		offsetY: ofY,
+		showTimeout: 100
+	});
+}
+
+function init_comm() {
+
+	$('.nfc_link').poshytip('destroy');
+	
+	if ( document.body.clientWidth < 1000 ) {
+		init_poshytip('.nfc_link', '', 'target', 'center', 'top', 5, 6);
+	} else {
+		init_poshytip('.nfc_link', '', 'target', 'right', 'center', 5, 0);
+	}
+	
+	$('.tip-yellowsimple, .tip-inner ').css( "font-size", ( mobilScreen ? '35px' : '' ) );
+	$('.tip-yellowsimple, .tip-inner ').css( "line-height", ( mobilScreen ? '1.2' : '' ) );
+}
+
 function mobileScreenCheck() {
 
 	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
@@ -380,6 +412,8 @@ function mobileScreenCheck() {
 	$('.edit_input').attr( "value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
 
 	if ( !mobilScreen ) {
+	
+		init_comm();
 	
 		$('#progressbar').css( "display", 'table' );
 		$('#app_form').css( "margin", '50px' );
