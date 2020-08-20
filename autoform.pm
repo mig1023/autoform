@@ -425,11 +425,13 @@ sub payment_check
 {
 	my $self = shift;
 	
-	my ( $pay_id, $order_id ) = $self->query( 'sel1', __LINE__, "
-		SELECT AutoPayment.ID, OrderID FROM AutoPayment
+	my ( $pay_id, $order_id, $current_pay_status ) = $self->query( 'sel1', __LINE__, "
+		SELECT AutoPayment.ID, OrderID, PaymentStatus FROM AutoPayment
 		JOIN AutoToken ON AutoPayment.AutoID = AutoToken.AutoAppID
 		WHERE Token = ?", $self->{ token }
-	);		
+	);
+
+	return ( 1, "" ) if $current_pay_status == 2;
 
 	my $status = VCS::Site::autopayment::status( $self, $order_id );
 
