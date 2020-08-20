@@ -57,7 +57,7 @@ sub get_content_rules_hash
 					table => 'Appointments',
 					name => 'VType',
 				},
-				param => '[visas_from_db]',
+				param => '[visas_from_db_checkdoc]',
 				first_elements => '13',
 				special => 'cach_this_value',
 			},
@@ -139,11 +139,6 @@ sub get_content_rules_hash
 					name => 'PersonalDataPermission',
 					transfer => 'nope',
 				},
-			},
-			{
-				type => 'include',
-				place => 'out',
-				template => 'vip_form.tt2',
 			},
 		],
 			
@@ -2332,6 +2327,28 @@ sub get_content_rules_hash
 			},
 		],
 			
+		'Оферта' => [
+			{
+				page_ord => 2650,
+				progress => 10,
+				param => 1,
+				page_db_id => 400032,
+			},
+			{
+				type => 'oferta',
+				name => 'oferta',
+				label_for => 'я ознакомился с офертой на оказание услуги проверки документов',
+				comment => 'oferta_text_checkdoc',
+				check => 'true',
+				full_line => 1,
+				db => {
+					table => 'Appointments',
+					name => 'MobilPermission',
+					transfer => 'nope',
+				},
+			},
+		],
+			
 		'Оплата' => [
 			{
 				page_ord => 2700,
@@ -2339,12 +2356,8 @@ sub get_content_rules_hash
 				page_db_id => 400030,
 			},
 			{
-				# type => 'payment',
-				# full_line => 1,
-				
-				type => 'text',
-				name => 'pay_warning',
-				label => 'Тестирование оплаты происходит в отдельной системы. Это просто страница-заглушка.',
+				type => 'payment',
+				full_line => 1,
 			},
 		],
 				

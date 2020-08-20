@@ -170,6 +170,9 @@ sub get_html_elements
 				'<script>function openDisclaimer() { if ( $("#disc").css("display") == "none" )' .
 				'{ $("#disc").show(); } else { $("#disc").hide(); } }</script>',
 		
+		oferta		=> '<div id="disc" class="oferta"><br>[comment]<br></div>' .
+				'<br><input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
+		
 		select		=> '<select class="input_width select_gen" size = "1" ' .
 				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
 				

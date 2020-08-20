@@ -243,6 +243,13 @@
 	text-align:justify;
 }
 
+.oferta {
+	border:1px solid black;
+	padding:15px;
+	font-size:9px;
+	text-align:justify;
+}
+
 .editFullOption {
 	border:1px solid gray;
 	padding:15px;
