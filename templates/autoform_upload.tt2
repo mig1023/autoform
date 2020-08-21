@@ -75,6 +75,10 @@
 		[% END %]
 		</td>
 		
+		<td class="hidden pc_hide_line center">
+			<br>[% langreq(doc.title) %]
+		</td>
+		
 		[% IF ( ( doc.uploaded != 1 ) || ( doc.multiple > 0 ) ) %]
 			<td class="middle" colspan="2"><span id="tmp_span_[% doc.id %]" class="hidden"><img src="/vcs/static/images/autoform_wait.gif"></span>&nbsp;</td>
 		[% ELSE %]
@@ -98,7 +102,7 @@
 			[% langreq(doc.title) %]&nbsp;
 			<br><span class="up_doc_date">[% doc.files.0.name %]</span>&nbsp;
 			[% IF doc.files.0.type != '' %]
-				<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
+				<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% doc.files.0.type %].png">&nbsp;
 			[% END %]
 			</td>
 		[% END %]
@@ -132,7 +136,7 @@
 				<span class="uplsuccess">&#10003;</span>&nbsp;
 				[% langreq(doc.title) %]&nbsp;
 				<br><span class="up_doc_date">[% file.name %]</span>&nbsp;
-				<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% doc.type %].png">&nbsp;
+				<img style="vertical-align:bottom;" src="/vcs/static/images/type_[% file.type %].png">&nbsp;
 				</td>
 
 				<td class="m_right">
@@ -420,7 +424,7 @@ function mobileScreenCheck() {
 		$('#app_table').attr( "width", '590px' );
 		$('.input_width').css( "width", '20em' );
 
-		$('.pc_hide').css( "display", 'none' );
+		$('.pc_hide, .pc_hide_line').css( "display", 'none' );
 		
 		[% IF last_error_name %]
 			show_error_tip('[% last_error_name %]', '[% langreq(last_error_text) %]');
@@ -456,7 +460,7 @@ function mobileScreenCheck() {
 		});
 	});
 
-	$('.pc_hide').css( "display", 'table-cell' );
+	$('.pc_hide, .pc_hide_line').css( "display", 'table-cell' );
 
 	$('*').css( "font-size", '15px' );
 	$('.up_doc_date').css( "font-size", '20px' );
