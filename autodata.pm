@@ -8,7 +8,7 @@ sub get_settings
 	return {
 		general => {
 			max_applicants => 10,
-			max_file_upload_size => ( 10 * 1024 * 1024 ), # <--- 10 mb
+			max_file_upload_size => ( 15 * 1024 * 1024 ), # <--- 15 mb
 			maps_type => 'embedded', # <--- embedded / geo
 			technical_work => 0, 
 			anti_injection => 0,
@@ -468,14 +468,7 @@ sub get_doc_list
 			doc_ord => 1,
 			title => 'Действующий загранпаспорт',
 			visa => '1, 13',
-			help => {
-				base => {
-					ru => '/zagranpasport/',
-					en => '/travel-document-passport/',
-					it => '/il-titolo-di-viaggio/',
-				},
-			},
-			comment => 'Загружается СТРОГО одним файлом',
+			comment => 'Необходимо загрузить все страницы одним файлом.',
 		},
 		{ 
 			id => 2,
@@ -483,13 +476,7 @@ sub get_doc_list
 			title => 'Второй действующий загранпаспорт',
 			visa => '1',
 			optional => 1,
-			help => {
-				base => {
-					ru => '/zagranpasport/',
-					en => '/travel-document-passport/',
-					it => '/il-titolo-di-viaggio/',
-				},
-			},
+			comment => 'При наличии, предоставляется обязательно. Необходимо загрузить все страницы одним файлом.',
 		},
 		{ 
 			id => 3,
@@ -497,13 +484,7 @@ sub get_doc_list
 			title => 'Аннулированный загранпаспорт',
 			visa => '1',
 			optional => 1,
-			help => {
-				base => {
-					ru => '/zagranpasport/',
-					en => '/travel-document-passport/',
-					it => '/il-titolo-di-viaggio/',
-				},
-			},
+			comment => 'По желанию (показать визовую историю/наличие ранее сданных отпечатков пальцев). Необходимо загрузить все страницы одним файлом.',
 		},
 		{
 			id => 4,
@@ -511,13 +492,6 @@ sub get_doc_list
 			title => 'Справка с работы',
 			visa => '1',
 			multiple => 3,
-			help => {
-				base => {
-					ru => '/podtverzhdenie-zanyatosti/',
-					en => '/proof-of-employment/',
-					it => '/dichiarazione-del-datore-di-lavoro/',
-				},
-			},
 		},
 		{
 			id => 5,
@@ -526,6 +500,7 @@ sub get_doc_list
 			visa => '1',
 			multiple => 2,
 			optional => 1,
+			comment => 'Для сотрудников пресс-служб и государственных учреждений необязательно.',
 		},
 		{
 			id => 6,
@@ -533,21 +508,14 @@ sub get_doc_list
 			title => 'Финансовая гарантия',
 			visa => '1',
 			multiple => 10,
-			help => {
-				base => {
-					ru => '/finansovaya-garantiya-2/',
-					en => '/financial-guarantees-2/',
-					it => '/garanzie-finanziarie-3/',
-				},
-			},
 		},
 		{
 			id => 7,
 			doc_ord => 7,
 			title => 'Внутренний паспорт',
 			visa => '1',
-			
-			comment => 'Для граждан РФ: страница с личными данными и прописка. Для иностранных граждан: регистрация/РВП/ВНЖ, действующая виза РФ.',
+			multiple => 5,
+			comment => 'Для граждан РФ: страница с личными данными и прописка. Для иностранных граждан: регистрация/РВП/ВНЖ, действующая виза РФ, Миграционная карта /патент/разрешение на работу.',
 		},
 		{
 			id => 8,
@@ -562,13 +530,15 @@ sub get_doc_list
 					it => '/lettera-dinvito/',
 				},
 			},
+			comment => 'Приглашение должно быть установленного образца.',
 		},
 		{
 			id => 9,
 			doc_ord => 9,
-			title => 'Документы приглашающего лица ',
+			title => 'Документы приглашающего лица',
 			multiple => 2,
 			visa => '1',
+			comment => 'Страница с личной подписью обязательна.',
 		},
 		{
 			id => 10,
@@ -576,7 +546,7 @@ sub get_doc_list
 			title => 'Выписка из Торговой Палаты',
 			optional => 1,
 			visa => '1',
-			comment => 'Загружается СТРОГО одним файлом',
+			comment => 'Загружается СТРОГО одним файлом.',
 		},
 		{
 			id => 11,
@@ -585,14 +555,7 @@ sub get_doc_list
 			multiple => 10,
 			optional => 1,
 			visa => '1',
-			help => {
-				base => {
-					ru => '/documentformsk/dokumenty-na-turisticheskuyu-vizu-2/priglashenie-ili-bron-otelya/',
-					en => '/documents-for-moscow/document-requirements-for-tourist-visa/invitation-letter-or-hotel-reservation/',
-					it => '/documentformskit/i-documenti-per-il-visto-turistico/lettera-di-invito-o-prenotazione-alberghiera/',
-				},
-			},
-			comment => 'Необходимо предоставить, если не указано в приглашении от организации',
+			comment => 'Необходимо предоставить, если не указано в приглашении от организации.',
 		},
 		{ 
 			id => 12,
@@ -632,7 +595,6 @@ sub get_doc_list
 		},
 	];
 }
-
 
 sub get_blocked_emails
 # //////////////////////////////////////////////////
