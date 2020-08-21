@@ -292,6 +292,14 @@
 	padding-bottom:3px;
 }
 
+.pc_hide_line {
+	display:none;
+	text-align:center;
+	vertical-align:bottom;
+	font-weight:bold;
+	text-transform:uppercase;
+}
+
 .middle {
 	vertical-align:middle;
 }
