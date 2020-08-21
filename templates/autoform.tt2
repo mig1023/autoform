@@ -93,6 +93,7 @@
 							<span id="mobile_order_top">
 							[% IF ( special.payment.0) %]
 								<input class="action_button" id="payment" type="button" value="[% langreq('Оплатить') %] &#9655;" onclick="pay();">
+								&nbsp;
 							[% ELSIF ( step < max_step ) && ( step > 0 ) %]
 								<input class="action_button" id="next_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
 								&nbsp;
