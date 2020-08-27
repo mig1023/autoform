@@ -1373,8 +1373,8 @@ sub set_current_app_finished
 	
 	my $service = $self->get_current_service();
 	
-	$center = 1 if $service > 1;
-
+	$center = 46 if $service == 2;
+	
 	return $self->query( 'query', __LINE__, "
 		UPDATE AutoAppData SET FinishedVType = ?, FinishedCenter = ? WHERE ID = ?", {},
 		$vtype, $center, $tables_id->{ AutoAppData }
@@ -1673,6 +1673,8 @@ sub homology_fail
 		and
 		( $old_visa_not_h or $new_visa_not_h )
 	);
+	
+	return 22 if ( $app->{ ServiceType } == 2 ) and ( $app->{ FinishedCenter } != 46 );
 
 	return 22 if (
 		( $app->{ FinishedCenter } != $app->{ CenterID } )
@@ -1689,7 +1691,7 @@ sub check_all_app_finished_and_not_empty
 	my $self = shift;
 
 	my $allfinished = $self->query( 'selallkeys',  __LINE__, "
-		SELECT FinishedVType, FinishedCenter, VType, CenterID
+		SELECT FinishedVType, FinishedCenter, VType, CenterID, ServiceType
 		FROM AutoAppData
 		JOIN AutoAppointments ON AutoAppointments.ID = AutoAppData.AppID
 		JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
@@ -1965,13 +1967,13 @@ sub get_list_of_app
 	
 	my $content = $self->query( 'selallkeys', __LINE__, "
 		SELECT AutoAppData.ID, AutoAppData.FName, AutoAppData.LName, 
-		BirthDate, FinishedVType, FinishedCenter, VType, CenterID 
+		BirthDate, FinishedVType, FinishedCenter, VType, CenterID, ServiceType
 		FROM AutoToken 
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID
 		WHERE Token = ?", $self->{ token }
 	);
-	
+
 	my $link = $self->query( 'selallkeys', __LINE__, "
 		SELECT LinkSended, AutoAppointments.EMail, ServiceType
 		FROM AutoToken 
