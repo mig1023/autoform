@@ -315,7 +315,7 @@ sub autoform
 	}
 	
 	$self->mod_last_error_date( $self->param( 'last_error_return' ) ) if $self->param( 'last_error_return' );
-
+	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my ( $max_app, $app_id ) = $self->get_current_max_app();
@@ -359,6 +359,7 @@ sub autoform
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 	$tvars->{ service_type } = $self->get_current_service();
+	$tvars->{ only_moscow } = ( $self->get_cookie( 'geo_center_id' ) eq 'moscow' ? 1 : 0 );
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
@@ -4911,6 +4912,27 @@ sub param
 	}
 	
 	return $param;
+}
+
+sub get_cookie
+# //////////////////////////////////////////////////
+{
+	my ( $self, $name ) = @_;
+	
+	my $cookies = $ENV{ HTTP_COOKIE };
+	
+	my @cookies = split( /\;/, $cookies );
+	
+	for ( @cookies ) {
+		
+		my ( $key, $val ) = split( /=/ );
+		
+		$key =~ s/(^\s+|\s+$)//g;
+		
+		return $val if lc( $key ) eq lc( $name );
+	}
+	
+	return undef;
 }
 
 sub query
