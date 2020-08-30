@@ -27,16 +27,6 @@ sub get_content_rules_hash
 
 	return {
 		
-		'Тип услуги' => [
-			{
-				page_ord => 90,
-				progress => 1,
-				param => 1,
-				replacer => '[service_type_change]',
-				page_db_id => 300000,
-			},
-		],
-	
 		'Начало записи' => [
 			{
 				page_ord => 100,

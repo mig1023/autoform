@@ -272,7 +272,7 @@ sub autoform
 	my $lang = lc( $self->param( 'lang' ) );
 	
 	$self->{ lang } = ( $lang =~ /^(en|it)$/i ? $lang : 'ru' );
-
+	
 	for ( 'scanner', 'biometric_data' ) {
 	
 		$self->{ biometric_data } = 'yes' if lc( $self->param( $_ ) ) eq 'yes';
@@ -359,7 +359,6 @@ sub autoform
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 	$tvars->{ service_type } = $self->get_current_service();
-	$tvars->{ only_moscow } = ( $self->get_cookie( 'geo_center_id' ) eq 'moscow' ? 1 : 0 );
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
@@ -864,10 +863,21 @@ sub get_token
 	return $token;
 }
 
-sub get_token_and_create_new_form_if_need
+sub get_service_for_token
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	
+	my $services = VCS::Site::autodata::get_services();
+	
+	return $services->{ lc( $self->param( 's' ) ) } || 1;
+	
+}
+
+sub get_token_and_create_new_form_if_need
+# //////////////////////////////////////////////////
+{
+	my ( $self, $service ) = @_;
 	
 	my $token = $self->get_token();
 	
@@ -879,7 +889,7 @@ sub get_token_and_create_new_form_if_need
 	
 	return '06' if $self->{ autoform }->{ general }->{ technical_work };
 
-	return $self->token_generation() if $token eq '';
+	return $self->token_generation( $self->get_service_for_token() ) if $token eq '';
 	
 	if ( length( $token ) == 24 ) {
 	
@@ -958,7 +968,7 @@ sub create_clear_form
 sub token_generation
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $service ) = @_;
 
 	my ( $token_existing, $token_existed_before, $token ) = ( 1, 0, 't' );
 	
@@ -966,8 +976,8 @@ sub token_generation
 	
 	$self->query( 'query', __LINE__, "
 		INSERT INTO AutoToken (
-		AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft, StartDate, LastIP) 
-		VALUES (0, 0, 0, ?, '', 0, 0, now(), ?)", {}, $self->get_id_by_step( 1 ), $ENV{ HTTP_X_REAL_IP }
+		AutoAppID, AutoAppDataID, AutoSchengenAppDataID, Step, LastError, Finished, Draft, StartDate, LastIP, ServiceType) 
+		VALUES (0, 0, 0, ?, '', 0, 0, now(), ?, ?)", {}, $self->get_id_by_step( 1 ), $ENV{ HTTP_X_REAL_IP }, $service
 	);
 	
 	my $appid = $self->query( 'sel1', __LINE__, "SELECT last_insert_id()" ) || 0;
@@ -1898,8 +1908,6 @@ sub get_html_page
 	
 	my $page_content = $self->get_content_rules( $step, undef, 'init' );
 
-	return $self->get_service_buttons() if $page_content eq '[service_type_change]';
-
 	return $self->get_list_of_app() if $page_content eq '[list_of_applicants]';
 	
 	return $self->get_doc_uploading() if $page_content eq '[doc_uploading]';	
@@ -1952,12 +1960,6 @@ sub correct_values
 	}
 	
 	return $$current_values;
-}
-
-sub get_service_buttons
-# //////////////////////////////////////////////////
-{
-	return ( undef, 'autoform_service_type.tt2' );
 }
 
 sub get_list_of_app

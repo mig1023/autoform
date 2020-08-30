@@ -30,17 +30,7 @@ sub get_content_rules_hash
 	my $standart_date_check_opt = 'D^(([012]\d|3[01])\.((0\d)|(1[012]))\.(19\d\d|20[0-3]\d))$';
 
 	return {
-	
-		'Тип услуги' => [
-			{
-				page_ord => 90,
-				progress => 1,
-				param => 1,
-				replacer => '[service_type_change]',
-				page_db_id => 100000,
-			},
-		],
-		
+
 		'Начало записи' => [
 			{
 				page_ord => 100,
