@@ -213,6 +213,8 @@ sub get_html_elements
 				'border-radius:4px;color: #33c3ba;background:#f7f9fa;margin-bottom: 7px;">[%edit_btn%]</a>',
 				
 		payment 	=> '<div class="captcha_container" id="payment_container">[pay_text] [pay_amount] руб</div>',
+		
+		pay_confirm	=> '<td class="left" colspan="3" [u]>[value]</td>',
 	}
 }
 

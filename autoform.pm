@@ -2087,7 +2087,7 @@ sub get_html_line
 	
 	my $content = $self->get_html_for_element( 'start_line' );
 	
-	if ( $element->{ type } eq 'text' ) {
+	if ( $element->{ type } =~ /^(text|pay_confirm)$/ ) {
 	
 		$content .= $self->get_html_for_element(
 			'text', $element->{ name }, $element->{ label }, undef, $element->{ font }
@@ -2222,7 +2222,7 @@ sub get_html_for_element
 		$value = $value_line;
 	}
 	
-	$value =~ s/"/&quot;/g unless $type =~ /^(label_for|text)$/;
+	$value =~ s/"/&quot;/g unless $type =~ /^(label_for|text|pay_confirm)$/;
 	
 	$comment .= $self->add_rules_format( $check ) if $type =~ /^input$/;
 	
@@ -2246,7 +2246,7 @@ sub get_html_for_element
 	$content =~ s/\[value\]/$value/gi;
 	$content =~ s/\[comment\]/$comment/gi;
 	$content =~ s/\[example\]/$example/gi;
-	
+
 	if ( ( $type eq 'checkbox' ) or ( $type eq 'disclaimer' ) or ( $type eq 'oferta' ) ) {
 	
 		$content =~ s/\[checked\]/checked/gi if $value_original;
@@ -2354,16 +2354,16 @@ sub get_html_for_element
 		$content =~ s/\[lang\]/$lang/gi;
 	}
 	
-	if ( $type eq 'payment' ) {
-	
+	if ( ( $type eq 'payment' ) or ( ( $type eq 'text' ) and ( $content =~ /\[pay_amount\]/ ) ) ) {
+
 		my $pay = $self->get_payment_price( 2 );
-		
+
 		my $pay_text = $self->lang( 'К оплате за услугу:' );
 					
 		$content =~ s/\[pay_text\]/$pay_text/;
 		$content =~ s/\[pay_amount\]/$pay/;
 	}
-	
+
 	if ( $type eq 'progress' ) {
 		
 		my $form = ( $first_elements ? 'big' : 'ltl' ) . '_progr pr_' . $param;

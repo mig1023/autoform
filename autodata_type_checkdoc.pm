@@ -2358,14 +2358,14 @@ sub get_content_rules_hash
 				page_db_id => 400031,
 			},
 			{
-				type => 'text',
-				name => 'conf_mail_text',
-				label => 'Скоро на вашу почту придёт письмо с ответом по документам.',
+				type => 'pay_confirm',
+				name => 'conf_pay',
+				label => 'Оплаченная сумма: [pay_amount] руб',
 			},
 			{
 				type => 'text',
-				name => 'conf_mail_text2',
-				label => 'Ждите.',
+				name => 'conf_mail_text',
+				label => 'Скоро на вашу почту придёт письмо с ответом по документам.',
 			},
 		],
 	};
