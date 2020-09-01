@@ -1645,6 +1645,10 @@ sub get_delete
 		
 	$self->mod_last_change_date();
 	
+	my $service = $self->get_current_service();
+	
+	$self->clean_old_visa_file( $appdata_id ) if $service == 2;
+	
 	return $result;
 }
 
