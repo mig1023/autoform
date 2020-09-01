@@ -354,10 +354,6 @@ function upload( doc_id, upfile_field ) {
 				window.location = '/autoform/?t=[% content_text.token %]&appdata=[% content_text.app_id %]';
 				return;
 			}
-			else if (data.indexOf('already')+1) {
-				
-				alert( '[% langreq('Данный файл уже загружен для этого заявителя.') %]' );
-			}
 			else if (data.indexOf('size')+1) {
 				
 				alert( '[% langreq('Размер загружаемого файла превышает максимально допустимый') %]' );

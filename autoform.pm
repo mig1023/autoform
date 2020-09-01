@@ -673,7 +673,7 @@ sub init_add_param
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
 				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
-				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID = 1',
+				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID in (1, 15)',
 				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU, Schengen FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
 			};
@@ -4604,13 +4604,6 @@ sub upload_file
 
 	return $self->unlink_and_print( $file_name, 'error' )
 		unless $md5;
-
-	my $already_exist = $self->query( 'sel1', __LINE__, "
-		SELECT ID FROM DocUploaded WHERE AutoAppDataID = ? AND MD5 = ?", $appdata_id, $md5
-	);
-
-	return $self->unlink_and_print( $file_name, 'already' )
-		if $already_exist;
 
 	return $self->unlink_and_print( $file_name, 'size' )
 		if -s $file_name > $self->{ autoform }->{ general }->{ max_file_upload_size };
