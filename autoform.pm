@@ -673,7 +673,7 @@ sub init_add_param
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
 				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
-				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID in (1, 15)',
+				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID in (1, 15, 2)',
 				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU, Schengen FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
 			};
@@ -1238,8 +1238,10 @@ sub skip_page_by_relation
 # //////////////////////////////////////////////////
 {
 	my ( $self, $condition, $relation ) = @_;
-	
+
 	return ( $self->citizenship_check_fail( $relation->{ value } ) ? 1 : 0 ) if $condition =~ /^only_if_citizenship$/;
+	
+	return ( $self->change_visa_check_fail() ? 0 : 1 ) if $condition =~ /^only_if_visa_changed$/;
 	
 	my $current_table_id = $self->get_current_table_id(); 
 	
@@ -1265,6 +1267,66 @@ sub skip_by_condition
 	return 1 if $condition =~ /^only_if(_\d+)?$/ and !exists $relation{ $value };
 	
 	return 0;
+}
+
+sub change_visa_check_fail
+# //////////////////////////////////////////////////
+{
+	my ( $self, $appdata_id ) = @_;
+	
+	my $appdata_single = ( $appdata_id ? "AND AutoAppData.ID = $appdata_id" : "" );
+	
+	my $files_already_uploaded = $self->query( 'selallkeys', __LINE__, "
+		SELECT AutoAppData.ID, VType, FinishedVType, DocUploaded.DocType		
+		FROM AutoToken
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		JOIN AutoAppData ON AutoAppointments.ID = AutoAppData.AppID 
+		JOIN DocUploaded ON AutoAppData.ID = DocUploaded.AutoAppDataID
+		WHERE Token = ? $appdata_single", $self->{ token }
+	);
+	
+	for ( @$files_already_uploaded ) {
+		
+		return 1 if $_->{ FinishedVType } and ( $_->{ VType } != $_->{ FinishedVType } );
+	}
+	
+	my $doc_list = VCS::Site::autodata::get_doc_list();
+	
+	for my $visa_type ( keys %$doc_list ) {
+		
+		for my $doc_type ( @{ $doc_list->{ $visa_type } } ) {
+			
+			for my $file ( @$files_already_uploaded ) {
+			
+				return 1 if ( $doc_type->{ id } == $file->{ DocType } ) and ( $visa_type != $file->{ VType } );
+			}
+		}
+	}
+	
+	return 0;
+}
+
+sub clean_old_visa_file
+# //////////////////////////////////////////////////
+{
+	my ( $self, $appdata_id ) = @_;
+	
+	my $files = $self->query( 'selallkeys', __LINE__, "
+		SELECT ID, Folder, MD5 FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
+	);
+
+	for my $file ( @$files ) {
+	
+		$self->query( 'query', __LINE__, "
+			DELETE FROM DocUploaded WHERE ID = ?", {}, $file->{ ID }
+		);
+		
+		my $file_name = $self->{ vars }->getConfig('general')->{ tmp_folder } . "doc/" . $file->{ Folder } . $file->{ MD5 };
+		
+		unlink $file_name;
+	}
+	
+	$self->log( undef, "документы удалёны (смена типа визы)", $appdata_id );
 }
 
 sub citizenship_check_fail
@@ -1523,33 +1585,36 @@ sub get_edit
 {
 	my ( $self, $step, $appdata_id ) = @_;
 	
-	if ( $self->check_existing_id_in_token( $appdata_id ) ) {
+	return $step unless $self->check_existing_id_in_token( $appdata_id );
 		
-		$step = $self->get_step_by_content( '[list_of_applicants]', 'next');
-		
-		my ( $sch_id, $spb_id, $ext_id ) = $self->query( 'sel1', __LINE__, "
-			SELECT SchengenAppDataID, AutoSpbAlterAppData.ID, AutoSchengenExtData.ID
-			FROM AutoAppData
-			JOIN AutoSpbAlterAppData ON AutoSpbAlterAppData.AppDataID = AutoAppData.ID
-			LEFT JOIN AutoSchengenExtData ON AutoSchengenExtData.AppDataID = AutoAppData.ID
-			WHERE AutoAppData.ID = ?", $appdata_id
-		);
+	$step = $self->get_step_by_content( '[list_of_applicants]', 'next' );
+	
+	my ( $sch_id, $spb_id, $ext_id ) = $self->query( 'sel1', __LINE__, "
+		SELECT SchengenAppDataID, AutoSpbAlterAppData.ID, AutoSchengenExtData.ID
+		FROM AutoAppData
+		JOIN AutoSpbAlterAppData ON AutoSpbAlterAppData.AppDataID = AutoAppData.ID
+		LEFT JOIN AutoSchengenExtData ON AutoSchengenExtData.AppDataID = AutoAppData.ID
+		WHERE AutoAppData.ID = ?", $appdata_id
+	);
 
-		$ext_id = 0 unless $ext_id;
+	$ext_id = 0 unless $ext_id;
 
-		$self->query( 'query', __LINE__, "
-			UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSpbDataID = ?,
-			AutoSchengenAppDataID = ?, AutoSchengenExtID = ?
-			WHERE Token = ?", {}, 
-			$self->get_id_by_step( $step ), $appdata_id, $spb_id, $sch_id, $ext_id, $self->{ token }
-		);
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoToken SET Step = ?, AutoAppDataID = ?, AutoSpbDataID = ?,
+		AutoSchengenAppDataID = ?, AutoSchengenExtID = ?
+		WHERE Token = ?", {}, 
+		$self->get_id_by_step( $step ), $appdata_id, $spb_id, $sch_id, $ext_id, $self->{ token }
+	);
 
-		$self->query( 'query', __LINE__, "
-			UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $appdata_id
-		);
-		
-		$self->mod_last_change_date();
-	}
+	$self->query( 'query', __LINE__, "
+		UPDATE AutoAppData SET FinishedVType = 0, FinishedCenter = 0 WHERE ID = ?", {}, $appdata_id
+	);
+	
+	$self->mod_last_change_date();
+	
+	my $service = $self->get_current_service();
+	
+	$self->clean_old_visa_file( $appdata_id ) if ( $service == 2 ) and $self->change_visa_check_fail( $appdata_id );
 	
 	return $step;
 }
@@ -1559,27 +1624,26 @@ sub get_delete
 {
 	my ( $self, $appdata_id ) = @_;
 	
+	return 0 unless $self->check_existing_id_in_token( $appdata_id );
+	
 	my $result = 0;
 	
-	if ( $self->check_existing_id_in_token( $appdata_id ) ) {
+	my $sch_id = $self->query( 'sel1', __LINE__, "
+		SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
+	);
+
+	$result += $self->query( 'query', __LINE__, "
+		DELETE FROM AutoAppData WHERE ID = ?", {}, $appdata_id
+	);
 	
-		my $sch_id = $self->query( 'sel1', __LINE__, "
-			SELECT SchengenAppDataID FROM AutoAppData WHERE ID = ?", $appdata_id
-		);
+	$result += $self->query( 'query', __LINE__, "
+		DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, $sch_id
+	);
 	
-		$result += $self->query( 'query', __LINE__, "
-			DELETE FROM AutoAppData WHERE ID = ?", {}, $appdata_id
-		);
+	$result += $self->query( 'query', __LINE__, "DELETE FROM $_ WHERE AppDataID = ?", {}, $appdata_id )
+		for ( 'AutoSpbAlterAppData', 'AutoSchengenExtData' );
 		
-		$result += $self->query( 'query', __LINE__, "
-			DELETE FROM AutoSchengenAppData WHERE ID = ?", {}, $sch_id
-		);
-		
-		$result += $self->query( 'query', __LINE__, "DELETE FROM $_ WHERE AppDataID = ?", {}, $appdata_id )
-			for ( 'AutoSpbAlterAppData', 'AutoSchengenExtData' );
-			
-		$self->mod_last_change_date();
-	}
+	$self->mod_last_change_date();
 	
 	return $result;
 }
@@ -1626,7 +1690,7 @@ sub get_homologous_series
 			for my $relation ( keys %{ $element->{ relation } } ) {
 			
 				for my $factor ( keys %$all_factor ) {
-		
+
 					if ( $element->{ relation }->{ $relation }->{ name } eq $factor ) {
 					
 						my @tmp = split( /\s?,\s?/, $element->{ relation }->{ $relation }->{ value } );
@@ -1677,6 +1741,8 @@ sub homology_fail
 	my $new_center_not_h = $homologous_series->{ CenterID }->{ $app->{ CenterID } };
 	
 	return 19 if $self->type_change_fail( $app );
+	
+	return 19 if ( $app->{ FinishedVType } != $app->{ VType } ) and ( $app->{ ServiceType } == 2 );
 
 	return 19 if (
 		( $app->{ FinishedVType } != $app->{ VType } )
@@ -4545,7 +4611,7 @@ sub remove_file
 	return print 'error' unless $self->check_existing_id_in_token( $appdata_id );
 	
 	my ( $path_to_file, $md5, $type ) = $self->query( 'sel1', __LINE__, "
-		SELECT Folder, MD5 FROM DocUploaded WHERE AutoAppDataID = ? AND ID = ?", $appdata_id, $file_id
+		SELECT Folder, MD5, DocType FROM DocUploaded WHERE AutoAppDataID = ? AND ID = ?", $appdata_id, $file_id
 	);
 	
 	$self->query( 'query', __LINE__, "
@@ -4604,6 +4670,13 @@ sub upload_file
 
 	return $self->unlink_and_print( $file_name, 'error' )
 		unless $md5;
+		
+	my $already_exist = $self->query( 'sel1', __LINE__, "
+		SELECT ID FROM DocUploaded WHERE AutoAppDataID = ? AND MD5 = ?", $appdata_id, $md5
+	);
+
+	return $self->unlink_and_print( $file_name, 'already' )
+		if $already_exist;
 
 	return $self->unlink_and_print( $file_name, 'size' )
 		if -s $file_name > $self->{ autoform }->{ general }->{ max_file_upload_size };

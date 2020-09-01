@@ -131,7 +131,7 @@ sub get_infopage
 	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT ServiceType, CreatedApp, AppNum as new_app_num, AppDate as new_app_date,
 		TimeslotID as new_app_timeslot,	CenterID as new_app_branch, VName as new_app_vname,
-		category, Appointments.Status as app_status
+		category, Appointments.Status as app_status, Appointments.VType
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 		JOIN VisaTypes ON Appointments.VType = VisaTypes.ID
@@ -165,7 +165,7 @@ sub get_infopage
 		$title = 1;
 	}
 	else {
-		$app_list = $self->get_app_file_list_by_token( $self->{ token } );
+		$app_list = $self->get_app_file_list_by_token( $self->{ token }, $app_info->{ VType } );
 		
 		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
 		
@@ -623,10 +623,10 @@ sub get_same_info_for_timeslots_from_app
 	my $app = {};
 
 	( $app->{ persons }, $app->{ center }, $app->{ fdate }, $app->{ timeslot },
-			$app->{ appdate }, $app->{ AppData }, $app->{ Appointments } ) = 
+			$app->{ appdate }, $app->{ AppData }, $app->{ Appointments }, $app->{ vtype } ) = 
 		$self->{ af }->query( 'sel1', __LINE__, "
 			SELECT count(AppData.ID), CenterID, SDate, TimeslotID,
-			Appointments.AppDate, AppData.ID, Appointments.ID AS AppID
+			Appointments.AppDate, AppData.ID, Appointments.ID AS AppID, VType
 			FROM AutoToken 
 			JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 			JOIN AppData ON AppData.AppID = Appointments.ID
@@ -703,7 +703,7 @@ sub set_new_appdate
 sub get_app_file_list_by_token
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token ) = @_;
+	my ( $self, $token, $visa_type ) = @_;
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
@@ -716,7 +716,9 @@ sub get_app_file_list_by_token
 	
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
 	
-	my $doc_types_list = VCS::Site::autodata::get_doc_list();
+	my $doc_types_list_all = VCS::Site::autodata::get_doc_list();
+	
+	my $doc_types_list = $doc_types_list_all->{ $visa_type };
 	
 	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_list;
 	my %doc_ords = map { $_->{ id } => $_->{ doc_ord } } @$doc_types_list;
@@ -784,7 +786,7 @@ sub get_app_file_list_by_token
 	}
 
 	my $doc_list = {};
-	
+
 	for my $app ( @$app_list ) {
 		
 		my $file = {};
@@ -821,10 +823,6 @@ sub get_app_file_list_by_token
 	);
 	
 	for my $empty ( @$doc_types_list ) {
-		
-		my %visas = map { $_ => 1 } split /,\s?/, $empty->{ visa };
-		
-		next unless exists $visas{ $visa_type };
 		
 		next unless $empty->{ optional };
 		
