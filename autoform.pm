@@ -4363,13 +4363,13 @@ sub doc_for_uploading
 	my $self = shift;
 
 	my $doc_list = VCS::Site::autodata::get_doc_list();
-
+	
 	my ( $appdata_id, $visa_type ) = $self->query( 'sel1', __LINE__, "
 		SELECT AutoAppDataID, VType FROM AutoAppointments
 		JOIN AutoToken ON AutoToken.AutoAppID = AutoAppointments.ID
 		WHERE Token = ?", $self->{ token }
 	);
-	
+
 	my $all_docs = $self->query( 'selallkeys', __LINE__, "
 		SELECT ID, DocType, Name, Ext FROM DocUploaded WHERE AutoAppDataID = ?", $appdata_id
 	) if $appdata_id;
@@ -4384,12 +4384,8 @@ sub check_doc_uploaded
 	
 	my ( $doc_list, $appdata_id, $visa_type, $all_docs ) = $self->doc_for_uploading();
 	
-	for my $doc ( @$doc_list ) {
+	for my $doc ( @{ $doc_list->{ $visa_type } } ) {
 	
-		my %visas = map { $_ => 1 } split /,\s?/, $doc->{ visa };
-
-		next unless exists $visas{ $visa_type };
-		
 		my $uploaded = 0;
 		
 		for my $file ( @$all_docs ) {
@@ -4424,60 +4420,54 @@ sub get_doc_uploading
 {
 	my $self = shift;
 	
-	my ( $doc_list, $appdata_id, $visa_type, $all_docs ) = $self->doc_for_uploading();
+	my ( $doc_list_for_visa, $appdata_id, $visa_type, $all_docs ) = $self->doc_for_uploading();
 
 	my $index = 0;
 	
 	my $lang = $self->{ lang };
 	
+	my $doc_list = $doc_list_for_visa->{ $visa_type };
+	
 	for ( my $index = $#$doc_list; $index >= 0; --$index ) {
 	
-		my %visas = map { $_ => 1 } split /,\s?/, $doc_list->[ $index ]->{ visa };
+		my $files = $doc_list->[ $index ];
 		
-		if ( !exists $visas{ $visa_type } ) {
+		for my $doc ( @$all_docs ) {
 
-			splice( @$doc_list, $index, 1 );
-		}
-		else {
-			my $files = $doc_list->[ $index ];
+			next unless $files->{ id } == $doc->{ DocType };
+	
+			my $file = {};
+
+			my $filename = $self->{ vars }->get_system->transliteration( decode( 'utf8', $doc->{ Name } ) );
+
+			$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
+				
+			$file->{ name } = $filename;
+
+			$file->{ type } = $self->check_file_ext( $doc->{ Ext } );
 			
-			for my $doc ( @$all_docs ) {
+			$file->{ optional } = ( $doc->{ optional } ? 1 : 0 );
+			
+			$file->{ file_id } = $doc->{ ID };
+			
+			$files->{ files } = [] unless ref( $files->{ files } ) eq 'ARRAY';
+			
+			push( @{ $files->{ files } }, $file );
+		}
 
-				next unless $files->{ id } == $doc->{ DocType };
+		$files->{ uploaded } = ( @{ $files->{ files } } > 1 ? 2 : 1 ) if ref( $files->{ files } ) eq 'ARRAY';
 		
-				my $file = {};
-
-				my $filename = $self->{ vars }->get_system->transliteration( decode( 'utf8', $doc->{ Name } ) );
-
-				$filename = substr( $filename, 0, 15 ) . "..." if length( $filename ) > 15;
-					
-				$file->{ name } = $filename;
-
-				$file->{ type } = $self->check_file_ext( $doc->{ Ext } );
-				
-				$file->{ optional } = ( $doc->{ optional } ? 1 : 0 );
-				
-				$file->{ file_id } = $doc->{ ID };
-				
-				$files->{ files } = [] unless ref( $files->{ files } ) eq 'ARRAY';
-				
-				push( @{ $files->{ files } }, $file );
-			}
-
-			$files->{ uploaded } = ( @{ $files->{ files } } > 1 ? 2 : 1 ) if ref( $files->{ files } ) eq 'ARRAY';
-			
-			$files->{ uploaded } = 0 unless $files->{ uploaded };
-			
-			if ( ref( $files->{ files } ) eq 'ARRAY' ) {
-				$files->{ total_uploaded } = 0 + @{ $files->{ files } };
-			};
-			
-			my $help = $doc_list->[ $index ]->{ help };
-			
-			my $help_link = $help->{ ( exists $help->{ $visa_type } ? $visa_type : "base" ) }->{ $lang };
-			
-			$doc_list->[ $index ]->{ help } = $help_link;
-		}
+		$files->{ uploaded } = 0 unless $files->{ uploaded };
+		
+		if ( ref( $files->{ files } ) eq 'ARRAY' ) {
+			$files->{ total_uploaded } = 0 + @{ $files->{ files } };
+		};
+		
+		my $help = $doc_list->[ $index ]->{ help };
+		
+		my $help_link = $help->{ ( exists $help->{ $visa_type } ? $visa_type : "base" ) }->{ $lang };
+		
+		$doc_list->[ $index ]->{ help } = $help_link;
 	}
 	
 	my $opt_doc_index = 0;
