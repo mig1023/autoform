@@ -154,74 +154,20 @@
 							[% file.0.TypeStr %]
 						[% END %]
 					[% IF (file.0.CheckStatus == 1) %]</b>[% END %]
-					
-					[% IF ((file.0.multiple != 1) && !closed_app) %]
-						<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %] )"/>
-						<span class="ltl_link" id="upfile_button_[% file.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">[% langreq('заменить') %]</span>
-					[% END %]
-					</nobr></td>
+					</nobr>
+				</td>
 				<td class="m_right">
-				[% IF (file.0.multiple != 1) %]
-					[% IF (file.CheckStatus == 3) %]
-						<span class="insist_doc">[% langreq('по настоянию') %]</span>
-					[% ELSIF (file.0.CheckStatus == 2) %]
-						<span class="ok_doc">[% langreq('всё хорошо') %]</span>
-					[% ELSIF (file.0.CheckStatus == 1) %]
-						<span class="err_doc">[% langreq('некорректен') %]</span>
-					[% ELSE %]
-						<span class="nope_doc">[% langreq('не проверен') %]</span>
-					[% END %]
+				[% IF (file.0.CheckStatus == 3) %]
+					<span class="insist_doc">[% langreq('по настоянию') %]</span>
+				[% ELSIF (file.0.CheckStatus == 2) %]
+					<span class="ok_doc">[% langreq('всё хорошо') %]</span>
+				[% ELSIF (file.0.CheckStatus == 1) %]
+					<span class="err_doc">[% langreq('некорректен') %]</span>
 				[% ELSE %]
-					&nbsp;
+					<span class="nope_doc">[% langreq('не проверен') %]</span>
 				[% END %]
 				</td>
 				</tr>
-				
-				[% IF (file.0.multiple == 1) %]
-					
-					[% SET k = 0 %]
-					[% FOREACH page IN file.value %]
-						[% SET k = k + 1 %]
-						<tr>
-						<td colspan="2"><nobr>&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
-							[% IF (fpage.CheckStatus == 1) %]<b>[% END %]
-							[% langreq('Страница') %] [% k %]
-							[% IF (page.CheckStatus == 1) %]</b>[% END %]
-							
-							[% IF !closed_app %]
-								<input type="file" id="upfile_[% page.DocType  %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
-								<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
-							[% END %]
-							</nobr></td>
-						<td class="m_right">
-						[% IF (page.CheckStatus == 3) %]
-							<span class="insist_doc">[% langreq('по настоянию') %]</span>
-						[% ELSIF  (page.CheckStatus == 2) %]
-							<span class="ok_doc">[% langreq('всё хорошо') %]</span>
-						[% ELSIF (page.CheckStatus == 1) %]
-							<span class="err_doc">[% langreq('некорректен') %]</span>
-						[% ELSE %]
-							<span class="nope_doc">[% langreq('не проверен') %]</span>
-						[% END %]
-						</td>
-						</tr>
-					[% END %]
-				[% END %]
-				
-				[% IF (file.0.comments.size > 0) %]
-				
-					<tr id="show_comments[% i %]-[% n %]">
-						<td colspan="3"><span class="show_comment" onclick="javascript:show_comments('[% i %]-[% n %]')">[% langreq('! показать комментарии к документу') %]</span></td>
-					</tr>
-					[% FOREACH comment IN file.0.comments %]
-
-						<tr class="hidden" name="comments[% i %]-[% n %]">
-						<td colspan="3"><span class="[% IF (comment.log == 1) %]log_comment[% ELSE %]doc_support_comment[% END %]">[% comment.text %] | [% comment.date %]</span></td>
-					</tr>
-					[% END %]
-					
-					<tr class="hidden" name="comments[% i %]-[% n %]"><td>&nbsp;<br></td></tr>
-				[% END %]
 			[% END %]
 		[% END %]
 	[% END %]
@@ -443,7 +389,7 @@
 				[% FOREACH page IN file %]
 					[% SET k = k + 1 %]
 					<tr class="files_uploaded">
-					<td colspan="4" width="450px">&nbsp;&nbsp;&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
+					<td colspan="4" width="450px" class="optional_line">&nbsp;&nbsp;&nbsp;&nbsp;[% i %].[% n %].[% k %]&nbsp;
 						[% IF (page.CheckStatus == 1) %]<b>[% END %]
 							[% langreq('Страница') %] [% k %]
 						[% IF (page.CheckStatus == 1) %]</b>[% END %]
@@ -506,17 +452,17 @@
 		<tr><td>&nbsp;</td></tr>
 	[% ELSIF (!closed_app) %]
 		<tr>
-		<td colspan="2"><br><input class="big_button" type="button" value="[% langreq('Завершить обслуживание') %]" onclick="close_app();"><br></td>
+		<td colspan="2"><input class="big_button button_spacer" type="button" value="[% langreq('Завершить обслуживание') %]" onclick="close_app();"><br></td>
 		</tr>
 	[% ELSE %]
 		<tr>
-		<td colspan="2"><br><h2>[% langreq('Услуга завершена') %]</h2></td>
+		<td colspan="2"><h2 class="finish_text_spacer">[% langreq('Услуга завершена') %]</h2></td>
 		</tr>
 	[% END %]
 	
 	[% IF !not_checked_yet %]
 		<tr>
-			<td colspan="2"><br><input class="big_button" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="offline_app();"><br></td>
+			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="offline_app();"><br></td>
 		</tr>
 	[% END %]
 

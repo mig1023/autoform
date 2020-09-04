@@ -628,7 +628,7 @@ sub set_new_appdate_for_checkdoc_transform
 
 	my $urgent = VCS::Site::newapps::getUrgent( $self, $new->{ fdate }, $new->{ app_date }, $new->{ center } );
 	
-	$self->{ af }->query( 'query', __LINE__, "LOCK TABLES Appointments WRITE, AppData READ, Branches READ, Timeslots READ, TimeData READ, TimeSlotOverrides READ" );
+	$self->{ af }->query( 'query', __LINE__, "LOCK TABLES AutoToken WRITE, Appointments WRITE, AppData READ, Branches READ, Timeslots READ, TimeData READ, TimeSlotOverrides READ" );
 	
 	my $error1 = VCS::Docs::appointments->check_appdate( $self->{ vars }, $new->{ appdate_iso }, $new->{ center }, 0);
 	
@@ -649,15 +649,6 @@ sub set_new_appdate_for_checkdoc_transform
 	}
 	
 	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
-
-	#my $docobj = VCS::Docs::docs->new( 'VCS::Docs::docs', $self->{ vars } );
-
-	#my $error = $docobj->reschApp( $appid, $urgent, \$newnum, \$new_app_id );
-
-	#$self->{ af }->query( 'query', __LINE__, "
-	#	UPDATE AutoToken SET CreatedApp = ? WHERE Token = ?", {},
-	#	$new_app_id, $self->{ token }
-	#) unless $error;
 
 	return ( !$error1 and !$error2 ? $error1 : $new_app_id );
 }
