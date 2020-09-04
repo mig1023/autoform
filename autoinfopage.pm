@@ -540,6 +540,8 @@ sub offline_app
 
 		$appinfo_for_timeslots->{ appdate_iso } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
 		
+		$appinfo_for_timeslots->{ apptime } = $new->{ apptime };
+		
 		$appinfo_for_timeslots->{ center } = $new->{ center };
 		
 		$id_or_error = $self->{ af }->check_logic( $date_pseudo_element, $appinfo_for_timeslots, 'edt' );
@@ -573,19 +575,20 @@ sub offline_app
 				UPDATE Appointments SET Status = 12, CenterID = ? WHERE ID = ?", {}, $new->{ center }, $app_id
 			);
 
-			$id_or_error = $self->set_new_appdate( $new );
-warn "id_or_error = $id_or_error";
+			$id_or_error = $self->set_new_appdate_for_checkdoc_transform( $appinfo_for_timeslots );
 
 			if ( $id_or_error =~ /^\d+$/ ) {
 				
 				$self->{ af }->query( 'query', __LINE__, "
-					UPDATE AutoToken SET CreatedApp = ?, ServiceType = 1 WHERE Token = ?", {}, $id_or_error, $self->{ token }
+					INSERT INTO Appointments_tranform (Type, OldID, NewID) VALUES ('checkdoc-to-offine', ?, ?)", {},
+					$app_id, $id_or_error
 				);
 
-				return $self->{ af }->redirect( $self->{ token }.'&action=offline_apped' );
+				
 			}
+			
+			return $self->{ af }->redirect( $self->{ token }.'&action=offline_apped' );
 		}
-
 	}
 
 	my $centers = $self->{ af }->query( 'selallkeys', __LINE__, "
@@ -608,6 +611,55 @@ warn "id_or_error = $id_or_error";
 		'error'		=> $id_or_error,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub set_new_appdate_for_checkdoc_transform
+# //////////////////////////////////////////////////
+{
+	my ( $self, $new ) = @_;
+
+	my ( $appid, $ncount ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CreatedApp, NCount FROM AutoToken
+		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+		WHERE Token = ?", $self->{ token }
+	);
+
+	my ( $newnum, $new_app_id );
+
+	my $urgent = VCS::Site::newapps::getUrgent( $self, $new->{ fdate }, $new->{ app_date }, $new->{ center } );
+	
+	$self->{ af }->query( 'query', __LINE__, "LOCK TABLES Appointments WRITE, AppData READ, Branches READ, Timeslots READ, TimeData READ, TimeSlotOverrides READ" );
+	
+	my $error1 = VCS::Docs::appointments->check_appdate( $self->{ vars }, $new->{ appdate_iso }, $new->{ center }, 0);
+	
+	my $error2 = VCS::Docs::appointments->check_apptime( $self->{ vars }, $new->{ appdate_iso }, $new->{ center },  $new->{ apptime }, $urgent, $ncount,0);
+	
+	my $maxnum = VCS::Docs::appointments->getLastAppNum( $self->{ vars }, $new->{ center }, $new->{ appdate_iso } );
+	
+	if ( !$error1 and !$error2 ) {
+		
+		$self->{ af }->query( 'query', __LINE__, "
+			UPDATE Appointments SET AppDate = ?, AppNum = ?, Status = 1, TimeslotID = ? WHERE ID = ?", {},
+			$new->{ appdate_iso }, $maxnum, $new->{ apptime }, $appid
+		);
+		
+		$self->{ af }->query( 'query', __LINE__, "
+			UPDATE AutoToken SET ServiceType = 4 WHERE Token = ?", {}, $self->{ token }
+		);
+	}
+	
+	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
+
+	#my $docobj = VCS::Docs::docs->new( 'VCS::Docs::docs', $self->{ vars } );
+
+	#my $error = $docobj->reschApp( $appid, $urgent, \$newnum, \$new_app_id );
+
+	#$self->{ af }->query( 'query', __LINE__, "
+	#	UPDATE AutoToken SET CreatedApp = ? WHERE Token = ?", {},
+	#	$new_app_id, $self->{ token }
+	#) unless $error;
+
+	return ( !$error1 and !$error2 ? $error1 : $new_app_id );
 }
 
 sub offline_apped
@@ -924,7 +976,7 @@ sub get_app_file_list_by_token
 			$doc_list->{ $app->{ ID } }->{ files }->{ $file->{ DocType } } = [ $file ];
 		}
 	}
-	
+		
 	my $visa_type = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT VType FROM AutoToken
 		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
@@ -1006,7 +1058,7 @@ sub get_app_file_list_by_token
 		
 		$doc_list->{ $app }->{ checked_already } = $checked_already;
 	};
-	
+
 	return $doc_list;
 }
 	

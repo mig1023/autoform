@@ -69,7 +69,7 @@
 	<td><span class="spacer2"></span>[% langreq('Номер записи') %]</td>
 	<td class="m_left"><span class="m_info">[% app_info.new_app_num %]</span></td>
 	</tr>
-	[% IF ( app_info.ServiceType <= 1 ) %]
+	[% IF ( app_info.ServiceType != 2 ) %]
 		<tr>
 		<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
 		<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
@@ -141,8 +141,11 @@
 			
 			[% SET n = 0 %]
 			[% FOREACH file IN person.value.files %]
+			
+				[% NEXT IF file.0.empty %]
+				
 				[% SET n = n + 1 %]
-				<tr>
+				<tr class="files_uploaded">
 				<td colspan="2"><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
 					[% IF (file.0.CheckStatus == 1) %]<b>[% END %]
 						[% IF (file.0.DocType < 0) %]
