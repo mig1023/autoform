@@ -721,7 +721,6 @@ sub get_app_file_list_by_token
 	my $doc_types_list = $doc_types_list_all->{ $visa_type };
 	
 	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_list;
-	my %doc_ords = map { $_->{ id } => $_->{ doc_ord } } @$doc_types_list;
 	
 	my $doc_comments_tmp = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT DocID, CommentText, CommentDate, DocUploadedComment.Login
@@ -780,7 +779,7 @@ sub get_app_file_list_by_token
 	
 	for my $doc ( keys %$doc_comments ) {
 		
-		my @new_ord_comments = sort { $a->{ date } cmp $b->{date } } @{ $doc_comments->{ $doc } };
+		my @new_ord_comments = sort { $a->{ date } cmp $b->{ date } } @{ $doc_comments->{ $doc } };
 		
 		$doc_comments->{ $doc } = \@new_ord_comments;
 	}
@@ -793,7 +792,7 @@ sub get_app_file_list_by_token
 
 		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID' );
 		
-		$file->{ file_ord } = $doc_ords{ $file->{ DocType } }; 		
+		$file->{ file_ord } = $app->{ DocID }; 		
 
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
 	
@@ -828,24 +827,23 @@ sub get_app_file_list_by_token
 		
 		for my $app ( keys %$doc_list ) {
 			
-			if ( !exists $doc_list->{ $app }->{ files }->{ $empty->{ id } } ) {
+			next if exists $doc_list->{ $app }->{ files }->{ $empty->{ id } };
 			
-				$doc_list->{ $app }->{ files }->{ $empty->{ id } } = [];
-				
-				my $file = {};
-				
-				$file->{ file_ord } = $empty->{ doc_ord }; 
+			$doc_list->{ $app }->{ files }->{ $empty->{ id } } = [];
+			
+			my $file = {};
+			
+			$file->{ file_ord } = $empty->{ id }; 
 
-				$file->{ DocID } = "empty_" . $empty->{ id };
-				
-				$file->{ DocType } = $empty->{ id }; 
+			$file->{ DocID } = "empty_" . $empty->{ id };
+			
+			$file->{ DocType } = $empty->{ id }; 
 
-				$file->{ TypeStr } = $empty->{ title };
-				
-				$file->{ empty } = 1;
-				
-				push( @{ $doc_list->{ $app }->{ files }->{ $empty->{ id } } }, $file );
-			}
+			$file->{ TypeStr } = $empty->{ title };
+			
+			$file->{ empty } = 1;
+			
+			push( @{ $doc_list->{ $app }->{ files }->{ $empty->{ id } } }, $file );
 		}
 	}
 	
