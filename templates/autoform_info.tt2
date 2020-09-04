@@ -133,8 +133,8 @@
 			<td class="m_right"><span class="mobil_hide">[% person.value.BirthDate %]</span>&nbsp;</td>
 			<td class="m_right_m">
 			[% IF app_info.category == 'C' %]
-				<input class="small_button" type="button" style="min-width:110px;" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.value.ID %]');">
-				&nbsp;<input class="small_button" type="button" style="min-width:96px;" value="[% langreq('Распечатать') %]" onclick="go_button('print_a', '[% person.value.ID %]');">
+				<input class="small_button" type="button" style="min-width:110px;" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.key %]');">
+				&nbsp;<input class="small_button" type="button" style="min-width:96px;" value="[% langreq('Распечатать') %]" onclick="go_button('print_a', '[% person.key %]');">
 			[% END %]
 			</td>
 			</tr>
