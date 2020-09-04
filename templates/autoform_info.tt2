@@ -10,7 +10,7 @@
 	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=[% yandex_key %]" type="text/javascript"></script>
 [% END %]
 
-[% IF title == 2 %]
+[% IF ( title == 2 ) || ( title == 7 )  %]
 	<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
@@ -510,6 +510,12 @@
 		<td colspan="2"><br><h2>[% langreq('Услуга завершена') %]</h2></td>
 		</tr>
 	[% END %]
+	
+	[% IF !not_checked_yet %]
+		<tr>
+			<td colspan="2"><br><input class="big_button" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="offline_app();"><br></td>
+		</tr>
+	[% END %]
 
 	<tr><td>&nbsp;</td></tr>
 	
@@ -521,6 +527,33 @@
 	<tr><td colspan="2">&nbsp;</td></tr>
 
 	<tr><td colspan="2"><h2>[% langreq('Спасибо') %]<br>[% langreq('Итальянский визовый центр') %]</h2></td></tr>
+
+[% ELSIF title == 7 %]
+
+	<tr><td colspan="2">
+	<br><br>
+	<h2>[% langreq('Записаться в Визовый центр') %]</h2><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
+	
+	<tr><td width="60%"><label id="text">Визовый центр</label></td>
+	<td>
+	<select class="input_width select_gen" size = "1" name="center" title="Выберите визовый центр для подачи документов" id="center" onchange="update_timeslots();">
+		[% FOREACH center IN centers %]
+			<option value="[% center.ID %]">[% langreq(center.BName) %]</option>
+		[% END %]
+	</td></tr>
+	
+	<tr><td width="60%"><label id="text">Дата записи</label></td>
+	<td><input class="input_width input_gen mobil_big width_full" type="text" value="[% appinfo.appdate %]" name="appdate" id="appdate" onchange="update_timeslots();"></td></tr>
+	<tr><td><label id="text">Время записи</label></td><td><select class="input_width select_gen mobil_big width_full" size = "1" name="apptime" title="" id="apptime" data-timeslot="5694"></select></td></tr>
+
+	<tr><td colspan="2"><br>
+	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+	<input class="small_button" type="button" value="[% langreq('Записаться') %] &#9655;" onclick="go_button('reschedule');"><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
+
 [% END %]
 
 	<tr><td class="left" colspan="2">
@@ -545,7 +578,7 @@
 
 <script>
 
-[% IF title == 2 %]
+[% IF ( title == 2 ) || ( title == 7 ) %]
 	$("#appdate").mask("99.99.9999");
 	
 	[% IF error %]
@@ -563,7 +596,8 @@
 		var reload_timeslot = $('#apptime').attr('data-timeslot');
 
 		$.get("[% vcs_tools %]get_times.htm", {
-			'center': '[% appinfo.center %]', 
+			'vtype': '[% appinfo.vtype %]', 
+			'center': [% IF title == 2 %]'[% appinfo.center %]'[% ELSE %]$('#center').val()[% END %], 
 			'persons': '[% appinfo.persons %]', 
 			'appdate':$('#appdate').val(),
 			'fdate': '[% appinfo.fdate %]', 
@@ -697,16 +731,30 @@
 
 [% IF title == 6 %]
 	function close_app() {
-		if (confirm('[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]'))
+		if ( confirm( '[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]' ) )
 			go_button('close_check');
 	}
+	
+	function offline_app(app) {
+	
+		if ( app == 'close' ) {
+			var user_confirm = confirm( '[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]' );
+			
+			if ( !user_confirm )
+				return;
+		}
+
+		go_button('offline_app');
+	}
+	
+	
 [% END %]
 
 $(document).ready( mobileScreenCheck() );
 
 function mobileScreenCheck() {
 
-	[% IF title == 2 %]
+	[% IF ( title == 2 ) || ( title == 7 ) %]
 	
 		$('#appdate').datepicker({
 			dateFormat: 'dd.mm.yy',

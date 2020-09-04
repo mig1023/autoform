@@ -218,6 +218,43 @@ sub get_html_elements
 	}
 }
 
+sub get_app_date_pseudo_element
+# //////////////////////////////////////////////////
+{
+	return {
+		name => 'appdate',
+		check_logic => [
+			{
+				condition => 'now_or_later',
+			},
+			{
+				condition => 'now_or_earlier',
+				offset => 90,
+				equality_is_also_fail => 1,
+				full_error => 'Запись в Визовый центр более чем за [offset] не осуществляется',
+			},
+			{
+				condition => 'not_beyond_than',
+				table => 'AppData',
+				name => 'AppSDate',
+				offset => 180,
+				full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
+			},
+			{
+				condition => 'not_beyond_than',
+				table => 'Appointments',
+				name => 'SDate',
+				offset => 180,
+				full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
+			},
+		],
+		db => {
+			table => 'Appointments',
+			name => 'AppDate',
+		},
+	};
+}
+
 sub get_tables_controled_by_AutoToken
 # //////////////////////////////////////////////////
 {

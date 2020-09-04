@@ -55,6 +55,8 @@ sub autoinfopage
 	
 	return close_check( @_ ) if /^close_check$/i;
 	
+	return offline_app( @_ ) if /^offline_app$/i;
+	
 	return get_infopage( @_ );
 }
 
@@ -397,6 +399,8 @@ sub edited
 	$template->process( 'autoform_info.tt2', $tvars );
 }
 
+
+
 sub reschedule
 # //////////////////////////////////////////////////
 {
@@ -404,39 +408,8 @@ sub reschedule
 	
 	my $new = {};
 	
-	my $date_pseudo_element = {
-		name => 'appdate',
-		check_logic => [
-			{
-				condition => 'now_or_later',
-			},
-			{
-				condition => 'now_or_earlier',
-				offset => 90,
-				equality_is_also_fail => 1,
-				full_error => 'Запись в Визовый центр более чем за [offset] не осуществляется',
-			},
-			{
-				condition => 'not_beyond_than',
-				table => 'AppData',
-				name => 'AppSDate',
-				offset => 180,
-				full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
-			},
-			{
-				condition => 'not_beyond_than',
-				table => 'Appointments',
-				name => 'SDate',
-				offset => 180,
-				full_error => 'Запись в Визовый центр более чем за [offset] до дня вылета не осуществляется',
-			},
-		],
-		db => {
-			table => 'Appointments',
-			name => 'AppDate',
-		},
-	};
-
+	my $date_pseudo_element = VCS::Site::autodata::get_app_date_pseudo_element();
+	
 	my $id_or_error = undef;
 	
 	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
@@ -534,6 +507,90 @@ sub rescheduled
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub offline_app
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my ( $new, $centers ) = ( {}, () );
+	
+	my $date_pseudo_element = VCS::Site::autodata::get_app_date_pseudo_element();
+
+	my $id_or_error = undef;
+	
+	my $appinfo_for_timeslots = $self->get_same_info_for_timeslots_from_app();
+
+	$new->{ $_ } = $self->{ vars }->getparam( $_ ) for ( 'appdate', 'apptime', 'center' );
+
+	if (
+		$new->{ center } =~ /^\d+$/
+		and
+		$new->{ apptime } =~ /^\d+$/
+		and
+		$new->{ appdate } =~ /\d\d\.\d\d\.\d\d\d\d/
+	) {
+
+		$appinfo_for_timeslots->{ $_  } = $new->{ appdate } for ( 'appdate', 'appdate_iso' );
+
+		$appinfo_for_timeslots->{ appdate_iso } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
+		
+		$id_or_error = $self->{ af }->check_logic( $date_pseudo_element, $appinfo_for_timeslots, 'edt' );
+		
+		if ( $id_or_error ) {
+		
+			my @array = split( /\|/, $id_or_error );
+			
+			$id_or_error = $array[1];
+		}
+		
+		if (
+			!$id_or_error
+			and
+			$new->{ apptime } > 0
+			and
+			$self->check_timeslots_already_full( $appinfo_for_timeslots, $new->{ apptime } )
+			and
+			Date::Calc::check_date( $3, $2, $1 )
+		) {
+			
+			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+			);
+
+			$self->{ af }->log(
+				"autoinfo_resch", "перенос записи на " . $new->{ appdate } . " таймслот " . $new->{ apptime }, $app_id
+			);
+
+			$id_or_error = $self->set_new_appdate( $new );
+			
+			return $self->{ af }->redirect( $self->{ token }.'&action=rescheduled' ) if $id_or_error =~ /^\d+$/;
+		}
+
+	}
+	else {
+		$centers = $self->{ af }->query( 'selallkeys', __LINE__, "
+			SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0"
+		);
+		
+		$_->{ BName } = $self->{ af }->lang( $_->{ BName } ) for @$centers;
+	}
+
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'title' 	=> 7,
+		'appinfo'	=> $appinfo_for_timeslots,
+		'centers'	=> $centers,
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
+		'error'		=> $id_or_error,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -719,7 +776,7 @@ sub get_app_file_list_by_token
 	my $doc_types_list_all = VCS::Site::autodata::get_doc_list();
 	
 	my $doc_types_list = $doc_types_list_all->{ $visa_type };
-	
+
 	my %doc_types = map { $_->{ id } => $_->{ title } } @$doc_types_list;
 	
 	my $doc_comments_tmp = $self->{ af }->query( 'selallkeys', __LINE__, "
