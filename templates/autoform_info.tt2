@@ -10,7 +10,7 @@
 	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=[% yandex_key %]" type="text/javascript"></script>
 [% END %]
 
-[% IF ( title == 2 ) || ( title == 7 )  %]
+[% IF ( title == 2 ) || ( title == 7 ) %]
 	<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
@@ -538,9 +538,9 @@
 	
 	<tr><td width="60%"><label id="text">Визовый центр</label></td>
 	<td>
-	<select class="input_width select_gen" size = "1" name="center" title="Выберите визовый центр для подачи документов" id="center" onchange="update_timeslots();">
+	<select class="input_width select_gen mobil_big width_full" size = "1" name="center" title="Выберите визовый центр для подачи документов" id="center" onchange="update_timeslots();">
 		[% FOREACH center IN centers %]
-			<option value="[% center.ID %]">[% langreq(center.BName) %]</option>
+			<option value="[% center.ID %]">[% center.name %]</option>
 		[% END %]
 	</td></tr>
 	
@@ -550,9 +550,34 @@
 
 	<tr><td colspan="2"><br>
 	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-	<input class="small_button" type="button" value="[% langreq('Записаться') %] &#9655;" onclick="go_button('reschedule');"><br></td></tr>
+	<input class="small_button" type="button" value="[% langreq('Записаться') %] &#9655;" onclick="offline_app();"><br></td></tr>
 
 	<tr><td colspan="2">&nbsp;</td></tr>
+
+[% ELSIF title == 8 %]
+
+	<tr><td colspan="2">
+	<br><br>
+	<h2>[% langreq('Запись успешно создана') %]</h2><br></td></tr>
+
+	<tr><td>
+	<table width="100%">
+
+	<tr>
+	<td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.CenterID %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
+	</tr><tr>
+	<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
+	</tr>
+
+	<tr><td colspan="2"><br>
+	<input class="small_button" type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('nothing');"><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>	
 
 [% END %]
 
@@ -729,7 +754,7 @@
 
 [% END %]
 
-[% IF title == 6 %]
+[% IF ( title == 6 ) || ( title == 7 ) %]
 	function close_app() {
 		if ( confirm( '[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]' ) )
 			go_button('close_check');
@@ -828,7 +853,7 @@ function mobileScreenCheck() {
 	$('#info_form').show(); 
 }
 
-[% IF ( title == 2 ) && error %]
+[% IF ( ( title == 2 ) || ( title == 7 ) ) && error %]
 
 	function showErrorTip() {
 

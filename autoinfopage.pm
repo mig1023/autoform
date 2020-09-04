@@ -57,6 +57,8 @@ sub autoinfopage
 	
 	return offline_app( @_ ) if /^offline_app$/i;
 	
+	return offline_apped( @_ ) if /^offline_apped$/i;
+	
 	return get_infopage( @_ );
 }
 
@@ -516,7 +518,7 @@ sub offline_app
 {
 	my ( $self, $task, $id, $template ) = @_;
 	
-	my ( $new, $centers ) = ( {}, () );
+	my $new = {};
 	
 	my $date_pseudo_element = VCS::Site::autodata::get_app_date_pseudo_element();
 
@@ -538,15 +540,17 @@ sub offline_app
 
 		$appinfo_for_timeslots->{ appdate_iso } =~ s/(\d\d)\.(\d\d)\.(\d\d\d\d)/$3-$2-$1/;
 		
+		$appinfo_for_timeslots->{ center } = $new->{ center };
+		
 		$id_or_error = $self->{ af }->check_logic( $date_pseudo_element, $appinfo_for_timeslots, 'edt' );
 		
 		if ( $id_or_error ) {
-		
+
 			my @array = split( /\|/, $id_or_error );
 			
 			$id_or_error = $array[1];
 		}
-		
+	
 		if (
 			!$id_or_error
 			and
@@ -556,28 +560,39 @@ sub offline_app
 			and
 			Date::Calc::check_date( $3, $2, $1 )
 		) {
-			
+		
 			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
 				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 			);
 
 			$self->{ af }->log(
-				"autoinfo_resch", "перенос записи на " . $new->{ appdate } . " таймслот " . $new->{ apptime }, $app_id
+				"autoinfo_resch", "запись оффлайн после проверки " . $new->{ appdate } . " таймслот " . $new->{ apptime }, $app_id
+			);
+			
+			$self->{ af }->query( 'query', __LINE__, "
+				UPDATE Appointments SET Status = 12, CenterID = ? WHERE ID = ?", {}, $new->{ center }, $app_id
 			);
 
 			$id_or_error = $self->set_new_appdate( $new );
-			
-			return $self->{ af }->redirect( $self->{ token }.'&action=rescheduled' ) if $id_or_error =~ /^\d+$/;
+warn "id_or_error = $id_or_error";
+
+			if ( $id_or_error =~ /^\d+$/ ) {
+				
+				$self->{ af }->query( 'query', __LINE__, "
+					UPDATE AutoToken SET CreatedApp = ?, ServiceType = 1 WHERE Token = ?", {}, $id_or_error, $self->{ token }
+				);
+
+				return $self->{ af }->redirect( $self->{ token }.'&action=offline_apped' );
+			}
 		}
 
 	}
-	else {
-		$centers = $self->{ af }->query( 'selallkeys', __LINE__, "
-			SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0"
-		);
-		
-		$_->{ BName } = $self->{ af }->lang( $_->{ BName } ) for @$centers;
-	}
+
+	my $centers = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT ID FROM Branches WHERE Display = 1 AND isDeleted = 0"
+	);
+
+	$_->{ name } = $self->{ af }->lang( "mobname" . $_->{ ID } ) for @$centers;
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -591,6 +606,42 @@ sub offline_app
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 		'error'		=> $id_or_error,
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub offline_apped
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT AppDate as new_app_date,	TimeslotID as new_app_timeslot, CenterID
+		FROM AutoToken
+		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
+		WHERE Token = ?", $self->{ token }
+	)->[0];
+	
+	my @new_date = split( /\-/, $app_info->{ new_app_date } );
+	
+	my $months = VCS::Site::autodata::get_months();
+	
+	$app_info->{ new_app_date } = [ $new_date[2], $months->{ $new_date[1] }, $new_date[0] ];
+	
+	$self->{ af }->correct_values( \$app_info );
+	
+	$app_info->{ new_app_timeslot } =~ s/\s.+//g;
+
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'app_info'	=> $app_info,
+		'title' 	=> 8,
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -713,6 +764,8 @@ sub check_timeslots_already_full
 
 		return 1 if $_->{id} == $timeslot;
 	}
+	
+	return 0;
 }
 
 sub get_app_list
@@ -849,7 +902,7 @@ sub get_app_file_list_by_token
 
 		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID' );
 		
-		$file->{ file_ord } = $app->{ DocID }; 		
+		$file->{ file_ord } = $app->{ DocType }; 		
 
 		$file->{ TypeStr } = $doc_types{ $file->{ DocType } }; 
 	
