@@ -870,7 +870,7 @@ sub get_service_for_token
 	
 	my $services = VCS::Site::autodata::get_services();
 	
-	return $services->{ lc( $self->param( 's' ) ) } || 1;
+	return $services->{ lc( $self->param( 'service' ) ) } || 1;
 	
 }
 

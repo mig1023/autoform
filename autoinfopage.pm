@@ -582,9 +582,7 @@ sub offline_app
 				$self->{ af }->query( 'query', __LINE__, "
 					INSERT INTO Appointments_tranform (Type, OldID, NewID) VALUES ('checkdoc-to-offine', ?, ?)", {},
 					$app_id, $id_or_error
-				);
-
-				
+				);		
 			}
 			
 			return $self->{ af }->redirect( $self->{ token }.'&action=offline_apped' );
@@ -659,7 +657,7 @@ sub offline_apped
 	my ( $self, $task, $id, $template ) = @_;
 	
 	my $app_info = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppDate as new_app_date,	TimeslotID as new_app_timeslot, CenterID
+		SELECT AppDate as new_app_date,	TimeslotID as new_app_timeslot, CenterID as new_app_branch
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 		WHERE Token = ?", $self->{ token }
