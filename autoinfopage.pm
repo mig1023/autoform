@@ -55,6 +55,8 @@ sub autoinfopage
 	
 	return close_check( @_ ) if /^close_check$/i;
 	
+	return online_app( @_ ) if /^online_app$/i;
+	
 	return offline_app( @_ ) if /^offline_app$/i;
 	
 	return offline_apped( @_ ) if /^offline_apped$/i;
@@ -77,6 +79,8 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
+
+	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } ) ) {
 	
 		return $self->{ af }->redirect( 'no_field' );
 	}
@@ -505,6 +509,24 @@ sub rescheduled
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'app_info'	=> $app_info,
 		'title' 	=> 4,
+		'token' 	=> $self->{ token },
+		'static'	=> $self->{ autoform }->{ paths }->{ static },
+		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
+		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
+	};
+	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub online_app
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+
+	my $tvars = {
+		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
+		'title' 	=> 9,
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },

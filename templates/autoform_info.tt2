@@ -10,7 +10,7 @@
 	<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=[% yandex_key %]" type="text/javascript"></script>
 [% END %]
 
-[% IF ( title == 2 ) || ( title == 7 ) %]
+[% IF ( title == 2 ) || ( title == 7 ) || ( title == 9 ) %]
 	<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery.maskedinput.min.js"></script>
 	<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
@@ -462,7 +462,10 @@
 	
 	[% IF !not_checked_yet %]
 		<tr>
-			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="offline_app();"><br></td>
+			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="go_app('offline_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
+		</tr>
+		<tr>
+			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и оформить удалённое получение документов') %][% ELSE %][% langreq('Оформить удалённую подачу документов') %][% END %]" onclick="go_app('online_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
 		</tr>
 	[% END %]
 
@@ -499,7 +502,7 @@
 
 	<tr><td colspan="2"><br>
 	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-	<input class="small_button" type="button" value="[% langreq('Записаться') %] &#9655;" onclick="offline_app();"><br></td></tr>
+	<input class="small_button" type="button" value="[% langreq('Записаться') %] &#9655;" onclick="go_app('offline_app');"><br></td></tr>
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 
@@ -514,7 +517,7 @@
 
 	<tr>
 	<td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
-	<td class="m_left"><span class="m_info">[% app_info.CenterID %]</span></td>
+	<td class="m_left"><span class="m_info">[% app_info.new_app_branch %]</span></td>
 	</tr><tr>
 	<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
 	<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
@@ -526,7 +529,37 @@
 	<tr><td colspan="2"><br>
 	<input class="small_button" type="button" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('nothing');"><br></td></tr>
 
-	<tr><td colspan="2">&nbsp;</td></tr>	
+	<tr><td colspan="2">&nbsp;</td></tr>
+	
+[% ELSIF title == 9 %]
+
+	<tr><td colspan="2">
+	<br><br>
+	<h2>[% langreq('Оформление удалённой подачи документов') %]</h2><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
+	
+	<tr><td colspan="2">Здесь выбор адреса и оплата FOX</td></tr>
+	
+	<tr><td colspan="2">
+		<div id="selectAddr">
+			<input type="text" id="fox_addr" style="width:90%">
+		</div>
+		<div id="selectedAddr" style="display:none;font-size:9pt;border:1px solid black;padding:5px;">
+			<span id="selectedAddrText" style="font-weight:bold;"></span>&nbsp;<a href="javascript:changeSelectedAddr()">[% langreq('изменить') %]</a>
+			<br><label id="houseaoguid"></label>
+		</div>
+		<div id="selectedAddrParams" style="display:none;font-size:9pt;"><br>
+			[% langreq('Стоимость доставки') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
+			[% langreq('Доставка (дней)') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span>
+		</div>
+	</td></tr>
+
+	<tr><td colspan="2">&nbsp;<br>
+	<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+	<input class="small_button" type="button" disabled value="[% langreq('Записаться') %] &#9655;" onclick="go_app('online_app');"><br></td></tr>
+
+	<tr><td colspan="2">&nbsp;</td></tr>
 
 [% END %]
 
@@ -703,24 +736,85 @@
 
 [% END %]
 
+[% IF ( title == 9 ) %]
+
+		$("#fox_addr").autocomplete({
+			source:function( request, response ) {
+			
+				var addruri = "127.0.0.1/" + $("#fox_addr").val();
+
+				$.ajax({
+					url: addruri,
+					dataType: "jsonp",
+					success: function( data ) {
+						response( data, $.map( function( item ) {
+							return {
+								value: item.address,
+								post: item.postalcode,
+								cid: item.id
+							}
+						}));
+					}
+				});
+			},
+			delay:10,
+			minLength:3,
+			select: function( event, ui ) {
+			
+				$('#selectAddr').fadeOut();
+				$('#selectedAddrText').html(ui.item.address);
+				$('#houseaoguid').html(ui.item.houseaoguid);
+				$('#selectedAddr').fadeIn();
+				
+				$.ajax({
+					url: "127.0.0.1/JSONWebService.asmx/Calc?login=unregistered&password=unregistered&service=109ca3d2-d30b-11e0-b7a2-dfe1dde4ab3e&fromindex=121059&toindex=" + ui.item.postalcode + "&typeOfCargo=81dd8a13-8235-494f-84fd-9c04c51d50ec&urgency=5883b0fb-0e34-11e3-b3a0-f5ed137aca63&weight=0.5&qty=1",
+					dataType: "json",
+					success: function( data ) {
+
+						$('#selectedAddrPrice').html(data["tariffs"][0]["total"] + ' руб');
+						$('#selectedAddrTime').html(data["tariffs"][0]["maxPeriod"]);
+						$('#selectedAddrParams').fadeIn();
+					}
+				});
+
+				return false;
+			},
+		})
+		.data( "autocomplete" )._renderItem = function( ul, item ) {
+				return $( "<li></li>" )
+					.data( "item.autocomplete", item )
+					.append( "<a>" + item.address + "</a>" )
+					.appendTo( ul );
+		};
+		
+		function changeSelectedAddr() {
+			$('#selectAddr').fadeIn();
+			$('#selectedAddr').fadeOut();
+			$('#selectedAddrParams').fadeOut();
+		}
+	
+[% END %]
+
 [% IF ( title == 6 ) || ( title == 7 ) %]
+
+	function confirm_app_closing() {
+	
+		return confirm( '[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]' );
+	}
+
 	function close_app() {
-		if ( confirm( '[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]' ) )
+	
+		if ( confirm_app_closing() )
 			go_button('close_check');
 	}
 	
-	function offline_app(app) {
-	
-		if ( app == 'close' ) {
-			var user_confirm = confirm( '[% langreq('Вы уверены, что хотите завершить обслуживание по услуге онлайн проверка документов?\nПосле завершения обслуживания проверка документов более не осуществляется.') %]' );
-			
-			if ( !user_confirm )
-				return;
-		}
+	function go_app(type, app) {
 
-		go_button('offline_app');
+		if ( ( app == 'close' ) && !confirm_app_closing() )
+			return;
+			
+		go_button(type);
 	}
-	
 	
 [% END %]
 
