@@ -539,19 +539,22 @@
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 	
-	<tr><td colspan="2">Здесь выбор адреса и оплата FOX</td></tr>
-	
 	<tr><td colspan="2">
 		<div id="selectAddr">
+			[% langreq('Выберите адрес получения и доставки документов') %]:<br>
 			<input type="text" id="fox_addr" style="width:90%">
 		</div>
-		<div id="selectedAddr" style="display:none;font-size:9pt;border:1px solid black;padding:5px;">
+		<div id="selectedAddr" style="display:none;font-size:9pt;">
+			[% langreq('Адрес получения и доставки документов') %]:<br>
 			<span id="selectedAddrText" style="font-weight:bold;"></span>&nbsp;<a href="javascript:changeSelectedAddr()">[% langreq('изменить') %]</a>
-			<br><label id="houseaoguid"></label>
 		</div>
 		<div id="selectedAddrParams" style="display:none;font-size:9pt;"><br>
 			[% langreq('Стоимость доставки') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
 			[% langreq('Доставка (дней)') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span>
+			<input type="hidden" id="houseaoguid">
+		</div>
+		<div id="selectedAddrFail" style="display:none;font-size:9pt;"><br>
+			[% langreq('Доставка по этому адресу не осуществляется или выбран неполный адрес') %]
 		</div>
 	</td></tr>
 
@@ -741,23 +744,19 @@
 		$("#fox_addr").autocomplete({
 			source:function( request, response ) {
 			
-				var addruri = "127.0.0.1/" + $("#fox_addr").val();
-
 				$.ajax({
-					url: addruri,
+					url: "127.0.0.1/" + $("#fox_addr").val(),
 					dataType: "jsonp",
 					success: function( data ) {
 						response( data, $.map( function( item ) {
 							return {
-								value: item.address,
-								post: item.postalcode,
-								cid: item.id
+								value: item,
 							}
 						}));
 					}
 				});
 			},
-			delay:10,
+			delay:5,
 			minLength:3,
 			select: function( event, ui ) {
 			
@@ -766,14 +765,23 @@
 				$('#houseaoguid').html(ui.item.houseaoguid);
 				$('#selectedAddr').fadeIn();
 				
+				var calcUrl = "127.0.0.1/JSONWebService.asmx/Calc?login=unregistered&password=unregistered&service=109ca3d2-d30b-11e0-b7a2-dfe1dde4ab3e";
+				var indexes = "&fromindex=121059&toindex=" + ui.item.postalcode;
+				var typesAndUrgancy = "&typeOfCargo=81dd8a13-8235-494f-84fd-9c04c51d50ec&urgency=5883b0fb-0e34-11e3-b3a0-f5ed137aca63&weight=0.5&qty=1";
+				
 				$.ajax({
-					url: "127.0.0.1/JSONWebService.asmx/Calc?login=unregistered&password=unregistered&service=109ca3d2-d30b-11e0-b7a2-dfe1dde4ab3e&fromindex=121059&toindex=" + ui.item.postalcode + "&typeOfCargo=81dd8a13-8235-494f-84fd-9c04c51d50ec&urgency=5883b0fb-0e34-11e3-b3a0-f5ed137aca63&weight=0.5&qty=1",
+					url: calcUrl + indexes + typesAndUrgancy,
 					dataType: "json",
 					success: function( data ) {
 
-						$('#selectedAddrPrice').html(data["tariffs"][0]["total"] + ' руб');
-						$('#selectedAddrTime').html(data["tariffs"][0]["maxPeriod"]);
-						$('#selectedAddrParams').fadeIn();
+						if (data["tariffs"] == null) {
+							$('#selectedAddrFail').fadeIn();
+						}
+						else {
+							$('#selectedAddrPrice').html(data["tariffs"][0]["total"] + ' руб');
+							$('#selectedAddrTime').html(data["tariffs"][0]["maxPeriod"]);
+							$('#selectedAddrParams').fadeIn();
+						}
 					}
 				});
 
@@ -791,6 +799,7 @@
 			$('#selectAddr').fadeIn();
 			$('#selectedAddr').fadeOut();
 			$('#selectedAddrParams').fadeOut();
+			$('#selectedAddrFail').fadeOut();
 		}
 	
 [% END %]
