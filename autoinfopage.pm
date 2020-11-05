@@ -7,6 +7,7 @@ use VCS::Site::autodata;
 use Data::Dumper;
 use Date::Calc;
 use JSON;
+use LWP::UserAgent;
 
 sub new
 # //////////////////////////////////////////////////
@@ -517,21 +518,86 @@ sub rescheduled
 	$template->process( 'autoform_info.tt2', $tvars );
 }
 
+sub online_order
+# //////////////////////////////////////////////////
+{
+	my ( $self ) = @_;
+	
+	my $config = VCS::Site::autodata::get_settings();
+
+	my $data = {
+		'login' => $config->{ fox }->{ login },
+		'password' => $config->{ fox }->{ password },
+		'department' => '',
+		'urgency' => $config->{ fox }->{ urgency },
+		'typeOfCargo' => $config->{ fox }->{ cargo },
+		'cargoDescription' => $config->{ fox }->{ description },
+		
+		'payer' => '',
+		'paymentMethod' => '',
+		'withReturn' => '',
+		'weight' => '',
+		'cargoPackageQty' => '',
+		'senderInfo' => '',
+				
+		'recipient' => '',
+		'recipientIndex' => '',
+		'recipientOfficial' => '',
+		'recipientGeography' => '',
+		'recipientAddress' => '',
+		'recipientPhone' => '',
+		'recipientEMail' => '',
+		'recipientInfo' => '',
+	};
+	
+	for ( 'date', 'time', 'contactPerson', 'comment', 'sender', 'senderGeography',
+			'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
+				
+		$data->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
+		$data->{ $_ } =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.\,\:\"\\\/\(\)№_]/./g;
+	}
+	
+	$data->{ senderOfficial } = $data->{ sender };
+	$data->{ contactPerson } = $data->{ sender };
+
+	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
+
+	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
+	my $errorInfo = $errorInfoTMP->{ errorInfo };
+
+	return ( undef, $errorInfo ) unless $response->is_success;
+	
+	my $order = JSON->new->pretty->decode( $response->decoded_content );
+
+	return ( $order->{ number }, $errorInfo );
+}
+
+
 sub online_app
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
-
+	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 9,
 		'token' 	=> $self->{ token },
+		'addr_url'	=> $self->{ autoform }->{ fox }->{ addr },
+		'calc_url'	=> $self->{ autoform }->{ fox }->{ calc },
+		'urgency' 	=> $self->{ autoform }->{ fox }->{ urgency }, 
+		'cargo' 	=> $self->{ autoform }->{ fox }->{ cargo },
+		'login' 	=> $self->{ autoform }->{ fox }->{ login },
+		'pass' 		=> $self->{ autoform }->{ fox }->{ password },
+		'service' 	=> $self->{ autoform }->{ fox }->{ service },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
+	
+	( $tvars->{ order_num }, $tvars->{ err } ) = $self->online_order() if $self->{ vars }->getparam('appdata') eq 'order';
+	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
 

@@ -35,6 +35,18 @@ sub get_settings
 			password => '',
 		},
 		
+		fox => {
+			addr => '',
+			calc => '',
+			order => '',
+			login => '',
+			password => '',
+			urgency => '',
+			cargo => '',
+			service => '',
+			description => '',
+		},
+		
 		yandex_map => {
 			api_key => '',
 		},
