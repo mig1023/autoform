@@ -33,6 +33,12 @@ sub get_settings
 			url => '',
 			user_name => '',
 			password => '',
+			
+			cloud_url => '',
+			cloud_ssl_cert => '',
+			cloud_ssl_key => '',
+			cloud_ssl_pwd => '',
+			cloud_rsa_key => '',
 		},
 		
 		fox => {
