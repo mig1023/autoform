@@ -10,7 +10,7 @@ use VCS::Site::autodata_type_checkdoc;
 use VCS::Site::autodata_type_remote;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
-use VCS::Site::autopayment;		
+use VCS::Site::autopayment;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -425,8 +425,8 @@ sub payment_check
 {
 	my $self = shift;
 	
-	my ( $pay_id, $order_id, $current_pay_status ) = $self->query( 'sel1', __LINE__, "
-		SELECT AutoPayment.ID, OrderID, PaymentStatus FROM AutoPayment
+	my ( $pay_id, $order_id, $current_pay_status, $amount, $email ) = $self->query( 'sel1', __LINE__, "
+		SELECT AutoPayment.ID, OrderID, PaymentStatus, Amount, EMail FROM AutoPayment
 		JOIN AutoToken ON AutoPayment.AutoID = AutoToken.AutoAppID
 		WHERE Token = ?", $self->{ token }
 	);
@@ -439,14 +439,52 @@ sub payment_check
 		UPDATE AutoPayment SET PaymentStatus = ?, PaymentDate = now() WHERE ID = ?", {}, 
 		$status, $pay_id
 	);
+	
+	if ( $status == 2 ) {
+		
+		my $data = {
+			"id" => $pay_id,
+			"inn" => $self->{ autoform }->{ payment }->{ inn },
+			"key" => $self->{ autoform }->{ payment }->{ inn },
+			"content" => {
+				"type" => "1",
+				"positions" => [
+					{
+						"quantity" 		=> "1.000",
+						"price" 		=> $amount,
+						"tax" 			=> "6",
+						"text" 			=> "Услуга проверки документов",
+						"paymentMethodType" 	=> "3",
+						"paymentSubjectType" 	=> "4",
+					},
+				],
+				"checkClose" => {
+					"payments" => [
+						{
+							"type" 		=> "2",
+							"amount" 	=> $amount
+						},
+					],
+					"taxationSystem" => "0",
+				},
+				"customerContact" => $email,
+			},
+		};
+		
+		my $cloud = VCS::Site::autopayment::cloud_payment( $self, $data );
+	
+		$self->query( 'query', __LINE__, "
+			UPDATE AutoPayment SET Cloud = ? WHERE ID = ?", {}, $cloud, $pay_id
+		);
+		
+		return ( 1, "" );	
+	}
+	else {
+		
+		my $errors_code = VCS::Site::autodata::get_payment_error();
 
-	my $pay_status_ok = ( $status == 2 ? 1 : 0 );
-
-	my $errors_code = VCS::Site::autodata::get_payment_error();
-
-	my $pay_error = ( $pay_status_ok ? "" : $errors_code->[ $status ] );
-
-	return ( $pay_status_ok, $pay_error );
+		return ( 0, $errors_code->[ $status ]  );
+	}
 }
 
 sub get_payment_price

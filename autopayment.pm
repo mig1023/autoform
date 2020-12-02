@@ -104,7 +104,17 @@ sub cloud_payment {
 	
 	my $response = $ua->request( $request );
 
-	return $response->{ "_rc" };
+	my $responses = {
+		201 => "OK",
+		401 => "ERROR: certificate",
+		409 => "ERROR: duplicate",
+		400 => "ERROR: validation",
+		503 => "ERROR: queue",
+	};
+	
+	my $response_line = $responses->{ $response->{ _rc } };
+
+	return ($response_line ? $response_line : "ERROR: unknown type (" . $response->{ _rc }  . ")" );
 }
 
 sub cloud_status {
@@ -123,16 +133,16 @@ sub cloud_status {
 
 	my $response = $ua->get( $config->{ payment }->{ cloud_url } . "$company/status/$docid" );
 
-	return $response->{ "_rc" };
+	return $response->{ _rc };
 }
 
 sub signature
 {
-	my ( $self, $data ) = @_;
+	my $data = shift;
 	
 	my $config = VCS::Site::autodata::get_settings();
-	
-	open( $file, '<', $config->{ payment }->{ cloud_rsa_key } ) or return;
+
+	open( my $file, '<', $config->{ payment }->{ cloud_rsa_key } ) or return;
 	
 	my $key_string;
 	
