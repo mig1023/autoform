@@ -578,10 +578,11 @@
 				[% langreq('Стоимость доставки') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
 				[% langreq('Доставка (дней)') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span><br><br>
 				
+				
 				<input type="hidden" name="senderGeography" id="senderGeography">
 				<input type="hidden" name="senderIndex" id="senderIndex">
 				<input type="hidden" name="senderAddress" id="senderAddress">
-
+				
 				[% langreq('Предпочтительное дата передачи документов') %]:<br>
 				<input class="input_width input_gen mobil_big width_full" type="text" value="" name="date" id="date"><br>
 		
@@ -861,6 +862,10 @@
 								$('#selectedAddrParams').fadeIn();
 								
 								$('#fox_order').prop('disabled', false);
+								
+								$('#senderGeography').val(ui.item.houseaoguid);
+								$('#senderIndex').val(ui.item.address);
+								$('#senderAddress').val(ui.item.postalcode);
 							}
 						}
 					});

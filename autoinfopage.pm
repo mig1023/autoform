@@ -526,28 +526,28 @@ sub online_order
 	my $config = VCS::Site::autodata::get_settings();
 
 	my $data = {
-		'login' => $config->{ fox }->{ login },
+		'login' => $config->{ fox }->{ login }, 
 		'password' => $config->{ fox }->{ password },
-		'department' => '',
+		'department' => 'Документы',
 		'urgency' => $config->{ fox }->{ urgency },
 		'typeOfCargo' => $config->{ fox }->{ cargo },
 		'cargoDescription' => $config->{ fox }->{ description },
 		
-		'payer' => '',
-		'paymentMethod' => '',
-		'withReturn' => '',
-		'weight' => '',
-		'cargoPackageQty' => '',
-		'senderInfo' => '',
-				
-		'recipient' => '',
-		'recipientIndex' => '',
-		'recipientOfficial' => '',
-		'recipientGeography' => '',
-		'recipientAddress' => '',
-		'recipientPhone' => '',
-		'recipientEMail' => '',
-		'recipientInfo' => '',
+		'payer' => '2',
+		'paymentMethod' => '2',
+		'withReturn' => 'true',
+		'weight' => '0.5',
+		'cargoPackageQty' => '1',
+		
+		'senderInfo' => $config->{ fox }->{ senderInfo },
+		'recipient' => $config->{ fox }->{ recipient },
+		'recipientIndex' => $config->{ fox }->{ recipientIndex },
+		'recipientOfficial' => $config->{ fox }->{ recipientOfficial },
+		'recipientGeography' => $config->{ fox }->{ recipientGeography },
+		'recipientAddress' => $config->{ fox }->{ recipientAddress },
+		'recipientPhone' => $config->{ fox }->{ recipientPhone },
+		'recipientEMail' => $config->{ fox }->{ recipientEMail },
+		'recipientInfo' => $config->{ fox }->{ recipientInfo },
 	};
 	
 	for ( 'date', 'time', 'contactPerson', 'comment', 'sender', 'senderGeography',
@@ -559,7 +559,7 @@ sub online_order
 	
 	$data->{ senderOfficial } = $data->{ sender };
 	$data->{ contactPerson } = $data->{ sender };
-
+	
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
 
 	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );

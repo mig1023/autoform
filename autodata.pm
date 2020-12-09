@@ -39,6 +39,7 @@ sub get_settings
 			cloud_ssl_key => '',
 			cloud_ssl_pwd => '',
 			cloud_rsa_key => '',
+			inn => '',
 		},
 		
 		fox => {
@@ -50,7 +51,17 @@ sub get_settings
 			urgency => '',
 			cargo => '',
 			service => '',
+			
 			description => '',
+			senderInfo => '',
+			recipient => '',
+			recipientIndex => '',
+			recipientOfficial => '',
+			recipientGeography => '',
+			recipientAddress => '',
+			recipientPhone => '',
+			recipientEMail => '',
+			recipientInfo => '',
 		},
 		
 		yandex_map => {
