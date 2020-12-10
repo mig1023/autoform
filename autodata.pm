@@ -48,6 +48,7 @@ sub get_settings
 			order => '',
 			pay => '',
 			pay_status => '',
+			track => '',
 			
 			login => '',
 			password => '',

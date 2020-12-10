@@ -439,7 +439,7 @@ sub payment_check
 		UPDATE AutoPayment SET PaymentStatus = ?, PaymentDate = now() WHERE ID = ?", {}, 
 		$status, $pay_id
 	);
-	
+
 	if ( $status == 2 ) {
 		
 		my $data = {
@@ -452,25 +452,25 @@ sub payment_check
 					{
 						"quantity" 		=> "1.000",
 						"price" 		=> $amount,
-						"tax" 			=> "6",
+						"tax" 			=> "6", 		
 						"text" 			=> "Услуга проверки документов",
-						"paymentMethodType" 	=> "3",
-						"paymentSubjectType" 	=> "4",
+						"paymentMethodType" 	=> "3",			
+						"paymentSubjectType" 	=> "4",			
 					},
 				],
 				"checkClose" => {
 					"payments" => [
 						{
-							"type" 		=> "2",
+							"type" 		=> "2",		
 							"amount" 	=> $amount
 						},
 					],
-					"taxationSystem" => "0",
+					"taxationSystem" => "0",	
 				},
 				"customerContact" => $email,
 			},
 		};
-		
+	
 		my $cloud = VCS::Site::autopayment::cloud_payment( $self, $data );
 	
 		$self->query( 'query', __LINE__, "
@@ -970,7 +970,7 @@ sub get_token_and_create_new_form_if_need
 	
 	return ( $token, $finished, 'docstatus' ) if $status == 4;
 	
-	return ( ( $status =~ /^(1|10|11|12)$/ ? $token : '02' ), $finished );
+	return ( ( $status =~ /^(1|10|11|12|13)$/ ? $token : '02' ), $finished );
 }
 
 sub create_clear_form

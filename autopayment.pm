@@ -188,4 +188,24 @@ sub fox_pay_status
 	return $payment_ok;
 }
 
+sub fox_status
+# //////////////////////////////////////////////////
+{
+	my ( $self, $order_number ) = @_;
+	
+	my $config = VCS::Site::autodata::get_settings();
+	
+	my $url_param = "login=unregistered&password=unregistered&documentType=order&number=" . $order_number;
+
+	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ track } . $url_param );
+	
+	return "" unless $response->is_success;
+	
+	my $status = JSON->new->pretty->decode( $response->decoded_content );
+
+	my $line = $status->{ documents }->[ 0 ]->{ history }->[ -1 ]->{ eventState };
+
+	return $line;
+}
+
 1;

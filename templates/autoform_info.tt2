@@ -73,13 +73,23 @@
 		<tr>
 		<td><span class="spacer2"></span>[% langreq('Дата подачи') %]</td>
 		<td class="m_left"><span class="m_info">[% app_info.new_app_date.0 %] [% langreq(app_info.new_app_date.1) %] [% app_info.new_app_date.2 %]</span></td>
-		</tr><tr>
-		<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
-		<td class="m_left"><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
-		</tr><tr>
+		</tr>
+		[% IF ( app_info.ServiceType != 3 ) %]
+			<tr>
+			<td><span class="spacer2"></span>[% langreq('Время подачи') %]</td>
+			<td class="m_left"><span class="m_info">[% app_info.new_app_timeslot %]</span></td>
+			</tr>
+		[% END %]
+		<tr>
 		<td><span class="spacer2"></span>[% langreq('Визовый центр') %]</td>
 		<td class="m_left"><span class="m_info">[% app_info.new_app_branch %]</span></td>
 		</tr>
+		[% IF ( app_info.ServiceType == 3 ) %]
+			<tr>
+			<td><span class="spacer2"></span>[% langreq('Статус доставки') %]</td>
+			<td class="m_left"><b><span class="m_info">[% fox_status %]</span></b></td>
+			</tr>
+		[% END %]
 	[% END %]
 	<tr>
 	<td><span class="spacer2"></span>[% langreq('Тип визы') %]</td>
@@ -92,8 +102,8 @@
 	<table width="100%">
 	<tr><td><span class="spacer2"></span>
 	<input class="big_button" type="button" value="[% langreq('Распечатать запись') %]" onclick="go_button('print');"><br>
-	<input class="big_button" type="button" value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
-	<input class="big_button" type="button" value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
+	<input class="big_button" type="button" [% IF ( app_info.ServiceType == 3 ) %]disabled[% END %] value="[% langreq('Назначить другую дату') %]" onclick="go_button('reschedule');"><br>
+	<input class="big_button" type="button" [% IF ( app_info.ServiceType == 3 ) %]disabled[% END %] value="[% langreq('Отменить запись') %]" onclick="go_button('cancel');"><br>
 	</td></tr>
 	</table>
 

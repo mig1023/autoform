@@ -269,6 +269,11 @@ sub get_infopage
 		'closed_app'	=> $closed_app,
 		'not_checked_yet' => $not_checked_yet,
 	};
+	
+	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
+	
+	$tvars->{ fox_status } = VCS::Site::autopayment::fox_status( $self, $order_num ) if $online_status == 5;
+	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
 
@@ -668,7 +673,9 @@ sub online_app
 		if ( $self->{ vars }->getparam('appdata') eq 'service_pay' ) {
 			
 			set_remote_status( $self, 5 );
-			create_offline_appointment();
+			
+			create_online_appointment( $self );
+			
 			$self->{ af }->redirect( $self->{ token } );
 		}
 	}
@@ -715,6 +722,29 @@ sub online_app
 	$tvars->{ service_fee } = 1 if $service_fee;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+
+sub create_online_appointment
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+	);
+
+	$self->{ af }->log(
+		"autoinfo_remote", "удалённая запись после проверки документов", $app_id
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE Appointments SET Status = 13, AppDate = now(), CenterID = 1 WHERE ID = ?", {}, $app_id
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE AutoToken SET ServiceType = 3 WHERE Token = ?", {}, $self->{ token }
+	);
 }
 
 sub online_app_foxstatus
