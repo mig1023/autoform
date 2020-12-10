@@ -543,12 +543,15 @@
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Номер вашего заказа') %]: <b>[% order_num %]</b>
+				[% langreq('Номер вашего заказа') %]: <b>[% order_num %]</b><br><br>
+				[% langreq('Вы будете перенаправлены на страницу компании для оплаты доставки.') %]<br><br>
+				[% langreq('После оплаты вы сможете продолжить оформление удалённой записи.') %]
 			</div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить') %] &#9655;" onclick="foxpay();"><br>
 		</td></tr>
 	
 	[% ELSIF err != '' %]
@@ -800,99 +803,117 @@
 
 [% IF ( title == 9 ) %]
 
-		$('#date').datepicker({
-			dateFormat: 'dd.mm.yy',
-			firstDay: 1,
-			showOn: 'both',
-			buttonImage: '[% static %]/images/1x1.png',
-			buttonImageOnly:true
-		});
+	$('#date').datepicker({
+		dateFormat: 'dd.mm.yy',
+		firstDay: 1,
+		showOn: 'both',
+		buttonImage: '[% static %]/images/1x1.png',
+		buttonImageOnly:true
+	});
 
-		$("#fox_addr").autocomplete({
-			source:function( request, response ) {
-			
+	$("#fox_addr").autocomplete({
+		source:function( request, response ) {
+		
+			$.ajax({
+				url: "[% addr_url %]" + $("#fox_addr").val(),
+				dataType: "jsonp",
+				success: function( data ) {
+					response( data, $.map( function( item ) {
+						return {
+							value: item,
+						}
+					}));
+				}
+			});
+		},
+		delay:5,
+		minLength:3,
+		select: function( event, ui ) {
+
+			if (ui.item.room == "") {
+				$('#selectedAddrIncomplete').fadeIn();
+				$('#fox_order').prop('disabled', true);
+			}
+			else {
+				hideAnotherFields();
+				
+				$('#selectAddr').fadeOut();
+				$('#selectedAddrText').html(ui.item.address);
+				$('#selectedAddr').fadeIn();
+				
+				var calcUrl = "[% calc_url %]login=[% login %]&password=[% pass %]&service=[% service %]";
+				var indexes = "&fromindex=121059&toindex=" + ui.item.postalcode;
+				var typesAndUrgancy = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&weight=0.5&qty=1";
+				
 				$.ajax({
-					url: "[% addr_url %]" + $("#fox_addr").val(),
-					dataType: "jsonp",
+					url: calcUrl + indexes + typesAndUrgancy,
+					dataType: "json",
+					
+					error: function( data ) {
+						$('#selectedAddrError').fadeIn();
+						$('#fox_order').prop('disabled', true);
+					},
 					success: function( data ) {
-						response( data, $.map( function( item ) {
-							return {
-								value: item,
-							}
-						}));
+
+						if (data["tariffs"] == null) {
+							$('#selectedAddrFail').fadeIn();
+							$('#fox_order').prop('disabled', true);
+						}
+						else {
+							$('#selectedAddrPrice').html(data["tariffs"][0]["total"] + ' руб');
+							$('#selectedAddrTime').html(data["tariffs"][0]["maxPeriod"]);
+							$('#selectedAddrParams').fadeIn();
+							
+							$('#fox_order').prop('disabled', false);
+							
+							$('#senderGeography').val(ui.item.houseaoguid);
+							$('#senderIndex').val(ui.item.address);
+							$('#senderAddress').val(ui.item.postalcode);
+						}
 					}
 				});
-			},
-			delay:5,
-			minLength:3,
-			select: function( event, ui ) {
 
-				if (ui.item.room == "") {
-					$('#selectedAddrIncomplete').fadeIn();
-					$('#fox_order').prop('disabled', true);
+				return false;
+			}
+		},
+	})
+	.data( "autocomplete" )._renderItem = function( ul, item ) {
+			return $( "<li></li>" )
+				.data( "item.autocomplete", item )
+				.append( "<a>" + item.address + "</a>" )
+				.appendTo( ul );
+	};
+	
+	function changeSelectedAddr() {
+		hideAnotherFields();
+		$('#selectAddr').fadeIn();
+	}
+	
+	function hideAnotherFields() {
+		$('#selectedAddr').fadeOut();
+		$('#selectedAddrParams').fadeOut();
+		$('#selectedAddrFail').fadeOut();
+		$('#selectedAddrError').fadeOut();
+		$('#selectedAddrIncomplete').fadeOut();
+	}
+	
+	
+	function foxpay() {
+	
+		$.ajax({
+			url:'/autoform/?t=[% token %]&action=foxstatus',
+			dataType: "html",
+			success : function (data) {
+				if (data == 'ok' ) {
+					go_button('nothing');
+				} else {
+					window.open('[% fox_pay_url %][% order_num %]');
 				}
-				else {
-					hideAnotherFields();
-					
-					$('#selectAddr').fadeOut();
-					$('#selectedAddrText').html(ui.item.address);
-					$('#selectedAddr').fadeIn();
-					
-					var calcUrl = "[% calc_url %]login=[% login %]&password=[% pass %]&service=[% service %]";
-					var indexes = "&fromindex=121059&toindex=" + ui.item.postalcode;
-					var typesAndUrgancy = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&weight=0.5&qty=1";
-					
-					$.ajax({
-						url: calcUrl + indexes + typesAndUrgancy,
-						dataType: "json",
-						
-						error: function( data ) {
-							$('#selectedAddrError').fadeIn();
-							$('#fox_order').prop('disabled', true);
-						},
-						success: function( data ) {
-
-							if (data["tariffs"] == null) {
-								$('#selectedAddrFail').fadeIn();
-								$('#fox_order').prop('disabled', true);
-							}
-							else {
-								$('#selectedAddrPrice').html(data["tariffs"][0]["total"] + ' руб');
-								$('#selectedAddrTime').html(data["tariffs"][0]["maxPeriod"]);
-								$('#selectedAddrParams').fadeIn();
-								
-								$('#fox_order').prop('disabled', false);
-								
-								$('#senderGeography').val(ui.item.houseaoguid);
-								$('#senderIndex').val(ui.item.address);
-								$('#senderAddress').val(ui.item.postalcode);
-							}
-						}
-					});
-
-					return false;
-				}
-			},
-		})
-		.data( "autocomplete" )._renderItem = function( ul, item ) {
-				return $( "<li></li>" )
-					.data( "item.autocomplete", item )
-					.append( "<a>" + item.address + "</a>" )
-					.appendTo( ul );
-		};
-		
-		function changeSelectedAddr() {
-			hideAnotherFields();
-			$('#selectAddr').fadeIn();
-		}
-		
-		function hideAnotherFields() {
-			$('#selectedAddr').fadeOut();
-			$('#selectedAddrParams').fadeOut();
-			$('#selectedAddrFail').fadeOut();
-			$('#selectedAddrError').fadeOut();
-			$('#selectedAddrIncomplete').fadeOut();
-		}
+			}
+		});
+	
+	}
+	
 [% END %]
 
 [% IF ( title == 6 ) || ( title == 7 ) %]
@@ -1040,4 +1061,4 @@ function go_button(where, who) {
 
 </script>
 
-</div>
+</div>FOX

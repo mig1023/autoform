@@ -3,6 +3,7 @@ use strict;
 
 use VCS::Vars;
 use VCS::Site::autodata;
+use VCS::Site::autopayment;
 
 use Data::Dumper;
 use Date::Calc;
@@ -60,6 +61,8 @@ sub autoinfopage
 	
 	return offline_app( @_ ) if /^offline_app$/i;
 	
+	return offline_app_foxstatus( @_ ) if /^foxstatus$/i;
+	
 	return offline_apped( @_ ) if /^offline_apped$/i;
 	
 	return get_infopage( @_ );
@@ -80,8 +83,6 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-
-	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } ) ) {
 	
 		return $self->{ af }->redirect( 'no_field' );
 	}
@@ -528,7 +529,7 @@ sub online_order
 	my $data = {
 		'login' => $config->{ fox }->{ login }, 
 		'password' => $config->{ fox }->{ password },
-		'department' => 'Документы',
+		'department' => 'Документы для визы',
 		'urgency' => $config->{ fox }->{ urgency },
 		'typeOfCargo' => $config->{ fox }->{ cargo },
 		'cargoDescription' => $config->{ fox }->{ description },
@@ -561,7 +562,7 @@ sub online_order
 	$data->{ contactPerson } = $data->{ sender };
 	
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
-
+	
 	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
 	my $errorInfo = $errorInfoTMP->{ errorInfo };
 
@@ -571,7 +572,6 @@ sub online_order
 
 	return ( $order->{ number }, $errorInfo );
 }
-
 
 sub online_app
 # //////////////////////////////////////////////////
@@ -586,6 +586,7 @@ sub online_app
 		'token' 	=> $self->{ token },
 		'addr_url'	=> $self->{ autoform }->{ fox }->{ addr },
 		'calc_url'	=> $self->{ autoform }->{ fox }->{ calc },
+		'fox_pay_url'	=> $self->{ autoform }->{ fox }->{ pay },
 		'urgency' 	=> $self->{ autoform }->{ fox }->{ urgency }, 
 		'cargo' 	=> $self->{ autoform }->{ fox }->{ cargo },
 		'login' 	=> $self->{ autoform }->{ fox }->{ login },
@@ -595,6 +596,8 @@ sub online_app
 		'vcs_tools' 	=> $self->{ autoform }->{ paths }->{ addr_vcs },
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
+	
+	( $tvars->{ order_num }, $tvars->{ err } ) = $self->online_order() if $self->{ vars }->getparam('appdata') eq 'pay';
 	
 	( $tvars->{ order_num }, $tvars->{ err } ) = $self->online_order() if $self->{ vars }->getparam('appdata') eq 'order';
 	
@@ -697,6 +700,20 @@ sub offline_app
 		'error'		=> $id_or_error,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub offline_app_foxstatus
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $tmp_order_num = "";
+	
+	my $payment_ok = VCS::Site::autopayment::fox_pay_status( $self, $tmp_order_num );
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	print ( $payment_ok ? "ok" : "error" );	
 }
 
 sub set_new_appdate_for_checkdoc_transform

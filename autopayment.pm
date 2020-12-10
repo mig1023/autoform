@@ -23,15 +23,19 @@ sub new
 	return $self;
 }
 
-sub return_url {
+sub return_url
+# //////////////////////////////////////////////////
+{
 	
 	my $self = shift;
 	
 	return decode( 'utf8', '127.0.0.1' . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token } );
 }
 	
-sub payment {
-	
+sub payment
+# //////////////////////////////////////////////////
+{
+
 	my ( $self, $order_number, $amount ) = @_;
 	
 	my $config = VCS::Site::autodata::get_settings();
@@ -55,7 +59,9 @@ sub payment {
 	return ( $payment->{ orderId }, $payment->{ formUrl } );
 }
 
-sub status {
+sub status
+# //////////////////////////////////////////////////
+{
 	
 	my ( $self, $order_id ) = @_;
 	
@@ -78,7 +84,9 @@ sub status {
 	return $status->{ OrderStatus };
 }
 
-sub cloud_payment {
+sub cloud_payment
+# //////////////////////////////////////////////////	
+{
 	
 	my ( $self, $data ) = @_;
 	
@@ -117,7 +125,9 @@ sub cloud_payment {
 	return ($response_line ? $response_line : "ERROR: unknown type (" . $response->{ _rc }  . ")" );
 }
 
-sub cloud_status {
+sub cloud_status
+# //////////////////////////////////////////////////
+{
 	
 	my ( $self, $company, $docid ) = @_;
 	
@@ -137,6 +147,7 @@ sub cloud_status {
 }
 
 sub signature
+# //////////////////////////////////////////////////
 {
 	my $data = shift;
 	
@@ -157,6 +168,24 @@ sub signature
 	$rsa->use_sha256_hash();
 	
 	return encode_base64( $rsa->sign( $data ) );
+}
+
+sub fox_pay_status
+# //////////////////////////////////////////////////
+{
+	my ( $self, $order_number ) = @_;
+	
+	my $config = VCS::Site::autodata::get_settings();
+
+	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ pay_status } . $order_number );
+	
+	return 0 unless $response->is_success;
+	
+	my $result = decode( 'utf8', $response->{ _content } );
+
+	my $payment_ok = ( $result =~ /Документ\s+$order_number\s+оплачен/i ? 1 : 0 );
+	
+	return $payment_ok;
 }
 
 1;

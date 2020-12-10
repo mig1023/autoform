@@ -46,6 +46,9 @@ sub get_settings
 			addr => '',
 			calc => '',
 			order => '',
+			pay => '',
+			pay_status => '',
+			
 			login => '',
 			password => '',
 			urgency => '',
@@ -76,8 +79,8 @@ sub get_settings
 		},
 		
 		confirm => {
-			tt => '/usr/local/www/data/htdocs/vcs/templates/autoform/autoform_confirm.tt2',
-			pers_data => '/usr/local/www/data/htdocs/pers_data_agreement.pdf',
+			tt => '',
+			pers_data => '',
 			link_image => '',
 			link_site => '',
 			html_website => '',
