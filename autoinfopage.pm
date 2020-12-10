@@ -39,6 +39,16 @@ sub autoinfopage
 	
 	s/[^a-z_]//g;
 	
+	my ( $offline_app_status ) = get_remote_status( $self );
+	
+	return online_app( @_ ) if /^online_app$/i;
+	
+	return online_app_foxstatus( @_ ) if /^foxstatus$/i;
+	
+	return online_cancel( @_ ) if /^online_cancel$/i;
+	
+	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 6 );
+	
 	return $self->print_appointment() if /^print$/i;
 	
 	return $self->print_appdata() if /^print_a$/i;
@@ -57,15 +67,70 @@ sub autoinfopage
 	
 	return close_check( @_ ) if /^close_check$/i;
 	
-	return online_app( @_ ) if /^online_app$/i;
-	
 	return offline_app( @_ ) if /^offline_app$/i;
-	
-	return offline_app_foxstatus( @_ ) if /^foxstatus$/i;
 	
 	return offline_apped( @_ ) if /^offline_apped$/i;
 	
 	return get_infopage( @_ );
+}
+
+sub get_remote_status
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $remote_status, $remote_id, $order_num ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT RemoteStatus, AutoRemote.ID, FoxID
+		FROM AutoRemote
+		JOIN AutoToken ON AutoToken.CreatedApp = AutoRemote.AppID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	return ( $remote_status, $remote_id, $order_num );
+}
+
+sub set_remote_status
+# //////////////////////////////////////////////////
+{
+	my ( $self, $new_status ) = @_;
+		
+	my ( $remote_status, $remote_id ) = get_remote_status( $self );
+	
+	if ( $remote_id and ( $remote_status == $new_status ) ) {
+		
+		return;
+	}
+	elsif ( $remote_id ) {
+		
+		$self->{ af }->query( 'query', __LINE__, "
+			UPDATE AutoRemote SET RemoteStatus = ? WHERE ID = ?", {}, $remote_status, $remote_id
+		);
+	}
+	else {
+		
+		my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+		);
+		
+		$self->{ af }->query( 'query', __LINE__, "
+			INSERT INTO AutoRemote (AppID, RemoteStatus) VALUES (?, ?)", {},
+			 $app_id, $new_status
+		);		
+	}
+}
+
+sub online_cancel
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+		
+	my ( undef, $remote_id ) = get_remote_status( $self );
+
+	$self->{ af }->query( 'query', __LINE__, "
+		DELETE FROM AutoRemote WHERE ID = ?", {}, $remote_id
+	);
+
+	return $self->{ af }->redirect( $self->{ token } );	
 }
 
 sub autoinfopage_entry
@@ -407,8 +472,6 @@ sub edited
 	$template->process( 'autoform_info.tt2', $tvars );
 }
 
-
-
 sub reschedule
 # //////////////////////////////////////////////////
 {
@@ -577,7 +640,18 @@ sub online_app
 # //////////////////////////////////////////////////
 {
 	my ( $self, $task, $id, $template ) = @_;
+
+	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
+
+	unless ( $online_status > 0 ) {
+		
+		set_remote_status( $self, 1 );
+	}
+	# elsif ( $online_status == 2 ) {
 	
+		# ( undef, undef, $order_num ) = get_remote_status( $self );
+	# }
+		
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
@@ -597,11 +671,41 @@ sub online_app
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	
-	( $tvars->{ order_num }, $tvars->{ err } ) = $self->online_order() if $self->{ vars }->getparam('appdata') eq 'pay';
+	# ( $tvars->{ order_num }, $tvars->{ err } ) = $self->online_order() if $self->{ vars }->getparam('appdata') eq 'pay';
 	
-	( $tvars->{ order_num }, $tvars->{ err } ) = $self->online_order() if $self->{ vars }->getparam('appdata') eq 'order';
+	if ( $self->{ vars }->getparam('appdata') eq 'order' ) {
+		
+		( $order_num, $tvars->{ err } ) = $self->online_order();
+		
+		if ( !$tvars->{ err } ) {
+			
+			$tvars->{ order_num } = $order_num;
+			
+			my ( undef , $remote_id ) = get_remote_status( $self );
+	
+			$self->{ af }->query( 'query', __LINE__, "
+				UPDATE AutoRemote SET RemoteStatus = 2, FoxID = ? WHERE ID = ?", {}, $order_num, $remote_id
+			);
+		}
+	}
+	
+	$tvars->{ order_num } = $order_num if $order_num;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub online_app_foxstatus
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my ( undef, undef, $order_num ) = get_remote_status( $self );
+	
+	my $payment_ok = VCS::Site::autopayment::fox_pay_status( $self, $order_num );
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	print ( $payment_ok ? "ok" : "error" );	
 }
 
 sub offline_app
@@ -700,20 +804,6 @@ sub offline_app
 		'error'		=> $id_or_error,
 	};
 	$template->process( 'autoform_info.tt2', $tvars );
-}
-
-sub offline_app_foxstatus
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-	
-	my $tmp_order_num = "";
-	
-	my $payment_ok = VCS::Site::autopayment::fox_pay_status( $self, $tmp_order_num );
-	
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
-	
-	print ( $payment_ok ? "ok" : "error" );	
 }
 
 sub set_new_appdate_for_checkdoc_transform

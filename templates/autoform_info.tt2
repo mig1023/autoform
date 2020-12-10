@@ -550,8 +550,8 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить') %] &#9655;" onclick="foxpay();"><br>
+			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
+			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br>
 		</td></tr>
 	
 	[% ELSIF err != '' %]
@@ -563,7 +563,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
 		</td></tr>
 	
 	[% ELSE %]
@@ -621,7 +621,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
 			<input class="small_button" type="button" id="fox_order" name="fox_order" disabled value="[% langreq('Записаться') %] &#9655;" onclick="go_button('online_app', 'order');"><br>
 		</td></tr>
 	[% END %]
@@ -1061,4 +1061,4 @@ function go_button(where, who) {
 
 </script>
 
-</div>FOX
+</div>
