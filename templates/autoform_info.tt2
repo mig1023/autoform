@@ -605,7 +605,8 @@
 		<tr><td colspan="2">
 			<div id="selectAddr">
 				[% langreq('Выберите адрес получения и доставки документов') %]:<br>
-				<input type="text" id="fox_addr" style="width:90%">
+				<input type="text" id="fox_addr" style="width:90%"><br>
+				<span class="exam_span_gen">[% langreq('') %]</span>
 			</div>
 			<div id="selectedAddr" style="display:none;font-size:9pt;">
 				[% langreq('Адрес получения и доставки документов') %]:<br>
@@ -615,28 +616,36 @@
 				[% langreq('Стоимость доставки') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
 				[% langreq('Доставка (дней)') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span><br><br>
 				
-				
 				<input type="hidden" name="senderGeography" id="senderGeography">
 				<input type="hidden" name="senderIndex" id="senderIndex">
 				<input type="hidden" name="senderAddress" id="senderAddress">
 				
-				[% langreq('Предпочтительное дата передачи документов') %]:<br>
-				<input class="input_width input_gen mobil_big width_full" type="text" value="" name="date" id="date"><br>
-		
-				[% langreq('Предпочтительное время передачи документов') %]:<br>
-				<input type="text" id="time" name="time" style="width:90%"><br>
-		
-				[% langreq('ФИО отправителя') %]:<br>
-				<input type="text" id="sender" name="sender" style="width:90%"><br>
-				
-				[% langreq('Контактный телефон') %]:<br>
-				<input type="text" id="senderPhone" name="senderPhone" style="width:90%"><br>
-				
-				[% langreq('Контатный email') %]:<br>
-				<input type="text" id="senderEMail" name="senderEMail" style="width:90%"><br>
-				
-				[% langreq('Комментарий к доставке') %]:<br>
-				<input type="text" id="comment" name="comment" style="width:90%">
+				<table width="100%">
+				<tr>
+					<td rowspan=2 valign=top>[% langreq('Дата передачи документов') %]:</td>
+					<td><input type="text" value="" name="date" id="date"></td>
+					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('01.01.2021') %]</span></td></tr>
+				</tr><tr>
+					<td rowspan=2 valign=top>[% langreq('Время передачи документов') %]:</td>
+					<td><input type="text" id="time" name="time" style="width:90%"></td>
+					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('C 10:00 до 18:00') %]</span></td></tr>
+				</tr><tr>
+					<td rowspan=2 valign=top>[% langreq('ФИО отправителя') %]:</td>
+					<td><input type="text" id="sender" name="sender" style="width:90%"></td>
+					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('Иванов Иван Иванович') %]</span></td></tr>
+				</tr><tr>
+				<td rowspan=2 valign=top>[% langreq('Контактный телефон') %]:</td>
+					<td><input type="text" id="senderPhone" name="senderPhone" style="width:90%"></td>
+					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('79XXXXXXXXX') %]</span></td></tr>
+				</tr><tr>
+					<td rowspan=2 valign=top>[% langreq('Контатный email') %]:</td>
+					<td><input type="text" id="senderEMail" name="senderEMail" style="width:90%"></td>
+					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('test@test.com') %]</span></td></tr>
+				</tr><tr>
+					<td colspan="2">:<br>[% langreq('Комментарий к доставке') %]:<br>
+					<input type="text" id="comment" name="comment" style="width:90%"></td>
+				</tr>
+				</table>
 			</div>
 			
 			<div id="selectedAddrError" style="display:none;font-size:9pt;color:red;"><br>
