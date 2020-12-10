@@ -47,7 +47,9 @@ sub autoinfopage
 	
 	return online_cancel( @_ ) if /^online_cancel$/i;
 	
-	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 6 );
+	return online_consular_fee( @_ ) if /^online_consular_fee$/i;
+	
+	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 5 );
 	
 	return $self->print_appointment() if /^print$/i;
 	
@@ -95,15 +97,15 @@ sub set_remote_status
 	my ( $self, $new_status ) = @_;
 		
 	my ( $remote_status, $remote_id ) = get_remote_status( $self );
-	
+
 	if ( $remote_id and ( $remote_status == $new_status ) ) {
-		
+
 		return;
 	}
 	elsif ( $remote_id ) {
-		
+
 		$self->{ af }->query( 'query', __LINE__, "
-			UPDATE AutoRemote SET RemoteStatus = ? WHERE ID = ?", {}, $remote_status, $remote_id
+			UPDATE AutoRemote SET RemoteStatus = ? WHERE ID = ?", {}, $new_status, $remote_id
 		);
 	}
 	else {
@@ -642,15 +644,34 @@ sub online_app
 	my ( $self, $task, $id, $template ) = @_;
 
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
+	
+	my ( $consular_fee, $service_fee ) = ( 0, 0 );
 
 	unless ( $online_status > 0 ) {
 		
 		set_remote_status( $self, 1 );
 	}
-	# elsif ( $online_status == 2 ) {
+	elsif ( $online_status == 3 ) {
 	
-		# ( undef, undef, $order_num ) = get_remote_status( $self );
-	# }
+		$consular_fee = 1;
+		
+		if ( $self->{ vars }->getparam('appdata') eq 'consular_pay' ) {
+			
+			set_remote_status( $self, 4 );
+			$self->{ af }->redirect( $self->{ token } );
+		}
+	}
+	elsif ( $online_status == 4 ) {
+	
+		$service_fee = 1;
+		
+		if ( $self->{ vars }->getparam('appdata') eq 'service_pay' ) {
+			
+			set_remote_status( $self, 5 );
+			create_offline_appointment();
+			$self->{ af }->redirect( $self->{ token } );
+		}
+	}
 		
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -690,6 +711,8 @@ sub online_app
 	}
 	
 	$tvars->{ order_num } = $order_num if $order_num;
+	$tvars->{ consular_fee } = 1 if $consular_fee;
+	$tvars->{ service_fee } = 1 if $service_fee;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -706,6 +729,16 @@ sub online_app_foxstatus
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	print ( $payment_ok ? "ok" : "error" );	
+}
+
+sub online_consular_fee
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	set_remote_status( $self, 3 );
+	
+	$self->{ af }->redirect( $self->{ token } );
 }
 
 sub offline_app

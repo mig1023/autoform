@@ -539,7 +539,31 @@
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 	
-	[% IF order_num != '' %]
+	[% IF service_fee == 1 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Оплата сервисного сбора.') %]
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="go_button('online_app', 'service_pay');"><br>
+		</td></tr>
+	
+	[% ELSIF consular_fee == 1 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Оплата консульского сбора.') %]
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="consular_pay" name="consular_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="go_button('online_app', 'consular_pay');"><br>
+		</td></tr>
+	
+	[% ELSIF order_num != '' %]
 	
 		<tr><td colspan="2">
 			<div>
@@ -905,7 +929,7 @@
 			dataType: "html",
 			success : function (data) {
 				if (data == 'ok' ) {
-					go_button('nothing');
+					go_button('online_consular_fee');
 				} else {
 					window.open('[% fox_pay_url %][% order_num %]');
 				}
