@@ -99,7 +99,6 @@ sub set_remote_status
 	my ( $remote_status, $remote_id ) = get_remote_status( $self );
 
 	if ( $remote_id and ( $remote_status == $new_status ) ) {
-
 		return;
 	}
 	elsif ( $remote_id ) {
@@ -150,7 +149,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-	
+
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -650,7 +649,7 @@ sub online_app
 
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
 	
-	my ( $consular_fee, $service_fee ) = ( 0, 0 );
+	my ( $consular, $service, $consular_fee, $service_fee ) = ( 0, 0, 0, 0 );
 
 	unless ( $online_status > 0 ) {
 		
@@ -658,17 +657,20 @@ sub online_app
 	}
 	elsif ( $online_status == 3 ) {
 	
-		$consular_fee = 1;
+		$consular_fee = get_consular_price( $self );
 		
 		if ( $self->{ vars }->getparam('appdata') eq 'consular_pay' ) {
 			
 			set_remote_status( $self, 4 );
+			
 			$self->{ af }->redirect( $self->{ token } );
 		}
+		
+		$consular = 1;
 	}
 	elsif ( $online_status == 4 ) {
 	
-		$service_fee = 1;
+		$service_fee = get_from_price( $self, "Price" );
 		
 		if ( $self->{ vars }->getparam('appdata') eq 'service_pay' ) {
 			
@@ -678,6 +680,8 @@ sub online_app
 			
 			$self->{ af }->redirect( $self->{ token } );
 		}
+		
+		$service = 1;
 	}
 		
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -699,8 +703,6 @@ sub online_app
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	
-	# ( $tvars->{ order_num }, $tvars->{ err } ) = $self->online_order() if $self->{ vars }->getparam('appdata') eq 'pay';
-	
 	if ( $self->{ vars }->getparam('appdata') eq 'order' ) {
 		
 		( $order_num, $tvars->{ err } ) = $self->online_order();
@@ -718,12 +720,15 @@ sub online_app
 	}
 	
 	$tvars->{ order_num } = $order_num if $order_num;
-	$tvars->{ consular_fee } = 1 if $consular_fee;
-	$tvars->{ service_fee } = 1 if $service_fee;
+	
+	$tvars->{ consular } = 1 if $consular;
+	$tvars->{ consular_fee } = $consular_fee if $consular_fee;
+	
+	$tvars->{ service } = 1 if $service;
+	$tvars->{ service_fee } = $service_fee if $service_fee;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
-
 
 sub create_online_appointment
 # //////////////////////////////////////////////////
@@ -745,6 +750,42 @@ sub create_online_appointment
 	$self->{ af }->query( 'query', __LINE__, "
 		UPDATE AutoToken SET ServiceType = 3 WHERE Token = ?", {}, $self->{ token }
 	);
+}
+
+sub get_from_price
+# //////////////////////////////////////////////////
+{
+	my ( $self, $price ) = @_;
+
+	my $payment_price = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT $price FROM PriceRate
+		JOIN PriceList ON PriceRate.ID = PriceList.RateID
+		JOIN Appointments ON PriceList.VisaID = Appointments.VType
+		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+		WHERE BranchID = 1 AND PriceRate.RDate <= curdate() AND Token = ?
+		ORDER by PriceRate.ID DESC LIMIT 1",
+		$self->{ token }
+	);
+	
+	return $payment_price;
+}
+
+sub get_consular_price
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $payment_price = get_from_price( $self, "ConcilR" );
+	
+	my $currate = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CRate FROM CurRates
+		WHERE CurCode = 'EUR' AND CRDAte <= curdate()
+		ORDER BY CRDAte DESC LIMIT 1",
+	);
+	
+	$payment_price *= $currate;
+
+	return sprintf( "%.2f", $payment_price );
 }
 
 sub online_app_foxstatus

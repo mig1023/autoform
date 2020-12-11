@@ -452,25 +452,25 @@ sub payment_check
 					{
 						"quantity" 		=> "1.000",
 						"price" 		=> $amount,
-						"tax" 			=> "6", 		
+						"tax" 			=> "6",
 						"text" 			=> "Услуга проверки документов",
-						"paymentMethodType" 	=> "3",			
-						"paymentSubjectType" 	=> "4",			
+						"paymentMethodType" 	=> "3",
+						"paymentSubjectType" 	=> "4",
 					},
 				],
 				"checkClose" => {
 					"payments" => [
 						{
-							"type" 		=> "2",		
+							"type" 		=> "2",
 							"amount" 	=> $amount
 						},
 					],
-					"taxationSystem" => "0",	
+					"taxationSystem" => "0",
 				},
 				"customerContact" => $email,
 			},
 		};
-	
+		
 		my $cloud = VCS::Site::autopayment::cloud_payment( $self, $data );
 	
 		$self->query( 'query', __LINE__, "

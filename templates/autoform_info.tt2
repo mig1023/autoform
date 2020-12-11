@@ -549,11 +549,12 @@
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 	
-	[% IF service_fee == 1 %]
+	[% IF service == 1 %]
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Оплата сервисного сбора.') %]
+				[% langreq('Оплата сервисного сбора.') %]<br><br>
+				[% langreq('К оплате') %]: <b>[% service_fee %] [% langreq('руб') %]</b>.
 			</div>
 		</td></tr>
 		
@@ -561,11 +562,12 @@
 			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="go_button('online_app', 'service_pay');"><br>
 		</td></tr>
 	
-	[% ELSIF consular_fee == 1 %]
+	[% ELSIF consular == 1 %]
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Оплата консульского сбора.') %]
+				[% langreq('Оплата консульского сбора.') %]<br><br>
+				[% langreq('К оплате') %]: <b>[% consular_fee %] [% langreq('руб') %]</b>.
 			</div>
 		</td></tr>
 		
