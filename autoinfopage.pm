@@ -99,6 +99,7 @@ sub set_remote_status
 	my ( $remote_status, $remote_id ) = get_remote_status( $self );
 
 	if ( $remote_id and ( $remote_status == $new_status ) ) {
+
 		return;
 	}
 	elsif ( $remote_id ) {
@@ -149,7 +150,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-
+	
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -690,6 +691,7 @@ sub online_app
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 9,
 		'token' 	=> $self->{ token },
+		'concil_url'	=> $self->{ autoform }->{ payment }->{ concil_payment },
 		'addr_url'	=> $self->{ autoform }->{ fox }->{ addr },
 		'calc_url'	=> $self->{ autoform }->{ fox }->{ calc },
 		'fox_pay_url'	=> $self->{ autoform }->{ fox }->{ pay },
