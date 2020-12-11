@@ -567,12 +567,18 @@
 		<tr><td colspan="2">
 			<div>
 				[% langreq('Оплата консульского сбора.') %]<br><br>
+				
+				[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br>
+				[% langreq('После оплаты укажите в поле номер своей квитанции:') %]<br>
+				
+				<input type="text" id="concil_number" style="width:90%"><br><br>
+				
 				[% langreq('К оплате') %]: <b>[% consular_fee %] [% langreq('руб') %]</b>.
 			</div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="consular_pay" name="consular_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="go_button('online_app', 'consular_pay');"><br>
+			<input class="small_button" type="button" id="consular_pay" name="consular_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="concilpay()"><br>
 		</td></tr>
 	
 	[% ELSIF order_num != '' %]
@@ -957,6 +963,16 @@
 			}
 		});
 	
+	}
+	
+	function concilpay() {
+	
+		if ( $('#concil_number').val() == "" ) {
+			window.open('[% concil_url %]');
+		}
+		else {	
+			go_button('online_app', 'consular_pay');
+		}
 	}
 	
 [% END %]

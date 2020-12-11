@@ -40,6 +40,8 @@ sub get_settings
 			cloud_ssl_pwd => '',
 			cloud_rsa_key => '',
 			inn => '',
+			
+			concil_payment => '',
 		},
 		
 		fox => {
