@@ -31,8 +31,15 @@ sub get_settings
 		
 		payment => {
 			url => '',
-			user_name => '',
-			password => '',
+			
+			check => {
+				user_name => '',
+				password => '',
+			},
+			service => {
+				user_name => '',
+				password => '',
+			},
 			
 			cloud_url => '',
 			cloud_ssl_cert => '',

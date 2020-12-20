@@ -574,7 +574,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="go_button('online_app', 'service_pay');"><br>
+			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="servicepay();"><br>
 		</td></tr>
 		
 	[% ELSIF consular == 1 %]
@@ -854,7 +854,7 @@
 
 [% END %]
 
-[% IF ( title == 9 ) %]
+[% IF ( title == 9 ) && (online_status == 1) %]
 
 	$('#date').datepicker({
 		dateFormat: 'dd.mm.yy',
@@ -968,7 +968,11 @@
 		});
 	
 	}
-	
+
+[% END %]
+
+[% IF ( title == 9 ) %]	
+
 	function concilpay() {
 	
 		if ( $('#concil_number').val() == "" ) {
@@ -1171,6 +1175,23 @@ function mobileScreenCheck() {
 		
 		else
 			go_button('online_app', 'order');
+	}
+	
+	function servicepay() {
+	
+		$.ajax({
+			url:'/autoform/?t=[% token %]&action=servstatus',
+			dataType: "html",
+			success : function (data) {
+				if (data == 'ok' ) {
+					go_button('online_app', 'service_pay');
+				} else {
+					window.open('[% payment.form_url %]');
+				}
+			}
+		});
+		
+		
 	}
 [% END %]	
 	

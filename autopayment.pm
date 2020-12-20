@@ -36,22 +36,22 @@ sub payment
 # //////////////////////////////////////////////////
 {
 
-	my ( $self, $order_number, $amount ) = @_;
+	my ( $self, $order_number, $amount, $type ) = @_;
 	
 	my $config = VCS::Site::autodata::get_settings();
 	
 	my $amount_in_kopek = $amount * 100;
-	
+
 	my $data = {
-		userName	=>  $config->{ payment }->{ user_name },
-		password	=> $config->{ payment }->{ password },
+		userName	=> $config->{ payment }->{ $type }->{ user_name },
+		password	=> $config->{ payment }->{ $type }->{ password },
 		orderNumber 	=> $order_number,
 		amount 		=> $amount_in_kopek,
 		returnUrl 	=> return_url( $self ),
 	};
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( join( '/', $config->{ payment }->{ url } , 'register.do' ), $data );
-
+warn Dumper($response);
 	return ( undef, undef ) unless $response->is_success;
 	
 	my $payment = JSON->new->pretty->decode( $response->decoded_content );
@@ -63,13 +63,13 @@ sub status
 # //////////////////////////////////////////////////
 {
 	
-	my ( $self, $order_id ) = @_;
+	my ( $self, $order_id, $type ) = @_;
 	
 	my $config = VCS::Site::autodata::get_settings();
 	
 	my $data = {
-		userName	=>  $config->{ payment }->{ user_name },
-		password	=> $config->{ payment }->{ password },
+		userName	=>  $config->{ payment }->{ $type }->{ user_name },
+		password	=> $config->{ payment }->{ $type }->{ password },
 		orderId 	=> $order_id,
 	};
 	

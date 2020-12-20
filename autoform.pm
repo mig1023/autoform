@@ -320,7 +320,7 @@ sub autoform
 	
 	my ( $max_app, $app_id ) = $self->get_current_max_app();
 	
-	$payment = $self->payment_prepare( $app_id )
+	$payment = $self->payment_prepare( $app_id, 'check' )
 		if ( ( ref( $special->{ payment } ) eq 'ARRAY' ) and ( @{ $special->{ payment } } > 0 ) ? 1 : 0 );
 
 	my $tvars = {
@@ -395,25 +395,29 @@ sub get_current_max_app
 sub payment_prepare
 # //////////////////////////////////////////////////
 {
-	my ( $self, $app_id ) = @_;
+	my ( $self, $app_id, $type ) = @_;
+
+	my ( $row_amount ) = $self->get_payment_price( $type );
+
+	my $amount = decode( 'utf8', $row_amount );
 	
-	my $amount = decode( 'utf8', $self->get_payment_price( 2 ) );
-		
 	my ( $order, $form_url, $order_number ) = $self->query( 'sel1', __LINE__, "
-		SELECT OrderID, OrderLink, OrderNumber FROM AutoPayment WHERE AutoID = ?", $app_id
+		SELECT OrderID, OrderLink, OrderNumber FROM AutoPayment WHERE AutoID = ? AND Type = ?",
+		$app_id, $type
 	);
 
 	if ( !$order or !$form_url or !$order_number) {
 		
 		$order_number = $app_id . '-' . time();
 		
-		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount );
+		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount, $type );
 		
 		return undef unless $order and $form_url;
-	
+
 		$self->query( 'query', __LINE__, "
-			INSERT INTO AutoPayment (AutoID, OrderNumber, Amount, OrderID, OrderLink, StartDate) VALUES (?, ?, ?, ?, ?, now())", {}, 
-			$app_id, $order_number, $amount, $order, $form_url
+			INSERT INTO AutoPayment (AutoID, Type, OrderNumber, Amount, OrderID, OrderLink, StartDate)
+			VALUES (?, ?, ?, ?, ?, ?, now())", {}, 
+			$app_id, $type, $order_number, $amount, $order, $form_url
 		);	
 	}
 
@@ -423,17 +427,17 @@ sub payment_prepare
 sub payment_check
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $type, $quantity ) = @_;
 	
 	my ( $pay_id, $order_id, $current_pay_status, $amount, $email ) = $self->query( 'sel1', __LINE__, "
 		SELECT AutoPayment.ID, OrderID, PaymentStatus, Amount, EMail FROM AutoPayment
 		JOIN AutoToken ON AutoPayment.AutoID = AutoToken.AutoAppID
-		WHERE Token = ?", $self->{ token }
+		WHERE Token = ? AND AutoPayment.Type = ?", $self->{ token }, $type
 	);
 
 	return ( 1, "" ) if $current_pay_status == 2;
 
-	my $status = VCS::Site::autopayment::status( $self, $order_id );
+	my $status = VCS::Site::autopayment::status( $self, $order_id, $type );
 
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoPayment SET PaymentStatus = ?, PaymentDate = now() WHERE ID = ?", {}, 
@@ -441,6 +445,13 @@ sub payment_check
 	);
 
 	if ( $status == 2 ) {
+		
+		my $paymentTypes = {
+			"check" => "Услуга проверки документов",
+			"service" => "Сервисный сбор",
+		};
+		
+		my $amount_quantity = ( $quantity ? $quantity : 1 );
 		
 		my $data = {
 			"id" => $pay_id,
@@ -450,10 +461,10 @@ sub payment_check
 				"type" => "1",
 				"positions" => [
 					{
-						"quantity" 		=> "1.000",
+						"quantity" 		=> $amount_quantity,
 						"price" 		=> $amount,
 						"tax" 			=> "6",
-						"text" 			=> "Услуга проверки документов",
+						"text" 			=> $paymentTypes->{ $type },
 						"paymentMethodType" 	=> "3",
 						"paymentSubjectType" 	=> "4",
 					},
@@ -462,7 +473,7 @@ sub payment_check
 					"payments" => [
 						{
 							"type" 		=> "2",
-							"amount" 	=> $amount
+							"amount" 	=> ( $amount * $amount_quantity ),
 						},
 					],
 					"taxationSystem" => "0",
@@ -490,21 +501,48 @@ sub payment_check
 sub get_payment_price
 # //////////////////////////////////////////////////
 {
-	my ( $self, $service ) = @_;
-	
-	my $services_id = {
-		2 => 17,
-	};
-	
-	my $payment_price = $self->query( 'sel1', __LINE__, "
-		SELECT Price FROM PriceRate
-		JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
-		WHERE BranchID = 46 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = ?
-		ORDER by PriceRate.ID DESC LIMIT 1",
-		$services_id->{ $service }
-	);
+	my ( $self, $type ) = @_;
 
-	return $payment_price;
+	if ( $type eq "check" ) {
+	
+		my $payment_price = $self->query( 'sel1', __LINE__, "
+			SELECT Price FROM PriceRate
+			JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
+			WHERE BranchID = 46 AND RDate <= curdate() AND ServicesPriceRates.ServiceID = 17
+			ORDER by PriceRate.ID DESC LIMIT 1",
+		);
+		
+		return $payment_price;
+	}
+	elsif ( $type eq "service" ) {
+					
+		my $payment_price = $self->query( 'sel1', __LINE__, "
+			SELECT Price FROM PriceRate
+			JOIN PriceList ON PriceRate.ID = PriceList.RateID
+			JOIN Appointments ON PriceList.VisaID = Appointments.VType
+			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			WHERE BranchID = 1 AND PriceRate.RDate <= curdate() AND Token = ?
+			ORDER by PriceRate.ID DESC LIMIT 1",
+			$self->{ token }
+		);
+	
+		my $vtype = $self->query( 'sel1', __LINE__, "
+			SELECT VName
+			FROM Appointments
+			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			JOIN VisaTypes ON VisaTypes.ID = Appointments.VType
+			WHERE Token = ?",
+			$self->{ token }
+		);
+			
+		my ( $app_id, $service_count ) = $self->query( 'sel1', __LINE__, "
+			SELECT Appointments.ID, NCount FROM Appointments
+			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			WHERE Token = ?", $self->{ token }
+		);
+	
+		return ( ( $payment_price * $service_count ), $payment_price, $vtype, $service_count, $app_id );
+	}
 }
 
 sub urgent_allowed
@@ -1145,7 +1183,7 @@ sub get_autoform_content
 	
 	if ( $self->param('orderId') ) {
 		
-		my ( $pay_status_ok, $payment_error ) =  $self->payment_check();
+		my ( $pay_status_ok, $payment_error ) =  $self->payment_check( "check" );
 		
 		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step ) if $pay_status_ok;
 		
@@ -2464,7 +2502,7 @@ sub get_html_for_element
 	
 	if ( ( $type eq 'payment' ) or ( ( $type eq 'text' ) and ( $content =~ /\[pay_amount\]/ ) ) ) {
 
-		my $pay = $self->get_payment_price( 2 );
+		my $pay = $self->get_payment_price( "check" );
 
 		my $pay_text = $self->lang( 'К оплате за услугу:' );
 					

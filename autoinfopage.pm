@@ -45,6 +45,8 @@ sub autoinfopage
 	
 	return online_app_foxstatus( @_ ) if /^foxstatus$/i;
 	
+	return online_app_servstatus( @_ ) if /^servstatus$/i;
+	
 	return online_cancel( @_ ) if /^online_cancel$/i;
 	
 	return online_consular_fee( @_ ) if /^online_consular_fee$/i;
@@ -714,7 +716,7 @@ sub online_app
 	
 	my ( $consular, $service, $service_fee, $service_count, $service_price ) = ( 0, 0, 0, 0, 0 );
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
-	my ( $error, $err_target ) = ( undef, undef );
+	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
 	unless ( $online_status > 0 ) {
 		
@@ -773,23 +775,26 @@ sub online_app
 	}
 	elsif ( $online_status == 4 ) {
 	
-		( $service_price, $service_type ) = get_from_price( $self, "Price" );
+		( $service_fee, $service_price, $service_type, $service_count, my $app_id ) =
+			$self->{ af }->get_payment_price( "service" );
 		
-		$service_count = $self->{ af }->query( 'sel1', __LINE__, "
-			SELECT NCount FROM Appointments
-			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-			WHERE Token = ?", $self->{ token }
-		);
-		
-		$service_fee = $service_price * $service_count;
-		
+		$payment = $self->{ af }->payment_prepare( $app_id, 'service' );
+				
 		if ( $self->{ vars }->getparam('appdata') eq 'service_pay' ) {
 			
-			set_remote_status( $self, 5 );
+			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service", $service_count );
 			
-			create_online_appointment( $self );
+			if ( $pay_status_ok ) {
 			
-			$self->{ af }->redirect( $self->{ token } );
+				set_remote_status( $self, 5 );
+				
+				create_online_appointment( $self );
+				
+				$self->{ af }->redirect( $self->{ token } );
+			}
+			else {
+				$error = $self->{ af }->lang( "Ошибка оплаты:" ) .  $payment_error;
+			}
 		}
 		
 		$service = 1;
@@ -840,7 +845,10 @@ sub online_app
 		}
 	}
 	
+	$tvars->{ payment } = $payment if $payment;
+	
 	$tvars->{ order_num } = $order_num if $order_num;
+	$tvars->{ online_status } = $online_status if $online_status;
 	
 	$tvars->{ consular } = 1 if $consular;
 	$tvars->{ service } = 1 if $service;
@@ -874,33 +882,6 @@ sub create_online_appointment
 	);
 }
 
-sub get_from_price
-# //////////////////////////////////////////////////
-{
-	my ( $self, $price ) = @_;
-
-	my $payment_price = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT $price FROM PriceRate
-		JOIN PriceList ON PriceRate.ID = PriceList.RateID
-		JOIN Appointments ON PriceList.VisaID = Appointments.VType
-		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-		WHERE BranchID = 1 AND PriceRate.RDate <= curdate() AND Token = ?
-		ORDER by PriceRate.ID DESC LIMIT 1",
-		$self->{ token }
-	);
-	
-	my $vtype = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT VName
-		FROM Appointments
-		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-		JOIN VisaTypes ON VisaTypes.ID = Appointments.VType
-		WHERE Token = ?",
-		$self->{ token }
-	);
-	
-	return ( $payment_price, $vtype );
-}
-
 sub online_app_foxstatus
 # //////////////////////////////////////////////////
 {
@@ -913,6 +894,20 @@ sub online_app_foxstatus
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	print ( $payment_ok ? "ok" : "error" );	
+}
+
+sub online_app_servstatus
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	( undef, undef, undef, undef, my $count ) = $self->{ af }->get_payment_price( $self, "service" );
+
+	my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( $self, "service", $count );
+
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	print ( $pay_status_ok ? "ok" : "error" );	
 }
 
 sub online_consular_fee
