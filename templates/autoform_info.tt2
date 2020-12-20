@@ -116,7 +116,7 @@
 	<tr><td colspan="2">
 	<table width="100%">
 	[% IF app_info.category == 'C' %]
-		<tr class="mobil_hide"><td colspan="2">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
+		<tr class="mobil_hide"><td colspan="[% IF ( app_info.ServiceType <= 1 ) %]2[% ELSE %]3[% END %]">&nbsp;</td><td class="center">[% langreq('Анкета заявителя') %]<br><img src="[% static %]/images/app-helper.png"></td></tr>
 	[% END %]
 	
 	[% IF ( app_info.ServiceType <= 1 ) %]
@@ -156,7 +156,7 @@
 				
 				[% SET n = n + 1 %]
 				<tr class="files_uploaded">
-				<td colspan="2"><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
+				<td colspan="3"><nobr>&nbsp;&nbsp;[% i %].[% n %].&nbsp;
 					[% IF (file.0.CheckStatus == 1) %]<b>[% END %]
 						[% IF (file.0.DocType < 0) %]
 							[% langreq('Дополнительный документ') %]
@@ -566,7 +566,10 @@
 		<tr><td colspan="2">
 			<div>
 				[% langreq('Оплата сервисного сбора.') %]<br><br>
-				[% langreq('К оплате') %]: <b>[% service_fee %] [% langreq('руб') %]</b>.
+				[% langreq('Количество заявителей') %]: [% service_count %]<br>
+				[% langreq('Тип визы') %]: [% service_type %]<br>
+				[% langreq('Стоимость') %]: [% service_price %] [% langreq('руб') %]<br><br>
+				[% langreq('К оплате') %]: <b>[% service_fee %] [% langreq('руб') %]</b>
 			</div>
 		</td></tr>
 		

@@ -712,7 +712,8 @@ sub online_app
 
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
 	
-	my ( $consular, $service, $service_fee, $start_date, $end_date ) = ( 0, 0, 0, undef, undef );
+	my ( $consular, $service, $service_fee, $service_count, $service_price ) = ( 0, 0, 0, 0, 0 );
+	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $error, $err_target ) = ( undef, undef );
 
 	unless ( $online_status > 0 ) {
@@ -731,22 +732,21 @@ sub online_app
 				
 		my ( $year, $month, $day ) = Date::Calc::Add_Delta_Days( split( /\-/, $fly_date ), ( $collect_days * -1 ) );
 		
-		$end_date = "$day.$month.$year";
-		
-		my ( $sec, $min, $hour, $current_day, $current_mon, $current_year ) = localtime( time );
+		my ( undef, undef, undef, $current_day, $current_mon, $current_year ) = localtime( time );
 		
 		$current_year += 1900;
 		$current_mon += 1;
 		
-		for ( $current_day, $current_mon ) {
+		for ( $day, $month, $current_day, $current_mon ) {
 			
 			$_ = "0$_" if $_ < 10;
 		};
 		
+		$end_date = "$day.$month.$year";
+		
 		$start_date = "$current_day.$current_mon.$current_year";
 	}
 	elsif ( $online_status == 3 ) {
-	
 	
 		if ( $self->{ vars }->getparam('appdata') eq 'consular_pay' ) {
 			
@@ -773,7 +773,15 @@ sub online_app
 	}
 	elsif ( $online_status == 4 ) {
 	
-		$service_fee = get_from_price( $self, "Price" );
+		( $service_price, $service_type ) = get_from_price( $self, "Price" );
+		
+		$service_count = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT NCount FROM Appointments
+			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			WHERE Token = ?", $self->{ token }
+		);
+		
+		$service_fee = $service_price * $service_count;
 		
 		if ( $self->{ vars }->getparam('appdata') eq 'service_pay' ) {
 			
@@ -836,7 +844,10 @@ sub online_app
 	
 	$tvars->{ consular } = 1 if $consular;
 	$tvars->{ service } = 1 if $service;
+	$tvars->{ service_price } = $service_price if $service_price;
 	$tvars->{ service_fee } = $service_fee if $service_fee;
+	$tvars->{ service_type } = $service_type if $service_type;
+	$tvars->{ service_count } = $service_count if $service_count;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -878,7 +889,16 @@ sub get_from_price
 		$self->{ token }
 	);
 	
-	return $payment_price;
+	my $vtype = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT VName
+		FROM Appointments
+		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+		JOIN VisaTypes ON VisaTypes.ID = Appointments.VType
+		WHERE Token = ?",
+		$self->{ token }
+	);
+	
+	return ( $payment_price, $vtype );
 }
 
 sub online_app_foxstatus
