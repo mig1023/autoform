@@ -140,7 +140,7 @@
 			[% SET i = i + 1 %]
 			<tr>
 			<td class="info_list"><nobr>[% i %]. [% person.value.FName %] [% person.value.LName %]</nobr></td>
-			<td class="m_right"><span class="mobil_hide">[% person.value.BirthDate %]</span>&nbsp;</td>
+			<td class="m_right" colspan="2"><span class="mobil_hide">[% person.value.BirthDate %]</span>&nbsp;</td>
 			<td class="m_right_m">
 			[% IF app_info.category == 'C' %]
 				<input class="small_button" type="button" style="min-width:110px;" value="[% langreq('Редактировать') %]" onclick="go_button('edit', '[% person.key %]');">
@@ -568,12 +568,10 @@
 			<div>
 				[% langreq('Оплата консульского сбора.') %]<br><br>
 				
-				[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br>
+				[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br><br>
 				[% langreq('После оплаты укажите в поле номер своей квитанции:') %]<br>
 				
 				<input type="text" id="concil_number" style="width:90%"><br><br>
-				
-				[% langreq('К оплате') %]: <b>[% consular_fee %] [% langreq('руб') %]</b>.
 			</div>
 		</td></tr>
 		
@@ -593,7 +591,8 @@
 		
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
-			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br>
+			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br><br>
+			<input class="small_button" type="button" value="* [% langreq('подменить номер квитанции') %]" style="background:#FF3333;" onclick="go_button('tmp_debug');">
 		</td></tr>
 	
 	[% ELSIF err != '' %]
@@ -605,7 +604,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
+			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 		</td></tr>
 	
 	[% ELSE %]
@@ -631,7 +630,7 @@
 				<table width="100%">
 				<tr>
 					<td rowspan=2 valign=top>[% langreq('Дата передачи документов') %]:</td>
-					<td><input type="text" value="" name="date" id="date"></td>
+					<td><input type="text" value="" name="date" id="date" readonly></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('01.01.2021') %]</span></td></tr>
 				</tr><tr>
 					<td rowspan=2 valign=top>[% langreq('Время передачи документов') %]:</td>
@@ -646,11 +645,11 @@
 					<td><input type="text" id="senderPhone" name="senderPhone" style="width:90%"></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('79XXXXXXXXX') %]</span></td></tr>
 				</tr><tr>
-					<td rowspan=2 valign=top>[% langreq('Контатный email') %]:</td>
+					<td rowspan=2 valign=top>[% langreq('Контактный email') %]:</td>
 					<td><input type="text" id="senderEMail" name="senderEMail" style="width:90%"></td>
-					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('test@test.com') %]</span></td></tr>
+					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('test@mail.com') %]</span></td></tr>
 				</tr><tr>
-					<td colspan="2">:<br>[% langreq('Комментарий к доставке') %]:<br>
+					<td colspan="2"><br>[% langreq('Комментарий к доставке') %]:<br>
 					<input type="text" id="comment" name="comment" style="width:90%"></td>
 				</tr>
 				</table>
@@ -673,7 +672,7 @@
 		
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
-			<input class="small_button" type="button" id="fox_order" name="fox_order" disabled value="[% langreq('Записаться') %] &#9655;" onclick="go_button('online_app', 'order');"><br>
+			<input class="small_button" type="button" id="fox_order" name="fox_order" disabled value="[% langreq('Записаться') %] &#9655;" onclick="online_app();"><br>
 		</td></tr>
 	[% END %]
 
@@ -857,6 +856,8 @@
 	$('#date').datepicker({
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
+		minDate: '[% start_date %]',
+		maxDate: '[% end_date %]',
 		showOn: 'both',
 		buttonImage: '[% static %]/images/1x1.png',
 		buttonImageOnly:true
@@ -866,8 +867,8 @@
 		source:function( request, response ) {
 		
 			$.ajax({
-				url: "[% addr_url %]" + $("#fox_addr").val(),
-				dataType: "jsonp",
+				url: '/autoform/?t=[% token %]&action=online_addr_proxy&addr=' + $("#fox_addr").val(),
+				dataType: "json",
 				success: function( data ) {
 					response( data, $.map( function( item ) {
 						return {
@@ -1112,6 +1113,66 @@ function mobileScreenCheck() {
 		$( '#appdate' ).poshytip( 'show' );
 	}
 
+[% END %]
+
+[% IF ( title == 9 ) %]
+
+	function showErrorTip(what, where) {
+
+		var error_x = ( mobilScreen ? 'inner-left' : 'left' );
+		var error_y = ( mobilScreen ? 'bottom' : 'center' );
+		var offset_x = ( mobilScreen ? 0 : 5 );
+		var offset_y = ( mobilScreen ? 5 : 0 );
+		
+		$( '.tip-redsimple .tip-inner' ).css( "font-size", ( mobilScreen ? '20px' : '' ) );
+		$( '.tip-redsimple .tip-inner' ).css( "line-height", ( mobilScreen ? '1.2' : '' ) );
+		
+		$( '#' + where ).css( { 'background-color' : '#FF9999', 'border-width' : '1px' } );
+		
+		$( '#' + where ).poshytip({
+			className: 'tip-redsimple',
+			content: what,
+			showOn: 'none',
+			alignTo: 'target',
+			alignX: error_x,
+			alignY: error_y,
+			offsetX: offset_x,
+			offsetY: offset_y,
+		});
+		
+		$( '#' + where ).bind({
+			click: function( e ) {
+				$( '#' + where ).poshytip( 'hide' );
+			}
+		});
+		
+		$( '#' + where ).poshytip( 'show' );
+	}
+	
+	function online_app() {
+	
+		if ( $( '#date' ).val() == "" )
+			showErrorTip( "Поле 'Дата передачи документов' должно быть заполнено", 'date' );
+			
+		else if ( $( '#time' ).val() == "" )
+			showErrorTip( "Поле 'Время передачи документов' должно быть заполнено", 'time' );	
+			
+		else if ( $( '#sender' ).val() == "" )
+			showErrorTip( "Поле 'ФИО отправителя' должно быть заполнено", 'sender' );	
+			
+		else if ( $( '#senderPhone' ).val() == "" )
+			showErrorTip( "Поле 'Контактный телефон' должно быть заполнено", 'senderPhone' );	
+			
+		else if ( $( '#senderEMail' ).val() == "" )
+			showErrorTip( "Поле 'Контактный email' должно быть заполнено", 'senderEMail' );	
+		
+		else
+			go_button('online_app', 'order');
+	}
+[% END %]	
+	
+[% IF ( title == 9 ) && error %]
+	showErrorTip('[% error %]', '[% err_target %]');
 [% END %]
 
 function go_button(where, who) {

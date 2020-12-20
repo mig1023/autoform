@@ -49,6 +49,8 @@ sub autoinfopage
 	
 	return online_consular_fee( @_ ) if /^online_consular_fee$/i;
 	
+	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
+	
 	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 5 );
 	
 	return $self->print_appointment() if /^print$/i;
@@ -99,11 +101,11 @@ sub set_remote_status
 	my ( $remote_status, $remote_id ) = get_remote_status( $self );
 
 	if ( $remote_id and ( $remote_status == $new_status ) ) {
-
+		
 		return;
 	}
 	elsif ( $remote_id ) {
-
+		
 		$self->{ af }->query( 'query', __LINE__, "
 			UPDATE AutoRemote SET RemoteStatus = ? WHERE ID = ?", {}, $new_status, $remote_id
 		);
@@ -133,6 +135,22 @@ sub online_cancel
 	);
 
 	return $self->{ af }->redirect( $self->{ token } );	
+}
+
+sub online_addr_proxy
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+		
+	my $addr = $self->{ vars }->getparam( "addr" ) || "";
+	
+	my $config = VCS::Site::autodata::get_settings();
+
+	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ addr } . $addr );
+	
+	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
+
+	print $response->decoded_content;
 }
 
 sub autoinfopage_entry
@@ -643,6 +661,32 @@ sub online_order
 	return ( $order->{ number }, $errorInfo );
 }
 
+sub offline_check_params
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $checks = [
+		{ name => 'date', field => "Дата передачи документов" },
+		{ name => 'time', field => "Время передачи документов" },
+		{ name => 'sender', field => "ФИО отправителя" },
+		{ name => 'senderPhone', field => "Контактный телефон" },
+		{ name => 'senderEMail', field => "Контактный email" },
+		{ name => 'comment', field => "Комментарий к доставкев" },
+	];
+	
+	for ( @$checks ) {
+				
+		my $param = $self->{ vars }->getparam( $_->{ name } );
+		
+		return $self->{ af }->lang( "Поле '" ) . $_->{ field } . $self->{ af }->lang( "' должно быть заполнено" )
+			if !$param and ( $_->{ name } ne "comment" );
+		
+		return $self->{ af }->lang( "В поле '" ) . $_->{ field } . $self->{ af }->lang( "' введены недопустимые символы" )
+			if $param =~ /[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.\,\:\"\\\/\(\)№_]/;
+	}
+}
+
 sub online_app
 # //////////////////////////////////////////////////
 {
@@ -650,16 +694,41 @@ sub online_app
 
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
 	
-	my ( $consular, $service, $consular_fee, $service_fee ) = ( 0, 0, 0, 0 );
+	my ( $consular, $service, $service_fee, $start_date, $end_date ) = ( 0, 0, 0, undef, undef );
+	my ( $error, $err_target ) = ( undef, undef );
 
 	unless ( $online_status > 0 ) {
 		
 		set_remote_status( $self, 1 );
 	}
+	elsif ( $online_status == 1 ) {
+		
+		my $collect_days = $self->{ af }->get_collect_date();
+		
+		my $fly_date = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT SDate FROM Appointments
+			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			WHERE Token = ?", $self->{ token }
+		);
+				
+		my ( $year, $month, $day ) = Date::Calc::Add_Delta_Days( split( /\-/, $fly_date ), ( $collect_days * -1 ) );
+		
+		$end_date = "$day.$month.$year";
+		
+		my ( $sec, $min, $hour, $current_day, $current_mon, $current_year ) = localtime( time );
+		
+		$current_year += 1900;
+		$current_mon += 1;
+		
+		for ( $current_day, $current_mon ) {
+			
+			$_ = "0$_" if $_ < 10;
+		};
+		
+		$start_date = "$current_day.$current_mon.$current_year";
+	}
 	elsif ( $online_status == 3 ) {
 	
-		$consular_fee = get_consular_price( $self );
-		
 		if ( $self->{ vars }->getparam('appdata') eq 'consular_pay' ) {
 			
 			set_remote_status( $self, 4 );
@@ -705,7 +774,16 @@ sub online_app
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 	};
 	
-	if ( $self->{ vars }->getparam('appdata') eq 'order' ) {
+	$tvars->{ start_date } = $start_date;
+	$tvars->{ end_date } = $end_date;
+	
+	$error = offline_check_params( $self ) if $self->{ vars }->getparam('appdata') eq 'order';
+	
+	if ( $error ) {
+		
+		$tvars->{ err } = $error;
+	}
+	elsif ( !$error and ( $self->{ vars }->getparam('appdata') eq 'order' ) ) {
 		
 		( $order_num, $tvars->{ err } ) = $self->online_order();
 		
@@ -724,8 +802,6 @@ sub online_app
 	$tvars->{ order_num } = $order_num if $order_num;
 	
 	$tvars->{ consular } = 1 if $consular;
-	$tvars->{ consular_fee } = $consular_fee if $consular_fee;
-	
 	$tvars->{ service } = 1 if $service;
 	$tvars->{ service_fee } = $service_fee if $service_fee;
 	
@@ -770,24 +846,6 @@ sub get_from_price
 	);
 	
 	return $payment_price;
-}
-
-sub get_consular_price
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-
-	my $payment_price = get_from_price( $self, "ConcilR" );
-	
-	my $currate = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT CRate FROM CurRates
-		WHERE CurCode = 'EUR' AND CRDAte <= curdate()
-		ORDER BY CRDAte DESC LIMIT 1",
-	);
-	
-	$payment_price *= $currate;
-
-	return sprintf( "%.2f", $payment_price );
 }
 
 sub online_app_foxstatus
