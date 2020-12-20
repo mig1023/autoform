@@ -683,8 +683,26 @@ sub offline_check_params
 			if !$param and ( $_->{ name } ne "comment" );
 		
 		return $self->{ af }->lang( "В поле '" ) . $_->{ field } . $self->{ af }->lang( "' введены недопустимые символы" )
-			if $param =~ /[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.\,\:\"\\\/\(\)№_]/;
+			if $param =~ /[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\@\.\,\:\"\\\/\(\)№_]/;
 	}
+}
+
+sub offline_check_consular
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $consular = $self->{ vars }->getparam( "concil_number" ) || "";
+	
+	$consular =~ s/[^0-9]//g;
+	
+	return undef unless $consular;
+	
+	return undef unless length( $consular ) == 12;
+	
+	return undef unless $consular =~ /^202/;
+	
+	return $consular;
 }
 
 sub online_app
@@ -729,11 +747,26 @@ sub online_app
 	}
 	elsif ( $online_status == 3 ) {
 	
+	
 		if ( $self->{ vars }->getparam('appdata') eq 'consular_pay' ) {
 			
-			set_remote_status( $self, 4 );
+			my $consular_number = offline_check_consular( $self );
 			
-			$self->{ af }->redirect( $self->{ token } );
+			if ( !$consular_number ) {
+				
+				$error = $self->{ af }->lang( "Проверьте правильность ввода номера квитанции консульского сбора" );
+			}
+			else {
+				my ( undef , $remote_id ) = get_remote_status( $self );
+				
+				$self->{ af }->query( 'query', __LINE__, "
+					UPDATE AutoRemote SET BankID = ? WHERE ID = ?", {}, $consular_number, $remote_id
+				);
+				
+				set_remote_status( $self, 4 );
+				
+				$self->{ af }->redirect( $self->{ token } );
+			}
 		}
 		
 		$consular = 1;

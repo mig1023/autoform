@@ -549,7 +549,19 @@
 
 	<tr><td colspan="2">&nbsp;</td></tr>
 	
-	[% IF service == 1 %]
+	[% IF err != '' %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Ошибка') %]: <font color="red"><b>[% err %]</b></font>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
+		</td></tr>
+	
+	[% ELSIF service == 1 %]
 	
 		<tr><td colspan="2">
 			<div>
@@ -561,7 +573,7 @@
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="go_button('online_app', 'service_pay');"><br>
 		</td></tr>
-	
+		
 	[% ELSIF consular == 1 %]
 	
 		<tr><td colspan="2">
@@ -571,7 +583,7 @@
 				[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br><br>
 				[% langreq('После оплаты укажите в поле номер своей квитанции:') %]<br>
 				
-				<input type="text" id="concil_number" style="width:90%"><br><br>
+				<input type="text" id="concil_number" name="concil_number" style="width:90%"><br><br>
 			</div>
 		</td></tr>
 		
@@ -594,19 +606,7 @@
 			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br><br>
 			<input class="small_button" type="button" value="* [% langreq('подменить номер квитанции') %]" style="background:#FF3333;" onclick="go_button('tmp_debug');">
 		</td></tr>
-	
-	[% ELSIF err != '' %]
-	
-		<tr><td colspan="2">
-			<div>
-				[% langreq('Ошибка заказа') %]: <font color="red"><b>[% err %]</b></font>
-			</div>
-		</td></tr>
-		
-		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
-		</td></tr>
-	
+
 	[% ELSE %]
 	
 		<tr><td colspan="2">
