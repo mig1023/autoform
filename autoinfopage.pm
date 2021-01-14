@@ -650,9 +650,9 @@ sub online_order
 	
 	$data->{ senderOfficial } = $data->{ sender };
 	$data->{ contactPerson } = $data->{ sender };
-	
+
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
-	
+
 	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
 	my $errorInfo = $errorInfoTMP->{ errorInfo };
 
@@ -903,7 +903,7 @@ sub online_app_servstatus
 
 	( undef, undef, undef, undef, my $count ) = $self->{ af }->get_payment_price( $self, "service" );
 
-	my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( $self, "service", $count );
+	my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service", $count );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	

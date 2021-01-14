@@ -429,9 +429,11 @@ sub payment_check
 {
 	my ( $self, $type, $quantity ) = @_;
 	
+	my $appIDfield = ( $type eq "check" ? "AutoToken.AutoAppID" : "AutoToken.CreatedApp");
+	
 	my ( $pay_id, $order_id, $current_pay_status, $amount, $email ) = $self->query( 'sel1', __LINE__, "
 		SELECT AutoPayment.ID, OrderID, PaymentStatus, Amount, EMail FROM AutoPayment
-		JOIN AutoToken ON AutoPayment.AutoID = AutoToken.AutoAppID
+		JOIN AutoToken ON AutoPayment.AutoID = $appIDfield
 		WHERE Token = ? AND AutoPayment.Type = ?", $self->{ token }, $type
 	);
 
@@ -449,6 +451,7 @@ sub payment_check
 		my $paymentTypes = {
 			"check" => "Услуга проверки документов",
 			"service" => "Сервисный сбор",
+			"sms" => "Услуги по оповещению (СМС сообщение)",
 		};
 		
 		my $amount_quantity = ( $quantity ? $quantity : 1 );
@@ -482,8 +485,9 @@ sub payment_check
 			},
 		};
 		
+
 		my $cloud = VCS::Site::autopayment::cloud_payment( $self, $data );
-	
+
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoPayment SET Cloud = ? WHERE ID = ?", {}, $cloud, $pay_id
 		);
