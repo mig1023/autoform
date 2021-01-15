@@ -644,7 +644,7 @@
 					<td><input type="text" id="sender" name="sender" style="width:90%"></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('Иванов Иван Иванович') %]</span></td></tr>
 				</tr><tr>
-				<td rowspan=2 valign=top>[% langreq('Контактный телефон') %]:</td>
+					<td rowspan=2 valign=top>[% langreq('Контактный телефон') %]:</td>
 					<td><input type="text" id="senderPhone" name="senderPhone" style="width:90%"></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('79XXXXXXXXX') %]</span></td></tr>
 				</tr><tr>
@@ -670,6 +670,11 @@
 			
 			<div id="selectedAddrFail" style="display:none;font-size:9pt;"><br>
 				[% langreq('Доставка по этому адресу не осуществляется или выбран неполный адрес') %]
+			</div>
+			
+			<div id="selectedAddrPriceLoad" style="display:none;font-size:9pt;"><br>
+				<img id='tmp_img' src='[% static %]/images/autoform_wait.gif' />&nbsp;
+				[% langreq('Пожалуйста, подождите пока система проверит цену доставки...') %]
 			</div>
 		</td></tr>
 		
@@ -865,13 +870,20 @@
 		buttonImage: '[% static %]/images/1x1.png',
 		buttonImageOnly:true
 	});
+	
+	var ajax;
 
 	$("#fox_addr").autocomplete({
 		source:function( request, response ) {
 		
-			$.ajax({
+			ajax = $.ajax({
 				url: '/autoform/?t=[% token %]&action=online_addr_proxy&addr=' + $("#fox_addr").val(),
 				dataType: "json",
+				beforeSend: function() {
+					if (ajax) {
+						ajax.abort();
+					}
+				},
 				success: function( data ) {
 					response( data, $.map( function( item ) {
 						return {
@@ -885,7 +897,7 @@
 		minLength:3,
 		select: function( event, ui ) {
 
-			if (ui.item.room == "") {
+			if ((ui.item.room == "") || (ui.item.postalcode == "")) {
 				$('#selectedAddrIncomplete').fadeIn();
 				$('#fox_order').prop('disabled', true);
 			}
@@ -897,11 +909,14 @@
 				$('#selectedAddr').fadeIn();
 				
 				var calcUrl = "[% calc_url %]login=[% login %]&password=[% pass %]&service=[% service %]";
-				var indexes = "&fromindex=121059&toindex=" + ui.item.postalcode;
-				var typesAndUrgancy = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&weight=0.5&qty=1";
+				var indexes = "&toindex=&fromindex=" + ui.item.postalcode;
+				var addresses = encodeURI("&recipientAddress=&senderAddress=" + ui.item.address);
+				var typesAndUrgancy = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&service=[% service %]&weight=0.5&qty=1";
 				
+				$('#selectedAddrPriceLoad').fadeIn();
+
 				$.ajax({
-					url: calcUrl + indexes + typesAndUrgancy,
+					url: calcUrl + indexes + addresses + typesAndUrgancy,
 					dataType: "json",
 					
 					error: function( data ) {
@@ -909,6 +924,8 @@
 						$('#fox_order').prop('disabled', true);
 					},
 					success: function( data ) {
+					
+						$('#selectedAddrPriceLoad').fadeOut();
 
 						if (data["tariffs"] == null) {
 							$('#selectedAddrFail').fadeIn();
@@ -921,9 +938,8 @@
 							
 							$('#fox_order').prop('disabled', false);
 							
-							$('#senderGeography').val(ui.item.houseaoguid);
-							$('#senderIndex').val(ui.item.address);
-							$('#senderAddress').val(ui.item.postalcode);
+							$('#senderIndex').val(ui.item.postalcode);
+							$('#senderAddress').val(ui.item.address);
 						}
 					}
 				});

@@ -170,7 +170,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-	
+
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -624,8 +624,8 @@ sub online_order
 		'typeOfCargo' => $config->{ fox }->{ cargo },
 		'cargoDescription' => $config->{ fox }->{ description },
 		
-		'payer' => '2',
-		'paymentMethod' => '2',
+		'payer' => 1,
+		'paymentMethod' => 2,
 		'withReturn' => 'true',
 		'weight' => '0.5',
 		'cargoPackageQty' => '1',
@@ -634,14 +634,13 @@ sub online_order
 		'recipient' => $config->{ fox }->{ recipient },
 		'recipientIndex' => $config->{ fox }->{ recipientIndex },
 		'recipientOfficial' => $config->{ fox }->{ recipientOfficial },
-		'recipientGeography' => $config->{ fox }->{ recipientGeography },
 		'recipientAddress' => $config->{ fox }->{ recipientAddress },
 		'recipientPhone' => $config->{ fox }->{ recipientPhone },
 		'recipientEMail' => $config->{ fox }->{ recipientEMail },
 		'recipientInfo' => $config->{ fox }->{ recipientInfo },
 	};
 	
-	for ( 'date', 'time', 'contactPerson', 'comment', 'sender', 'senderGeography',
+	for ( 'date', 'time', 'contactPerson', 'comment', 'sender',
 			'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
 				
 		$data->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
@@ -652,7 +651,6 @@ sub online_order
 	$data->{ contactPerson } = $data->{ sender };
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
-
 	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
 	my $errorInfo = $errorInfoTMP->{ errorInfo };
 
@@ -721,6 +719,7 @@ sub online_app
 	unless ( $online_status > 0 ) {
 		
 		set_remote_status( $self, 1 );
+		$online_status = 1;
 	}
 	elsif ( $online_status == 1 ) {
 		
