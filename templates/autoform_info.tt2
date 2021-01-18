@@ -954,6 +954,10 @@
 				.append( "<a>" + item.address + "</a>" )
 				.appendTo( ul );
 	};
+
+[% END %]
+
+[% IF ( title == 9 ) %]
 	
 	function changeSelectedAddr() {
 		hideAnotherFields();
@@ -984,10 +988,6 @@
 		});
 	
 	}
-
-[% END %]
-
-[% IF ( title == 9 ) %]	
 
 	function concilpay() {
 	
