@@ -170,7 +170,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-
+	
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -651,6 +651,7 @@ sub online_order
 	$data->{ contactPerson } = $data->{ sender };
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
+
 	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
 	my $errorInfo = $errorInfoTMP->{ errorInfo };
 
@@ -738,14 +739,21 @@ sub online_app
 		$current_year += 1900;
 		$current_mon += 1;
 		
-		for ( $day, $month, $current_day, $current_mon ) {
+		my ( $max_year, $max_month, $max_day ) = Date::Calc::Add_Delta_Days( $current_year, $current_mon, $current_day, 14 );
+		
+		( $current_year, $current_mon, $current_day ) = Date::Calc::Add_Delta_Days( $current_year, $current_mon, $current_day, 1 );
+		
+		for ( $day, $month, $current_day, $current_mon, $max_month, $max_day ) {
 			
 			$_ = "0$_" if $_ < 10;
 		};
 		
+		( $year, $month, $day ) = ( $max_year, $max_month, $max_day)
+			if $self->{ vars }->get_system->cmp_date( "$year-$month-$day", "$max_year-$max_month-$max_day") < 0;
+		
 		$end_date = "$day.$month.$year";
 		
-		$start_date = "$current_day.$current_mon.$current_year";
+		$start_date = "$current_day.$current_mon.$current_year";		
 	}
 	elsif ( $online_status == 3 ) {
 	
