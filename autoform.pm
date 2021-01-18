@@ -409,9 +409,9 @@ sub payment_prepare
 	if ( !$order or !$form_url or !$order_number) {
 		
 		$order_number = $app_id . '-' . time();
-		
+	
 		( $order, $form_url ) = VCS::Site::autopayment::payment( $self, $order_number, $amount, $type );
-		
+
 		return undef unless $order and $form_url;
 
 		$self->query( 'query', __LINE__, "
@@ -517,6 +517,23 @@ sub get_payment_price
 		);
 		
 		return $payment_price;
+	}
+	elsif ( $type eq "sms" ) {
+					
+		my $sms_price = $self->query( 'sel1', __LINE__, "
+			SELECT SMS FROM PriceRate
+			WHERE BranchID = 1 AND PriceRate.RDate <= curdate()
+			ORDER by PriceRate.ID DESC LIMIT 1;"
+		);
+		
+		my $app_id = $self->query( 'sel1', __LINE__, "
+			SELECT Appointments.ID FROM Appointments
+			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			WHERE Token = ?",
+			$self->{ token }
+		);
+					
+		return ( $sms_price, $app_id );
 	}
 	elsif ( $type eq "service" ) {
 					

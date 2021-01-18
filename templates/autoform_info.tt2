@@ -560,7 +560,23 @@
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 		</td></tr>
+		
+	[% ELSIF sms == 1 %]
 	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Дополнительная услуга по оповещению') %]<br><br>
+				[% langreq('Вы можете оформить дополнительную услугу СМС-оповещения.') %]<br><br>
+				[% langreq('К оплате') %]: <b>[% sms_price %] [% langreq('руб') %]</b>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="smspay();">
+			&nbsp;
+			<input class="small_button" type="button" id="skip_sms_pay" name="skip_sms_pay" value="[% langreq('СМС не нужна') %] &#9655;" onclick="smspay('skip');"><br>
+		</td></tr>
+		
 	[% ELSIF service == 1 %]
 	
 		<tr><td colspan="2">
@@ -574,7 +590,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="servicepay();"><br>
+			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="servicepay();"><br>
 		</td></tr>
 		
 	[% ELSIF consular == 1 %]
@@ -1206,7 +1222,26 @@ function mobileScreenCheck() {
 				}
 			}
 		});
+	}
 		
+	function smspay(type) {
+	
+		if (type == 'skip')
+			go_button('online_app', 'skip_sms_pay');
+		else {
+		
+			$.ajax({
+				url:'/autoform/?t=[% token %]&action=smstatus',
+				dataType: "html",
+				success : function (data) {
+					if (data == 'ok' ) {
+						go_button('online_app', 'sms_pay');
+					} else {
+						window.open('[% payment.form_url %]');
+					}
+				}
+			});	
+		}
 		
 	}
 [% END %]	

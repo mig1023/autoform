@@ -47,13 +47,15 @@ sub autoinfopage
 	
 	return online_app_servstatus( @_ ) if /^servstatus$/i;
 	
+	return online_app_smstatus( @_ ) if /^smstatus$/i;
+	
 	return online_cancel( @_ ) if /^online_cancel$/i;
 	
 	return online_consular_fee( @_ ) if /^online_consular_fee$/i;
 	
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
-	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 5 );
+	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 6 );
 	
 	return $self->print_appointment() if /^print$/i;
 	
@@ -713,7 +715,7 @@ sub online_app
 
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
 	
-	my ( $consular, $service, $service_fee, $service_count, $service_price ) = ( 0, 0, 0, 0, 0 );
+	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price ) = ( 0, 0, 0, 0, 0, 0, 0 );
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
@@ -794,6 +796,41 @@ sub online_app
 			if ( $pay_status_ok ) {
 			
 				set_remote_status( $self, 5 );
+			}
+			else {
+				$error = $self->{ af }->lang( "Ошибка оплаты:" ) .  $payment_error;
+			}
+		}
+		
+		$service = 1;
+	}
+	elsif ( $online_status == 5 ) {
+	
+		( $sms_price, my $app_id ) = $self->{ af }->get_payment_price( "sms" );
+		
+		$payment = $self->{ af }->payment_prepare( $app_id, 'sms' );
+			
+		if ( $self->{ vars }->getparam('appdata') eq 'skip_sms_pay' ) {
+			
+			set_remote_status( $self, 6 );
+				
+			create_online_appointment( $self );
+			
+			$self->{ af }->redirect( $self->{ token } );
+		}
+		elsif ( $self->{ vars }->getparam('appdata') eq 'sms_pay' ) {
+			
+			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "sms", $service_count );
+			
+			if ( $pay_status_ok ) {
+				
+				$self->{ af }->query( 'query', __LINE__, "
+					UPDATE Appointments SET Appointments.SMS = 1
+					JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+					WHERE Token = ?", $self->{ token }
+				);
+			
+				set_remote_status( $self, 6 );
 				
 				create_online_appointment( $self );
 				
@@ -804,7 +841,7 @@ sub online_app
 			}
 		}
 		
-		$service = 1;
+		$sms = 1;
 	}
 		
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
@@ -859,10 +896,12 @@ sub online_app
 	
 	$tvars->{ consular } = 1 if $consular;
 	$tvars->{ service } = 1 if $service;
+	$tvars->{ sms } = 1 if $sms;
 	$tvars->{ service_price } = $service_price if $service_price;
 	$tvars->{ service_fee } = $service_fee if $service_fee;
 	$tvars->{ service_type } = $service_type if $service_type;
 	$tvars->{ service_count } = $service_count if $service_count;
+	$tvars->{ sms_price } = $sms_price if $sms_price;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -911,6 +950,18 @@ sub online_app_servstatus
 	( undef, undef, undef, undef, my $count ) = $self->{ af }->get_payment_price( $self, "service" );
 
 	my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service", $count );
+
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	
+	print ( $pay_status_ok ? "ok" : "error" );	
+}
+
+sub online_app_smstatus
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+
+	my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "sms" );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	

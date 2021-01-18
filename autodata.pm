@@ -40,6 +40,10 @@ sub get_settings
 				user_name => '',
 				password => '',
 			},
+			sms => {
+				user_name => '',
+				password => '',
+			},
 			
 			cloud_url => '',
 			cloud_ssl_cert => '',
