@@ -788,14 +788,16 @@ sub online_app
 			$self->{ af }->get_payment_price( "service" );
 		
 		$payment = $self->{ af }->payment_prepare( $app_id, 'service' );
-				
+
 		if ( $self->{ vars }->getparam('appdata') eq 'service_pay' ) {
-			
+
 			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service", $service_count );
 			
 			if ( $pay_status_ok ) {
 			
 				set_remote_status( $self, 5 );
+				
+				$self->{ af }->redirect( $self->{ token } );
 			}
 			else {
 				$error = $self->{ af }->lang( "Ошибка оплаты:" ) .  $payment_error;
@@ -827,7 +829,7 @@ sub online_app
 				$self->{ af }->query( 'query', __LINE__, "
 					UPDATE Appointments SET Appointments.SMS = 1
 					JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-					WHERE Token = ?", $self->{ token }
+					WHERE Token = ?", {}, $self->{ token }
 				);
 			
 				set_remote_status( $self, 6 );
