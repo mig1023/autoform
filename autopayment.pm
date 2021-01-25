@@ -29,7 +29,7 @@ sub return_url
 	
 	my $self = shift;
 	
-	return decode( 'utf8', '127.0.0.1' . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token } );
+	return decode( 'utf8', $self->{ autoform }->{ payment }->{ back_url } . $self->{ autoform }->{ paths }->{ addr } . '?t=' . $self->{ token } );
 }
 	
 sub payment
@@ -51,7 +51,7 @@ sub payment
 	};
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( join( '/', $config->{ payment }->{ url } , 'register.do' ), $data );
-warn Dumper($response);
+
 	return ( undef, undef ) unless $response->is_success;
 	
 	my $payment = JSON->new->pretty->decode( $response->decoded_content );
@@ -64,7 +64,7 @@ sub status
 {
 	
 	my ( $self, $order_id, $type ) = @_;
-	
+
 	my $config = VCS::Site::autodata::get_settings();
 	
 	my $data = {
@@ -72,7 +72,7 @@ sub status
 		password	=> $config->{ payment }->{ $type }->{ password },
 		orderId 	=> $order_id,
 	};
-	
+
 	my $response = LWP::UserAgent->new(timeout => 30)->post( join( '/', $config->{ payment }->{ url }, 'getOrderStatus.do' ), $data );
 
 	return -1 unless $response->is_success;
@@ -95,14 +95,14 @@ sub cloud_payment
 	my $ua = LWP::UserAgent->new( timeout => 30 );
 	
 	$ua->ssl_opts(
-		SSL_cert_file	=> $config->{ payment }->{ cloud_ssl_cert },
-		SSL_key_file	=> $config->{ payment }->{ cloud_ssl_key },
-		SSL_passwd_cb	=> sub { return $config->{ payment }->{ cloud_ssl_pwd }; }  
+		SSL_cert_file	=> $config->{ cloud }->{ ssl_cert },
+		SSL_key_file	=> $config->{ cloud }->{ ssl_key },
+		SSL_passwd_cb	=> sub { return $config->{ cloud }->{ ssl_pwd }; }  
 	);
 	
 	my $content = encode( 'utf8', JSON->new->pretty->encode( $data ) );
 	
-	my $request = HTTP::Request->new( 'POST', $config->{ payment }->{ cloud_url } );
+	my $request = HTTP::Request->new( 'POST', $config->{ cloud }->{ url } );
 	
 	$request->header('Content-Type' => 'application/json');
 	
@@ -136,12 +136,12 @@ sub cloud_status
 	my $ua = LWP::UserAgent->new( timeout => 30 );
 	
 	$ua->ssl_opts(
-		SSL_cert_file	=> $config->{ payment }->{ cloud_ssl_cert },
-		SSL_key_file	=> $config->{ payment }->{ cloud_ssl_key },
-		SSL_passwd_cb	=> sub { return $config->{ payment }->{ cloud_ssl_pwd }; }    
+		SSL_cert_file	=> $config->{ cloud }->{ ssl_cert },
+		SSL_key_file	=> $config->{ cloud }->{ ssl_key },
+		SSL_passwd_cb	=> sub { return $config->{ cloud }->{ ssl_pwd }; }    
 	);
 
-	my $response = $ua->get( $config->{ payment }->{ cloud_url } . "$company/status/$docid" );
+	my $response = $ua->get( $config->{ cloud }->{ url } . "$company/status/$docid" );
 
 	return $response->{ _rc };
 }
@@ -153,7 +153,7 @@ sub signature
 	
 	my $config = VCS::Site::autodata::get_settings();
 
-	open( my $file, '<', $config->{ payment }->{ cloud_rsa_key } ) or return;
+	open( my $file, '<', $config->{ cloud }->{ rsa_key } ) or return;
 	
 	my $key_string;
 	

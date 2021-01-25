@@ -646,7 +646,7 @@ sub online_order
 			'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
 				
 		$data->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
-		$data->{ $_ } =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.\,\:\"\\\/\(\)№_]/./g;
+		$data->{ $_ } =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
 	}
 	
 	$data->{ senderOfficial } = $data->{ sender };
@@ -686,8 +686,18 @@ sub offline_check_params
 			if !$param and ( $_->{ name } ne "comment" );
 		
 		return $self->{ af }->lang( "В поле '" ) . $_->{ field } . $self->{ af }->lang( "' введены недопустимые символы" )
-			if $param =~ /[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\@\.\,\:\"\\\/\(\)№_]/;
+			if $param =~ /[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\@\?\!\_\.\,\:\"\\\/\(\)№_]/;
 	}
+	
+	my $date = $self->{ vars }->getparam( 'date' );
+	
+	my ( $start_date, $end_date ) = $self->get_min_max_date();
+	
+	return $self->{ af }->lang( "Указана дата до начала допустимого периода" )
+		if ( $self->{ vars }->get_system->cmp_date( $start_date, $date ) < 0 );
+		
+	return $self->{ af }->lang( "Указана дата после окончания допустимого периода" )
+		if ( $self->{ vars }->get_system->cmp_date( $end_date, $date ) > 0 );
 }
 
 sub offline_check_consular
@@ -715,6 +725,8 @@ sub online_app
 
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
 	
+	my $concil = [];
+	
 	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price ) = ( 0, 0, 0, 0, 0, 0, 0 );
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
@@ -724,40 +736,32 @@ sub online_app
 		set_remote_status( $self, 1 );
 		$online_status = 1;
 	}
-	elsif ( $online_status == 1 ) {
-		
-		my $collect_days = $self->{ af }->get_collect_date();
-		
-		my $fly_date = $self->{ af }->query( 'sel1', __LINE__, "
-			SELECT SDate FROM Appointments
-			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-			WHERE Token = ?", $self->{ token }
-		);
-				
-		my ( $year, $month, $day ) = Date::Calc::Add_Delta_Days( split( /\-/, $fly_date ), ( $collect_days * -1 ) );
-		
-		my ( undef, undef, undef, $current_day, $current_mon, $current_year ) = localtime( time );
-		
-		$current_year += 1900;
-		$current_mon += 1;
-		
-		my ( $max_year, $max_month, $max_day ) = Date::Calc::Add_Delta_Days( $current_year, $current_mon, $current_day, 14 );
-		
-		( $current_year, $current_mon, $current_day ) = Date::Calc::Add_Delta_Days( $current_year, $current_mon, $current_day, 1 );
-		
-		for ( $day, $month, $current_day, $current_mon, $max_month, $max_day ) {
+	
+	if ( $online_status == 1 ) {
+	
+		if ( $self->{ vars }->getparam('appdata') eq 'confirm_app_start' ) {
 			
-			$_ = "0$_" if $_ < 10;
-		};
-		
-		( $year, $month, $day ) = ( $max_year, $max_month, $max_day)
-			if $self->{ vars }->get_system->cmp_date( "$year-$month-$day", "$max_year-$max_month-$max_day") < 0;
-		
-		$end_date = "$day.$month.$year";
-		
-		$start_date = "$current_day.$current_mon.$current_year";		
+			set_remote_status( $self, 2 );
+				
+			$self->{ af }->redirect( $self->{ token } );
+		}
 	}
-	elsif ( $online_status == 3 ) {
+	else if ( $online_status == 2 ) {
+
+		( $start_date, $end_date ) = $self->get_min_max_date();
+	}
+	elsif ( $online_status == 4 ) {
+		
+		( my $concil_free, $concil ) = $self->calc_concil();
+		
+		$service_type = $self->{ af }->get_payment_price( "vtype_only" );
+		
+		if ( $concil_free ) {
+			
+			set_remote_status( $self, 5 );
+				
+			$self->{ af }->redirect( $self->{ token } );
+		}
 	
 		if ( $self->{ vars }->getparam('appdata') eq 'consular_pay' ) {
 			
@@ -774,7 +778,7 @@ sub online_app
 					UPDATE AutoRemote SET BankID = ? WHERE ID = ?", {}, $consular_number, $remote_id
 				);
 				
-				set_remote_status( $self, 4 );
+				set_remote_status( $self, 5 );
 				
 				$self->{ af }->redirect( $self->{ token } );
 			}
@@ -782,7 +786,7 @@ sub online_app
 		
 		$consular = 1;
 	}
-	elsif ( $online_status == 4 ) {
+	elsif ( $online_status == 5 ) {
 	
 		( $service_fee, $service_price, $service_type, $service_count, my $app_id ) =
 			$self->{ af }->get_payment_price( "service" );
@@ -795,7 +799,7 @@ sub online_app
 			
 			if ( $pay_status_ok ) {
 			
-				set_remote_status( $self, 5 );
+				set_remote_status( $self, 6 );
 				
 				$self->{ af }->redirect( $self->{ token } );
 			}
@@ -806,7 +810,7 @@ sub online_app
 		
 		$service = 1;
 	}
-	elsif ( $online_status == 5 ) {
+	elsif ( $online_status == 6 ) {
 	
 		( $sms_price, my $app_id ) = $self->{ af }->get_payment_price( "sms" );
 		
@@ -814,7 +818,7 @@ sub online_app
 			
 		if ( $self->{ vars }->getparam('appdata') eq 'skip_sms_pay' ) {
 			
-			set_remote_status( $self, 6 );
+			set_remote_status( $self, 7 );
 				
 			create_online_appointment( $self );
 			
@@ -832,7 +836,7 @@ sub online_app
 					WHERE Token = ?", {}, $self->{ token }
 				);
 			
-				set_remote_status( $self, 6 );
+				set_remote_status( $self, 7 );
 				
 				create_online_appointment( $self );
 				
@@ -852,7 +856,7 @@ sub online_app
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 9,
 		'token' 	=> $self->{ token },
-		'concil_url'	=> $self->{ autoform }->{ payment }->{ concil_payment },
+		'concil_url'	=> $self->{ autoform }->{ concil }->{ payment },
 		'addr_url'	=> $self->{ autoform }->{ fox }->{ addr },
 		'calc_url'	=> $self->{ autoform }->{ fox }->{ calc },
 		'fox_pay_url'	=> $self->{ autoform }->{ fox }->{ pay },
@@ -886,7 +890,7 @@ sub online_app
 			my ( undef , $remote_id ) = get_remote_status( $self );
 	
 			$self->{ af }->query( 'query', __LINE__, "
-				UPDATE AutoRemote SET RemoteStatus = 2, FoxID = ? WHERE ID = ?", {}, $order_num, $remote_id
+				UPDATE AutoRemote SET RemoteStatus = 3, FoxID = ? WHERE ID = ?", {}, $order_num, $remote_id
 			);
 		}
 	}
@@ -904,8 +908,71 @@ sub online_app
 	$tvars->{ service_type } = $service_type if $service_type;
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
+	$tvars->{ concil } = $concil if $concil;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub get_min_max_date
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $collect_days = $self->{ af }->get_collect_date();
+	
+	my $fly_date = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT SDate FROM Appointments
+		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+		WHERE Token = ?", $self->{ token }
+	);
+			
+	my ( $year, $month, $day ) = Date::Calc::Add_Delta_Days( split( /\-/, $fly_date ), ( $collect_days * -1 ) );
+	
+	my ( undef, undef, undef, $current_day, $current_mon, $current_year ) = localtime( time );
+	
+	$current_year += 1900;
+	$current_mon += 1;
+	
+	my ( $max_year, $max_month, $max_day ) = Date::Calc::Add_Delta_Days( $current_year, $current_mon, $current_day, 14 );
+	
+	( $current_year, $current_mon, $current_day ) = Date::Calc::Add_Delta_Days( $current_year, $current_mon, $current_day, 1 );
+	
+	for ( $day, $month, $current_day, $current_mon, $max_month, $max_day ) {
+		
+		$_ = "0$_" if $_ < 10;
+	};
+	
+	( $year, $month, $day ) = ( $max_year, $max_month, $max_day)
+		if $self->{ vars }->get_system->cmp_date( "$year-$month-$day", "$max_year-$max_month-$max_day") < 0;
+		
+	my $start_date = "$current_day.$current_mon.$current_year";
+	
+	my $end_date = "$day.$month.$year";
+	
+	return ( $start_date, $end_date );
+}
+
+sub calc_concil
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $concil = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT AppData.FName, AppData.LName, ConcilOnlinePay FROM AppData
+		JOIN Appointments ON AppData.AppID = Appointments.ID
+		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $concil_free = 1;
+	my $persons = [];
+	
+	for ( @$concil ) {
+	
+		$concil_free = 0 unless $_->{ ConcilOnlinePay } == 2;
+	}
+		
+	return ( $concil_free, $concil );
 }
 
 sub create_online_appointment
@@ -1325,13 +1392,14 @@ sub get_app_file_list_by_token
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
-		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus, Token
+		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus,
+		Token, AppData.ConcilOnlinePay
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
 		WHERE Token = ? AND AppData.Status = 1", $token
 	);
-	
+
 	$_->{ 'BirthDate' } =~ s/(\d\d\d\d)\-(\d\d)\-(\d\d)/$3.$2.$1/ for @$app_list;
 	
 	my $doc_types_list_all = VCS::Site::autodata::get_doc_list();
@@ -1425,7 +1493,7 @@ sub get_app_file_list_by_token
 		else {
 			$doc_list->{ $app->{ ID } } = {};
 			
-			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token' );
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay' );
 
 			$doc_list->{ $app->{ ID } }->{ files } = {};
 			

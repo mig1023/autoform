@@ -458,8 +458,8 @@ sub payment_check
 		
 		my $data = {
 			"id" => $pay_id,
-			"inn" => $self->{ autoform }->{ payment }->{ inn },
-			"key" => $self->{ autoform }->{ payment }->{ inn },
+			"inn" => $self->{ autoform }->{ cloud }->{ inn },
+			"key" => $self->{ autoform }->{ cloud }->{ inn },
 			"content" => {
 				"type" => "1",
 				"positions" => [
@@ -563,6 +563,19 @@ sub get_payment_price
 		);
 	
 		return ( ( $payment_price * $service_count ), $payment_price, $vtype, $service_count, $app_id );
+	}
+	elsif ( $type eq "vtype_only" ) {
+					
+		my $vtype = $self->query( 'sel1', __LINE__, "
+			SELECT VName
+			FROM Appointments
+			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			JOIN VisaTypes ON VisaTypes.ID = Appointments.VType
+			WHERE Token = ?",
+			$self->{ token }
+		);
+					
+		return $vtype;
 	}
 }
 

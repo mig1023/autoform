@@ -31,6 +31,7 @@ sub get_settings
 		
 		payment => {
 			url => '',
+			back_url => '',
 			
 			check => {
 				user_name => '',
@@ -44,15 +45,22 @@ sub get_settings
 				user_name => '',
 				password => '',
 			},
+		},
+		
+		cloud => {	
+			url => '',
 			
-			cloud_url => '',
-			cloud_ssl_cert => '',
-			cloud_ssl_key => '',
-			cloud_ssl_pwd => '',
-			cloud_rsa_key => '',
+			ssl_cert => '',
+			ssl_key => '',
+			ssl_pwd => '',
+			
+			rsa_key => '',
+			
 			inn => '',
-			
-			concil_payment => '',
+		},
+		
+		concil => {
+			payment => '',
 		},
 		
 		fox => {
