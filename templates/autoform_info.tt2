@@ -179,6 +179,7 @@
 				</td>
 				</tr>
 			[% END %]
+			<tr><td colspan="5">&nbsp;</td></tr>
 		[% END %]
 	[% END %]
 	</table>
@@ -454,6 +455,7 @@
 				</td></tr>
 			[% END %]
 		[% END %]
+		<tr><td colspan="5">&nbsp;</td></tr>
 	[% END %]
 	</table>
 	</td></tr>
@@ -599,6 +601,19 @@
 			<div>
 				[% langreq('Оплата консульского сбора.') %]<br><br>
 				
+				[% langreq('Тип визы') %]: [% service_type %]<br><br>
+				[% FOREACH person IN concil %]
+					[% person.FName %] [% person.LName %] - <b>
+						[% IF ( person.ConcilOnlinePay == 1 ) %]
+							[% langreq('35 евро') %]
+						[% ELSIF ( person.ConcilOnlinePay == 2 ) %]
+							[% langreq('не должен платить сбор') %]
+						[% ELSE %]
+							[% langreq('пожалуйста, свяжитесь с нами для уточнения') %]
+						[% END %]
+						</b><br>
+				[% END %]
+				<br>
 				[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br><br>
 				[% langreq('После оплаты укажите в поле номер своей квитанции:') %]<br>
 				
@@ -875,7 +890,7 @@
 
 [% END %]
 
-[% IF ( title == 9 ) && (online_status == 1) %]
+[% IF ( title == 9 ) && (online_status == 2) %]
 
 	$('#date').datepicker({
 		dateFormat: 'dd.mm.yy',
@@ -1006,12 +1021,13 @@
 	}
 
 	function concilpay() {
-	
-		if ( $('#concil_number').val() == "" ) {
+
+		if ( $('#concil_number').val() == "" )
 			window.open('[% concil_url %]');
-		}
-		else {	
+		else if ( $('#concil_number').val().match(/^202\d{9}$/) )
 			go_button('online_app', 'consular_pay');
+		else {	
+			showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number' );	
 		}
 	}
 	
@@ -1190,23 +1206,67 @@ function mobileScreenCheck() {
 	
 	function online_app() {
 	
-		if ( $( '#date' ).val() == "" )
+		var date_val_check = date_check( $( '#date' ).val() );
+		
+		if ( date_val_check != "" )
+			showErrorTip( date_val_check, 'date' );
+	
+		else if ( $( '#date' ).val() == "" )
 			showErrorTip( "Поле 'Дата передачи документов' должно быть заполнено", 'date' );
+		
+		else if ( $('#date').val().match(/[^0-9\.]/) )
+			showErrorTip( "В поле 'Дата передачи документов' введены недопустимые символы", 'date' );
 			
 		else if ( $( '#time' ).val() == "" )
-			showErrorTip( "Поле 'Время передачи документов' должно быть заполнено", 'time' );	
+			showErrorTip( "Поле 'Время передачи документов' должно быть заполнено", 'time' );
+
+		else if ( $('#time').val().match(/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\@\?\!\.\,\:\"\\\/\(\)№_]/) )
+			showErrorTip( "В поле 'Время передачи документов' введены недопустимые символы", 'time' );			
 			
 		else if ( $( '#sender' ).val() == "" )
-			showErrorTip( "Поле 'ФИО отправителя' должно быть заполнено", 'sender' );	
+			showErrorTip( "Поле 'ФИО отправителя' должно быть заполнено", 'sender' );
+			
+		else if ( $('#sender').val().match(/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\.]/) )
+			showErrorTip( "В поле 'ФИО отправителя' введены недопустимые символы", 'sender' );
 			
 		else if ( $( '#senderPhone' ).val() == "" )
-			showErrorTip( "Поле 'Контактный телефон' должно быть заполнено", 'senderPhone' );	
+			showErrorTip( "Поле 'Контактный телефон' должно быть заполнено", 'senderPhone' );
+
+		else if ( $('#senderPhone').val().match(/[^0-9\s\-\(\)\+]/) )
+			showErrorTip( "В поле 'Контактный телефон' введены недопустимые символы", 'senderPhone' );			
 			
 		else if ( $( '#senderEMail' ).val() == "" )
 			showErrorTip( "Поле 'Контактный email' должно быть заполнено", 'senderEMail' );	
+			
+		else if ( $('#senderEMail').val().match(/[^A-Za-z0-9\s\-\@\_\.]/) )
+			showErrorTip( "В поле 'Контактный email' введены недопустимые символы", 'senderEMail' );
+			
+		else if ( $('#comment').val().match(/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\@\?\!\.\,\:\"\\\/\(\)№_]/) )
+			showErrorTip( "В поле 'Комментарий' введены недопустимые символы", 'comment' );
 		
 		else
 			go_button('online_app', 'order');
+	}
+	
+	function date_check(date) {
+	
+		var datetime_regex = /(\d\d)\.(\d\d)\.(\d\d\d\d)/;
+		var app_date_arr = datetime_regex.exec(date);
+		var app_date = new Date(app_date_arr[3], app_date_arr[2], app_date_arr[1]);
+		
+		var min_date_arr = datetime_regex.exec('[% start_date %]');
+		var min_date = new Date(min_date_arr[3], min_date_arr[2], min_date_arr[1]);
+		
+		var max_date_arr = datetime_regex.exec('[% end_date %]');
+		var max_date = new Date(max_date_arr[3], max_date_arr[2], max_date_arr[1]);
+
+		if ( app_date < min_date )
+			return "Указана дата до начала допустимого периода";
+		else if ( app_date > max_date )
+			return "Указана дата после окончания допустимого периода";
+		else
+			return "";
+	
 	}
 	
 	function servicepay() {
