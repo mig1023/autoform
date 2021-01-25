@@ -55,7 +55,7 @@ sub autoinfopage
 	
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
-	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 6 );
+	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 7 );
 	
 	return $self->print_appointment() if /^print$/i;
 	
@@ -294,7 +294,7 @@ sub get_infopage
 	
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
 	
-	$tvars->{ fox_status } = VCS::Site::autopayment::fox_status( $self, $order_num ) if $online_status == 5;
+	$tvars->{ fox_status } = VCS::Site::autopayment::fox_status( $self, $order_num ) if $online_status == 7;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -642,7 +642,7 @@ sub online_order
 		'recipientInfo' => $config->{ fox }->{ recipientInfo },
 	};
 	
-	for ( 'date', 'time', 'contactPerson', 'comment', 'sender',
+	for ( 'date', 'contactPerson', 'comment', 'sender',
 			'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
 				
 		$data->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
@@ -671,7 +671,6 @@ sub offline_check_params
 	
 	my $checks = [
 		{ name => 'date', field => "Дата передачи документов" },
-		{ name => 'time', field => "Время передачи документов" },
 		{ name => 'sender', field => "ФИО отправителя" },
 		{ name => 'senderPhone', field => "Контактный телефон" },
 		{ name => 'senderEMail', field => "Контактный email" },
@@ -727,7 +726,7 @@ sub online_app
 	
 	my $concil = [];
 	
-	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price ) = ( 0, 0, 0, 0, 0, 0, 0 );
+	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price, $confirm ) = ( 0, 0, 0, 0, 0, 0, 0, 0 );
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
@@ -739,6 +738,8 @@ sub online_app
 	
 	if ( $online_status == 1 ) {
 	
+		$confirm = 1;
+	
 		if ( $self->{ vars }->getparam('appdata') eq 'confirm_app_start' ) {
 			
 			set_remote_status( $self, 2 );
@@ -746,7 +747,7 @@ sub online_app
 			$self->{ af }->redirect( $self->{ token } );
 		}
 	}
-	else if ( $online_status == 2 ) {
+	elsif ( $online_status == 2 ) {
 
 		( $start_date, $end_date ) = $self->get_min_max_date();
 	}
@@ -900,6 +901,7 @@ sub online_app
 	$tvars->{ order_num } = $order_num if $order_num;
 	$tvars->{ online_status } = $online_status if $online_status;
 	
+	$tvars->{ confirm } = 1 if $confirm;
 	$tvars->{ consular } = 1 if $consular;
 	$tvars->{ service } = 1 if $service;
 	$tvars->{ sms } = 1 if $sms;
@@ -1042,7 +1044,7 @@ sub online_consular_fee
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	set_remote_status( $self, 3 );
+	set_remote_status( $self, 4 );
 	
 	$self->{ af }->redirect( $self->{ token } );
 }

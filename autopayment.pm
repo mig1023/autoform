@@ -178,7 +178,7 @@ sub fox_pay_status
 	my $config = VCS::Site::autodata::get_settings();
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ pay_status } . $order_number );
-	
+
 	return 0 unless $response->is_success;
 	
 	my $result = decode( 'utf8', $response->{ _content } );
@@ -195,15 +195,19 @@ sub fox_status
 	
 	my $config = VCS::Site::autodata::get_settings();
 	
-	my $url_param = "login=unregistered&password=unregistered&documentType=order&number=" . $order_number;
+	my $url_param = "login=" . $config->{ fox }->{ login } . "&password=" . $config->{ fox }->{ password } .
+		"&documentType=order&number=" . $order_number;
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ track } . $url_param );
-	
+
 	return "" unless $response->is_success;
 	
 	my $status = JSON->new->pretty->decode( $response->decoded_content );
+	
+	my $line = "";
 
-	my $line = $status->{ documents }->[ 0 ]->{ history }->[ -1 ]->{ eventState };
+	$line = $status->{ documents }->[ 0 ]->{ history }->[ -1 ]->{ eventState }
+		if ( length( $status->{ documents }->[ 0 ]->{ history } ) > 0 );
 
 	return $line;
 }
