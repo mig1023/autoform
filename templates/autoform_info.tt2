@@ -477,7 +477,7 @@
 			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="go_app('offline_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
 		</tr>
 		<tr>
-			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и оформить удалённое получение документов') %][% ELSE %][% langreq('Оформить удалённую подачу документов') %][% END %]" onclick="go_app('online_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
+			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и оформить удалённую подачу документов') %][% ELSE %][% langreq('Оформить удалённую подачу документов') %][% END %]" onclick="go_app('online_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
 		</tr>
 	[% END %]
 
@@ -562,6 +562,27 @@
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 		</td></tr>
+	
+	[% ELSIF confirm == 1 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Вы начинаете удалённую запись. Она состоит из нескольких этапов:') %]<br><br>
+				[% langreq('1. Вы указываете свой <b>полный адрес</b>. Система сообщит вам цену и сроки доставки.') %]<br><br>
+				[% langreq('2. Если цена доставки Вас устраивает, то <b>выбираете дату забора</b> у вас документов и иные необходимые для почтовой службы данные.') %]<br><br>
+				[% langreq('3. Вы <b>оплачиваете доставку</b> на сайте почтовой службы.') %]<br><br>
+				[% langreq('4. Вы <b>оплачиваете Консульский сбор</b> на сайте банка и указываете номер квитанции.') %]<br><br>
+				[% langreq('5. Вы <b>оплачиваете Сервисный сбор</b> на сайте банка.') %]<br><br>
+				[% langreq('6. Выбираете и оплачиваете <b>дополнительные услуги</b>.') %]<br><br>
+				[% langreq('7. В выбранный день с вами <b>свяжется почтовая служба</b> и уточнит время забора документов.') %]
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
+			&nbsp;
+			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Начать удалённую запись') %] &#9655;" onclick="go_button('online_app', 'confirm_app_start');">
+		</td></tr>
 		
 	[% ELSIF sms == 1 %]
 	
@@ -574,7 +595,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Оплатить') %] &#9655;" onclick="smspay();">
+			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="smspay();">
 			&nbsp;
 			<input class="small_button" type="button" id="skip_sms_pay" name="skip_sms_pay" value="[% langreq('СМС не нужна') %] &#9655;" onclick="smspay('skip');"><br>
 		</td></tr>
@@ -666,10 +687,6 @@
 					<td rowspan=2 valign=top>[% langreq('Дата передачи документов') %]:</td>
 					<td><input type="text" value="" name="date" id="date" readonly></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('01.01.2021') %]</span></td></tr>
-				</tr><tr>
-					<td rowspan=2 valign=top>[% langreq('Время передачи документов') %]:</td>
-					<td><input type="text" id="time" name="time" style="width:90%"></td>
-					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('C 10:00 до 18:00') %]</span></td></tr>
 				</tr><tr>
 					<td rowspan=2 valign=top>[% langreq('ФИО отправителя') %]:</td>
 					<td><input type="text" id="sender" name="sender" style="width:90%"></td>
@@ -1216,13 +1233,7 @@ function mobileScreenCheck() {
 		
 		else if ( $('#date').val().match(/[^0-9\.]/) )
 			showErrorTip( "В поле 'Дата передачи документов' введены недопустимые символы", 'date' );
-			
-		else if ( $( '#time' ).val() == "" )
-			showErrorTip( "Поле 'Время передачи документов' должно быть заполнено", 'time' );
 
-		else if ( $('#time').val().match(/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\@\?\!\.\,\:\"\\\/\(\)№_]/) )
-			showErrorTip( "В поле 'Время передачи документов' введены недопустимые символы", 'time' );			
-			
 		else if ( $( '#sender' ).val() == "" )
 			showErrorTip( "Поле 'ФИО отправителя' должно быть заполнено", 'sender' );
 			
