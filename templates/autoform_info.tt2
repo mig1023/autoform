@@ -941,8 +941,8 @@
 				}
 			});
 		},
-		delay:5,
-		minLength:3,
+		deferRequestBy: 2000,
+		minLength: 3,
 		select: function( event, ui ) {
 
 			if ((ui.item.room == "") || (ui.item.postalcode == "")) {
