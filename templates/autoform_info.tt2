@@ -20,6 +20,11 @@
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 [% END %]
 
+[% IF ( title == 9 ) && sms_confirm %]
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+[% END %]
+
 </head>
 
 <font face="arial">
@@ -599,6 +604,26 @@
 			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('online_app', 'confirm_app_end');">
 		</td></tr>
 		
+	[% ELSIF sms_confirm == 1 %]
+	
+		<tr><td colspan="2">
+			<div>
+				<div id="agreement" class="oferta"><br>text_of_agreement<br></div><br>	
+			
+				[% langreq('Для подписания договора, мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br><br>
+				[% langreq('Введите присланный код, это будет считаться простой электронной подписью') %]:<br>
+				
+				<input type="text" id="digital_signature" name="digital_signature" style="width:90%"><br><br>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" value="&#9665; [% langreq('Отказаться') %]" onclick="go_button('online_cancel');">
+			&nbsp;
+			<input class="small_button" type="button" id="sms_signature" name="sms_signature" value="[% langreq('Подписать договор') %] &#9655;" onclick="sms_sign();">
+		</td></tr>
+		
+		
 	[% ELSIF sms == 1 %]
 	
 		<tr><td colspan="2">
@@ -680,7 +705,6 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
 			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br><br>
 			<input class="small_button" type="button" value="* [% langreq('подменить номер квитанции') %]" style="background:#FF3333;" onclick="go_button('tmp_debug');">
 		</td></tr>
@@ -750,7 +774,6 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
 			<input class="small_button" type="button" id="fox_order" name="fox_order" disabled value="[% langreq('Записаться') %] &#9655;" onclick="online_app();"><br>
 		</td></tr>
 	[% END %]
@@ -930,7 +953,7 @@
 
 [% END %]
 
-[% IF ( title == 9 ) && (online_status == 2) %]
+[% IF ( title == 9 ) && (online_status == 3) %]
 
 	$('#date').datepicker({
 		dateFormat: 'dd.mm.yy',
@@ -1066,10 +1089,23 @@
 			window.open('[% concil_url %]');
 		else if ( $('#concil_number').val().match(/^202\d[^\d]?\d{8}$/) )
 			go_button('online_app', 'consular_pay');
-		else {	
+		else	
 			showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number' );	
-		}
 	}
+	
+	function sms_sign() {
+	
+		var sms_code = CryptoJS.MD5( $('#digital_signature').val() );
+		
+		var sms_check = '[% sms_code %]';
+
+		if ( sms_code == sms_check )
+			go_button('online_app', 'sms_signed');
+		else
+			showErrorTip( "Проверьте правильность введёного номера SMS", 'digital_signature' );	
+	}
+	
+	
 	
 [% END %]
 

@@ -4,6 +4,7 @@ use strict;
 use VCS::Vars;
 use VCS::Site::autodata;
 use VCS::Site::autopayment;
+use VCS::Site::autosms;
 
 use Data::Dumper;
 use Date::Calc;
@@ -55,7 +56,7 @@ sub autoinfopage
 	
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
-	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status < 8 );
+	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status < 9 );
 	
 	return $self->print_appointment() if /^print$/i;
 	
@@ -726,7 +727,9 @@ sub online_app
 	
 	my $concil = [];
 	
-	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price, $start_confirm, $end_confirm ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );
+	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price, $start_confirm,
+		$end_confirm, $sms_confirm, $sms_phone, $sms_code ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 );
+		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
@@ -740,7 +743,7 @@ sub online_app
 	
 		$start_confirm = 1;
 	
-		if ( $self->{ vars }->getparam('appdata') eq 'confirm_app_start' ) {
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_start' ) {
 			
 			set_remote_status( $self, 2 );
 				
@@ -748,10 +751,33 @@ sub online_app
 		}
 	}
 	elsif ( $online_status == 2 ) {
+	
+		$sms_confirm = 1;
+		
+		$sms_phone = VCS::Site::autosms::get_phone_for_sms( $self );
+		
+		$sms_code = VCS::Site::autosms::get_code_for_sms( $self, $sms_phone );
+	
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'sms_signed' ) {
+			
+			my $code = $self->{ vars }->getparam( 'digital_signature' ) || undef;
+			
+			if ( VCS::Site::autosms::code_from_sms_is_ok( $self, $code ) ) {
+				
+				set_remote_status( $self, 3 );
+				
+				$self->{ af }->redirect( $self->{ token } );
+			}
+			else {
+				$error = $self->{ af }->lang( "Проверьте правильность введёного номера SMS" );
+			}
+		}
+	}
+	elsif ( $online_status == 3 ) {
 
 		( $start_date, $end_date ) = $self->get_min_max_date();
 	}
-	elsif ( $online_status == 4 ) {
+	elsif ( $online_status == 5 ) {
 		
 		( my $concil_free, $concil ) = $self->calc_concil();
 		
@@ -759,12 +785,12 @@ sub online_app
 		
 		if ( $concil_free ) {
 			
-			set_remote_status( $self, 5 );
+			set_remote_status( $self, 6 );
 				
 			$self->{ af }->redirect( $self->{ token } );
 		}
 	
-		if ( $self->{ vars }->getparam('appdata') eq 'consular_pay' ) {
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'consular_pay' ) {
 			
 			my $consular_number = offline_check_consular( $self );
 			
@@ -779,7 +805,7 @@ sub online_app
 					UPDATE AutoRemote SET BankID = ? WHERE ID = ?", {}, $consular_number, $remote_id
 				);
 				
-				set_remote_status( $self, 5 );
+				set_remote_status( $self, 6 );
 				
 				$self->{ af }->redirect( $self->{ token } );
 			}
@@ -787,20 +813,20 @@ sub online_app
 		
 		$consular = 1;
 	}
-	elsif ( $online_status == 5 ) {
+	elsif ( $online_status == 6 ) {
 	
 		( $service_fee, $service_price, $service_type, $service_count, my $app_id ) =
 			$self->{ af }->get_payment_price( "service" );
 		
 		$payment = $self->{ af }->payment_prepare( $app_id, 'service' );
 
-		if ( $self->{ vars }->getparam('appdata') eq 'service_pay' ) {
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'service_pay' ) {
 
 			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service", $service_count );
 			
 			if ( $pay_status_ok ) {
 			
-				set_remote_status( $self, 6 );
+				set_remote_status( $self, 7 );
 				
 				$self->{ af }->redirect( $self->{ token } );
 			}
@@ -811,21 +837,21 @@ sub online_app
 		
 		$service = 1;
 	}
-	elsif ( $online_status == 6 ) {
+	elsif ( $online_status == 7 ) {
 	
 		( $sms_price, my $app_id ) = $self->{ af }->get_payment_price( "sms" );
 		
 		$payment = $self->{ af }->payment_prepare( $app_id, 'sms' );
 			
-		if ( $self->{ vars }->getparam('appdata') eq 'skip_sms_pay' ) {
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'skip_sms_pay' ) {
 			
-			set_remote_status( $self, 7 );
+			set_remote_status( $self, 8 );
 				
 			create_online_appointment( $self );
 			
 			$self->{ af }->redirect( $self->{ token } );
 		}
-		elsif ( $self->{ vars }->getparam('appdata') eq 'sms_pay' ) {
+		elsif ( $self->{ vars }->getparam( 'appdata' ) eq 'sms_pay' ) {
 			
 			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "sms", $service_count );
 			
@@ -837,7 +863,7 @@ sub online_app
 					WHERE Token = ?", {}, $self->{ token }
 				);
 			
-				set_remote_status( $self, 7 );
+				set_remote_status( $self, 8 );
 				
 				create_online_appointment( $self );
 				
@@ -850,13 +876,13 @@ sub online_app
 		
 		$sms = 1;
 	}
-	elsif ( $online_status == 7 ) {
+	elsif ( $online_status == 8 ) {
 	
 		$end_confirm = 1;
 	
-		if ( $self->{ vars }->getparam('appdata') eq 'confirm_app_end' ) {
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_end' ) {
 			
-			set_remote_status( $self, 2 );
+			set_remote_status( $self, 9 );
 				
 			$self->{ af }->redirect( $self->{ token } );
 		}
@@ -885,13 +911,13 @@ sub online_app
 	$tvars->{ start_date } = $start_date;
 	$tvars->{ end_date } = $end_date;
 	
-	$error = offline_check_params( $self ) if $self->{ vars }->getparam('appdata') eq 'order';
+	$error = offline_check_params( $self ) if $self->{ vars }->getparam( 'appdata' ) eq 'order';
 	
 	if ( $error ) {
 		
 		$tvars->{ err } = $error;
 	}
-	elsif ( !$error and ( $self->{ vars }->getparam('appdata') eq 'order' ) ) {
+	elsif ( !$error and ( $self->{ vars }->getparam( 'appdata' ) eq 'order' ) ) {
 		
 		( $order_num, $tvars->{ err } ) = $self->online_order();
 		
@@ -902,8 +928,10 @@ sub online_app
 			my ( undef , $remote_id ) = get_remote_status( $self );
 	
 			$self->{ af }->query( 'query', __LINE__, "
-				UPDATE AutoRemote SET RemoteStatus = 3, FoxID = ? WHERE ID = ?", {}, $order_num, $remote_id
+				UPDATE AutoRemote SET FoxID = ? WHERE ID = ?", {}, $order_num, $remote_id
 			);
+			
+			set_remote_status( $self, 4);
 		}
 	}
 	
@@ -911,18 +939,21 @@ sub online_app
 	
 	$tvars->{ order_num } = $order_num if $order_num;
 	$tvars->{ online_status } = $online_status if $online_status;
-	
-	$tvars->{ start_confirm } = 1 if $start_confirm;
-	$tvars->{ end_confirm } = 1 if $end_confirm;
-	$tvars->{ consular } = 1 if $consular;
-	$tvars->{ service } = 1 if $service;
-	$tvars->{ sms } = 1 if $sms;
+	$tvars->{ sms_phone } = $sms_phone if $sms_phone;
+	$tvars->{ sms_code } = $sms_code if $sms_code;
 	$tvars->{ service_price } = $service_price if $service_price;
 	$tvars->{ service_fee } = $service_fee if $service_fee;
 	$tvars->{ service_type } = $service_type if $service_type;
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
 	$tvars->{ concil } = $concil if $concil;
+	
+	$tvars->{ start_confirm } = 1 if $start_confirm;
+	$tvars->{ end_confirm } = 1 if $end_confirm;
+	$tvars->{ sms_confirm } = 1 if $sms_confirm;
+	$tvars->{ consular } = 1 if $consular;
+	$tvars->{ service } = 1 if $service;
+	$tvars->{ sms } = 1 if $sms;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -1056,7 +1087,7 @@ sub online_consular_fee
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	set_remote_status( $self, 4 );
+	set_remote_status( $self, 5 );
 	
 	$self->{ af }->redirect( $self->{ token } );
 }
