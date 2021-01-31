@@ -39,7 +39,7 @@ sub autoinfopage
 	
 	s/[^a-z_]//g;
 	
-	my ( $offline_app_status ) = get_remote_status( $self );
+	my ( $online_app_status ) = get_remote_status( $self );
 	
 	return online_app( @_ ) if /^online_app$/i;
 	
@@ -55,7 +55,7 @@ sub autoinfopage
 	
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
-	return online_app( @_ ) if ( $offline_app_status > 0 ) and ( $offline_app_status < 7 );
+	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status < 8 );
 	
 	return $self->print_appointment() if /^print$/i;
 	
@@ -726,7 +726,7 @@ sub online_app
 	
 	my $concil = [];
 	
-	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price, $confirm ) = ( 0, 0, 0, 0, 0, 0, 0, 0 );
+	my ( $consular, $service, $sms, $service_fee, $service_count, $service_price, $sms_price, $start_confirm, $end_confirm ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
@@ -738,7 +738,7 @@ sub online_app
 	
 	if ( $online_status == 1 ) {
 	
-		$confirm = 1;
+		$start_confirm = 1;
 	
 		if ( $self->{ vars }->getparam('appdata') eq 'confirm_app_start' ) {
 			
@@ -850,6 +850,17 @@ sub online_app
 		
 		$sms = 1;
 	}
+	elsif ( $online_status == 7 ) {
+	
+		$end_confirm = 1;
+	
+		if ( $self->{ vars }->getparam('appdata') eq 'confirm_app_end' ) {
+			
+			set_remote_status( $self, 2 );
+				
+			$self->{ af }->redirect( $self->{ token } );
+		}
+	}
 		
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -901,7 +912,8 @@ sub online_app
 	$tvars->{ order_num } = $order_num if $order_num;
 	$tvars->{ online_status } = $online_status if $online_status;
 	
-	$tvars->{ confirm } = 1 if $confirm;
+	$tvars->{ start_confirm } = 1 if $start_confirm;
+	$tvars->{ end_confirm } = 1 if $end_confirm;
 	$tvars->{ consular } = 1 if $consular;
 	$tvars->{ service } = 1 if $service;
 	$tvars->{ sms } = 1 if $sms;
@@ -971,7 +983,7 @@ sub calc_concil
 	
 	for ( @$concil ) {
 	
-		$concil_free = 0 unless $_->{ ConcilOnlinePay } == 2;
+		$concil_free = 0 unless $_->{ ConcilOnlinePay } == 6;
 	}
 		
 	return ( $concil_free, $concil );
@@ -991,7 +1003,7 @@ sub create_online_appointment
 	);
 	
 	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE Appointments SET Status = 13, AppDate = now(), CenterID = 1 WHERE ID = ?", {}, $app_id
+		UPDATE Appointments SET Status = 13, AppDate = now(), CenterID = 47 WHERE ID = ?", {}, $app_id
 	);
 	
 	$self->{ af }->query( 'query', __LINE__, "

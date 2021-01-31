@@ -54,7 +54,7 @@
 
 <tr><td colspan="2" align ="justify" id="add_info_block" class="grayborder">
 <span class="add_info_text">
-[% langreq('Всю информацию о необходимых документах и требованиям к ним вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="/documentformsk/dokumenty-na-delovuyu-vizu-2/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Документы на проверку предоставляются в виде отсканированных копий и (или) фотографий. Допустимы к загрузке изображения в форматах JPEG, BMP, PNG, TIFF, а также файлы PDF. Обратите внимание на то, что все загружаемые изображения должны быть читабельны. Максимально допустимый размер загружаемого файла') %] [% content_text.max_size_mb %] [% langreq('МБ') %].<br></span></td></tr>
+[% langreq('Всю необходимую информацию о наборе документов вы можете узнать на ') %] <a target="_blank" class="dotted_link_big" href="/documentformsk/dokumenty-na-delovuyu-vizu-2/">[% langreq('соответствующей странице') %]</a> [% langreq('нашего сайта') %]. [% langreq('Документы на проверку предоставляются в виде отсканированных копий и (или) фотографий. Допустимы к загрузке изображения в форматах JPEG, BMP, PNG, TIFF, а также файлы PDF. Обратите внимание на то, что все загружаемые изображения должны быть читабельны. Максимально допустимый размер загружаемого файла') %] [% content_text.max_size_mb %] [% langreq('МБ') %].<br></span></td></tr>
 
 <tr><td colspan="2">&nbsp;</td></tr>
 
