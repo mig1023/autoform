@@ -2,8 +2,11 @@ package VCS::Site::autosms;
 use strict;
 use utf8;
 
-use Math::Random::Secure qw(irand);
-use Digest::MD5 qw (md5_hex);
+use Math::Random::Secure qw( irand );
+use Digest::MD5 qw( md5_hex );
+use Digest::SHA1 qw( sha1_hex );
+use HTTP::Request::Common;
+use Data::Dumper;
 
 sub new
 # //////////////////////////////////////////////////
@@ -56,8 +59,10 @@ sub get_code_for_sms
 	
 	my $new_code = int( irand( 10000 ) );
 	
+	my $sms_id = sending_sms( $self, $phone, "Vash kod dogovora $new_code" );
+	
 	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE AutoRemote SET SMScode = ? WHERE ID = ?", {}, $new_code, $remote_id
+		UPDATE AutoRemote SET SMScode = ?, SMSmsgID = ? WHERE ID = ?", {}, $new_code, $sms_id, $remote_id
 	);
 
 	return md5_hex( $new_code );
@@ -77,6 +82,37 @@ sub code_from_sms_is_ok
 	);
 	
 	return 1;
+}
+
+sub sending_sms
+# //////////////////////////////////////////////////
+{
+	my ( $self, $phone, $message ) = @_;
+	
+	my $sms = VCS::Site::autodata::get_settings()->{ sms };
+	
+	#my $sms = $config->{ sms };
+
+	my $sms_sign = join( ';', sort ( $sms->{ project },  $sms->{ sender }, $message, $phone ) ) . ';' . $sms->{ key };
+
+	$sms_sign = md5_hex( sha1_hex( $sms_sign ) );
+	
+	my $ua = LWP::UserAgent->new;
+	
+	$ua->agent('Mozilla/4.0 (compatible; MSIE 6.0; X11; Linux i686; en) Opera 7.60');
+	
+	my $request_url = $sms->{ send_url } . '?project=' . $sms->{ project } . '&sender=' . $sms->{ sender } .
+		'&message=' . $message . '&recipients=' . $phone . '&sign=' . $sms_sign;
+
+	my $response = LWP::UserAgent->new( timeout => 30 )->get( $request_url );
+	
+	return 0 unless $response->is_success;
+	
+	return 0 unless $response->content =~ /\"status\"\:\"success\"/;
+	
+	return 0 unless $response->content =~ /\"messages\_id\"\:\[([0-9]+)\]/;
+	
+	return $1;
 }
 
 1;

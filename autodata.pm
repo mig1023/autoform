@@ -47,6 +47,13 @@ sub get_settings
 			},
 		},
 		
+		sms => {
+			send_url => '',
+			project => '', 
+			sender => '',
+			key => '',	
+		},
+		
 		cloud => {	
 			url => '',
 			
