@@ -7,7 +7,6 @@ use VCS::Site::autodata_type_c;
 use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
 use VCS::Site::autodata_type_checkdoc;
-use VCS::Site::autodata_type_remote;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
 use VCS::Site::autopayment;
@@ -160,8 +159,6 @@ sub get_content_rules_hash_opt
 
 	return VCS::Site::autodata_type_checkdoc::get_content_rules_hash() if $service == 2;
 	
-	return VCS::Site::autodata_type_remote::get_content_rules_hash() if $service == 3;
-		
 	return VCS::Site::autodata_type_d::get_content_rules_hash() if $visa_category eq 'D';
 
 	return VCS::Site::autodata_type_c_spb::get_content_rules_hash() if VCS::Site::autodata::this_is_spb_center( $center );
@@ -2370,8 +2367,6 @@ sub get_progressbar_hash_opt
 	
 	return VCS::Site::autodata_type_checkdoc::get_progressline() if $service == 2;
 	
-	return VCS::Site::autodata_type_remote::get_progressline() if $service == 3;
-		
 	return VCS::Site::autodata_type_d::get_progressline() if $visa_category eq 'D';
 	
 	return VCS::Site::autodata_type_c_spb::get_progressline() if VCS::Site::autodata::this_is_spb_center( $center );
