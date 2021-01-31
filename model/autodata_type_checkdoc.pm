@@ -52,25 +52,6 @@ sub get_content_rules_hash
 				special => 'cach_this_value',
 			},
 			{
-				type => 'input',
-				name => 'num_of_person',
-				label => 'Количество заявителей',
-				comment => 'Укажите количество человек, запрашивающих визу',
-				example => '1',
-				check => 'zN',
-				uniq_code => 'onkeyup="update_nearest_date_free_date(1);"',
-				check_logic => [
-					{
-						condition => 'less_than',
-						offset => '40',
-					},
-				],
-				db => {
-					table => 'Appointments',
-					name => 'NCount',
-				},
-			},
-			{
 				type => 'free_line',
 			},
 			{

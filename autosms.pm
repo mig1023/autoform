@@ -57,7 +57,7 @@ sub get_code_for_sms
 	
 	return md5_hex( $sms_code ) if $sms_code;
 	
-	my $new_code = int( irand( 10000 ) );
+	my $new_code = int( irand( 9000 ) ) + 1000;
 	
 	my $sms_id = sending_sms( $self, $phone, "Vash kod dogovora $new_code" );
 	
@@ -91,8 +91,6 @@ sub sending_sms
 	
 	my $sms = VCS::Site::autodata::get_settings()->{ sms };
 	
-	#my $sms = $config->{ sms };
-
 	my $sms_sign = join( ';', sort ( $sms->{ project },  $sms->{ sender }, $message, $phone ) ) . ';' . $sms->{ key };
 
 	$sms_sign = md5_hex( sha1_hex( $sms_sign ) );

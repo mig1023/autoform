@@ -757,6 +757,8 @@ sub online_app
 		$sms_phone = VCS::Site::autosms::get_phone_for_sms( $self );
 		
 		$sms_code = VCS::Site::autosms::get_code_for_sms( $self, $sms_phone );
+		
+		$sms_phone =~ s/(\d)(\d\d\d)(\d\d\d)(\d\d)(\d\d)/$1 ($2) $3-$4-$5/;
 	
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'sms_signed' ) {
 			
