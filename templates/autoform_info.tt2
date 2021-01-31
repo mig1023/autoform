@@ -563,18 +563,18 @@
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 		</td></tr>
 	
-	[% ELSIF confirm == 1 %]
+	[% ELSIF start_confirm == 1 %]
 	
 		<tr><td colspan="2">
 			<div>
 				[% langreq('Вы начинаете удалённую запись. Она состоит из нескольких этапов:') %]<br><br>
 				[% langreq('1. Вы указываете свой <b>полный адрес</b>. Система сообщит вам цену и сроки доставки.') %]<br><br>
-				[% langreq('2. Если цена доставки Вас устраивает, то <b>выбираете дату забора</b> у вас документов и иные необходимые для почтовой службы данные.') %]<br><br>
-				[% langreq('3. Вы <b>оплачиваете доставку</b> на сайте почтовой службы.') %]<br><br>
+				[% langreq('2. Если цена доставки Вас устраивает, то <b>выбираете дату передачи вами документов</b> и иные необходимые для курьерской службы данные.') %]<br><br>
+				[% langreq('3. Вы <b>оплачиваете доставку</b> на сайте курьерской службы.') %]<br><br>
 				[% langreq('4. Вы <b>оплачиваете Консульский сбор</b> на сайте банка и указываете номер квитанции.') %]<br><br>
 				[% langreq('5. Вы <b>оплачиваете Сервисный сбор</b> на сайте банка.') %]<br><br>
 				[% langreq('6. Выбираете и оплачиваете <b>дополнительные услуги</b>.') %]<br><br>
-				[% langreq('7. В выбранный день с вами <b>свяжется почтовая служба</b> и уточнит время забора документов.') %]
+				[% langreq('7. В выбранный день с вами <b>свяжется курьерская служба</b> и уточнит время передачи документов.') %]
 			</div>
 		</td></tr>
 		
@@ -582,6 +582,20 @@
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
 			&nbsp;
 			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Начать удалённую запись') %] &#9655;" onclick="go_button('online_app', 'confirm_app_start');">
+		</td></tr>
+		
+	[% ELSIF end_confirm == 1 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Вы успешно завершил и удалённую запись!') %]<br><br>
+				[% langreq('В увазанную вами дату с вами свяжется представитель курьерской службы для уточнения времини передачи им документов.') %]<br><br>
+				[% langreq('<b>Обратите внимание</b>, что вам необходимо передать курьеру все те докуметы, которые вы предоставляли на проверку.') %]<br><br>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('online_app', 'confirm_app_end');">
 		</td></tr>
 		
 	[% ELSIF sms == 1 %]
@@ -941,8 +955,8 @@
 				}
 			});
 		},
-		deferRequestBy: 2000,
-		minLength: 3,
+		deferRequestBy:5000,
+		minLength:3,
 		select: function( event, ui ) {
 
 			if ((ui.item.room == "") || (ui.item.postalcode == "")) {
