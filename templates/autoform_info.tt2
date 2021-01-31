@@ -732,7 +732,7 @@
 				<table width="100%">
 				<tr>
 					<td rowspan=2 valign=top>[% langreq('Дата передачи документов') %]:</td>
-					<td><input type="text" value="" name="date" id="date" readonly></td>
+					<td><input type="text" value="" name="date" id="date" readonly="readonly"></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('01.01.2021') %]</span></td></tr>
 				</tr><tr>
 					<td rowspan=2 valign=top>[% langreq('ФИО отправителя') %]:</td>
@@ -747,8 +747,8 @@
 					<td><input type="text" id="senderEMail" name="senderEMail" style="width:90%"></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('test@mail.com') %]</span></td></tr>
 				</tr><tr>
-					<td colspan="2"><br>[% langreq('Комментарий к доставке') %]:<br>
-					<input type="text" id="comment" name="comment" style="width:90%"></td>
+					<td rowspan=2 valign=top><br>[% langreq('Комментарий к доставке') %]:</td>
+					<td><input class="optional_field" type="text" id="comment" name="comment" style="width:90%"></td>
 				</tr>
 				</table>
 			</div>
@@ -988,7 +988,7 @@
 			});
 		},
 		deferRequestBy:5000,
-		minLength:3,
+		minLength:5,
 		select: function( event, ui ) {
 
 			if ((ui.item.room == "") || (ui.item.postalcode == "")) {
@@ -1286,9 +1286,6 @@ function mobileScreenCheck() {
 		
 		if ( date_val_check != "" )
 			showErrorTip( date_val_check, 'date' );
-	
-		else if ( $( '#date' ).val() == "" )
-			showErrorTip( "Поле 'Дата передачи документов' должно быть заполнено", 'date' );
 		
 		else if ( $('#date').val().match(/[^0-9\.]/) )
 			showErrorTip( "В поле 'Дата передачи документов' введены недопустимые символы", 'date' );
@@ -1319,9 +1316,16 @@ function mobileScreenCheck() {
 	}
 	
 	function date_check(date) {
-	
+
+		if ( date == "" )
+			return "Поле 'Дата передачи документов' должно быть заполнено";
+
 		var datetime_regex = /(\d\d)\.(\d\d)\.(\d\d\d\d)/;
 		var app_date_arr = datetime_regex.exec(date);
+		
+		if ( ( app_date_arr == null ) || ( app_date_arr.length != 4 ) )
+			return "Поле 'Дата передачи документов' заполнено неверно";
+		
 		var app_date = new Date(app_date_arr[3], app_date_arr[2], app_date_arr[1]);
 		
 		var min_date_arr = datetime_regex.exec('[% start_date %]');
