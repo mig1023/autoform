@@ -463,9 +463,9 @@ sub payment_check
 					{
 						"quantity" 		=> $amount_quantity,
 						"price" 		=> $amount,
-						"tax" 			=> "6",
+						"tax" 			=> "1",
 						"text" 			=> $paymentTypes->{ $type },
-						"paymentMethodType" 	=> "3",
+						"paymentMethodType" 	=> "4",
 						"paymentSubjectType" 	=> "4",
 					},
 				],
@@ -1066,7 +1066,7 @@ sub create_clear_form
 	return if $checkdoc_service <= 1;
 
 	$self->query( 'query', __LINE__, "
-		UPDATE AutoAppointments SET CenterID = 46, NCount = 1 WHERE ID = ?", {}, $app_id
+		UPDATE AutoAppointments SET CenterID = 46 WHERE ID = ?", {}, $app_id
 	);
 	
 	$self->get_app_visa_and_center( 'need_to_recached_data' );
