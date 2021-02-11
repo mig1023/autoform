@@ -20,7 +20,7 @@
 	<style>.ui-datepicker-trigger{ margin-left:4px; }</style>
 [% END %]
 
-[% IF ( title == 9 ) && sms_confirm %]
+[% IF ( title == 9 ) && ( online_status == 8 ) %]
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
 [% END %]
@@ -192,37 +192,41 @@
 
 	<tr><td colspan="3">&nbsp;</td></tr>
 	
-	[% IF map_type == 'geo' %]
-	
-	<tr class="ymap"><td colspan="3"><div id="map" class="yandex_map"></div></td></tr>
-	
-	<tr><td colspan="3">&nbsp;</td></tr>
-
-	<script type="text/javascript">
-	
-		var map;
-
-		function initMap() {
-
-		    map = new google.maps.Map(document.getElementById('map'), {
-			center: {lat: [% map_in_page.0 %], lng: [% map_in_page.1 %]},
-			zoom: 8
-		    });
-		}
-	</script>
-	
-	[% ELSE %]
+	[% IF ( app_info.ServiceType != 3 ) %]
 		
-		<tr class="ymap"><td colspan="3"><iframe width="100%" height="300" style="border-width: 0px; margin: 0px;"
-		[% IF map_in_page.type == 'yandexwidget' %]
-			src="https://yandex.ru/map-widget/v1/-/[% map_in_page.code %]" class="iframe-width-100" allowfullscreen="allowfullscreen">
-		[% ELSIF map_in_page.type == 'yandexconstructor' %]
-			src="https://yandex.ru/map-widget/v1/?um=constructor%[% map_in_page.code %]&amp;lang=ru_RU&amp;scroll=true&amp;source=constructor">
+		[% IF map_type == 'geo' %]
+		
+		<tr class="ymap"><td colspan="3"><div id="map" class="yandex_map"></div></td></tr>
+		
+		<tr><td colspan="3">&nbsp;</td></tr>
+
+		<script type="text/javascript">
+		
+			var map;
+
+			function initMap() {
+
+			    map = new google.maps.Map(document.getElementById('map'), {
+				center: {lat: [% map_in_page.0 %], lng: [% map_in_page.1 %]},
+				zoom: 8
+			    });
+			}
+		</script>
+		
 		[% ELSE %]
-			src="https://google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
+			
+			<tr class="ymap"><td colspan="3"><iframe width="100%" height="300" style="border-width: 0px; margin: 0px;"
+			[% IF map_in_page.type == 'yandexwidget' %]
+				src="https://yandex.ru/map-widget/v1/-/[% map_in_page.code %]" class="iframe-width-100" allowfullscreen="allowfullscreen">
+			[% ELSIF map_in_page.type == 'yandexconstructor' %]
+				src="https://yandex.ru/map-widget/v1/?um=constructor%[% map_in_page.code %]&amp;lang=ru_RU&amp;scroll=true&amp;source=constructor">
+			[% ELSE %]
+				src="https://google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
+			[% END %]
+			</iframe></td></tr>
+		
 		[% END %]
-		</iframe></td></tr>
-	
+		
 	[% END %]
 	
 	<tr><td colspan="3"><br>
@@ -568,95 +572,70 @@
 			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('nothing');">
 		</td></tr>
 	
-	[% ELSIF start_confirm == 1 %]
+	[% ELSIF online_status == 1 %]
 	
 		<tr><td colspan="2">
 			<div>
 				[% langreq('Вы начинаете удалённую запись. Она состоит из нескольких этапов:') %]<br><br>
-				[% langreq('1. Указываете свой <b>полный адрес</b>. Система сообщит цену и сроки доставки.') %]<br><br>
-				[% langreq('2. Если цена доставки устраивает, то <b>выбираете дату передачи документов</b> и иные необходимые для курьерской службы данные.') %]<br><br>
+				[% langreq('1. Указываете свой <b>полный адрес</b>: система сообщит цену и сроки доставки.') %]<br><br>
+				[% langreq('2. <b>Выбираете дату передачи документов</b> и предоставляете иные необходимые для курьерской службы данные.') %]<br><br>
 				[% langreq('3. <b>Оплачиваете доставку</b> на сайте курьерской службы.') %]<br><br>
-				[% langreq('4. <b>Оплачиваете Консульский сбор</b> на сайте банка и указываете номер квитанции.') %]<br><br>
-				[% langreq('5. <b>Оплачиваете Сервисный сбор</b> на сайте банка.') %]<br><br>
+				[% langreq('4. <b>Оплачиваете консульский сбор</b> на сайте банка и указываете номер квитанции.') %]<br><br>
+				[% langreq('5. <b>Оплачиваете сервисный сбор</b> на сайте банка.') %]<br><br>
 				[% langreq('6. Выбираете и оплачиваете <b>дополнительные услуги</b>.') %]<br><br>
-				[% langreq('7. В выбранный день с Вами <b>свяжется курьерская служба</b> и уточнит время передачи документов.') %]
-			</div>
-		</td></tr>
-		
-		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="&#9665; [% langreq('Вернуться') %]" onclick="go_button('online_cancel');">
-			&nbsp;
-			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Начать удалённую запись') %] &#9655;" onclick="go_button('online_app', 'confirm_app_start');">
-		</td></tr>
-		
-	[% ELSIF end_confirm == 1 %]
-	
-		<tr><td colspan="2">
-			<div>
-				[% langreq('Вы успешно завершил и удалённую запись!') %]<br><br>
-				[% langreq('В увазанную вами дату с вами свяжется представитель курьерской службы для уточнения времини передачи им документов.') %]<br><br>
-				[% langreq('<b>Обратите внимание</b>, что вам необходимо передать курьеру все те докуметы, которые вы предоставляли на проверку.') %]<br><br>
-				[% langreq('Каждая анкета заявителя должна быть <b>распечатана и подписана заявителем</b>.') %]
-			</div>
-		</td></tr>
-		
-		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('online_app', 'confirm_app_end');">
-		</td></tr>
-		
-	[% ELSIF sms_confirm == 1 %]
-	
-		<tr><td colspan="2">
-			<div>
-				<div id="agreement" class="oferta"><br>text_of_agreement<br></div><br>	
-			
-				[% langreq('Для подписания договора, мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br><br>
-				[% langreq('Введите присланный код, это будет считаться простой электронной подписью') %]:<br>
-				
-				<input type="text" id="digital_signature" name="digital_signature" style="width:90%"><br><br>
+				[% langreq('7. В выбранный день с Вами <b>свяжется курьерская служба</b> и уточнит время передачи документов.') %]<br><br>
+				[% langreq('<b>Обратите внимание</b>, что воспользоваться услугой можно только в том случае, если вы сдавали биометрию (отпечатки пальцев) за последние 59 месяцев, если вам сдавать их не нужно или вы подеёте на визу категории D.') %]<br><br>
+				[% langreq('Документы проверенные ранее, были проверены <b>по актуальности на день проверки</b>, что не гарантирует их актуальности на день подачи. Вы должны самостоятельно контролировать этот момент. Так же вы обязательно должны проверить, что приложите <b>все документы по описи</b>.') %]
 			</div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" value="&#9665; [% langreq('Отказаться') %]" onclick="go_button('online_cancel');">
 			&nbsp;
-			<input class="small_button" type="button" id="sms_signature" name="sms_signature" value="[% langreq('Подписать договор') %] &#9655;" onclick="sms_sign();">
+			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Начать удалённую запись') %] &#9655;" onclick="go_button('online_app', 'confirm_app_start');">
 		</td></tr>
 		
-		
-	[% ELSIF sms == 1 %]
+	[% ELSIF online_status == 2 %]
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Дополнительная услуга по оповещению') %]<br><br>
-				[% langreq('Вы можете оформить дополнительную услугу СМС-оповещения.') %]<br><br>
-				[% langreq('К оплате') %]: <b>[% sms_price %] [% langreq('руб') %]</b>
+				[% langreq('Ознакомьтесь с договором на оказание услуги:') %]<br><br>
 			</div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="smspay();">
+			<input class="small_button" type="button" value="&#9665; [% langreq('Отказаться') %]" onclick="go_button('online_cancel');">
 			&nbsp;
-			<input class="small_button" type="button" id="skip_sms_pay" name="skip_sms_pay" value="[% langreq('СМС не нужна') %] &#9655;" onclick="smspay('skip');"><br>
+			<input class="small_button" type="button" value="[% langreq('Согласиться') %] &#9655;" onclick="go_button('online_app', 'confirm_agreement');">
 		</td></tr>
 		
-	[% ELSIF service == 1 %]
+	[% ELSIF online_status == 3 %]
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Оплата сервисного сбора.') %]<br><br>
-				[% langreq('Количество заявителей') %]: [% service_count %]<br>
-				[% langreq('Тип визы') %]: [% service_type %]<br>
-				[% langreq('Стоимость') %]: [% service_price %] [% langreq('руб') %]<br><br>
-				[% langreq('К оплате') %]: <b>[% service_fee %] [% langreq('руб') %]</b>
+				[% langreq('Нужна ли вам страховка?') %]<br><br>
 			</div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="servicepay();"><br>
+			<input class="small_button" type="button" value="[% langreq('Страховка уже есть') %] &#9655;" onclick="go_button('online_app', 'confirm_insurance');">
+			&nbsp;
+			<input class="small_button" type="button" value="[% langreq('Нужна страховка') %] &#9655;" onclick="go_button('online_app', 'need_insurance');">
 		</td></tr>
 		
-	[% ELSIF consular == 1 %]
+	[% ELSIF online_status == 4 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Оформление страховка') %]<br><br>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('online_app', 'confirm_insurance');">
+		</td></tr>
+		
+	[% ELSIF online_status == 5 %]
 	
 		<tr><td colspan="2">
 			<div>
@@ -693,23 +672,69 @@
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" id="consular_pay" name="consular_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="concilpay()"><br>
 		</td></tr>
-	
-	[% ELSIF order_num != '' %]
+		
+	[% ELSIF online_status == 6 %]
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Номер вашего заказа') %]: <b>[% order_num %]</b><br><br>
-				[% langreq('Вы будете перенаправлены на страницу компании для оплаты доставки.') %]<br><br>
-				[% langreq('После оплаты вы сможете продолжить оформление удалённой записи.') %]
+				[% langreq('Дополнительная услуга по оповещению') %]<br><br>
+				[% langreq('Вы можете оформить дополнительную услугу СМС-оповещения.') %]<br><br>
+				[% langreq('К оплате') %]: <b>[% sms_price %] [% langreq('руб') %]</b>
 			</div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br><br>
-			<input class="small_button" type="button" value="* [% langreq('подменить номер квитанции') %]" style="background:#FF3333;" onclick="go_button('tmp_debug');">
+			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="smspay();">
+			&nbsp;
+			<input class="small_button" type="button" id="skip_sms_pay" name="skip_sms_pay" value="[% langreq('СМС не нужна') %] &#9655;" onclick="smspay('skip');"><br>
+		</td></tr>
+		
+	[% ELSIF online_status == 7 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Оплата сервисного сбора.') %]<br><br>
+				[% langreq('Количество заявителей') %]: [% service_count %]<br>
+				[% langreq('Тип визы') %]: [% service_type %]<br>
+				[% langreq('Стоимость') %]: [% service_price %] [% langreq('руб') %]<br><br>
+				[% langreq('К оплате') %]: <b>[% service_fee %] [% langreq('руб') %]</b>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="servicepay();"><br>
+		</td></tr>
+		
+	[% ELSIF online_status == 8 %]
+	
+		<tr><td colspan="2">
+			<div>
+				<div id="agreement" class="oferta"><br>text_of_agreement<br></div><br>	
+			
+				[% langreq('Для подписания договора, мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br><br>
+				[% langreq('Введите присланный код, это будет считаться простой электронной подписью') %]:<br>
+				
+				<input type="text" id="digital_signature" name="digital_signature" style="width:90%"><br><br>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="sms_signature" name="sms_signature" value="[% langreq('Подписать договор') %] &#9655;" onclick="sms_sign();">
+		</td></tr>	
+	
+	[% ELSIF online_status == 9 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Скачайте договор на оказание услуги:') %]<br><br>
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('online_app', 'confirm_loaded');">
 		</td></tr>
 
-	[% ELSE %]
+	[% ELSIF online_status == 10 %]
 	
 		<tr><td colspan="2">
 			<div id="selectAddr">
@@ -732,7 +757,7 @@
 				<table width="100%">
 				<tr>
 					<td rowspan=2 valign=top>[% langreq('Дата передачи документов') %]:</td>
-					<td><input type="text" value="" name="date" id="date" readonly="readonly"></td>
+					<td><input type="text" value="" name="date" id="date" style="width:90%" readonly="readonly"></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('01.01.2021') %]</span></td></tr>
 				</tr><tr>
 					<td rowspan=2 valign=top>[% langreq('ФИО отправителя') %]:</td>
@@ -775,7 +800,38 @@
 		
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" id="fox_order" name="fox_order" disabled value="[% langreq('Записаться') %] &#9655;" onclick="online_app();"><br>
+		</td></tr>	
+	
+	[% ELSIF online_status == 11 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Номер вашего заказа') %]: <b>[% order_num %]</b><br><br>
+				[% langreq('Вы будете перенаправлены на страницу компании для оплаты доставки.') %]<br><br>
+				[% langreq('После оплаты вы сможете продолжить оформление удалённой записи.') %]
+			</div>
 		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br><br>
+			<input class="small_button" type="button" value="* [% langreq('подменить номер квитанции') %]" style="background:#FF3333;" onclick="go_button('tmp_debug');">
+		</td></tr>
+		
+	[% ELSIF online_status == 12 %]
+	
+		<tr><td colspan="2">
+			<div>
+				[% langreq('Вы успешно завершил и удалённую запись!') %]<br><br>
+				[% langreq('В увазанную вами дату с вами свяжется представитель курьерской службы для уточнения времини передачи им документов.') %]<br><br>
+				[% langreq('<b>Обратите внимание</b>, что вам необходимо передать курьеру все те докуметы, которые вы предоставляли на проверку. Вы обязательно должны <b>подписать опись</b> документов и <b>вложить опись в пакет документов</b>, который передадите курьеру.') %]<br><br>
+				[% langreq('Каждая анкета заявителя должна быть <b>распечатана и подписана заявителем</b>.') %]
+			</div>
+		</td></tr>
+		
+		<tr><td colspan="2">&nbsp;<br>
+			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Перейти на страницу записи') %] &#9655;" onclick="go_button('online_app', 'confirm_app_end');">
+		</td></tr>
+
 	[% END %]
 
 	<tr><td colspan="2">&nbsp;</td></tr>
@@ -953,7 +1009,7 @@
 
 [% END %]
 
-[% IF ( title == 9 ) && (online_status == 3) %]
+[% IF ( title == 9 ) && ( online_status == 10 ) %]
 
 	$('#date').datepicker({
 		dateFormat: 'dd.mm.yy',
@@ -1098,7 +1154,7 @@
 		var sms_code = CryptoJS.MD5( $('#digital_signature').val() );
 		
 		var sms_check = '[% sms_code %]';
-
+		
 		if ( sms_code == sms_check )
 			go_button('online_app', 'sms_signed');
 		else
