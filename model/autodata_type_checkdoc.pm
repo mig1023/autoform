@@ -28,8 +28,8 @@ sub get_content_rules_hash
 
 
 	return {
-
-		'Начало записи' => [
+		
+		'Начало оформления записи на услугу' => [
 			{
 				page_ord => 100,
 				progress => 1,
@@ -42,17 +42,33 @@ sub get_content_rules_hash
 				name => 'vtype',
 				label => 'Тип визы',
 				comment => 'Выберите тип запрашиваемой визы',
+				example => 'Affari',
 				check => 'zN',
 				db => {
 					table => 'Appointments',
 					name => 'VType',
 				},
 				param => '[visas_from_db_checkdoc]',
-				first_elements => '13',
 				special => 'cach_this_value',
 			},
 			{
-				type => 'free_line',
+				type => 'input',
+				name => 'num_of_person',
+				label => 'Количество заявителей',
+				comment => 'Укажите количество человек, запрашивающих визу',
+				example => '1',
+				check => 'zN',
+				uniq_code => 'onkeyup="update_nearest_date_free_date(1);"',
+				check_logic => [
+					{
+						condition => 'less_than',
+						offset => '40',
+					},
+				],
+				db => {
+					table => 'Appointments',
+					name => 'NCount',
+				},
 			},
 			{
 				type => 'input',
@@ -120,7 +136,7 @@ sub get_content_rules_hash
 				relation => {
 					only_if_visa_changed => {},
 				},
-				page_db_id => 400033,
+				page_db_id => 400002,
 			},
 			{
 				type => 'text',
@@ -134,7 +150,7 @@ sub get_content_rules_hash
 				page_ord => 200,
 				progress => 2,
 				collect_date => 1,
-				page_db_id => 400004,
+				page_db_id => 400003,
 			},
 			{
 				type => 'input',
@@ -193,7 +209,7 @@ sub get_content_rules_hash
 				goto_link => 'back_to_appdata',
 				all_app_in_title => 1,
 				replacer => '[list_of_applicants]',
-				page_db_id => 400003,
+				page_db_id => 400004,
 			},
 		],
 		
@@ -203,7 +219,7 @@ sub get_content_rules_hash
 				progress => 4,
 				all_app_in_title => 1,
 				param => 1,
-				page_db_id => 400006,
+				page_db_id => 400005,
 			},
 			{
 				type => 'free_line',
@@ -625,8 +641,8 @@ sub get_content_rules_hash
 			{
 				type => 'input',
 				name => 'appphone',
-				label => 'Телефон',
-				comment => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				label => 'Мобильный телефон',
+				comment => 'Введите контактный мобильный телефон, с кодом оператора, без пробелов и разделителей',
 				example => '79XXXXXXXXX',
 				check => 'zN',
 				db => {
@@ -644,7 +660,7 @@ sub get_content_rules_hash
 				param => 1,
 				all_app_in_title => 1,
 				ussr_or_rf_first => 1,
-				page_db_id => 400007,
+				page_db_id => 400006,
 			},
 			{
 				type => 'text',
@@ -983,7 +999,7 @@ sub get_content_rules_hash
 					name => 'VisaPurpose',
 				},
 				param => { 
-					1 => 'туризм', 
+					# 1 => 'туризм', 
 					2 => 'деловая',
 					3 => 'учёба',
 					4 => 'официальная',
@@ -1026,7 +1042,7 @@ sub get_content_rules_hash
 						value => 'ALTRE PROFESSIONI',
 					}
 				},
-				page_db_id => 400008,
+				page_db_id => 400007,
 			},
 			{
 				type => 'input',
@@ -1055,7 +1071,7 @@ sub get_content_rules_hash
 						value => '18',
 					}
 				},
-				page_db_id => 400009,
+				page_db_id => 400008,
 			},
 			{
 				type => 'input',
@@ -1151,7 +1167,7 @@ sub get_content_rules_hash
 						value => '6',
 					}
 				},
-				page_db_id => 400010,
+				page_db_id => 400009,
 			},
 			{
 				type => 'input',
@@ -1179,7 +1195,7 @@ sub get_content_rules_hash
 						value => '70',
 					}
 				},
-				page_db_id => 400011,
+				page_db_id => 400010,
 			},
 			{
 				type => 'input',
@@ -1220,7 +1236,7 @@ sub get_content_rules_hash
 						value => '10',
 					}
 				},
-				page_db_id => 400012,
+				page_db_id => 400011,
 			},
 			{
 				type => 'input',
@@ -1243,7 +1259,7 @@ sub get_content_rules_hash
 				all_app_in_title => 1,
 				param => 1,
 				copy_from_other_applicants => 'now',
-				page_db_id => 400013,
+				page_db_id => 400012,
 			},
 			{
 				type => 'text',
@@ -1444,7 +1460,7 @@ sub get_content_rules_hash
 						value => '7',
 					}
 				},
-				page_db_id => 400014,
+				page_db_id => 400013,
 			},
 			{
 				type => 'input',
@@ -1499,7 +1515,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
-				page_db_id => 400016,
+				page_db_id => 400014,
 			},
 			{
 				type => 'input',
@@ -1551,7 +1567,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
-				page_db_id => 400017,
+				page_db_id => 400015,
 			},
 			{
 				type => 'radiolist',
@@ -1587,7 +1603,7 @@ sub get_content_rules_hash
 						value => '7',
 					}
 				},
-				page_db_id => 400018,
+				page_db_id => 400016,
 			},
 			{
 				type => 'input',
@@ -1681,7 +1697,7 @@ sub get_content_rules_hash
 						value => '7',
 					}
 				},
-				page_db_id => 400019,
+				page_db_id => 400017,
 			},
 			{
 				type => 'input',
@@ -1758,7 +1774,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
-				page_db_id => 400020,
+				page_db_id => 400018,
 			},
 			{
 				type => 'input',
@@ -1888,7 +1904,7 @@ sub get_content_rules_hash
 						value => '1, 7, 9',
 					},
 				},
-				page_db_id => 400021,
+				page_db_id => 400019,
 			},
 			{
 				type => 'select',
@@ -2070,7 +2086,7 @@ sub get_content_rules_hash
 				page_ord => 1900,
 				progress => 8,
 				all_app_in_title => 1,
-				page_db_id => 400022,
+				page_db_id => 400020
 			},
 			{
 				type => 'radiolist',
@@ -2101,7 +2117,7 @@ sub get_content_rules_hash
 						value => '2',
 					}
 				},
-				page_db_id => 400023,
+				page_db_id => 400021,
 			},
 			{
 				type => 'input',
@@ -2129,7 +2145,7 @@ sub get_content_rules_hash
 						value => '0',
 					}
 				},
-				page_db_id => 400024,
+				page_db_id => 400022,
 			},
 			{
 				type => 'checklist',
@@ -2163,7 +2179,7 @@ sub get_content_rules_hash
 						value => '1,2',
 					}
 				},
-				page_db_id => 400025,
+				page_db_id => 400023,
 			},
 			{
 				type => 'checklist',
@@ -2196,7 +2212,7 @@ sub get_content_rules_hash
 						value => '1',
 					}
 				},
-				page_db_id => 400026,
+				page_db_id => 400024,
 			},
 			{
 				type => 'input',
@@ -2225,7 +2241,7 @@ sub get_content_rules_hash
 						value => '0',
 					}
 				},
-				page_db_id => 400027,
+				page_db_id => 400025,
 			},
 			{
 				type => 'input',
@@ -2300,7 +2316,7 @@ sub get_content_rules_hash
 				progress => 9,
 				all_app_in_title => 1,
 				replacer => '[doc_uploading]',
-				page_db_id => 400028,
+				page_db_id => 400026,
 			},
 		],
 		
@@ -2310,16 +2326,275 @@ sub get_content_rules_hash
 				progress => 9,
 				all_app_in_title => 1,
 				replacer => '[app_finish]',
-				page_db_id => 400029,
+				page_db_id => 400027,
 			},
 		],
-			
+		
+		'Выберите лицо на которое будет оформлен договор' => [
+			{
+				page_ord => 2700,
+				progress => 9,
+				persons_in_page => 1,
+				page_db_id => 400028,
+			},
+			{
+				type => 'select',
+				name => 'visa_text',
+				label => 'Выберите на кого оформляется',
+				check => 'zN-',
+				db => {
+					table => 'Appointments',
+					name => 'PersonForAgreements',
+					transfer => 'nope',
+				},
+				param => '[persons_in_app]',
+				first_elements => 'default_free',
+			},
+		],
+		
+		'Укажите данные документа, удостоверяющего личность' => [
+			{
+				page_ord => 2800,
+				progress => 10,
+				relation => {
+					only_if_not => {
+						table => 'Appointments',
+						name => 'PersonForAgreements',
+						value => '-1',
+					}
+				},
+				page_db_id => 400029,
+			},
+			{
+				type => 'text',
+				name => 'rupass_text',
+				label => 'Для граждан РФ необходимо указать данные внутреннего паспорта',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'info',
+				name => 'info_rulname',
+				label => 'Фамилия',
+				db => {
+					table => 'AppData',
+					name => 'RLName',
+				},
+			},
+			{
+				type => 'info',
+				name => 'info_rufname',
+				label => 'Имя',
+				db => {
+					table => 'AppData',
+					name => 'RFName',
+				},
+			},
+			{
+				type => 'info',
+				name => 'info_rumname',
+				label => 'Отчество',
+				db => {
+					table => 'AppData',
+					name => 'RMName',
+				},
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'input',
+				name => 'info_passnum',
+				label => '№ паспорта',
+				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				example => '4510ХХХХХХ',
+				check => 'zNW',
+				db => {
+					table => 'AppData',
+					name => 'RPassNum',
+				},
+			},
+			{
+				type => 'input',
+				name => 'info_passdate',
+				label => 'Дата выдачи',
+				comment => 'Введите дату выдачи, указанную в паспорте',
+				example => '31.12.1900',
+				check => $standart_date_check,
+				check_logic => [
+					{
+						condition => 'now_or_earlier',
+					},
+				],
+				db => {
+					table => 'AppData',
+					name => 'RPWhen',
+				},
+				special => 'mask',
+			},
+			{
+				type => 'input',
+				name => 'info_rupasswhere',
+				label => 'Кем выдан',
+				comment => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
+				example => 'ОВД по району Беговой города Москвы',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
+				db => {
+					table => 'AppData',
+					name => 'RPWhere',
+				},
+			},
+			{
+				type => 'input',
+				name => 'info_address',
+				label => 'Адрес регистрации',
+				comment => 'Укажите адрес регистрации',
+				example => 'г.Москва',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
+				db => {
+					table => 'AppData',
+					name => 'RAddress',
+					transfer => 'nope',
+				},
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'info',
+				name => 'info_phone',
+				label => 'Телефон',
+				db => {
+					table => 'AppData',
+					name => 'AppPhone',
+				},
+			},
+		],
+		
+		'Укажите данные доверенного лица' => [
+			{
+				page_ord => 2900,
+				progress => 10,
+				relation => {
+					only_if => {
+						table => 'Appointments',
+						name => 'PersonForAgreements',
+						value => '-1',
+					}
+				},
+				page_db_id => 400030,
+			},
+			{
+				type => 'input',
+				name => 'dovlname',
+				label => 'Фамилия',
+				comment => 'Введите фамилию на русском языке так, как она указана во внутреннем паспорте',
+				example => 'Иванов',
+				check => 'zWЁ\s\-',
+				db => {
+					table => 'Appointments',
+					name => 'LName',
+				},
+			},
+			{
+				type => 'input',
+				name => 'dovfname',
+				label => 'Имя',
+				comment => 'Введите имя на русском языке так, как оно указана во внутреннем паспорте',
+				example => 'Иван',
+				check => 'zWЁ\s\-',
+				db => {
+					table => 'Appointments',
+					name => 'FName',
+				},
+			},
+			{
+				type => 'input',
+				name => 'dovmname',
+				label => 'Отчество',
+				comment => 'Введите отчество на русском языке так, как оно указана во внутреннем паспорте',
+				example => 'Иванович',
+				check => 'zWЁ\s\-',
+				db => {
+					table => 'Appointments',
+					name => 'MName',
+				},
+			},
+			{
+				type => 'input',
+				name => 'dovpassnum',
+				label => '№ паспорта',
+				comment => 'Введите серию и номер паспорта как единый набор цифр без пробелов',
+				example => '4510ХХХХХХ',
+				check => 'zNW',
+				db => {
+					table => 'Appointments',
+					name => 'PassNum',
+				},
+			},
+			{
+				type => 'input',
+				name => 'dovpassdate',
+				label => 'Дата выдачи',
+				comment => 'Введите дату выдачи, указанную в паспорте',
+				example => '31.12.1900',
+				check => $standart_date_check,
+				check_logic => [
+					{
+						condition => 'now_or_earlier',
+					},
+				],
+				db => {
+					table => 'Appointments',
+					name => 'PassDate',
+				},
+				special => 'mask',
+			},
+			{
+				type => 'input',
+				name => 'dovpasswhere',
+				label => 'Кем выдан',
+				comment => 'Укажите полное название выдавшей организации, так, как она указана в паспорте',
+				example => 'ОВД по району Беговой города Москвы',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
+				db => {
+					table => 'Appointments',
+					name => 'PassWhom',
+				},
+			},
+			{
+				type => 'input',
+				name => 'dovaddress',
+				label => 'Адрес',
+				comment => 'Полный адрес, включая индекс',
+				example => '119017, г.Москва',
+				check => 'zWЁN\s\-\_\.\,\;\'\"',
+				db => {
+					table => 'Appointments',
+					name => 'Address',
+				},
+			},
+			{
+				type => 'input',
+				name => 'dovphone',
+				label => 'Телефон',
+				comment => 'Введите контактный телефон, сотовый или городской, с кодом оператора, без пробелов и разделителей',
+				example => '79161234567',
+				check => 'zN',
+				db => {
+					table => 'Appointments',
+					name => 'Phone',
+				},
+			},
+		],
+		
 		'Оферта' => [
 			{
-				page_ord => 2650,
+				page_ord => 3000,
 				progress => 10,
 				param => 1,
-				page_db_id => 400032,
+				page_db_id => 400031,
 			},
 			{
 				type => 'oferta',
@@ -2338,9 +2613,9 @@ sub get_content_rules_hash
 			
 		'Оплата' => [
 			{
-				page_ord => 2700,
+				page_ord => 3100,
 				progress => 10,
-				page_db_id => 400030,
+				page_db_id => 400032,
 			},
 			{
 				type => 'payment',
@@ -2350,9 +2625,9 @@ sub get_content_rules_hash
 				
 		'Заявка на проверку успешно создана!' => [
 			{
-				page_ord => 2800,
+				page_ord => 3200,
 				progress => 11,
-				page_db_id => 400031,
+				page_db_id => 400033,
 			},
 			{
 				type => 'pay_confirm',
