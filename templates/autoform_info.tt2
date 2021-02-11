@@ -464,6 +464,9 @@
 				</td></tr>
 			[% END %]
 		[% END %]
+		[% IF person.value.CheckDocComment != '' %]
+			<tr><td colspan="5">&nbsp;&nbsp;<font color="red">[% person.value.CheckDocComment %]</font></td></tr>
+		[% END %]
 		<tr><td colspan="5">&nbsp;</td></tr>
 	[% END %]
 	</table>

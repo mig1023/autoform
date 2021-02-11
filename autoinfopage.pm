@@ -1462,7 +1462,7 @@ sub get_app_file_list_by_token
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
 		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus,
-		Token, AppData.ConcilOnlinePay
+		Token, AppData.ConcilOnlinePay, AppData.CheckDocComment
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
@@ -1562,7 +1562,8 @@ sub get_app_file_list_by_token
 		else {
 			$doc_list->{ $app->{ ID } } = {};
 			
-			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ } for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay' );
+			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ }
+				for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay', 'CheckDocComment' );
 
 			$doc_list->{ $app->{ ID } }->{ files } = {};
 			
