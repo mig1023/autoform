@@ -737,7 +737,7 @@ sub online_app
 	
 	my $concil = [];
 	
-	my ( $service_fee, $concil_fee, $service_count, $service_price, $sms_price, $sms_phone, $sms_code ) = ( 0, 0, 0, 0, 0, 0, 0 );		
+	my ( $service_fee, $concil_fee, $service_count, $service_price, $sms_price, $sms_phone, $sms_code, $concil_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0 );		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
@@ -778,18 +778,13 @@ sub online_app
 	}
 	elsif ( $online_status == 5 ) {
 		
-		( my $concil_free, $concil ) = $self->calc_concil();
+		( $concil_free, $concil ) = $self->calc_concil();
 		
 		$service_type = $self->{ af }->get_payment_price( "vtype_only" );
-		
-		if ( $concil_free ) {
-			
-			set_remote_status( $self, 6 );
-				
-			$self->{ af }->redirect( $self->{ token } );
-		}
 	
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'consular_pay' ) {
+			
+			return online_status_change( $self, 6 ) if $concil_free;
 			
 			my $consular_number = offline_check_consular( $self );
 			
@@ -948,6 +943,7 @@ sub online_app
 	$tvars->{ service_price } = $service_price if $service_price;
 	$tvars->{ service_fee } = $service_fee if $service_fee;
 	$tvars->{ concil_fee } = $concil_fee if $concil_fee;
+	$tvars->{ concil_free } = $concil_free if $concil_free;
 	$tvars->{ service_type } = $service_type if $service_type;
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
