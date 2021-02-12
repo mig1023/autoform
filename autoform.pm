@@ -532,6 +532,23 @@ sub get_payment_price
 					
 		return ( $sms_price, $app_id );
 	}
+	elsif ( $type eq "concil" ) {
+		
+		my $concil_types = VCS::Site::autodata::get_concil_types();
+		
+		my $concils = $self->query( 'selallkeys', __LINE__, "
+			SELECT ConcilOnlinePay FROM AppData
+			JOIN AutoToken ON AppData.AppID = AutoToken.CreatedApp
+			WHERE AutoToken.Token = ? AND AppData.Status != 2",
+			$self->{ token }
+		);
+		
+		my $concil = 0;
+		
+		$concil += $concil_types->{ $_->{ ConcilOnlinePay } } for @$concils;
+		
+		return ( $concil, undef );
+	}
 	elsif ( $type eq "service" ) {
 					
 		my $payment_price = $self->query( 'sel1', __LINE__, "

@@ -737,7 +737,7 @@ sub online_app
 	
 	my $concil = [];
 	
-	my ( $service_fee, $service_count, $service_price, $sms_price, $sms_phone, $sms_code ) = ( 0, 0, 0, 0, 0, 0 );		
+	my ( $service_fee, $concil_fee, $service_count, $service_price, $sms_price, $sms_phone, $sms_code ) = ( 0, 0, 0, 0, 0, 0, 0 );		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
@@ -750,7 +750,10 @@ sub online_app
 	if ( $online_status == 1 ) {
 		
 		( $sms_price, undef ) = $self->{ af }->get_payment_price( "sms" );
+		
 		( $service_fee, undef ) = $self->{ af }->get_payment_price( "service" );
+		
+		( $concil_fee, undef ) = $self->{ af }->get_payment_price( "concil" );
 	
 		return online_status_change( $self, 2 )
 			if $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_start';
@@ -944,6 +947,7 @@ sub online_app
 	$tvars->{ sms_code } = $sms_code if $sms_code;
 	$tvars->{ service_price } = $service_price if $service_price;
 	$tvars->{ service_fee } = $service_fee if $service_fee;
+	$tvars->{ concil_fee } = $concil_fee if $concil_fee;
 	$tvars->{ service_type } = $service_type if $service_type;
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
@@ -995,6 +999,8 @@ sub calc_concil
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+	
+	my $concil_types = VCS::Site::autodata::get_concil_types();
 
 	my $concil = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.FName, AppData.LName, ConcilOnlinePay FROM AppData
@@ -1007,8 +1013,16 @@ sub calc_concil
 	my $persons = [];
 	
 	for ( @$concil ) {
-	
+		
 		$concil_free = 0 unless $_->{ ConcilOnlinePay } == 6;
+		
+		if ( $_->{ ConcilOnlinePay } > 0 ) {
+			
+			$_->{ ConcilOnlinePay } = $concil_types->{ $_->{ ConcilOnlinePay } } . $self->{ af }->lang( " евро" );
+		}
+		else {
+			$_->{ ConcilOnlinePay } = $self->{ af }->lang( "не должен платить сбор" );
+		}
 	}
 		
 	return ( $concil_free, $concil );
