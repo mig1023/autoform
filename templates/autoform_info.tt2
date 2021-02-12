@@ -609,6 +609,7 @@
 			<div>
 				[% langreq('Пожалуйста, внимательно ознакомьтесь с договором на оказание услуги:') %]<br><br>
 			</div>
+			<div id="agreement_text" class="oferta"><br>agreement_text<br></div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
@@ -634,9 +635,7 @@
 	[% ELSIF online_status == 4 %]
 	
 		<tr><td colspan="2">
-			<div>
-				[% langreq('Оформление страховки') %]<br><br>
-			</div>
+			[% INCLUDE insurance_form.tt2 %]
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
@@ -654,10 +653,11 @@
 					[% person.FName %] [% person.LName %] - <b>[% person.ConcilOnlinePay %]</b><br>
 				[% END %]
 				<br>
-				[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br><br>
-				[% langreq('После оплаты укажите в поле номер своей квитанции:') %]<br>
 				
-				<input type="text" id="concil_number" name="concil_number" style="width:90%"><br><br>
+			[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br><br>
+                	[% langreq('После оплаты укажите в поле номер своей квитанции:') %]<br>
+                
+                	<input type="text" id="concil_number" name="concil_number" style="width:90%"><br><br>
 			</div>
 		</td></tr>
 		
@@ -1138,7 +1138,7 @@
 		else if ( $('#concil_number').val().match(/^202\d[^\d]?\d{8}$/) )
 			go_button('online_app', 'consular_pay');
 		else	
-			showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number' );	
+			showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number' );
 	}
 	
 	function sms_sign() {
