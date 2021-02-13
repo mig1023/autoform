@@ -706,11 +706,19 @@ sub offline_check_consular
 	my $self = shift;
 	
 	my $consular = $self->{ vars }->getparam( "concil_data" ) || "";
-		
+	
+	( undef, undef, my $concil ) = $self->calc_concil();
+	
+	my $concils = {};
+	
+	$concils->{ $_->{ ID } } = $_->{ ConcilPayCode } for @$concil;
+	
 	my @consulars = split( /\|/, $consular );
 	
-	for( @consulars ) {
-		
+	my $codes = {};
+	
+	for ( @consulars ) {
+
 		my @id_and_number = split( /:/, $_ );
 		
 		my $number = $id_and_number[1];
@@ -722,6 +730,17 @@ sub offline_check_consular
 		return undef unless length( $number ) == 12;
 		
 		return undef unless $number =~ /^202/;
+		
+		$codes->{ $id_and_number[0] } = $number;
+	}
+
+	for ( keys %$concils ) {
+
+		next if $concils->{ $_ } == 6;
+
+		next if $codes->{ $_ };
+
+		return undef;
 	}
 	
 	$consular =~ s/[^0-9\:\|]//g;
@@ -749,7 +768,8 @@ sub online_app
 	
 	my $concil = [];
 	
-	my ( $service_fee, $concil_fee, $service_count, $service_price, $sms_price, $sms_phone, $sms_code, $concil_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0 );		
+	my ( $service_fee, $concil_fee, $service_count, $service_price, $sms_price, $sms_phone,
+		$sms_code, $concil_free, $concil_full_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
 	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
 
@@ -790,13 +810,13 @@ sub online_app
 	}
 	elsif ( $online_status == 5 ) {
 		
-		( $concil_free, $concil ) = $self->calc_concil();
+		( $concil_free, $concil_full_free, $concil ) = $self->calc_concil();
 		
 		$service_type = $self->{ af }->get_payment_price( "vtype_only" );
 	
-		if ( $self->{ vars }->getparam( 'appdata' ) eq 'consular_pay' ) {
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'consular_pay' ) {		
 			
-			return online_status_change( $self, 6 ) if $concil_free;
+			return online_status_change( $self, 6 ) if $concil_full_free;
 			
 			my $consular_number = offline_check_consular( $self );
 			
@@ -960,7 +980,9 @@ sub online_app
 	$tvars->{ service_fee } = $service_fee if $service_fee;
 	$tvars->{ concil_fee } = $concil_fee if $concil_fee;
 	$tvars->{ concil_free } = $concil_free if $concil_free;
+	$tvars->{ concil_full_free } = $concil_full_free if $concil_full_free;
 	$tvars->{ service_type } = $service_type if $service_type;
+
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
 	$tvars->{ concil } = $concil if $concil;
@@ -1021,12 +1043,14 @@ sub calc_concil
 		WHERE Token = ?", $self->{ token }
 	);
 	
-	my $concil_free = 1;
+	my $concil_free = 0;
+	my $concil_full_free = 1;
 	my $persons = [];
 	
 	for ( @$concil ) {
 
-		$concil_free = 0 unless $_->{ ConcilOnlinePay } == 6;
+		$concil_full_free = 0 unless $_->{ ConcilOnlinePay } == 6;
+		$concil_free = 1 if $_->{ ConcilOnlinePay } == 6;
 		
 		$_->{ ConcilPayCode } = $_->{ ConcilOnlinePay };
 		
@@ -1038,8 +1062,8 @@ sub calc_concil
 			$_->{ ConcilOnlinePay } = $self->{ af }->lang( "не должен платить сбор" );
 		}
 	}
-		
-	return ( $concil_free, $concil );
+
+	return ( $concil_free, $concil_full_free, $concil );
 }
 
 sub create_online_appointment
