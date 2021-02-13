@@ -173,7 +173,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-
+	
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -705,15 +705,27 @@ sub offline_check_consular
 {
 	my $self = shift;
 	
-	my $consular = $self->{ vars }->getparam( "concil_number" ) || "";
+	my $consular = $self->{ vars }->getparam( "concil_data" ) || "";
+		
+	my @consulars = split( /\|/, $consular );
 	
-	$consular =~ s/[^0-9]//g;
+	for( @consulars ) {
+		
+		my @id_and_number = split( /:/, $_ );
+		
+		my $number = $id_and_number[1];
+		
+		$number =~ s/[^0-9]//g;
+		
+		return undef unless $number;
+		
+		return undef unless length( $number ) == 12;
+		
+		return undef unless $number =~ /^202/;
+	}
 	
-	return undef unless $consular;
-	
-	return undef unless length( $consular ) == 12;
-	
-	return undef unless $consular =~ /^202/;
+	$consular =~ s/[^0-9\:\|]//g;
+	$consular =~ s/\|$//;
 	
 	return $consular;
 }
@@ -1003,7 +1015,7 @@ sub calc_concil
 	my $concil_types = VCS::Site::autodata::get_concil_types();
 
 	my $concil = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppData.FName, AppData.LName, ConcilOnlinePay FROM AppData
+		SELECT AppData.ID, AppData.FName, AppData.LName, ConcilOnlinePay FROM AppData
 		JOIN Appointments ON AppData.AppID = Appointments.ID
 		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
 		WHERE Token = ?", $self->{ token }
@@ -1013,10 +1025,12 @@ sub calc_concil
 	my $persons = [];
 	
 	for ( @$concil ) {
-		
+
 		$concil_free = 0 unless $_->{ ConcilOnlinePay } == 6;
 		
-		if ( $_->{ ConcilOnlinePay } > 0 ) {
+		$_->{ ConcilPayCode } = $_->{ ConcilOnlinePay };
+		
+		if ( ( $_->{ ConcilOnlinePay } > 0 ) and ( $_->{ ConcilOnlinePay } != 6 ) ) {
 			
 			$_->{ ConcilOnlinePay } = $concil_types->{ $_->{ ConcilOnlinePay } } . $self->{ af }->lang( " евро" );
 		}
