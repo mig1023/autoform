@@ -908,11 +908,14 @@ sub online_app
 			if $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_end';
 	}
 		
+	my $progress = $self->{ af }->get_progressbar( $online_status, VCS::Site::autodata::get_remote_progressline() );
+		
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> 9,
+		'progress'	=> $progress,
 		'token' 	=> $self->{ token },
 		'concil_url'	=> $self->{ autoform }->{ concil }->{ payment },
 		'addr_url'	=> $self->{ autoform }->{ fox }->{ addr },
