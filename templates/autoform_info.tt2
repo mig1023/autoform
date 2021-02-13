@@ -660,29 +660,35 @@
 					[% langreq('Оплаченную квитанцию консульского сбора <b>нельзя обменять или вернуть</b>, поэтому будьте, пожалуйста, особенно внимательны в вопросе их покупки.') %]<br>
 				</span><br>
 				
-				[% langreq('Тип визы') %]: [% service_type %]<br><br>
-				[% FOREACH person IN concil %]
-					[% person.FName %] [% person.LName %] - <b>[% person.ConcilOnlinePay %]</b><br>
-				[% END %]
-				<br>
-				
-				[% IF concil_free %]
-					<input type="checkbox" value="1" name="concil_free_warning" id="concil_free_warning">
-					&nbsp;<label for="concil_free_warning">[% langreq('Я осведомлён, что Консульство может потребовать оплатить Консульский сбор в том или ином объёме.') %]</label><br><br>
-				[% ELSE %]
-					[% langreq('Для оплаты нажмите кнопку "Оплатить" и следуйте инструкциям на сайте банка.') %]<br><br>
+								
+				[% IF ( concil_full_free != 0 ) %]
+					[% langreq('Для оплаты <b>нажмите кнопку "Оплатить"</b> и следуйте инструкциям на сайте банка.') %]<br><br>
 					[% langreq('После оплаты укажите в поле номер квитанции для каждого заявителя.') %]<br>
 					<span class="ltl_text">
 						[% langreq('Если одна квитанция покрывает сбор для нескольких заявителей, то укажите для одинаковый номер.') %]
 					</span><br><br>
 					
-					<input type="hidden" name="concil_data" id="concil_data">
-					<table width="100%">
-					[% FOREACH person IN concil %]
-						<tr><td>[% person.FName %] [% person.LName %]:</td><td><input type="text" id="concil_number_[% person.ID %]" name="concil_number_[% person.ID %]" style="width:90%" [% IF (person.ConcilPayCode == 6) %]disabled[% END %]></td></tr>
+				[% END %]
+				
+				<input type="hidden" name="concil_data" id="concil_data">
+				<table width="100%">
+				[% FOREACH person IN concil %]
+					<tr><td>[% person.FName %] [% person.LName %]</td>
+					[% IF (person.ConcilPayCode == 6) %]
+						<td>[% person.ConcilOnlinePay %]</td>
+						<td>&nbsp;</td>
+					[% ELSE %]
+						<td>[% person.ConcilOnlinePay %]</td>
+						<td><input type="text" id="concil_number_[% person.ID %]" name="concil_number_[% person.ID %]" style="width:90%"></td>
 					[% END %]
-					</table><br>
-				[% END %]	
+					</tr>
+				[% END %]
+				</table><br>
+			
+				<span class="files_uploaded">
+					<input type="checkbox" value="1" name="concil_free_warning" id="concil_free_warning">
+					&nbsp;<label for="concil_free_warning">[% langreq('я осведомлён, что Консульство по своему усмотрению может потребовать оплатить/доплатить Консульский сбор в том или ином объёме, в т.ч. за заявителей которые по общим правилам не должны были платить сбор.') %]</label><br><br>
+				</span>
 			</div>
 		</td></tr>
 		
@@ -1171,41 +1177,42 @@
 
 	function concilpay() {
 
-		[% IF concil_free %]
-			if ( $( '#concil_free_warning' ).prop( 'checked' ) )
-				showErrorTip( "Вы должны подтвердить своё ознакомление с условиями", 'concil_free_warning' );
-			else
-				go_button( 'online_app', 'consular_pay' );
-		[% ELSE %]
+		[% IF ( concil_full_free == 0 ) %]
 		
 			var concils = '';
 			var concils_ok = 1;
 		
-			$( 'input[name^=concil_number_]' ).each( function() {
+			[% FOREACH person IN concil %]
 			
-				var concil_id = this.name.split('_')[2];
-				
-				if ( this.value == "" ) {
-					window.open( '[% concil_url %]' );
-					concils_ok = 0;
-					return false;
-				}
-				else if ( this.value.match( /^202\d[^\d]?\d{8}$/ ) )
-					concils += concil_id + ':' + this.value + '|';
-				else {
-					showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", this.name );
-					concils_ok = 0;
-					return false;
-				}
+				[% IF ( person.ConcilPayCode != 6 ) %]
+			
+					var concil = $( '#concil_number_[% person.ID %]' ).val()
+
+					if ( concil == "" ) {
+						window.open( '[% concil_url %]' );
+						return;
+					}
+					else if ( concil.match( /^202\d[^\d]?\d{8}$/ ) )
+						concils += '[% person.ID %]:' + concil + '|';
+					else {
+						showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number_[% person.ID %]' );
+						return false;
+					}
 					
-			} );
-		
-			if ( concils_ok ) {
-				$( '#concil_data' ).val( concils );
-				go_button( 'online_app', 'consular_pay' );
-			}
-		
+				[% END %]
+			[% END %]
+			
+			$( '#concil_data' ).val( concils );
 		[% END %]
+			
+		if ( !$( '#concil_free_warning' ).prop( 'checked' ) ) {
+			showErrorTip( "Вы должны подтвердить своё ознакомление с условиями", 'concil_free_warning' );
+			return;
+		}
+	
+		go_button( 'online_app', 'consular_pay' );
+		
+		
 	}
 	
 	function sms_sign() {
