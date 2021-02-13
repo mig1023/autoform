@@ -673,13 +673,13 @@
 				<input type="hidden" name="concil_data" id="concil_data">
 				<table width="100%">
 				[% FOREACH person IN concil %]
-					<tr><td>[% person.FName %] [% person.LName %]</td>
+					<tr><td valign="top">[% person.FName %] [% person.LName %]</td>
 					[% IF (person.ConcilPayCode == 6) %]
-						<td>[% person.ConcilOnlinePay %]</td>
+						<td valign="top">[% person.ConcilOnlinePay %]</td>
 						<td>&nbsp;</td>
 					[% ELSE %]
-						<td>[% person.ConcilOnlinePay %]</td>
-						<td><input type="text" id="concil_number_[% person.ID %]" name="concil_number_[% person.ID %]" style="width:90%"></td>
+						<td valign="top">[% person.ConcilOnlinePay %]</td>
+						<td valign="top"><input type="text" id="concil_number_[% person.ID %]" name="concil_number_[% person.ID %]" style="width:90%"><br><span class="exam_span_gen">[% langreq('пример: 1234/12345678') %]</span></td>
 					[% END %]
 					</tr>
 				[% END %]
@@ -700,8 +700,11 @@
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Дополнительная услуга по оповещению') %]<br><br>
-				[% langreq('Вы можете оформить дополнительную услугу СМС-оповещения.') %]<br><br>
+				
+				[% langreq('Вы можете оформить дополнительную услугу SMS-оповещения.') %]<br><br>
+				<span class="ltl_text">
+					[% langreq('SMS оповестит вас о том, когда Ваши документы будут получены нами из Консульства и готовы для получения Вами или передачи курьеру для отправки Вам.') %]<br><br>
+				</span>
 				[% langreq('К оплате') %]: <b>[% sms_price %] [% langreq('руб') %]</b>
 			</div>
 		</td></tr>
@@ -709,14 +712,14 @@
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" id="sms_pay" name="sms_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="smspay();">
 			&nbsp;
-			<input class="small_button" type="button" id="skip_sms_pay" name="skip_sms_pay" value="[% langreq('СМС не нужна') %] &#9655;" onclick="smspay('skip');"><br>
+			<input class="small_button" type="button" id="skip_sms_pay" name="skip_sms_pay" value="[% langreq('SMS не нужна') %] &#9655;" onclick="smspay('skip');"><br>
 		</td></tr>
 		
 	[% ELSIF online_status == 7 %]
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Оплата сервисного сбора.') %]<br><br>
+				[% langreq('Оплата сервисного сбор') %]<br><br>
 				
 				<span class="ltl_text">
 					[% langreq('Вы оплачиваете сервисный сбор <b>на сайте банка-партнёра</b>.') %]<br>
@@ -1177,33 +1180,31 @@
 
 	function concilpay() {
 
-		[% IF ( concil_full_free == 0 ) %]
+		var concils = '';
+		var concils_ok = 1;
+	
+		[% FOREACH person IN concil %]
 		
-			var concils = '';
-			var concils_ok = 1;
+			[% IF ( person.ConcilPayCode != 6 ) %]
 		
-			[% FOREACH person IN concil %]
-			
-				[% IF ( person.ConcilPayCode != 6 ) %]
-			
-					var concil = $( '#concil_number_[% person.ID %]' ).val()
+				var concil = $( '#concil_number_[% person.ID %]' ).val()
 
-					if ( concil == "" ) {
-						window.open( '[% concil_url %]' );
-						return;
-					}
-					else if ( concil.match( /^202\d[^\d]?\d{8}$/ ) )
-						concils += '[% person.ID %]:' + concil + '|';
-					else {
-						showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number_[% person.ID %]' );
-						return false;
-					}
-					
-				[% END %]
+				if ( concil == "" ) {
+					window.open( '[% concil_url %]' );
+					return;
+				}
+				else if ( concil.match( /^202\d[^\d]?\d{8}$/ ) )
+					concils += '[% person.ID %]:' + concil + '|';
+				else {
+					showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number_[% person.ID %]' );
+					return false;
+				}
+				
 			[% END %]
-			
-			$( '#concil_data' ).val( concils );
 		[% END %]
+		
+		$( '#concil_data' ).val( concils );
+
 			
 		if ( !$( '#concil_free_warning' ).prop( 'checked' ) ) {
 			showErrorTip( "Вы должны подтвердить своё ознакомление с условиями", 'concil_free_warning' );
