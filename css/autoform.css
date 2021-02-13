@@ -141,6 +141,16 @@
 	height:40px;
 	margin-bottom:2px
 }
+
+.button_spacer{
+	margin-top:8px;
+}
+
+.finish_text_spacer{
+	margin-bottom:0px;
+	margin-top:8px;
+}
+
 .small_button{
 	height:25px;
 }
