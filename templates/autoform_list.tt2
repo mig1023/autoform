@@ -44,36 +44,57 @@
 <tr><td class="left" colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
 
 [% IF content_text.0.ID == "X" %]
-	<tr><td class="left" colspan="5" id = "applist">
-	[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
-	[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Следующий заявитель"</b>') %]!<br><br>
-	[% langreq('После заполнения данных первого заявителя, Вы сможете добавить данные остальных заявителей') %].<br><br>
-	[% langreq('Обратите внимание, что необходимо внести данные всех заявителей, которым необходима проверка документов. На каждого из них будет автоматически сформирована анкета') %].<br><br>
-	[% langreq('На указанную Вами электронную почту будет отправлено письмо с результатами онлайн проверки документов. Если вы не получили его в течение часа, проверьте папку нежелательные сообщения (спам)') %].<br><br>
-	</td></tr>
+	[% IF service_type == 2 %]
+		<tr><td class="left" colspan="5" id = "applist">
+		[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
+		[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Следующий заявитель"</b>') %]!<br><br>
+		<span class="ltl_text">
+			[% langreq('После заполнения данных первого заявителя, Вы сможете добавить данные остальных заявителей') %].<br><br>
+			[% langreq('<b>Обратите внимание</b>, что необходимо внести данные <b><u>всех</u></b> заявителей, которым необходима проверка документов. На каждого из них будет автоматически сформирована анкета') %].<br><br>
+			[% langreq('На указанную Вами электронную почту будет отправлено письмо <b>с результатами онлайн проверки документов</b>') %].<br><br>
+			[% langreq('Если вы не получили его в течение часа, проверьте папку нежелательные сообщения (спам)') %].
+		</span><br><br>
+		</td></tr>
+	[% ELSE %]
+		<tr><td class="left" colspan="5" id = "applist">
+			[% langreq('Вы ещё не зарегистрировали ни одного заявителя в данной записи') %].<br>
+			[% langreq('Сделайте это прямо сейчас, нажав на кнопку <b>"Следующий заявитель"</b>') %]!<br><br>
+			[% langreq('После заполнения данных первого заявителя, Вы сможете добавить последующих. <b>Обратите внимание</b>, что необходимо внести <b><u>всех</u></b> заявителей, которым необходима виза') %].<br>
+		</td></tr>
+	[% END %]
 [% ELSE %]
 	[% SET i = 0 %][% FOREACH person IN content_text %][% SET i = i + 1 %]
-	<tr>
-	<td class="left" >[% i %].</td>
-	<td class="left" [% IF i == 1 %]id = "applist"[% END %] width="90%">
-	[% IF person.Finished == 4 %]<b>[[% langreq('черновик') %]]</b>
-	[% ELSIF person.Finished == 19 %]<b>[[% langreq('тип визы') %]]</b>
-	[% ELSIF person.Finished == 22 %]<b>[[% langreq('в.центр') %]]</b>
-	[% END %]
-	[% IF (person.FName != '') || (person.LName != '') %]
-	[% person.FName %] [% person.LName %]
-	[% ELSE %]
-	([% langreq('ФИО пока не указано') %])
-	[% END %]</td>
-	<td>[% IF person.BirthDate != '00.00.0000' %][% person.BirthDate %][% ELSE %]&nbsp;[% END %]</td>
-	<td class="left" >
-	<input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
-	<td class="left" >
-	<input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
-	</tr>
+		<tr>
+		<td class="left" >[% i %].</td>
+		<td class="left" [% IF i == 1 %]id = "applist"[% END %] width="90%">
+		[% IF person.Finished == 4 %]<b>[[% langreq('черновик') %]]</b>
+		[% ELSIF person.Finished == 19 %]<b>[[% langreq('тип визы') %]]</b>
+		[% ELSIF person.Finished == 22 %]<b>[[% langreq('в.центр') %]]</b>
+		[% END %]
+		[% IF (person.FName != '') || (person.LName != '') %]
+			[% person.FName %] [% person.LName %]
+		[% ELSE %]
+			([% langreq('ФИО пока не указано') %])
+		[% END %]</td>
+		<td>[% IF person.BirthDate != '00.00.0000' %][% person.BirthDate %][% ELSE %]&nbsp;[% END %]</td>
+		<td class="left" >
+		<input class="edit_input small_button" type="button" value="[% langreq('Редактировать') %]" onclick="edit_button([% person.ID %]);"></td>
+		<td class="left" >
+		<input class="small_button" type="button" value="X" onclick="delapp_button([% person.ID %]);"></td>
+		</tr>
 	[% END %]
 	<tr><td colspan="5">
 		<div style="height:18px; overflow:hidden;">&nbsp;</div>
+	</td></tr>
+[% END %]
+
+[% IF (content_text.0.ID == "X") && (service_type != 2) %]
+	<tr><td class="left" colspan="5"><br>
+	[% langreq('На указанную Вами электронную почту отправлено <b>письмо со ссылкой</b>, перейдя по которой, Вы сможете:') %]<br><br>
+	<span class="ltl_text">
+	[% langreq('1. <b>Продолжить запись</b> в Визовый центр, которую Вы начали не более 14 дней назад.<br><br>2. После завершения записи Вы сможете получать <b>информацию о своей записи, отменить её или перенесети на другое время</b>, распечатать уже заполненную шенгенскую анкету.<br><br>3. После подачи Вы сможете <b>отслеживать статус документов</b>, их отправку в Консульство и готовность к получению.') %]</span>
+	
+	<br><br>[% langreq('Если вы не получили письмо в течение часа, проверьте папку нежелательные сообщения (спам)') %].<br><br>
 	</td></tr>
 [% END %]
 
