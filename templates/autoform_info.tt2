@@ -746,10 +746,17 @@
 			
 				<div id="agreement" class="oferta"><br>text_of_agreement<br></div><br>	
 			
-				[% langreq('Для подписания договора, мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br><br>
-				[% langreq('Введите присланный код, это будет считаться простой электронной подписью') %]:<br>
+				[% langreq('Для подписания договора, мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br>
+				<span class="ltl_text">
+					[% langreq('Когда вы введёте присланный код, договор будет считаться заключённым. Такая подпись считается простой электронной подписью.') %]<br>
+				</span><br>
 				
-				<input type="text" id="digital_signature" name="digital_signature" style="width:90%"><br>
+				<table width="100%">
+					<tr><td valign="top">[% langreq('Введите присланный код') %]:</td>
+					<td><input type="text" id="digital_signature" name="digital_signature" style="width:90%">
+					<br><span class="exam_span_gen">[% langreq('пример: 1234') %]</span>
+					</td></tr>
+				</table>
 			</div>
 		</td></tr>
 		
@@ -775,7 +782,7 @@
 			<div id="selectAddr">
 				[% langreq('Выберите адрес передачи и получения документов') %]:<br>
 				<input type="text" id="fox_addr" style="width:90%"><br>
-				<span class="exam_span_gen">[% langreq('') %]</span>
+				<span class="exam_span_gen">[% langreq('пример: Москва') %]</span>
 			</div>
 			<div id="selectedAddr" style="display:none;font-size:9pt;">
 				[% langreq('Адрес получения и доставки документов') %]:<br>
