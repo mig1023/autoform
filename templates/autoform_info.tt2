@@ -780,13 +780,19 @@
 	
 		<tr><td colspan="2">
 			<div id="selectAddr">
-				[% langreq('Выберите адрес передачи и получения документов') %]:<br>
+				[% langreq('Выбор адреса передачи и получения документов') %]<br><br>
+				
+				<span class="ltl_text">
+					[% langreq('Начните ввод своего адреса и выберите подходящий адрес из предложенных вариантов.') %]<br>
+					[% langreq('Обратите внимание, что нужен <b>полный адрес</b>, обязательно включающий адрес квартиры.') %]<br>
+				</span><br>
+				
 				<input type="text" id="fox_addr" style="width:90%"><br>
 				<span class="exam_span_gen">[% langreq('пример: Москва') %]</span>
 			</div>
-			<div id="selectedAddr" style="display:none;font-size:9pt;">
+			<div id="selectedAddr" style="display:none;">
 				[% langreq('Адрес получения и доставки документов') %]:<br>
-				<span id="selectedAddrText" style="font-weight:bold;"></span>&nbsp;<a href="javascript:changeSelectedAddr()">[% langreq('изменить') %]</a>
+				<span id="selectedAddrText" style="font-weight:bold;font-size:9pt;"></span>&nbsp;<a href="javascript:changeSelectedAddr()">[% langreq('изменить') %]</a>
 			</div>
 			<div id="selectedAddrParams" style="display:none;font-size:9pt;"><br>
 				[% langreq('Стоимость доставки') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
