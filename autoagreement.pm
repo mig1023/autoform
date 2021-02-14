@@ -57,7 +57,7 @@ sub create_online_agreement
 	);
 
 	my $now = $self->{ vars }->get_system->now_date();
-
+	
 	my $agreementNo = $self->{ vars }->admfunc->getAgrNumber( $self->{ vars }, 47, $now );
 	
 	my $rate = $self->{ vars }->admfunc->getRate( $self->{ vars }, 'RUR', $now, 47 );
@@ -69,7 +69,7 @@ sub create_online_agreement
 	my $app = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT FoxAddress, FName, LName, MName, Appointments.VType,
 		Appointments.ID, SMS, Phone, Mobile, PassNum, PassDate, PassWhom,
-		Appointments.Address, FoxID, AutoRemote.BankID
+		Appointments.Address, FoxID, AutoRemote.BankID, AutoToken.EMail
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 		JOIN AutoRemote ON Appointments.ID = AutoRemote.AppID
@@ -77,11 +77,11 @@ sub create_online_agreement
 	)->[0];
 
 	my $dsum = $service_fee + ( $app->{ SMS } ? $sms_price : 0 );
-	
+
 	my $template = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT ID FROM Templates WHERE TDate <= curdate() AND isJur=0 AND CenterID=47 ORDER BY TDate DESC LIMIT 1"
 	);
-
+	
 	$self->{ af }->query( 'query', __LINE__, "
 		INSERT INTO DocPack (
 			LastUpdate, Cur, RateID, Address, FName, LName, MName, DSum, ADate, PDate,
@@ -91,7 +91,7 @@ sub create_online_agreement
 			TShipSum, isNewDHL, ConcilPaymentDate, officeToReceive, ShippingPhone, InsData, NoReceived
 		) VALUES (
 			curdate(), 'RUR', ?, ?, ?, ?, ?, ?, now(), now(),
-			1, ?, ?, 2, 0, ?, ?, 1, ?, ?,
+			2, ?, ?, 2, 0, ?, ?, 1, ?, ?,
 			?, ?, ?, 47, ?, ?, ?, ?, ?, 0,
 			0, 0, 0, 0, 0, ?, ?, 0, 0, ?,
 			0, 0, now(), ?, ?, 0, 0
@@ -104,20 +104,22 @@ sub create_online_agreement
 	);
 
 	my $doc_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
-
+	
 	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 	my $feedback_token = "";
 	$feedback_token .= $alph[ int( irand( 36 ) ) ] for ( 1..24 );
 
-	$self->{ af }->query("
-		INSERT INTO DocPackOptional (DocPackID, ShippingFree, Reject, FeedbackKey) VALUES (?, 0, 0, ?)", {},
-		$doc_id, $feedback_token
+	$self->{ af }->query( 'query', __LINE__, "
+		INSERT INTO DocPackOptional (DocPackID, ShippingFree, Reject, FeedbackKey, SendInfoEmail) VALUES (?, 0, 0, ?, ?)", {},
+		$doc_id, $feedback_token, $app->{ EMail }
 	);
-
-	$self->{ af }->query("
-		INSERT INTO DocComments (DocID, Login, CommentText, CommentDate) VALUES (?, ?, ?, now())",{},
+	my $opt_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		INSERT INTO DocComments (DocID, Login, CommentText, CommentDate) VALUES (?, ?, ?, now())", {},
 		$doc_id, 'remote_script', 'Договор сформирован автоматически системой удалённой подачи; договор был оплачен картой через платёжный шлюз'
 	);
+	my $comm_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
 
 	my @bankids_arr = split( /\|/, $app->{ BankID } );
 
@@ -131,41 +133,44 @@ sub create_online_agreement
 		
 		$bankids->{ $bankid[1] } += 1;
 	}
-
+	
 	for ( keys %$bankids ) {
-
+		
 		my $bank_id = $_;
 		
-		$self->{ af }->query("
+		$self->{ af }->query( 'query', __LINE__, "
 			INSERT INTO DocPackInfo (PackID, BankID, VisaCnt) VALUES (?, ?, ?)",{},
 			$doc_id, $bank_id, $bankids->{ $bank_id }
 		);
 		
 		my $info_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
-
+	
 		for ( keys %$apps ) {
+	
+			next unless $bank_id eq $apps->{ $_ };
 
 			my $ad = $self->{ af }->query( 'selallkeys', __LINE__, "
 				SELECT ID, RFName, RMName, RLName, PassNum, BirthDate, AppSDate
 				FROM AppData WHERE ID = ?", $_
 			)->[0];
-
-			$self->{ af }->query("
+			
+			$self->{ af }->query( 'query', __LINE__, "
 				INSERT INTO DocPackList (
-					PackInfoID, FName, LName, MName, isChild, PassNum, SDate, Login, Status,
-					ApplID, iNRes, Concil, MobileNums, ShipAddress, ShipNum, RTShipSum, FlyDate, ShipPhone, ShipMail,
-					BthDate, AgeCatA
+					PackInfoID, FName, LName, MName, isChild, PassNum, SDate, Login, Status, ApplID,
+					iNRes, Concil, MobileNums, ShipAddress, ShipNum, RTShipSum, FlyDate, ShipPhone, ShipMail, BthDate,
+					AgeCatA
 				) VALUES (
-					?, ?, ?, ?, ?, ?, ?, now(), ?, ?,
+					?, ?, ?, ?, ?, ?, ?, now(), 2, ?,
 					?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-					?, ?
+					?
 				)",{},
-					$info_id, undef, $ad->{ RFName }, $ad->{ RMName }, $ad->{ RLName }, 0, $ad->{ PassNum }, 'remote_script', 1,
-					$ad->{ ID }, 0, 0, undef, undef, undef, undef, $ad->{ AppSDate }, undef, undef,
-					$ad->{ BirthDate }, 0
+					$info_id, $ad->{ RFName }, $ad->{ RMName }, $ad->{ RLName }, 0, $ad->{ PassNum }, 'remote_script', $ad->{ ID },
+					0, 0, ' ', ' ', 0, 0, $ad->{ AppSDate }, 0, 0, $ad->{ BirthDate },
+					0
 			);
 			
 			my $list_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+
 		}
 	}
 
