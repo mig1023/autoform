@@ -45,7 +45,7 @@ sub create_online_agreement
 {
 	my $self = shift;
 	
-	$self->query( 'query', __LINE__, "
+	$self->{ af }->query( 'query', __LINE__, "
 		LOCK TABLES
 			DocHistory WRITE, BlackList WRITE, PriceRate WRITE, PriceList WRITE,
 			ServicesPriceRates WRITE, DocPack WRITE, DocPackInfo WRITE, DocPackList WRITE,
@@ -53,21 +53,19 @@ sub create_online_agreement
 			ServiceFieldValuesINT WRITE, ServiceFieldValuesFLOAT WRITE, ServiceFieldValuesDATE WRITE,
 			ServiceFieldValuesVARCHAR WRITE, DocPackService WRITE, UserLog WRITE, Templates WRITE,
 			Appointments WRITE, AppData WRITE, CurRates WRITE, DocRequest WRITE, VisaTypes WRITE,
-			DocComments WRITE"
+			DocComments WRITE, AutoToken READ, AutoRemote READ"
 	);
-	
+
 	my $now = $self->{ vars }->get_system->now_date();
-	
+
 	my $agreementNo = $self->{ vars }->admfunc->getAgrNumber( $self->{ vars }, 47, $now );
 	
 	my $rate = $self->{ vars }->admfunc->getRate( $self->{ vars }, 'RUR', $now, 47 );
-	
-	( $sms_price, undef ) = $self->{ af }->get_payment_price( "sms" );
-		
-	( $service_fee, undef ) = $self->{ af }->get_payment_price( "service" );
-		
-	my $dsum = $service_fee + ( $sms ? $sms_price : 0 );
-	
+
+	my ( $sms_price, undef ) = $self->{ af }->get_payment_price( "sms" );
+
+	my ( $service_fee, undef ) = $self->{ af }->get_payment_price( "service" );
+
 	my $app = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT FoxAddress, FName, LName, MName, Appointments.VType,
 		Appointments.ID, SMS, Phone, Mobile, PassNum, PassDate, PassWhom,
@@ -77,11 +75,13 @@ sub create_online_agreement
 		JOIN AutoRemote ON Appointments.ID = AutoRemote.AppID
 		WHERE Token = ?", $self->{ token }
 	)->[0];
+
+	my $dsum = $service_fee + ( $app->{ SMS } ? $sms_price : 0 );
 	
 	my $template = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT ID FROM Templates WHERE TDate <= curdate() AND isJur=0 AND CenterID=47 ORDER BY TDate DESC LIMIT 1"
-	)->[0];
-	
+	);
+
 	$self->{ af }->query( 'query', __LINE__, "
 		INSERT INTO DocPack (
 			LastUpdate, Cur, RateID, Address, FName, LName, MName, DSum, ADate, PDate,
@@ -98,13 +98,13 @@ sub create_online_agreement
 		)", {},
 			$rate, $app->{ Address }, $app->{ FName }, $app->{ LName }, $app->{ MName }, $dsum,
 			'remote_script', $agreementNo, $app->{ VType }, $app->{ ID }, $app->{ SMS }, $app->{ Phone },
-			'0000-00-00', 0, $template, $app->{ Mobile }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, $app->{ FoxAddress },
-			$service_fee, $app->{ FoxID }, 0,
+			'0000-00-00', 0, $template, $app->{ Mobile }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, 'ещё нет',
+			$service_fee, 0, 0,
 			0, $app->{ Mobile },
 	);
-	
-	my $doc_id = $vars->db->sel1('SELECT last_insert_id()') || 0;
-	
+
+	my $doc_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+
 	my @alph = split( //, '0123456789abcdefghigklmnopqrstuvwxyz' );
 	my $feedback_token = "";
 	$feedback_token .= $alph[ int( irand( 36 ) ) ] for ( 1..24 );
@@ -113,16 +113,63 @@ sub create_online_agreement
 		INSERT INTO DocPackOptional (DocPackID, ShippingFree, Reject, FeedbackKey) VALUES (?, 0, 0, ?)", {},
 		$doc_id, $feedback_token
 	);
-	
+
 	$self->{ af }->query("
 		INSERT INTO DocComments (DocID, Login, CommentText, CommentDate) VALUES (?, ?, ?, now())",{},
 		$doc_id, 'remote_script', 'Договор сформирован автоматически системой удалённой подачи; договор был оплачен картой через платёжный шлюз'
 	);
-	
-	my @bankids_arr = split( /\|/, $app->{ BankID } );
-	
 
-	$self->query( 'query', __LINE__, "UNLOCK TABLES" );
+	my @bankids_arr = split( /\|/, $app->{ BankID } );
+
+	my ( $apps, $bankids ) = ( {}, {} );
+	
+	for ( @bankids_arr ) {
+		
+		my @bankid = split( /:/, $_ );
+		
+		$apps->{ $bankid[0] } = $bankid[1];
+		
+		$bankids->{ $bankid[1] } += 1;
+	}
+
+	for ( keys %$bankids ) {
+
+		my $bank_id = $_;
+		
+		$self->{ af }->query("
+			INSERT INTO DocPackInfo (PackID, BankID, VisaCnt) VALUES (?, ?, ?)",{},
+			$doc_id, $bank_id, $bankids->{ $bank_id }
+		);
+		
+		my $info_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+
+		for ( keys %$apps ) {
+
+			my $ad = $self->{ af }->query( 'selallkeys', __LINE__, "
+				SELECT ID, RFName, RMName, RLName, PassNum, BirthDate, AppSDate
+				FROM AppData WHERE ID = ?", $_
+			)->[0];
+
+			$self->{ af }->query("
+				INSERT INTO DocPackList (
+					PackInfoID, FName, LName, MName, isChild, PassNum, SDate, Login, Status,
+					ApplID, iNRes, Concil, MobileNums, ShipAddress, ShipNum, RTShipSum, FlyDate, ShipPhone, ShipMail,
+					BthDate, AgeCatA
+				) VALUES (
+					?, ?, ?, ?, ?, ?, ?, now(), ?, ?,
+					?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+					?, ?
+				)",{},
+					$info_id, undef, $ad->{ RFName }, $ad->{ RMName }, $ad->{ RLName }, 0, $ad->{ PassNum }, 'remote_script', 1,
+					$ad->{ ID }, 0, 0, undef, undef, undef, undef, $ad->{ AppSDate }, undef, undef,
+					$ad->{ BirthDate }, 0
+			);
+			
+			my $list_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+		}
+	}
+
+	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
 }
 
 1;
