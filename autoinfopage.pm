@@ -5,6 +5,7 @@ use VCS::Vars;
 use VCS::Site::autodata;
 use VCS::Site::autopayment;
 use VCS::Site::autosms;
+use VCS::Site::autoagreement;
 
 use Data::Dumper;
 use Date::Calc;
@@ -733,13 +734,13 @@ sub offline_check_consular
 		
 		$codes->{ $id_and_number[0] } = $number;
 	}
-
+	
 	for ( keys %$concils ) {
-
+		
 		next if $concils->{ $_ } == 6;
-
+	
 		next if $codes->{ $_ };
-
+		
 		return undef;
 	}
 	
@@ -897,7 +898,9 @@ sub online_app
 			
 			if ( VCS::Site::autosms::code_from_sms_is_ok( $self, $code ) ) {
 			
-				create_online_appointment( $self );
+				VCS::Site::autoagreement::create_online_appointment( $self );
+				
+				VCS::Site::autoagreement::create_online_agreement( $self );
 			
 				return online_status_change( $self, 9 );
 			}
@@ -1064,28 +1067,6 @@ sub calc_concil
 	}
 
 	return ( $concil_free, $concil_full_free, $concil );
-}
-
-sub create_online_appointment
-# //////////////////////////////////////////////////
-{
-	my $self = shift;
-	
-	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
-	);
-
-	$self->{ af }->log(
-		"autoinfo_remote", "удалённая запись после проверки документов", $app_id
-	);
-	
-	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE Appointments SET Status = 13, AppDate = now(), CenterID = 47 WHERE ID = ?", {}, $app_id
-	);
-	
-	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE AutoToken SET ServiceType = 3 WHERE Token = ?", {}, $self->{ token }
-	);
 }
 
 sub online_app_foxstatus
