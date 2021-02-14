@@ -746,7 +746,7 @@
 			
 				<div id="agreement" class="oferta"><br>text_of_agreement<br></div><br>	
 			
-				[% langreq('Для подписания договора, мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br>
+				[% langreq('Мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br>
 				<span class="ltl_text">
 					[% langreq('Когда вы введёте присланный код, договор будет считаться заключённым. Такая подпись считается простой электронной подписью.') %]<br>
 				</span><br>
