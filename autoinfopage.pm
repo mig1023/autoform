@@ -174,7 +174,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-	
+
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -933,6 +933,8 @@ sub online_app
 					$order_num, $address, $remote_id
 				);
 				
+				VCS::Site::autoagreement::update_sending_info( $self, $order_num, $address);
+				
 				return online_status_change( $self, 11 );
 			}
 		}
@@ -940,8 +942,19 @@ sub online_app
 	
 	elsif ( $online_status == 12 ) {
 	
-		return online_status_change( $self, 13 )
-			if $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_end';
+		
+		if ( $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_end' ) {
+			
+			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+			);
+			
+			$self->{ af }->query( 'query', __LINE__, "
+				UPDATE Appointments SET Status = 4 WHERE ID = ?", {}, $app_id
+			);
+		
+			return online_status_change( $self, 13 );
+		}
 	}
 		
 	my $progress = $self->{ af }->get_progressbar( $online_status, VCS::Site::autodata::get_remote_progressline() );
