@@ -39,7 +39,6 @@ sub create_online_appointment
 	);
 }
 
-
 sub create_online_agreement
 # //////////////////////////////////////////////////
 {
@@ -67,9 +66,9 @@ sub create_online_agreement
 	my ( $service_fee, undef ) = $self->{ af }->get_payment_price( "service" );
 
 	my $app = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT FoxAddress, FName, LName, MName, Appointments.VType,
-		Appointments.ID, SMS, Phone, Mobile, PassNum, PassDate, PassWhom,
-		Appointments.Address, FoxID, AutoRemote.BankID, AutoToken.EMail
+		SELECT FoxAddress, FName, LName, MName, Appointments.VType, Appointments.ID,
+		SMS, Phone, Mobile, PassNum, PassDate, PassWhom, Appointments.Address, FoxID,
+		AutoRemote.BankID, AutoToken.EMail, AutoRemote.ID as AutoRemoteID
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 		JOIN AutoRemote ON Appointments.ID = AutoRemote.AppID
@@ -98,7 +97,7 @@ sub create_online_agreement
 		)", {},
 			$rate, $app->{ Address }, $app->{ FName }, $app->{ LName }, $app->{ MName }, $dsum,
 			'remote_script', $agreementNo, $app->{ VType }, $app->{ ID }, $app->{ SMS }, $app->{ Phone },
-			'0000-00-00', 0, $template, $app->{ Mobile }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, 'ещё нет',
+			'0000-00-00', 0, $template, $app->{ Mobile }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, 'адрес ещё не указан',
 			$service_fee, 0, 0,
 			0, $app->{ Mobile },
 	);
@@ -139,7 +138,7 @@ sub create_online_agreement
 		my $bank_id = $_;
 		
 		$self->{ af }->query( 'query', __LINE__, "
-			INSERT INTO DocPackInfo (PackID, BankID, VisaCnt) VALUES (?, ?, ?)",{},
+			INSERT INTO DocPackInfo (PackID, BankID, VisaCnt) VALUES (?, ?, ?)", {},
 			$doc_id, $bank_id, $bankids->{ $bank_id }
 		);
 		
@@ -173,8 +172,30 @@ sub create_online_agreement
 
 		}
 	}
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE AutoRemote SET Agreement = ? WHERE ID = ?", {},
+		$doc_id, $app->{ AutoRemoteID }
+	);
 
 	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
+}
+
+sub update_sending_info
+# //////////////////////////////////////////////////
+{
+	my ( $self, $shipnum, $shipaddr ) = @_;
+	
+	my $doc_id = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT Agreement FROM AutoRemote 
+		JOIN AutoToken ON AutoToken.CreatedApp = AutoRemote.AppID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $app_id = $self->{ af }->query( 'query', __LINE__, "
+		UPDATE DocPack SET ShippingAddress = ?, ShipNum = ? WHERE ID = ?", {},
+		$shipaddr, $shipnum, $doc_id
+	);
 }
 
 1;
