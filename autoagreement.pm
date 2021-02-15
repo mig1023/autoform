@@ -83,23 +83,19 @@ sub create_online_agreement
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		INSERT INTO DocPack (
-			LastUpdate, Cur, RateID, Address, FName, LName, MName, DSum, ADate, PDate,
-			PStatus, Login, AgreementNo, PType, Urgent, VisaType, AppID, Shipping, SMS, Phone,
-			DovDate, DovNum, Template, CenterID, Mobile, PassNum, PassDate, PassWhom, ShippingAddress, XeroxPage,
-			AnketaSrv, PrintSrv, PhotoSrv, VIPSrv, InsSum, ServSum, ShipNum, SkipIns, Translate, PersonalNo,
-			TShipSum, isNewDHL, ConcilPaymentDate, officeToReceive, ShippingPhone, InsData, NoReceived
+			LastUpdate, Cur, RateID, Address, FName, LName, MName, DSum, ADate, PDate, PStatus, Login,
+			AgreementNo, PType, Urgent, VisaType, AppID, Shipping, SMS, Phone, DovDate, DovNum, Template,
+			CenterID, Mobile, PassNum, PassDate, PassWhom, ShippingAddress, XeroxPage, AnketaSrv, PrintSrv,
+			PhotoSrv, VIPSrv, InsSum, ServSum, ShipNum, SkipIns, Translate, PersonalNo, TShipSum, isNewDHL,
+			ConcilPaymentDate, officeToReceive, ShippingPhone, InsData, NoReceived
 		) VALUES (
-			curdate(), 'RUR', ?, ?, ?, ?, ?, ?, now(), now(),
-			2, ?, ?, 2, 0, ?, ?, 1, ?, ?,
-			?, ?, ?, 47, ?, ?, ?, ?, ?, 0,
-			0, 0, 0, 0, 0, ?, ?, 0, 0, ?,
-			0, 0, now(), ?, ?, 0, 0
+			curdate(), 'RUR', ?, ?, ?, ?, ?, ?, now(), now(), 2, ?, ?, 2, 0, ?, ?, 0, ?, ?, ?, ?, ?, 47,
+			?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, ?, ?, 0, 0, '', 0, 0, now(), ?, ?, 0, 0
 		)", {},
-			$rate, $app->{ Address }, $app->{ FName }, $app->{ LName }, $app->{ MName }, $dsum,
-			'remote_script', $agreementNo, $app->{ VType }, $app->{ ID }, $app->{ SMS }, $app->{ Phone },
-			'0000-00-00', 0, $template, $app->{ Mobile }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, 'адрес ещё не указан',
-			$service_fee, 0, 0,
-			0, $app->{ Mobile },
+			$rate, $app->{ Address }, $app->{ FName }, $app->{ LName }, $app->{ MName }, $dsum, 'remote_script',
+			$agreementNo, $app->{ VType }, $app->{ ID }, $app->{ SMS }, $app->{ Phone }, '0000-00-00', 0, $template,
+			$app->{ Mobile }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, 'адрес ещё не указан',
+			$service_fee, 0, 0, 0, $app->{ Mobile },
 	);
 
 	my $doc_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
@@ -155,17 +151,15 @@ sub create_online_agreement
 			
 			$self->{ af }->query( 'query', __LINE__, "
 				INSERT INTO DocPackList (
-					PackInfoID, FName, LName, MName, isChild, PassNum, SDate, Login, Status, ApplID,
-					iNRes, Concil, MobileNums, ShipAddress, ShipNum, RTShipSum, FlyDate, ShipPhone, ShipMail, BthDate,
-					AgeCatA
+					PackInfoID, CBankID, FName, LName, MName, isChild, PassNum, SDate, Login,
+					Status, ApplID, iNRes, Concil, MobileNums, ShipAddress, ShipNum, RTShipSum,
+					FlyDate, ShipPhone, ShipMail, BthDate, AgeCatA
 				) VALUES (
-					?, ?, ?, ?, ?, ?, ?, now(), 2, ?,
-					?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
-					?
-				)",{},
-					$info_id, $ad->{ RFName }, $ad->{ RMName }, $ad->{ RLName }, 0, $ad->{ PassNum }, 'remote_script', $ad->{ ID },
-					0, 0, ' ', ' ', 0, 0, $ad->{ AppSDate }, 0, 0, $ad->{ BirthDate },
-					0
+					?, ?, ?, ?, ?, ?, ?, ?, now(), 2, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+				)", {},
+					$info_id, $bank_id, $ad->{ RFName }, $ad->{ RMName }, $ad->{ RLName }, 0,
+					$ad->{ PassNum }, 'remote_script', $ad->{ ID }, 0, 0, ' ', ' ', 0, 0,
+					$ad->{ AppSDate }, 0, 0, $ad->{ BirthDate }, 0
 			);
 			
 			my $list_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
