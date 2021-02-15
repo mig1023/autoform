@@ -58,6 +58,8 @@ sub autoinfopage
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
 	return $self->print_agreement() if /^print_doc$/i;
+	
+	return $self->download_checklist() if /^download_checklist$/i;
 		
 	return $self->print_appointment() if /^print$/i;
 	
@@ -176,7 +178,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-	
+
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -359,6 +361,38 @@ sub print_agreement
 	$print->print_doc();
 	
 	$self->{ vars }->{ session }->{ branches } = undef;
+}
+
+sub download_checklist
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $conf = $self->{ vars }->getConfig('general');
+	
+	my $token = $self->{ vars }->getparam( 'token' );
+	
+	my $vtype = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT VType FROM Appointments
+		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	my $checklist_types = {
+		1  => 'checklist_affari.pdf',
+		2  => 'checklist_affari.pdf',
+		3  => 'checklist_affari.pdf',
+		10 => 'checklist_turismo.pdf',
+		15 => 'checklist_affari.pdf',
+	};
+	
+	my $file_name = $conf->{ tmp_folder } . "doc/" . $checklist_types->{ $vtype };	
+	
+	print "HTTP/1.1 200 Ok\nContent-Type: application/pdf name=\"checklist.pdf\"\nContent-Disposition: attachment; filename=\"checklist.pdf\"\n\n";
+	
+	my $file_content = $self->{ af }->get_file_content( $file_name );
+	
+	print $file_content;
 }
 
 sub param_disassembler
