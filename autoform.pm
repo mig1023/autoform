@@ -1014,7 +1014,7 @@ sub get_token_and_create_new_form_if_need
 	return '06' if $self->{ autoform }->{ general }->{ technical_work };
 
 	return $self->token_generation( $self->get_service_for_token() ) if $token eq '';
-	
+
 	if ( length( $token ) == 24 ) {
 	
 		my $doc_id = $self->param('doc') || undef;
@@ -1026,7 +1026,7 @@ sub get_token_and_create_new_form_if_need
 			JOIN DocPackOptional ON DocPack.ID = DocPackOptional.DocPackID
 			WHERE FeedbackKey = ?", $token
 		) || undef;
-		
+
 		return '01' if ( !$found_docpack or ( $doc_id and ( $doc_id != $found_docpack ) ) );
 	
 		return ( $token, 'finished', 'docstatus' );
@@ -1035,7 +1035,7 @@ sub get_token_and_create_new_form_if_need
 	my ( $token_exist, $finished, $deleted, $app ) = $self->query( 'sel1', __LINE__, "
 		SELECT ID, Finished, Deleted, CreatedApp FROM AutoToken WHERE Token = ?", $token
 	);
-	
+
 	return '01' if ( length( $token ) != 64 ) or ( $token !~ /^t/i );
 	
 	return '02' if $deleted;
@@ -1043,17 +1043,17 @@ sub get_token_and_create_new_form_if_need
 	my $token_expired = $self->query( 'sel1', __LINE__, "
 		SELECT ID FROM AutoToken_expired WHERE Token = ?", $token
 	);
-	
+
 	return '04' if $token_expired;
 
 	return '02' unless $token_exist;
 	
 	return $token unless $finished;
-	
+
 	my $status = $self->query( 'sel1', __LINE__, "
 		SELECT Status FROM Appointments WHERE ID = ?", $app
 	);
-	
+
 	return ( $token, $finished, 'docstatus' ) if $status == 4;
 	
 	return ( ( $status =~ /^(1|10|11|12|13)$/ ? $token : '02' ), $finished );
@@ -1797,6 +1797,21 @@ sub check_existing_id_in_token
 	}
 	
 	return $exist;
+}
+
+sub check_existing_docid_in_token
+# //////////////////////////////////////////////////
+{
+	my ( $self, $doc_id ) = @_;
+	
+	my $doc_ok = $self->query( 'sel1', __LINE__, "
+		SELECT Agreement FROM AutoRemote
+		JOIN AutoToken ON AutoRemote.AppID = AutoToken.CreatedApp
+		WHERE Token = ? AND Agreement = ?",
+		$self->{ token }, $doc_id
+	);
+
+	return ( $doc_ok > 0 ? 1 : 0 );
 }
 
 sub get_homologous_series
