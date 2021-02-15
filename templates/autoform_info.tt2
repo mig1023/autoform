@@ -768,7 +768,13 @@
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Скачайте договор на оказание услуги:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=print_doc&doc=[% docpack %]">Договор №[% docnum %]</a>
+				[% langreq('Скачайте договор на оказание услуги:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=print_doc&doc=[% docpack %]">Договор №[% docnum %]</a><br><br>
+				
+				[% langreq('Скачайте опись документов:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=print_doc&doc=[% docpack %]">Договор №[% docnum %]</a><br><br>
+				
+				<span class="ltl_text">
+					[% langreq('<b>Обратите внимание</b>, что Вы <b>обязательно должны</b> заполнить опись, указав все прилагаемые Вами документы, подписать её, указать дату передачи документов курьеру, а также укзать галочки, что подтверждаете полноту предоставленных документов и проинформированы о последствиях предоставления несоответствующих требованиям документов. Вы обязательно должны <b>вложить заполненную опись в пакет передаваемых курьеру документов</b>.') %]<br>
+				</span>
 			</div>
 		</td></tr>
 		
