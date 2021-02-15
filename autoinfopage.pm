@@ -57,6 +57,8 @@ sub autoinfopage
 	
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
+	return $self->print_agreement() if /^print_doc$/i;
+		
 	return $self->print_appointment() if /^print$/i;
 	
 	return $self->print_appdata() if /^print_a$/i;
@@ -335,6 +337,28 @@ sub print_appdata
 	my $lang_in_link = $self->{ vars }->{ session }->{ langid } || 'ru';
 
 	$print->print_anketa( $lang_in_link );
+}
+
+sub print_agreement
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $docpack = lc( $self->{ vars }->getparam( 'doc' ) );
+	
+	$docpack =~ s/[^0-9]//g;
+
+	return $self->{ af }->redirect( 'current' ) unless $self->{ af }->check_existing_docid_in_token( $docpack );
+
+	$self->{ vars }->{ session }->{ branches } = 47;
+
+	my $print = VCS::Docs::individuals->new( 'VCS::Docs::individuals', $self->{ vars } );
+	
+	$self->{ vars }->setparam( 'docid', $docpack );
+	
+	$print->print_doc();
+	
+	$self->{ vars }->{ session }->{ branches } = undef;
 }
 
 sub param_disassembler
