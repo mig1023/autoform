@@ -768,7 +768,7 @@
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Скачайте договор на оказание услуги:') %]<br><br>
+				[% langreq('Скачайте договор на оказание услуги:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=print_doc&doc=[% docpack %]">Договор №[% docnum %]</a>
 			</div>
 		</td></tr>
 		
