@@ -57,11 +57,11 @@ sub autoinfopage
 	
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
-	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status <= 12 );
-	
 	return $self->print_appointment() if /^print$/i;
 	
 	return $self->print_appdata() if /^print_a$/i;
+	
+	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status <= 12 );
 	
 	return autoinfopage_entry( @_ ) if $entry;
 	
@@ -174,7 +174,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-
+	
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -770,9 +770,10 @@ sub online_app
 	my $concil = [];
 	
 	my ( $service_fee, $concil_fee, $service_count, $service_price, $sms_price, $sms_phone,
-		$sms_code, $concil_free, $concil_full_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );		
+		$sms_code, $concil_free, $concil_full_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );	
+		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
-	my ( $payment, $error, $err_target ) = ( undef, undef, undef );
+	my ( $payment, $error, $err_target, $docpack, $docnum ) = ( undef, undef, undef, undef, undef );
 
 	unless ( $online_status > 0 ) {
 		
@@ -911,6 +912,15 @@ sub online_app
 	}
 	elsif ( $online_status == 9 ) {
 		
+		( $docpack, $docnum ) = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT Agreement, AgreementNo FROM AutoRemote
+			JOIN AutoToken ON AutoRemote.AppID = AutoToken.CreatedApp
+			JOIN DocPack ON AutoRemote.Agreement = DocPack.ID
+			WHERE Token = ?", $self->{ token }
+		);
+		
+		$docnum =~ s/(\d{2})(\d{6})(\d{6})/$1.$2.$3/;
+		
 		return online_status_change( $self, 10 )
 			if $self->{ vars }->getparam( 'appdata' ) eq 'confirm_loaded';
 	}
@@ -998,6 +1008,9 @@ sub online_app
 	$tvars->{ concil_free } = $concil_free if $concil_free;
 	$tvars->{ concil_full_free } = $concil_full_free if $concil_full_free;
 	$tvars->{ service_type } = $service_type if $service_type;
+	
+	$tvars->{ docpack } = $docpack if $docpack;
+	$tvars->{ docnum } = $docnum if $docnum;
 
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
