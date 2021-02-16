@@ -1007,12 +1007,15 @@ sub online_app
 		
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_end' ) {
 			
-			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
-				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+			my ( $app_id, $doc_id ) = $self->{ af }->query( 'sel1', __LINE__, "
+				SELECT CreatedApp, Agreement FROM AutoToken
+				JOIN AutoRemote ON AutoToken.CreatedApp = AutoRemote.AppID
+				WHERE Token = ?", $self->{ token }
 			);
 			
 			$self->{ af }->query( 'query', __LINE__, "
-				UPDATE Appointments SET Status = 4 WHERE ID = ?", {}, $app_id
+				UPDATE Appointments SET Status = 4, PacketID = ? WHERE ID = ?", {},
+				$doc_id, $app_id
 			);
 		
 			return online_status_change( $self, 13 );
