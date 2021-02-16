@@ -43,8 +43,8 @@ sub payment
 	my $amount_in_kopek = $amount * 100;
 
 	my $data = {
-		userName	=> $config->{ payment }->{ $type }->{ user_name },
-		password	=> $config->{ payment }->{ $type }->{ password },
+		userName	=> $config->{ payment }->{ user_name },
+		password	=> $config->{ payment }->{ password },
 		orderNumber 	=> $order_number,
 		amount 		=> $amount_in_kopek,
 		returnUrl 	=> return_url( $self ),
@@ -68,8 +68,8 @@ sub status
 	my $config = VCS::Site::autodata::get_settings();
 	
 	my $data = {
-		userName	=>  $config->{ payment }->{ $type }->{ user_name },
-		password	=> $config->{ payment }->{ $type }->{ password },
+		userName	=>  $config->{ payment }->{ user_name },
+		password	=> $config->{ payment }->{ password },
 		orderId 	=> $order_id,
 	};
 
@@ -203,7 +203,7 @@ sub fox_status
 	return "" unless $response->is_success;
 	
 	my $status = JSON->new->pretty->decode( $response->decoded_content );
-	
+
 	my $line = "";
 
 	$line = $status->{ documents }->[ 0 ]->{ history }->[ -1 ]->{ eventState }

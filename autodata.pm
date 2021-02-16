@@ -33,18 +33,8 @@ sub get_settings
 			url => '',
 			back_url => '',
 			
-			check => {
-				user_name => '',
-				password => '',
-			},
-			service => {
-				user_name => '',
-				password => '',
-			},
-			sms => {
-				user_name => '',
-				password => '',
-			},
+			user_name => '',
+			password => '',
 		},
 		
 		sms => {
