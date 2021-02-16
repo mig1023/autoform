@@ -1141,7 +1141,7 @@ sub doc_status
 {
 	my $self = shift;
 	
-	my ( $status, $shipping ) = ( 0, 0 );
+	my ( $status, $shipping, $service ) = ( 0, 0, 0 );
 	
 	if ( length( $self->{ token } ) == 24 ) {
 	
@@ -1153,8 +1153,8 @@ sub doc_status
 		);
 	}
 	else {
-		( $status, $shipping ) = $self->query( 'sel1', __LINE__, "
-			SELECT PStatus, DocPack.Shipping
+		( $status, $shipping, $service ) = $self->query( 'sel1', __LINE__, "
+			SELECT PStatus, DocPack.Shipping, ServiceType
 			FROM AutoToken
 			JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
 			JOIN DocPack ON DocPack.ID = Appointments.PacketID
@@ -1162,7 +1162,11 @@ sub doc_status
 		);
 	}
 	
+	$shipping = 1 if $service == 3;
+	
 	my $public_status = {
+		25 => 1,
+		26 => 1,
 		7  => 0,
 		8  => 3,
 		9  => 3,
@@ -1171,11 +1175,13 @@ sub doc_status
 		12 => 3,
 		13 => 3,
 		14 => 3,
+		15 => 3,
+		16 => 3,
 	};
 	
 	$status = $public_status->{ $status } if exists $public_status->{ $status };
 	
-	my $doc_progressbar = VCS::Site::autodata::get_docstatus_progress();
+	my $doc_progressbar = VCS::Site::autodata::get_docstatus_progress( $service );
 	
 	if ( !$shipping ) {
 	
