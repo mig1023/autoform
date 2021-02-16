@@ -74,9 +74,9 @@ sub create_online_agreement
 	)->[0];
 	
 	my $sms = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT autopayment.ID FROM autopayment
-		JOIN autotoken ON autopayment.AutoID = autotoken.CreatedApp
-		WHERE Token = ? AND autopayment.`Type` = 'sms' AND PaymentStatus = 2",
+		SELECT AutoPayment.ID FROM AutoPayment
+		JOIN AutoToken ON AutoPayment.AutoID = AutoToken.CreatedApp
+		WHERE Token = ? AND AutoPayment.`Type` = 'sms' AND PaymentStatus = 2",
 		$self->{ token }
 	);
 	
@@ -183,8 +183,6 @@ sub create_online_agreement
 			};
 		}
 	}
-	
-
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		UPDATE AutoRemote SET Agreement = ? WHERE ID = ?", {},
