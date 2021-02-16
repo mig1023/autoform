@@ -48,10 +48,8 @@ sub create_online_agreement
 		LOCK TABLES
 			DocHistory WRITE, BlackList WRITE, PriceRate WRITE, PriceList WRITE,
 			ServicesPriceRates WRITE, DocPack WRITE, DocPackInfo WRITE, DocPackList WRITE,
-			DocPackOptional WRITE, Services WRITE, ServicesBranches WRITE, ServiceFields WRITE,
-			ServiceFieldValuesINT WRITE, ServiceFieldValuesFLOAT WRITE, ServiceFieldValuesDATE WRITE,
-			ServiceFieldValuesVARCHAR WRITE, DocPackService WRITE, UserLog WRITE, Templates WRITE,
-			Appointments WRITE, AppData WRITE, CurRates WRITE, DocRequest WRITE, VisaTypes WRITE,
+			DocPackOptional WRITE, UserLog WRITE, Templates WRITE, Appointments WRITE,
+			AppData WRITE, CurRates WRITE, DocRequest WRITE, VisaTypes WRITE,
 			DocComments WRITE, AutoToken READ, AutoRemote READ"
 	);
 
@@ -89,7 +87,7 @@ sub create_online_agreement
 			PhotoSrv, VIPSrv, InsSum, ServSum, ShipNum, SkipIns, Translate, PersonalNo, TShipSum, isNewDHL,
 			ConcilPaymentDate, officeToReceive, ShippingPhone, InsData, NoReceived
 		) VALUES (
-			curdate(), 'RUR', ?, ?, ?, ?, ?, ?, now(), now(), 2, ?, ?, 2, 0, ?, ?, 0, ?, ?, ?, ?, ?, 47,
+			curdate(), 'RUR', ?, ?, ?, ?, ?, ?, now(), now(), 25, ?, ?, 2, 0, ?, ?, 0, ?, ?, ?, ?, ?, 47,
 			?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, ?, ?, 0, 0, '', 0, 0, now(), ?, ?, 0, 0
 		)", {},
 			$rate, $app->{ Address }, $app->{ FName }, $app->{ LName }, $app->{ MName }, $dsum, 'remote_script',
@@ -155,17 +153,23 @@ sub create_online_agreement
 					Status, ApplID, iNRes, Concil, MobileNums, ShipAddress, ShipNum, RTShipSum,
 					FlyDate, ShipPhone, ShipMail, BthDate, AgeCatA
 				) VALUES (
-					?, ?, ?, ?, ?, ?, ?, ?, now(), 2, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+					?, ?, ?, ?, ?, ?, ?, ?, now(), 25, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 				)", {},
 					$info_id, $bank_id, $ad->{ RFName }, $ad->{ RMName }, $ad->{ RLName }, 0,
 					$ad->{ PassNum }, 'remote_script', $ad->{ ID }, 0, 0, ' ', ' ', 0, 0,
 					$ad->{ AppSDate }, 0, 0, $ad->{ BirthDate }, 0
 			);
 			
-			my $list_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+			$self->{ af }->query( 'query', __LINE__, "
+				INSERT INTO DocHistory (DocID, PassNum, Login, HDate, StatusID, BankID)
+					VALUES (?, ?, ?, now(), ?, ?)", {},
+					$doc_id, $ad->{ PassNum }, 'remote_script', $_, $bank_id
+			) for ( 1, 2, 25 );
 
 		}
 	}
+	
+
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		UPDATE AutoRemote SET Agreement = ? WHERE ID = ?", {},
