@@ -53,14 +53,18 @@ sub get_code_for_sms
 {
 	my ( $self, $phone ) = @_;
 	
+	my $config = VCS::Site::autodata::get_settings()->{ sms };
+	
 	my ( $remote_id, $sms_code ) = get_code_from_db( $self );
 	
 	return md5_hex( $sms_code ) if $sms_code;
 	
 	my $new_code = int( irand( 9000 ) ) + 1000;
 	
-	my $sms_id = sending_sms( $self, $phone, "Vash kod dogovora $new_code" );
+	my $sms_id = 0;
 	
+	$sms_id = sending_sms( $self, $phone, "Vash kod dogovora $new_code" ) unless $config->{ do_not_send_sms };
+		
 	$self->{ af }->query( 'query', __LINE__, "
 		UPDATE AutoRemote SET SMScode = ?, SMSmsgID = ? WHERE ID = ?", {}, $new_code, $sms_id, $remote_id
 	);
@@ -88,7 +92,7 @@ sub sending_sms
 # //////////////////////////////////////////////////
 {
 	my ( $self, $phone, $message ) = @_;
-	
+		
 	my $sms = VCS::Site::autodata::get_settings()->{ sms };
 	
 	my $sms_sign = join( ';', sort ( $sms->{ project },  $sms->{ sender }, $message, $phone ) ) . ';' . $sms->{ key };

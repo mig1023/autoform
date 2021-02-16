@@ -41,7 +41,9 @@ sub get_settings
 			send_url => '',
 			project => '', 
 			sender => '',
-			key => '',	
+			key => '',
+			
+			do_not_send_sms => 0,	
 		},
 		
 		cloud => {	
