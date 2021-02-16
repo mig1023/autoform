@@ -178,7 +178,7 @@ sub autoinfopage_entry
 	}
 
 	if ( $param->{ action } and ( !$param->{ appnum } or !$param->{ passnum } or $self->{ af }->check_captcha() ) ) {
-
+	
 		return $self->{ af }->redirect( 'no_field' );
 	}
 	elsif ( $param->{ action } ) {
@@ -909,13 +909,7 @@ sub online_app
 			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "sms", $service_count );
 			
 			if ( $pay_status_ok ) {
-				
-				$self->{ af }->query( 'query', __LINE__, "
-					UPDATE Appointments SET Appointments.SMS = 1
-					JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-					WHERE Token = ?", {}, $self->{ token }
-				);
-			
+							
 				return online_status_change( $self, 7 );
 			}
 			else {
