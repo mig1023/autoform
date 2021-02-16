@@ -72,8 +72,17 @@ sub create_online_agreement
 		JOIN AutoRemote ON Appointments.ID = AutoRemote.AppID
 		WHERE Token = ?", $self->{ token }
 	)->[0];
+	
+	my $sms = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT autopayment.ID FROM autopayment
+		JOIN autotoken ON autopayment.AutoID = autotoken.CreatedApp
+		WHERE Token = ? AND autopayment.`Type` = 'sms' AND PaymentStatus = 2",
+		$self->{ token }
+	);
+	
+	$sms = 1 if $sms;
 
-	my $dsum = $service_fee + ( $app->{ SMS } ? $sms_price : 0 );
+	my $dsum = $service_fee + ( $sms ? $sms_price : 0 );
 
 	my $template = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT ID FROM Templates WHERE TDate <= curdate() AND isJur=0 AND CenterID=47 ORDER BY TDate DESC LIMIT 1"
@@ -91,8 +100,8 @@ sub create_online_agreement
 			?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, ?, ?, 0, 0, '', 0, 0, now(), ?, ?, 0, 0
 		)", {},
 			$rate, $app->{ Address }, $app->{ FName }, $app->{ LName }, $app->{ MName }, $dsum, 'remote_script',
-			$agreementNo, $app->{ VType }, $app->{ ID }, $app->{ SMS }, $app->{ Phone }, '0000-00-00', 0, $template,
-			$app->{ Mobile }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, 'адрес ещё не указан',
+			$agreementNo, $app->{ VType }, $app->{ ID }, $sms, $app->{ Phone }, '0000-00-00', 0, $template,
+			$app->{ Phone }, $app->{ PassNum }, $app->{ PassDate }, $app->{ PassWhom }, 'адрес ещё не указан',
 			$service_fee, 0, 0, 0, $app->{ Mobile },
 	);
 
@@ -160,12 +169,18 @@ sub create_online_agreement
 					$ad->{ AppSDate }, 0, 0, $ad->{ BirthDate }, 0
 			);
 			
-			$self->{ af }->query( 'query', __LINE__, "
-				INSERT INTO DocHistory (DocID, PassNum, Login, HDate, StatusID, BankID)
-					VALUES (?, ?, ?, now(), ?, ?)", {},
-					$doc_id, $ad->{ PassNum }, 'remote_script', $_, $bank_id
-			) for ( 1, 2, 25 );
-
+			my $secons_shift = 0;
+			
+			for ( 1, 2, 25 ) {
+				
+				$self->{ af }->query( 'query', __LINE__, "
+					INSERT INTO DocHistory (DocID, PassNum, Login, HDate, StatusID, BankID)
+						VALUES (?, ?, ?, DATE_ADD(now(), INTERVAL ? SECOND), ?, ?)", {},
+						$doc_id, $ad->{ PassNum }, 'remote_script', $secons_shift, $_, $bank_id
+				);
+				
+				$secons_shift += 1;
+			};
 		}
 	}
 	
