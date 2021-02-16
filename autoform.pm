@@ -3748,7 +3748,7 @@ sub create_new_appointment
 		WHERE Token = ?", $self->{ token }
 	)->[ 0 ];
 	
-	if ( ( $data_for_contract->{ PersonForAgreements } != -1 ) and ( $checkdoc < 2 ) ) {
+	if ( $data_for_contract->{ PersonForAgreements } != -1 ) {
 	
 		$info_for_contract = $self->query( 'selallkeys', __LINE__, "
 			SELECT RLName as LName, RFName as FName, RMName as MName, RPassNum as PassNum, 
