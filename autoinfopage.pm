@@ -550,14 +550,14 @@ sub change_status_if_need
 {
 	my ( $self, $appdata_id ) = @_;
 	
-	my $change_need = $self->{ af }->query( 'sel1', __LINE__, "
+	my $doc_id = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT ID FROM DocUploaded WHERE AppDataID = ? AND DocType = 9999", $appdata_id
 	);
 
-	return unless $change_need;
+	return unless $doc_id;
 	
 	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE DocUploaded SET CheckStatus = 0, CheckDate = NULL WHERE ID = ?", {}, $change_need
+		UPDATE DocUploaded SET CheckStatus = 0, CheckDate = NULL WHERE ID = ?", {}, $doc_id
 	);
 	
 	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
@@ -566,8 +566,8 @@ sub change_status_if_need
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		INSERT INTO DocUploadedLog (AppID, DocID, LogDate, Login, LogType, LogText)
-		VALUES (?, 9999, now(), ?, ?, ?)",
-		{}, $appdata_id, 'website', 1, "заявителем внесены правки в анкету"
+		VALUES (?, ?, now(), ?, ?, ?)",
+		{}, $appdata_id, $doc_id, 'website', 1, "заявителем внесены правки в анкету"
 	);
 	
 	$self->{ af }->query( 'query', __LINE__, "
@@ -1647,7 +1647,7 @@ sub get_app_file_list_by_token
 		
 		push( @{ $doc_comments->{ $_->{ DocID } } }, { text => $_->{ CommentText }, date => $_->{ CommentDate }, login => $_->{ Login } } );
 	}
-	
+
 	for my $doc ( keys %$doc_comments ) {
 		
 		my @new_ord_comments = sort { $a->{ date } cmp $b->{ date } } @{ $doc_comments->{ $doc } };
