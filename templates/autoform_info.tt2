@@ -460,10 +460,10 @@
 						<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">
 						[% IF (file.0.no_file_yet == 1) %][% langreq('загрузить') %][% ELSE %][% langreq('заменить') %][% END %]
 						</span>
-						<span class="show_other_option ltl_text">[% langreq('или') %]</span>
 					[% ELSE %]
-						<span class="show_replace_option ltl_link"></span>
+						<span class="show_replace_option ltl_link" id="edit_[% file.0.DocType %]" onclick="go_button('edit', '[% person.key %]');">[% langreq('редактировать') %]</span>
 					[% END %]
+					<span class="show_other_option ltl_text">[% langreq('или') %]</span>
 					<span class="show_other_option ltl_link" onclick="insist([% person.key %], [% file.0.DocType %]);">[% langreq('оставить как есть') %]</span><br><br>
 				</td></tr>
 			[% END %]
