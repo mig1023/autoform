@@ -444,7 +444,7 @@ sub edit
 	my $editable_fields = $self->{ af }->init_add_param( { page => $self->get_editable_fields() }, { param => 1 } )->{ page };
 
 	my $app_data = $self->{ vars }->getparam( 'appdata' ) || 0;
-	
+
 	$app_data =~ s/[^\d]+//;
 	
 	$app_data = 0 unless $self->{ af }->check_existing_id_in_token( $app_data, "finished" );
@@ -466,6 +466,8 @@ sub edit
 			$self->{ vars }->setparam( 'edt_prevvisa', $self->{ vars }->getparam( "edt_prevvisa" ) - 1 );
 			
 			$self->{ af }->save_data_from_form( undef, $tables_ids, "finished", $editable_fields );
+
+			change_status_if_need( $self, $tables_ids->{ AppData } );
 		
 			return $self->{ af }->redirect( $self->{ token }.'&action=edited' )
 		}
@@ -541,6 +543,36 @@ sub get_editable_fields
 		if VCS::Site::autodata::this_is_spb_center( $center );
 	
 	return VCS::Site::autodata_type_c::get_content_edit_rules_hash()
+}
+
+sub change_status_if_need
+# //////////////////////////////////////////////////
+{
+	my ( $self, $appdata_id ) = @_;
+	
+	my $change_need = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT ID FROM DocUploaded WHERE AppDataID = ? AND DocType = 9999", $appdata_id
+	);
+
+	return unless $change_need;
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE DocUploaded SET CheckStatus = 0, CheckDate = NULL WHERE ID = ?", {}, $change_need
+	);
+	
+	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		INSERT INTO DocUploadedLog (AppID, DocID, LogDate, Login, LogType, LogText)
+		VALUES (?, 9999, now(), ?, ?, ?)",
+		{}, $appdata_id, 'website', 1, "заявителем внесены правки в анкету"
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE Appointments SET Status = 10 WHERE ID = ?", {}, $app_id
+	);
 }
 
 sub edited
