@@ -183,7 +183,7 @@
 				[% ELSIF (file.0.CheckStatus == 1) %]
 					<span class="err_doc">[% langreq('некорректен') %]</span>
 				[% ELSE %]
-					<span class="nope_doc">[% langreq('не проверен') %]</span>
+					<span class="nope_doc">[% langreq('ждёт проверки') %]</span>
 				[% END %]
 				</td>
 				</tr>
@@ -399,7 +399,7 @@
 				[% ELSIF (file.0.CheckStatus == 1) %]
 					<span class="err_doc">[% langreq('некорректен') %]</span>
 				[% ELSE %]
-					<span class="nope_doc">[% langreq('не проверен') %]</span>
+					<span class="nope_doc">[% langreq('ждёт проверки') %]</span>
 				[% END %]
 			[% ELSE %]
 				&nbsp;
@@ -433,7 +433,7 @@
 					[% ELSIF (page.CheckStatus == 1) %]
 						<span class="err_doc">[% langreq('некорректен') %]</span>
 					[% ELSE %]
-						<span class="nope_doc">[% langreq('не проверен') %]</span>
+						<span class="nope_doc">[% langreq('ждёт проверки') %]</span>
 					[% END %]
 					</td>
 					</tr>
@@ -490,10 +490,10 @@
 	
 	[% IF !not_checked_yet %]
 		<tr>
-			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="go_app('offline_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
+			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и оформить удалённую подачу документов') %][% ELSE %][% langreq('Оформить удалённую подачу документов') %][% END %]" onclick="go_app('online_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
 		</tr>
 		<tr>
-			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и оформить удалённую подачу документов') %][% ELSE %][% langreq('Оформить удалённую подачу документов') %][% END %]" onclick="go_app('online_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
+			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="go_app('offline_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
 		</tr>
 	[% END %]
 
@@ -1046,7 +1046,7 @@
 			
 				if (data.indexOf('ok')+1) {
 				
-					alert( '[% langreq('Файл успешно заменён!') %]' );
+					alert( '[% langreq('Файл успешно заменён!\nПожалуйста, дождитесь его проверки нашим сотрудником!') %]' );
 					location.reload();
 				}
 				else if (data.indexOf('already')+1) {
