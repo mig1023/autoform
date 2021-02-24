@@ -489,9 +489,11 @@
 	[% END %]
 	
 	[% IF !not_checked_yet %]
-		<tr>
-			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и оформить удалённую подачу документов') %][% ELSE %][% langreq('Оформить удалённую подачу документов') %][% END %]" onclick="go_app('online_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
-		</tr>
+		[% IF !block_online_app %]
+			<tr>
+				<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и оформить удалённую подачу документов') %][% ELSE %][% langreq('Оформить удалённую подачу документов') %][% END %]" onclick="go_app('online_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
+			</tr>
+		[% END %]
 		<tr>
 			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="go_app('offline_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
 		</tr>

@@ -262,6 +262,8 @@ sub get_infopage
 	my ( $app_list, $title );
 	
 	my $not_checked_yet = 1;
+	
+	my $block_online_app = 0;
 
 	if ( $app_info->{ ServiceType } <= 1 ) {
 		
@@ -275,7 +277,10 @@ sub get_infopage
 		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
 		
 		for my $app ( keys %$app_list ) {
+			
 			$not_checked_yet = 0 if $app_list->{ $app }->{ checked_already } == 1;
+			
+			$block_online_app = 1 if $app_list->{ $app }->{ Fingers } == 0;
 		}
 	}
 
@@ -296,6 +301,8 @@ sub get_infopage
 		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
 		'closed_app'	=> $closed_app,
 		'not_checked_yet' => $not_checked_yet,
+		'block_online_app' => $block_online_app,
+
 	};
 	
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
@@ -1578,7 +1585,7 @@ sub get_app_file_list_by_token
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
 		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus,
-		Token, AppData.ConcilOnlinePay, AppData.CheckDocComment
+		Token, AppData.ConcilOnlinePay, AppData.CheckDocComment, AppData.Fingers
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
@@ -1679,7 +1686,7 @@ sub get_app_file_list_by_token
 			$doc_list->{ $app->{ ID } } = {};
 			
 			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ }
-				for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay', 'CheckDocComment' );
+				for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay', 'CheckDocComment', 'Fingers' );
 
 			$doc_list->{ $app->{ ID } }->{ files } = {};
 			
