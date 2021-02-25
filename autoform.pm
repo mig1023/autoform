@@ -4722,13 +4722,15 @@ sub get_doc_uploading
 		$opt_doc_index = $doc->{ DocType } if $opt_doc_index > $doc->{ DocType };
 	}
 	
-	my $vtype = $self->query( 'sel1', __LINE__, "
-		SELECT VisaTypes.VName
+	my ( $vtype_id, $vtype ) = $self->query( 'sel1', __LINE__, "
+		SELECT VisaTypes.ID, VisaTypes.VName
 		FROM AutoToken
 		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
 		JOIN VisaTypes ON AutoAppointments.VType = VisaTypes.ID
 		WHERE Token = ?", $self->{ token }
 	);
+	
+	my $document_requirements = VCS::Site::autodata::get_document_requirements_by_vtype()->{ $vtype_id };
 
 	my $content = {
 		'app_id'	=> $appdata_id,
@@ -4739,6 +4741,7 @@ sub get_doc_uploading
 		'token' 	=> $self->{ token },
 		'static'	=> $self->{ autoform }->{ paths }->{ static },
 		'opt_doc_next'	=> $opt_doc_index - 1,
+		'document_requirements'	=> $document_requirements,
 	};
 
 	return ( $content, 'autoform_upload.tt2' );

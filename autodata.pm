@@ -209,6 +209,18 @@ sub get_concil_types
 }
 
 
+sub get_document_requirements_by_vtype
+# //////////////////////////////////////////////////
+{
+	return {
+		1 => 'https://',
+		2 => 'https://',
+		3 => 'https://',
+		10 => 'https://',
+		15 => 'https://',
+	};
+}
+
 sub get_remote_progressline
 # //////////////////////////////////////////////////
 {
