@@ -94,14 +94,14 @@ sub get_remote_status
 {
 	my $self = shift;
 	
-	my ( $remote_status, $remote_id, $order_num ) = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT RemoteStatus, AutoRemote.ID, FoxID
+	my ( $remote_status, $remote_id, $order_num_from, $order_num_to) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT RemoteStatus, AutoRemote.ID, FoxIDfrom, FoxIDto
 		FROM AutoRemote
 		JOIN AutoToken ON AutoToken.CreatedApp = AutoRemote.AppID
 		WHERE Token = ?", $self->{ token }
 	);
 	
-	return ( $remote_status, $remote_id, $order_num );
+	return ( $remote_status, $remote_id, $order_num_from, $order_num_to );
 }
 
 sub set_remote_status
@@ -308,9 +308,9 @@ sub get_infopage
 
 	};
 	
-	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
+	my ( $online_status, undef, $order_num_from, $order_num_to ) = get_remote_status( $self );
 	
-	$tvars->{ fox_status } = VCS::Site::autopayment::fox_status( $self, $order_num ) if $online_status == 7;
+	$tvars->{ fox_status } = VCS::Site::autopayment::fox_status( $self, $order_num_from, $order_num_to ) if $online_status == 7;
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
@@ -749,7 +749,7 @@ sub online_order
 		$data->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
 		$data->{ $_ } =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
 	}
-	
+
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
 
 	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
@@ -757,9 +757,48 @@ sub online_order
 
 	return ( undef, $errorInfo ) unless $response->is_success;
 	
-	my $order = JSON->new->pretty->decode( $response->decoded_content );
+	my $order_from = JSON->new->pretty->decode( $response->decoded_content );
+	
+	my $data_to = {
+		'login' => $config->{ fox }->{ login }, 
+		'password' => $config->{ fox }->{ password },
+		'urgency' => $config->{ fox }->{ urgency },
+		'typeOfCargo' => $config->{ fox }->{ cargo },
+		'cargoDescription' => $config->{ fox }->{ description },
+		
+		'payer' => 1,
+		'paymentMethod' => 2,
+		'withReturn' => 'true',
+		'weight' => $sending->{ weight },
+		'cargoPackageQty' => '1',
+		
+		'sender' => $config->{ fox }->{ recipient },
+		'senderIndex' => $config->{ fox }->{ recipientIndex },
+		'senderAddress' => $config->{ fox }->{ recipientAddress },
+		'senderPhone' => $config->{ fox }->{ recipientPhone },
+		'senderEMail' => $config->{ fox }->{ recipientEMail },
+	};
+	
+	my $revert_fields = {
+		sender => 'recipient',
+		senderIndex => 'recipientIndex',
+		senderAddress => 'recipientAddress',
+		senderPhone => 'recipientPhone',
+		senderEMail => 'recipientEMail',
+	};
+	
+	for ( 'takeDate', 'comment', 'sender', 'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
+				
+		$data_to->{ $revert_fields->{ $_ } } = $self->{ vars }->getparam( $_ ) || "";
+		$data_to->{ $revert_fields->{ $_ } } =~
+			s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
+	}
 
-	return ( $order->{ number }, $errorInfo, $data->{ senderAddress } );
+	my $response_to = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data_to );
+
+	my $order_to = JSON->new->pretty->decode( $response_to->decoded_content );
+
+	return ( $order_from->{ number }, $order_to->{ number }, $errorInfo, $data->{ senderAddress } );
 }
 
 sub offline_check_params
@@ -861,7 +900,7 @@ sub online_app
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
+	my ( $online_status, undef, $order_num_from, $order_num_to ) = get_remote_status( $self );
 	
 	my $concil = [];
 	
@@ -1039,18 +1078,18 @@ sub online_app
 		
 		if ( !$error and ( $self->{ vars }->getparam( 'appdata' ) eq 'order' ) ) {
 			
-			( $order_num, $error, my $address ) = $self->online_order();
+			( $order_num_from, $order_num_to, $error, my $address ) = $self->online_order();
 			
 			if ( !$error ) {
 				
 				my ( undef , $remote_id ) = get_remote_status( $self );
 		
 				$self->{ af }->query( 'query', __LINE__, "
-					UPDATE AutoRemote SET FoxID = ?, FoxAddress = ? WHERE ID = ?", {},
-					$order_num, $address, $remote_id
+					UPDATE AutoRemote SET FoxIDfrom = ?, FoxIDto = ?, FoxAddress = ? WHERE ID = ?", {},
+					$order_num_from, $order_num_to, $address, $remote_id
 				);
 				
-				VCS::Site::autoagreement::update_sending_info( $self, $order_num, $address);
+				VCS::Site::autoagreement::update_sending_info( $self, $order_num_from, $order_num_to, $address);
 				
 				return online_status_change( $self, 11 );
 			}
@@ -1108,7 +1147,8 @@ sub online_app
 	
 	$tvars->{ payment } = $payment if $payment;
 	
-	$tvars->{ order_num } = $order_num if $order_num;
+	$tvars->{ order_num_from } = $order_num_from if $order_num_from;
+	$tvars->{ order_num_to } = $order_num_to if $order_num_to;
 	$tvars->{ online_status } = $online_status if $online_status;
 	$tvars->{ sms_phone } = $sms_phone if $sms_phone;
 	$tvars->{ sms_code } = $sms_code if $sms_code;
@@ -1146,7 +1186,7 @@ sub data_for_sending
 		
 	$data->{ weight } = POSIX::ceil( $app_count / 3 ) * 0.5;
 	
-	my $config = VCS::Site::autodata::get_settings(); # ->{ fox }-> 
+	my $config = VCS::Site::autodata::get_settings();
 	
 	$data->{ index } = $config->{ fox }->{ recipientIndex };
 	$data->{ address } = $config->{ fox }->{ recipientAddress };
@@ -1237,9 +1277,9 @@ sub online_app_foxstatus
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	my ( undef, undef, $order_num ) = get_remote_status( $self );
+	my ( undef, undef, $order_num_from, $order_num_to ) = get_remote_status( $self );
 	
-	my $payment_ok = VCS::Site::autopayment::fox_pay_status( $self, $order_num );
+	my $payment_ok = VCS::Site::autopayment::fox_pay_status( $self, $order_num_from, $order_num_to );
 	
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	

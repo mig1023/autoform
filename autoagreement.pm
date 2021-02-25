@@ -80,7 +80,7 @@ sub create_online_agreement
 		$self->{ token }
 	);
 	
-	$sms = 1 if $sms;
+	$sms = ( $sms ? 1 : 0 );
 
 	my $dsum = $service_fee + ( $sms ? $sms_price : 0 );
 
@@ -195,7 +195,7 @@ sub create_online_agreement
 sub update_sending_info
 # //////////////////////////////////////////////////
 {
-	my ( $self, $shipnum, $shipaddr ) = @_;
+	my ( $self, $shipnum_from, $shipnum_to, $shipaddr ) = @_;
 	
 	my $doc_id = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT Agreement FROM AutoRemote 
@@ -205,7 +205,7 @@ sub update_sending_info
 	
 	my $app_id = $self->{ af }->query( 'query', __LINE__, "
 		UPDATE DocPack SET ShippingAddress = ?, ShipNum = ? WHERE ID = ?", {},
-		$shipaddr, $shipnum, $doc_id
+		$shipaddr, $shipnum_from, $doc_id
 	);
 }
 

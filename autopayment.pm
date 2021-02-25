@@ -173,35 +173,43 @@ sub signature
 sub fox_pay_status
 # //////////////////////////////////////////////////
 {
-	my ( $self, $order_number ) = @_;
-	
-	my $config = VCS::Site::autodata::get_settings();
+	my ( $self, $order_number_from, $order_number_to ) = @_;
 
-	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ pay_status } . $order_number );
+	my $config = VCS::Site::autodata::get_settings();
+	
+	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ pay_status } . $order_number_from );
 
 	return 0 unless $response->is_success;
 	
 	my $result = decode( 'utf8', $response->{ _content } );
 
-	my $payment_ok = ( $result =~ /Документ\s+$order_number\s+оплачен/i ? 1 : 0 );
+	my $payment_ok = ( $result =~ /Документ\s+$order_number_from\s+оплачен/i ? 1 : 0 );
 	
-	return $payment_ok;
+	my $response_to = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ pay_status } . $order_number_to );
+
+	return 0 unless $response_to->is_success;
+	
+	my $result_to = decode( 'utf8', $response_to->{ _content } );
+
+	my $payment_to_ok = ( $result_to =~ /Документ\s+$order_number_to\s+оплачен/i ? 1 : 0 );
+	
+	return $payment_ok && $payment_to_ok;
 }
 
 sub fox_status
 # //////////////////////////////////////////////////
 {
-	my ( $self, $order_number ) = @_;
-	
+	my ( $self, $order_number_from, $order_number_to ) = @_;
+
 	my $config = VCS::Site::autodata::get_settings();
 	
 	my $url_param = "login=" . $config->{ fox }->{ login } . "&password=" . $config->{ fox }->{ password } .
-		"&documentType=order&number=" . $order_number;
-
+		"&documentType=order&number=" . $order_number_from;
+		
 	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ track } . $url_param );
 
-	return "" unless $response->is_success;
-	
+	return "" unless $response->is_success;	
+
 	my $status = JSON->new->pretty->decode( $response->decoded_content );
 
 	my $line = "";
