@@ -11,6 +11,7 @@ use Data::Dumper;
 use Date::Calc;
 use JSON;
 use LWP::UserAgent;
+use POSIX;
 
 sub new
 # //////////////////////////////////////////////////
@@ -720,11 +721,12 @@ sub online_order
 	my $self = shift;
 	
 	my $config = VCS::Site::autodata::get_settings();
+	
+	my $sending = $self->data_for_sending();
 
 	my $data = {
 		'login' => $config->{ fox }->{ login }, 
 		'password' => $config->{ fox }->{ password },
-		'department' => 'Документы для визы',
 		'urgency' => $config->{ fox }->{ urgency },
 		'typeOfCargo' => $config->{ fox }->{ cargo },
 		'cargoDescription' => $config->{ fox }->{ description },
@@ -732,29 +734,22 @@ sub online_order
 		'payer' => 1,
 		'paymentMethod' => 2,
 		'withReturn' => 'true',
-		'weight' => '0.5',
+		'weight' => $sending->{ weight },
 		'cargoPackageQty' => '1',
 		
-		'senderInfo' => $config->{ fox }->{ senderInfo },
 		'recipient' => $config->{ fox }->{ recipient },
 		'recipientIndex' => $config->{ fox }->{ recipientIndex },
-		'recipientOfficial' => $config->{ fox }->{ recipientOfficial },
 		'recipientAddress' => $config->{ fox }->{ recipientAddress },
 		'recipientPhone' => $config->{ fox }->{ recipientPhone },
 		'recipientEMail' => $config->{ fox }->{ recipientEMail },
-		'recipientInfo' => $config->{ fox }->{ recipientInfo },
 	};
 	
-	for ( 'date', 'contactPerson', 'comment', 'sender',
-			'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
+	for ( 'takeDate', 'comment', 'sender', 'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
 				
 		$data->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
 		$data->{ $_ } =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
 	}
 	
-	$data->{ senderOfficial } = $data->{ sender };
-	$data->{ contactPerson } = $data->{ sender };
-
 	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
 
 	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
@@ -773,7 +768,7 @@ sub offline_check_params
 	my $self = shift;
 	
 	my $checks = [
-		{ name => 'date', field => "Дата передачи документов" },
+		{ name => 'takeDate', field => "Дата передачи документов" },
 		{ name => 'sender', field => "ФИО отправителя" },
 		{ name => 'senderPhone', field => "Контактный телефон" },
 		{ name => 'senderEMail', field => "Контактный email" },
@@ -791,7 +786,7 @@ sub offline_check_params
 			if $param =~ /[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\@\?\!\_\.\,\:\"\\\/\(\)№_]/;
 	}
 	
-	my $date = $self->{ vars }->getparam( 'date' );
+	my $date = $self->{ vars }->getparam( 'takeDate' );
 	
 	my ( $start_date, $end_date ) = $self->get_min_max_date();
 	
@@ -874,7 +869,8 @@ sub online_app
 		$sms_code, $concil_free, $concil_full_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );	
 		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
-	my ( $payment, $error, $err_target, $docpack, $docnum, $app_list ) = ( undef, undef, undef, undef, undef, undef );
+	my ( $payment, $error, $err_target, $docpack, $docnum, $app_list, $sending ) =
+		( undef, undef, undef, undef, undef, undef, undef );
 
 	unless ( $online_status > 0 ) {
 		
@@ -1037,6 +1033,8 @@ sub online_app
 
 		( $start_date, $end_date ) = $self->get_min_max_date();
 		
+		$sending = $self->data_for_sending();
+		
 		$error = offline_check_params( $self ) if $self->{ vars }->getparam( 'appdata' ) eq 'order';
 		
 		if ( !$error and ( $self->{ vars }->getparam( 'appdata' ) eq 'order' ) ) {
@@ -1121,6 +1119,7 @@ sub online_app
 	$tvars->{ concil_full_free } = $concil_full_free if $concil_full_free;
 	$tvars->{ service_type } = $service_type if $service_type;
 	$tvars->{ app_list } = $app_list if $app_list;
+	$tvars->{ sending } = $sending if $sending;
 	
 	$tvars->{ docpack } = $docpack if $docpack;
 	$tvars->{ docnum } = $docnum if $docnum;
@@ -1130,6 +1129,29 @@ sub online_app
 	$tvars->{ concil } = $concil if $concil;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
+}
+
+sub data_for_sending
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $data = {};
+
+	my $app_count = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT COUNT(AppData.ID) FROM AppData
+		JOIN AutoToken ON AppData.AppID = AutoToken.CreatedApp
+		WHERE Token = ? AND AppData.Status != 2", $self->{ token }
+	);
+		
+	$data->{ weight } = POSIX::ceil( $app_count / 3 ) * 0.5;
+	
+	my $config = VCS::Site::autodata::get_settings(); # ->{ fox }-> 
+	
+	$data->{ index } = $config->{ fox }->{ recipientIndex };
+	$data->{ address } = $config->{ fox }->{ recipientAddress };
+	
+	return $data;
 }
 
 sub get_min_max_date
