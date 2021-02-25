@@ -819,7 +819,7 @@
 				<table width="100%">
 				<tr>
 					<td rowspan=2 valign=top>[% langreq('Дата передачи документов') %]:</td>
-					<td><input type="text" value="" name="date" id="date" style="width:90%" readonly="readonly"></td>
+					<td><input type="text" value="" name="takeDate" id="takeDate" style="width:90%" readonly="readonly"></td>
 					<tr><td class="exam_td_gen left"><span class="exam_span_gen">[% langreq('01.01.2021') %]</span></td></tr>
 				</tr><tr>
 					<td rowspan=2 valign=top>[% langreq('ФИО отправителя') %]:</td>
@@ -1077,7 +1077,7 @@
 
 [% IF ( title == 9 ) && ( online_status == 10 ) %]
 
-	$('#date').datepicker({
+	$('#takeDate').datepicker({
 		dateFormat: 'dd.mm.yy',
 		firstDay: 1,
 		minDate: '[% start_date %]',
@@ -1125,14 +1125,14 @@
 				$('#selectedAddr').fadeIn();
 				
 				var calcUrl = "[% calc_url %]login=[% login %]&password=[% pass %]&service=[% service %]";
-				var indexes = "&toindex=&fromindex=" + ui.item.postalcode;
-				var addresses = encodeURI("&recipientAddress=&senderAddress=" + ui.item.address);
-				var typesAndUrgancy = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&service=[% service %]&weight=0.5&qty=1";
+				var indexes = "&toindex=[% sending.index %]&fromindex=" + ui.item.postalcode;
+				var addresses = encodeURI("&recipientAddress=[% sending.address %]&senderAddress=" + ui.item.address);
+				var types = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&weight=[% sending.weight %]&qty=1";
 				
 				$('#selectedAddrPriceLoad').fadeIn();
 
 				$.ajax({
-					url: calcUrl + indexes + addresses + typesAndUrgancy,
+					url: calcUrl + indexes + addresses + types,
 					dataType: "json",
 					
 					error: function( data ) {
@@ -1436,13 +1436,13 @@ function mobileScreenCheck() {
 	
 	function online_app() {
 	
-		var date_val_check = date_check( $( '#date' ).val() );
+		var date_val_check = date_check( $( '#takeDate' ).val() );
 		
 		if ( date_val_check != "" )
-			showErrorTip( date_val_check, 'date' );
+			showErrorTip( date_val_check, 'takeDate' );
 		
-		else if ( $('#date').val().match(/[^0-9\.]/) )
-			showErrorTip( "В поле 'Дата передачи документов' введены недопустимые символы", 'date' );
+		else if ( $('#takeDate').val().match(/[^0-9\.]/) )
+			showErrorTip( "В поле 'Дата передачи документов' введены недопустимые символы", 'takeDate' );
 
 		else if ( $( '#sender' ).val() == "" )
 			showErrorTip( "Поле 'ФИО отправителя' должно быть заполнено", 'sender' );
