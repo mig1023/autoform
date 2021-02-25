@@ -273,7 +273,7 @@ sub get_infopage
 	}
 	else {
 		$app_list = $self->get_app_file_list_by_token( $self->{ token }, $app_info->{ VType } );
-		
+
 		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
 		
 		for my $app ( keys %$app_list ) {
@@ -870,7 +870,7 @@ sub online_app
 		$sms_code, $concil_free, $concil_full_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );	
 		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
-	my ( $payment, $error, $err_target, $docpack, $docnum ) = ( undef, undef, undef, undef, undef );
+	my ( $payment, $error, $err_target, $docpack, $docnum, $app_list ) = ( undef, undef, undef, undef, undef, undef );
 
 	unless ( $online_status > 0 ) {
 		
@@ -1012,6 +1012,12 @@ sub online_app
 		
 		$docnum =~ s/(\d{2})(\d{6})(\d{6})/$1.$2.$3/;
 		
+		$app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
+			SELECT AppData.ID, LName, FName FROM AppData
+			JOIN AutoToken ON AppData.AppID = AutoToken.CreatedApp
+			WHERE Token = ?", $self->{ token }
+		);
+
 		return online_status_change( $self, 10 )
 			if $self->{ vars }->getparam( 'appdata' ) eq 'confirm_loaded';
 	}
@@ -1102,6 +1108,7 @@ sub online_app
 	$tvars->{ concil_free } = $concil_free if $concil_free;
 	$tvars->{ concil_full_free } = $concil_full_free if $concil_full_free;
 	$tvars->{ service_type } = $service_type if $service_type;
+	$tvars->{ app_list } = $app_list if $app_list;
 	
 	$tvars->{ docpack } = $docpack if $docpack;
 	$tvars->{ docnum } = $docnum if $docnum;
