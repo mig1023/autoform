@@ -65,7 +65,7 @@ sub create_online_agreement
 
 	my $app = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT FoxAddress, FName, LName, MName, Appointments.VType, Appointments.ID,
-		SMS, Phone, Mobile, PassNum, PassDate, PassWhom, Appointments.Address, FoxID,
+		SMS, Phone, Mobile, PassNum, PassDate, PassWhom, Appointments.Address,
 		AutoRemote.BankID, AutoToken.EMail, AutoRemote.ID as AutoRemoteID
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
@@ -190,23 +190,6 @@ sub create_online_agreement
 	);
 
 	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
-}
-
-sub update_sending_info
-# //////////////////////////////////////////////////
-{
-	my ( $self, $shipnum_from, $shipnum_to, $shipaddr ) = @_;
-	
-	my $doc_id = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT Agreement FROM AutoRemote 
-		JOIN AutoToken ON AutoToken.CreatedApp = AutoRemote.AppID
-		WHERE Token = ?", $self->{ token }
-	);
-	
-	my $app_id = $self->{ af }->query( 'query', __LINE__, "
-		UPDATE DocPack SET ShippingAddress = ?, ShipNum = ? WHERE ID = ?", {},
-		$shipaddr, $shipnum_from, $doc_id
-	);
 }
 
 1;

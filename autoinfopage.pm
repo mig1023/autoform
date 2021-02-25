@@ -721,7 +721,7 @@ sub online_order
 	my $self = shift;
 	
 	my $config = VCS::Site::autodata::get_settings();
-	
+
 	my $sending = $self->data_for_sending();
 
 	my $data = {
@@ -795,7 +795,7 @@ sub online_order
 	}
 
 	my $response_to = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data_to );
-
+	
 	my $order_to = JSON->new->pretty->decode( $response_to->decoded_content );
 
 	return ( $order_from->{ number }, $order_to->{ number }, $errorInfo, $data->{ senderAddress } );
@@ -1088,8 +1088,6 @@ sub online_app
 					UPDATE AutoRemote SET FoxIDfrom = ?, FoxIDto = ?, FoxAddress = ? WHERE ID = ?", {},
 					$order_num_from, $order_num_to, $address, $remote_id
 				);
-				
-				VCS::Site::autoagreement::update_sending_info( $self, $order_num_from, $order_num_to, $address);
 				
 				return online_status_change( $self, 11 );
 			}
