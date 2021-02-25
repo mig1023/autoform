@@ -4694,7 +4694,7 @@ sub get_doc_uploading
 		
 		my $help_link = $help->{ ( exists $help->{ $visa_type } ? $visa_type : "base" ) }->{ $lang };
 		
-		$doc_list->[ $index ]->{ help } = $help_link;
+		$doc_list->[ $index ]->{ help } = $help_link || "";
 	}
 	
 	my $opt_doc_index = 0;
