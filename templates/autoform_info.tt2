@@ -774,6 +774,12 @@
 				
 				[% langreq('Скачайте опись документов:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=download_checklist">Опись документов</a><br><br>
 				
+				[% langreq('Скачайте анкеты для всех заявителей:') %]<br>
+				
+				[% FOREACH person IN app_list %]
+					<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=print_a&appdata=[% person.ID %]">[% person.LName %]&nbsp;[% person.FName %]</a>&nbsp;
+				[% END %]<br><br>
+				
 				<span class="ltl_text">
 					[% langreq('<b>Обратите внимание</b>, что Вы <b>обязательно должны</b> заполнить опись, указав все прилагаемые Вами документы, подписать её, указать дату передачи документов курьеру, а также укзать галочки, что подтверждаете полноту предоставленных документов и проинформированы о последствиях предоставления несоответствующих требованиям документов. Вы обязательно должны <b>вложить заполненную опись в пакет передаваемых курьеру документов</b>.') %]<br>
 				</span>
