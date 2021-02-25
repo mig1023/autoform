@@ -352,6 +352,10 @@ sub get_content_rules_hash
 					{
 						condition => 'now_or_earlier',
 					},
+					{
+						condition => 'age_for_visatypes',
+						full_error => 'Для выбранного типа визы не допускается подача на визу для несовершеннолетнего', 	
+					}
 				],
 				db => {
 					table => 'AppData',

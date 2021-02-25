@@ -3540,6 +3540,20 @@ sub check_logic
 				if ( $citizenship == 70 ) and $value !~ /^[0-9]{9}$/i;
 		}
 		
+		if ( $rule->{ condition } =~ /^age_for_visatypes$/ and $value ) {
+
+			my $age = $self->age( $value, localtime->ymd );
+			
+			my $vtype = $self->query( 'sel1', __LINE__, "
+				SELECT VType FROM AutoToken
+				JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+				WHERE Token = ?", $self->{ token }
+			);
+
+			return $self->text_error( undef, $element, undef, undef, undef, $rule->{ full_error } )
+				if ( $age < 18 ) and ( $vtype =~ /^(1|15)$/ );
+		}
+		
 		if ( $rule->{ condition } =~ /^(more|less)_than$/ ) {
 			
 			my $type = $1;
