@@ -257,7 +257,7 @@ sub get_infopage
 	
 	$app_info->{ new_app_timeslot } =~ s/\s.+//g;
 
-	$self->{ vars }->get_system->pheader( $self->{ vars } );
+	my ( undef, undef, $date_fail ) = $self->get_min_max_date();
 	
 	my ( $app_list, $title );
 	
@@ -283,6 +283,8 @@ sub get_infopage
 			$block_online_app = 1 if $app_list->{ $app }->{ BlockOnlineApp } == 1;
 		}
 	}
+	
+	$block_online_app = 1 if $date_fail;
 
 	my $closed_app = ( $app_info->{ app_status } == 12 ? 1 : 0 );
 	
@@ -308,6 +310,8 @@ sub get_infopage
 	my ( $online_status, undef, $order_num ) = get_remote_status( $self );
 	
 	$tvars->{ fox_status } = VCS::Site::autopayment::fox_status( $self, $order_num ) if $online_status == 7;
+	
+	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
@@ -874,8 +878,16 @@ sub online_app
 
 	unless ( $online_status > 0 ) {
 		
-		set_remote_status( $self, 1 );
-		$online_status = 1;
+		my ( undef, undef, $date_fail ) = $self->get_min_max_date();
+		
+		if ( $date_fail ) {
+			
+			$self->{ af }->redirect( $self->{ token } );
+		}
+		else {
+			set_remote_status( $self, 1 );
+			$online_status = 1;
+		}
 	}
 	
 	if ( $online_status == 1 ) {
@@ -1150,13 +1162,15 @@ sub get_min_max_date
 	};
 	
 	( $year, $month, $day ) = ( $max_year, $max_month, $max_day)
-		if $self->{ vars }->get_system->cmp_date( "$year-$month-$day", "$max_year-$max_month-$max_day") < 0;
+		if $self->{ vars }->get_system->cmp_date( "$year-$month-$day", "$max_year-$max_month-$max_day" ) < 0;
 		
 	my $start_date = "$current_day.$current_mon.$current_year";
 	
 	my $end_date = "$day.$month.$year";
 	
-	return ( $start_date, $end_date );
+	my $fail = $self->{ vars }->get_system->cmp_date( "$current_year-$current_mon-$current_day", "$year-$month-$day" ) < 0;
+
+	return ( $start_date, $end_date, $fail );
 }
 
 sub calc_concil
