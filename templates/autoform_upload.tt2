@@ -69,9 +69,9 @@
 		<td class="info_list mobil_hide [% IF (doc.optional == 1) %]optional_line[% END %]">
 		[% langreq(doc.title) %]
 		[% IF (doc.help != '') %]
-			<a target="_blank" class="nfc_link" href="[% doc.help %]" [% IF (doc.comment != '') %]title="[% doc.comment %]"[% END %]>[?]</a>
+			<a target="_blank" class="nfc_link" style="cursor:pointer;" href="[% doc.help %]" [% IF (doc.comment != '') %]title="[% doc.comment %]"[% END %]>[?]</a>
 		[% ELSIF (doc.comment != '') %]
-			<a class="nfc_link" href="" title="[% doc.comment %]" onclick="return false;">[?]</a>
+			<a class="nfc_link" style="cursor:help;" href="" title="[% doc.comment %]" onclick="return false;">[?]</a>
 		[% END %]
 		</td>
 		
