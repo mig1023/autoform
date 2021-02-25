@@ -820,8 +820,10 @@
 				<span id="selectedAddrText" style="font-weight:bold;font-size:9pt;"></span>&nbsp;<a href="javascript:changeSelectedAddr()">[% langreq('изменить') %]</a>
 			</div>
 			<div id="selectedAddrParams" style="display:none;font-size:9pt;"><br>
-				[% langreq('Стоимость доставки') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
-				[% langreq('Доставка (дней)') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span><br><br>
+				[% langreq('Стоимость доставки туда и обратно') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
+				<span class="ltl_text">
+					[% langreq('Это примерный расчёт, цена компании курьерской доставки может незначительно отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br><br>
+				</span>
 				
 				<input type="hidden" name="senderGeography" id="senderGeography">
 				<input type="hidden" name="senderIndex" id="senderIndex">
@@ -879,7 +881,7 @@
 	
 		<tr><td colspan="2">
 			<div>
-				[% langreq('Номера ваших заказов на доставку') %]:<br><b>[% order_num_from %]</b> ([% langreq('от Вас к нам') %]),<br><b>[% order_num_to %]</b> ([% langreq('от нас к Вам') %])<br><br>
+				[% langreq('Номера ваших заказов на доставку') %]:<br><b>[% order_num_from %]</b> ([% langreq('от Вас к нам') %]), <b>[% order_num_to %]</b> ([% langreq('от нас к Вам') %])<br><br>
 				<span class="ltl_text">
 					[% langreq('Вы будете перенаправлены на страницу курьерской службы для оплаты доставки.') %]<br>
 					[% langreq('После оплаты нажмите на кнопку оплаты повторно для продолжения.') %]
@@ -1152,21 +1154,47 @@
 					},
 					success: function( data ) {
 					
-						$('#selectedAddrPriceLoad').fadeOut();
-
 						if (data["tariffs"] == null) {
 							$('#selectedAddrFail').fadeIn();
 							$('#fox_order').prop('disabled', true);
 						}
 						else {
-							$('#selectedAddrPrice').html(data["tariffs"][0]["total"] + ' руб');
-							$('#selectedAddrTime').html(data["tariffs"][0]["maxPeriod"]);
-							$('#selectedAddrParams').fadeIn();
+							var price_from = data["tariffs"][0]["total"];
 							
-							$('#fox_order').prop('disabled', false);
-							
-							$('#senderIndex').val(ui.item.postalcode);
-							$('#senderAddress').val(ui.item.address);
+							indexes = "&fromindex=[% sending.index %]&toindex=" + ui.item.postalcode;
+							addresses = encodeURI("&senderAddress=[% sending.address %]&recipientAddress=" + ui.item.address);
+						
+							$.ajax({
+								url: calcUrl + indexes + addresses + types,
+								dataType: "json",
+								
+								error: function( data ) {
+									$('#selectedAddrError').fadeIn();
+									$('#fox_order').prop('disabled', true);
+								},
+								success: function( data ) {
+								
+									$('#selectedAddrPriceLoad').fadeOut();
+
+									if (data["tariffs"] == null) {
+										$('#selectedAddrFail').fadeIn();
+										$('#fox_order').prop('disabled', true);
+									}
+									else {
+										var price_to = data["tariffs"][0]["total"];
+									
+										var priceFull = price_from + ' + ' + price_to + ' = ' + (price_from + price_to);
+									
+										$('#selectedAddrPrice').html(priceFull + ' [% langreq('руб') %]');
+										$('#selectedAddrParams').fadeIn();
+										
+										$('#fox_order').prop('disabled', false);
+										
+										$('#senderIndex').val(ui.item.postalcode);
+										$('#senderAddress').val(ui.item.address);
+									}
+								}
+							});
 						}
 					}
 				});
