@@ -832,13 +832,17 @@ sub init_add_param
 
 		my $app_person_in_app = $self->query( 'selallkeys', __LINE__, "
 			SELECT AutoAppData.ID as ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person,
-			birthdate, CURRENT_DATE() as currentdate
+			birthdate, CURRENT_DATE() as currentdate, ServiceType
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 			WHERE AutoToken.Token = ?", $self->{ token }
 		);
+		
+		my $service = 1;
 
 		for my $person ( @$app_person_in_app ) {
+			
+			$service = $person->{ ServiceType } if $person->{ ServiceType } != 1;
 		
 			$person->{ person } = $self->date_format( $person->{ person } );
 			
@@ -847,8 +851,10 @@ sub init_add_param
 
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		};
-			
-		push( @{ $info_from_db->{ '[persons_in_app]' } }, [ -1, $self->lang('на доверенное лицо') ] );
+		
+		my $other = ( $service == 1 ? 'на доверенное лицо' : 'представитель' );
+		
+		push( @{ $info_from_db->{ '[persons_in_app]' } }, [ -1, $self->lang( $other ) ] );
 	}
 	
 	if ( $self->{ token } and $keys->{ ussr_or_rf_first } ) {
