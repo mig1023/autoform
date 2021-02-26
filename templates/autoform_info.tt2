@@ -822,8 +822,12 @@
 			<div id="selectedAddrParams" style="display:none;font-size:9pt;"><br>
 				[% langreq('Стоимость доставки туда и обратно') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
 				<span class="ltl_text">
-					[% langreq('Это примерный расчёт, цена компании курьерской доставки может незначительно отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br><br>
+					[% langreq('Это примерный расчёт, цена компании курьерской доставки может незначительно отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br>
 				</span>
+				<div id="selectedTimes" style="display:none;">
+					[% langreq('Приблизительный срок доставки') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span><br>
+				</div>
+				<br>
 				
 				<input type="hidden" name="senderGeography" id="senderGeography">
 				<input type="hidden" name="senderIndex" id="senderIndex">
@@ -1156,10 +1160,12 @@
 					
 						if (data["tariffs"] == null) {
 							$('#selectedAddrFail').fadeIn();
+							$('#selectedAddrPriceLoad').fadeOut();
 							$('#fox_order').prop('disabled', true);
 						}
 						else {
 							var price_from = data["tariffs"][0]["total"];
+							var time_from = data["tariffs"][0]["maxPeriod"];
 							
 							indexes = "&fromindex=[% sending.index %]&toindex=" + ui.item.postalcode;
 							addresses = encodeURI("&senderAddress=[% sending.address %]&recipientAddress=" + ui.item.address);
@@ -1170,6 +1176,7 @@
 								
 								error: function( data ) {
 									$('#selectedAddrError').fadeIn();
+									$('#selectedAddrPriceLoad').fadeOut();
 									$('#fox_order').prop('disabled', true);
 								},
 								success: function( data ) {
@@ -1182,11 +1189,20 @@
 									}
 									else {
 										var price_to = data["tariffs"][0]["total"];
+										var time_to = data["tariffs"][0]["maxPeriod"];
 									
 										var priceFull = price_from + ' + ' + price_to + ' = ' + (price_from + price_to);
 									
 										$('#selectedAddrPrice').html(priceFull + ' [% langreq('руб') %]');
+										
 										$('#selectedAddrParams').fadeIn();
+										
+										if ((time_from > 0) && (time_to > 0)) {
+										
+											var timeFull = time_from + ' дней к нам + ' + time_to + ' дней обратно';
+											$('#selectedAddrTime').html(timeFull);
+											$('#selectedTimes').fadeIn();
+										}
 										
 										$('#fox_order').prop('disabled', false);
 										
@@ -1222,6 +1238,7 @@
 	function hideAnotherFields() {
 		$('#selectedAddr').fadeOut();
 		$('#selectedAddrParams').fadeOut();
+		$('#selectedTimes').fadeOut();
 		$('#selectedAddrFail').fadeOut();
 		$('#selectedAddrError').fadeOut();
 		$('#selectedAddrIncomplete').fadeOut();
