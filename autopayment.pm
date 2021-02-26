@@ -196,11 +196,30 @@ sub fox_pay_status
 	return $payment_ok && $payment_to_ok;
 }
 
+sub fox_pay_document
+# //////////////////////////////////////////////////
+{
+	my ( $self, $order_number ) = @_;
+	
+	my $config = VCS::Site::autodata::get_settings();
+	
+	my $url_param = "login=" . $config->{ fox }->{ login } . "&password=" . $config->{ fox }->{ password } .
+		"&documentType=order&number=&numberType=internalnumber&formName=Waybill";
+		
+	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ document } . $url_param );
+
+	return "" unless $response->is_success;	
+
+	my $status = JSON->new->pretty->decode( $response->decoded_content );
+
+	return undef;
+}
+
 sub fox_status
 # //////////////////////////////////////////////////
 {
 	my ( $self, $order_number_from, $order_number_to ) = @_;
-
+		
 	my $config = VCS::Site::autodata::get_settings();
 	
 	my $url_param = "login=" . $config->{ fox }->{ login } . "&password=" . $config->{ fox }->{ password } .
