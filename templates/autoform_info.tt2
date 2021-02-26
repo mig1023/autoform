@@ -789,7 +789,7 @@
 					[% langreq('При отправке документов в визовый центр не забудьте <b>приложить фотографию</b>, соответствующую <a target="_blank" class="dotted_link" href="/trebovaniya-k-fotografii/">требованиям</a>.') %]
 				</span><br><br>
 				
-				[% langreq('Скачайте ') %] <a target="_blank" class="dotted_link_big" href="">[% langreq('Согласие на обработку персональных данных') %]</a>.<br><br>
+				[% langreq('Скачайте ') %] <a target="_blank" class="dotted_link_big" href="">[% langreq('Согласие на обработку персональных данных') %]</a>.<br>
 				
 				<span class="ltl_text">
 					[% langreq('Согласие на обработку ПД должно быть заполнено и подписано <b>каждым</b> заявителем.') %]<br>
@@ -798,7 +798,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('online_app', 'confirm_loaded');">
+			<input class="small_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_with_confirm()">
 		</td></tr>
 
 	[% ELSIF online_status == 10 %]
@@ -907,7 +907,22 @@
 					[% langreq('В указанную вами дату с вами свяжется представитель курьерской службы для уточнения времини передачи им документов.') %]<br><br>
 					[% langreq('<b>Обратите внимание</b>, что вам необходимо передать курьеру все те документы, которые вы предоставляли на проверку. Вы обязательно должны <b>подписать опись</b> документов и <b>вложить опись в пакет документов</b>, который передадите курьеру.') %]<br><br>
 					[% langreq('Каждая анкета заявителя должна быть <b>распечатана и подписана заявителем</b>.') %]
+					<br><br>
 				</span>
+			</div>
+			<div class="ltl_text grayborder">
+				<b>[% langreq('Если вы не сделали этого раньше, то вы можете:') %]</b><br><br>
+				[% langreq('Скачать договор на оказание услуги:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=print_doc&doc=[% docpack %]">[% langreq('Договор №') %] [% docnum %]</a><br><br>
+				
+				[% langreq('Скачать опись документов:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=download_checklist">[% langreq('Опись документов') %]</a><br><br>
+								
+				[% langreq('Скачать анкеты для всех заявителей:') %]<br>
+				
+				[% FOREACH person IN app_list %]
+					<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=print_a&appdata=[% person.ID %]">[% person.LName %]&nbsp;[% person.FName %]</a>&nbsp;
+				[% END %]<br><br>
+				
+				[% langreq('Скачать ') %] <a target="_blank" class="dotted_link_big" href="">[% langreq('Согласие на обработку персональных данных') %]</a>.<br>
 			</div>
 		</td></tr>
 		
@@ -1593,6 +1608,12 @@ function mobileScreenCheck() {
 [% IF ( title == 9 ) && error %]
 	showErrorTip('[% error %]', '[% err_target %]');
 [% END %]
+
+function go_with_confirm() {
+
+	if ( confirm( '[% langreq('Вы уверены, что скачали всё необходимое для пакета документов?') %]' ) )
+		go_button('online_app', 'confirm_loaded');
+}
 
 function go_button(where, who) {
 	$('#action').val(where);
