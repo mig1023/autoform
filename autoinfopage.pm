@@ -721,7 +721,7 @@ sub online_order
 	my $self = shift;
 	
 	my $config = VCS::Site::autodata::get_settings();
-
+	
 	my $sending = $self->data_for_sending();
 
 	my $data = {
@@ -758,7 +758,7 @@ sub online_order
 	return ( undef, $errorInfo ) unless $response->is_success;
 	
 	my $order_from = JSON->new->pretty->decode( $response->decoded_content );
-	
+
 	my $data_to = {
 		'login' => $config->{ fox }->{ login }, 
 		'password' => $config->{ fox }->{ password },
@@ -1096,6 +1096,20 @@ sub online_app
 	
 	elsif ( $online_status == 12 ) {
 	
+		( $docpack, $docnum ) = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT Agreement, AgreementNo FROM AutoRemote
+			JOIN AutoToken ON AutoRemote.AppID = AutoToken.CreatedApp
+			JOIN DocPack ON AutoRemote.Agreement = DocPack.ID
+			WHERE Token = ?", $self->{ token }
+		);
+		
+		$docnum =~ s/(\d{2})(\d{6})(\d{6})/$1.$2.$3/;
+		
+		$app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
+			SELECT AppData.ID, LName, FName FROM AppData
+			JOIN AutoToken ON AppData.AppID = AutoToken.CreatedApp
+			WHERE Token = ?", $self->{ token }
+		);
 		
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_end' ) {
 			
@@ -1181,7 +1195,7 @@ sub data_for_sending
 		JOIN AutoToken ON AppData.AppID = AutoToken.CreatedApp
 		WHERE Token = ? AND AppData.Status != 2", $self->{ token }
 	);
-		
+	
 	$data->{ weight } = POSIX::ceil( $app_count / 3 ) * 0.5;
 	
 	my $config = VCS::Site::autodata::get_settings();
