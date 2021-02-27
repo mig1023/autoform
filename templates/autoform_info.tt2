@@ -654,38 +654,78 @@
 	
 		<tr><td colspan="2">
 			<div>
+				
 				[% langreq('Покупка квитанций консульского сбора') %]<br><br>
+				
 				<span class="ltl_text">
-					[% langreq('Вы покупаете квитанции <b>на сайте банка-партнёра</b>.') %]<br>
-					[% langreq('После покупки квитанций, вы должны вписать её номер в поле ниже на этой странице. Если квитанций несколько, то впишите их через запятую.') %]<br>
-					[% langreq('Если вы не должны платить консульский сбор, то покупать квитанции не нужно, но <b>вы должны понимать</b>, что Консульство может принять иное решение и потребовать оплату того или иного сбора.') %]<br>
-					[% langreq('Оплаченную квитанцию консульского сбора <b>нельзя обменять или вернуть</b>, поэтому будьте, пожалуйста, особенно внимательны в вопросе их покупки.') %]<br>
-				</span><br>
-				
-								
-				[% IF ( concil_full_free != 0 ) %]
-					[% langreq('Для оплаты <b>нажмите кнопку "Оплатить"</b> и следуйте инструкциям на сайте банка.') %]<br><br>
-					[% langreq('После оплаты укажите в поле номер квитанции для каждого заявителя.') %]<br>
-					<span class="ltl_text">
-						[% langreq('Если одна квитанция покрывает сбор для нескольких заявителей, то укажите для одинаковый номер.') %]
-					</span><br><br>
+					[% IF ( concil_full_free != 1 ) %]
+						[% langreq('Вы покупаете квитанции <b>на сайте банка-партнёра</b>.') %]<br><br>
+					[% END %]
 					
-				[% END %]
+					[% langreq('Если вы относитесь к льготной категории, то покупать квитанции не нужно, но <b>вы должны понимать</b>, что Консульство может принять иное решение и потребовать оплату того или иного сбора.') %]<br><br>
+				</span>
 				
-				<input type="hidden" name="concil_data" id="concil_data">
+				[% IF ( concil_full_free != 1 ) %]
+					[% langreq('В случае <b>наличия ранее оплаченной квитанции</b> консульского сбора укажите номер квитанции для каждого заявителя в поле ниже. Срок действия квитанции составляет 90 дней с момента покупки.') %]<br><br>
+					
+					<span class="ltl_text">
+					[% langreq('Если одна квитанция покрывает сбор для нескольких заявителей, то укажите для них одинаковый номер.') %]
+					</span><br>
+				[% END %]
 				<table width="100%">
+				[% IF ( concil_full_free != 1 ) %]
+					<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td><span class="ltl_text">[% langreq('BankID купленной в банке квитанции') %]</span></td>
+					</tr>
+				[% END %]
 				[% FOREACH person IN concil %]
 					<tr><td valign="top">[% person.FName %] [% person.LName %]</td>
 					[% IF (person.ConcilPayCode == 6) %]
-						<td valign="top">[% person.ConcilOnlinePay %]</td>
-						<td>&nbsp;</td>
+						<td valign="top" colspan="2"><span class="ltl_text">[% person.ConcilOnlinePay %]</span></td>
 					[% ELSE %]
-						<td valign="top">[% person.ConcilOnlinePay %]</td>
-						<td valign="top"><input type="text" id="concil_number_[% person.ID %]" name="concil_number_[% person.ID %]" style="width:90%"><br><span class="exam_span_gen">[% langreq('пример: 1234/12345678') %]</span></td>
+						<td valign="top"><span class="ltl_text">[% person.ConcilOnlinePay %]</span></td>
+						<td valign="top"><input type="text" id="concil_number_[% person.ID %]" name="concil_number_[% person.ID %]" style="width:90%" onkeyup="onlyoneneed([% person.ID %]);"><br><span class="exam_span_gen">[% langreq('пример: 1234/12345678') %]</span></td>
 					[% END %]
 					</tr>
 				[% END %]
 				</table><br>
+								
+				[% IF ( concil_full_free != 1 ) %]
+					[% langreq('В случае отсутствия оплаченных квитаций, вы должны оплатить консульский сбор онлайн. Для оплаты <b>нажмите кнопку "Оплатить"</b> и следуйте инструкциям на сайте банка.') %]<br><br>
+					<span class="ltl_text">
+						[% langreq('После покупки квитанций онлайн, вы должны вписать номер PVC в поле ниже на этой странице. Если оплат несколько, то впишите их PVC отдельно для каждого заявителя. Номер PVC присваивается Банком, он отобразится на сайте Банка сразу после оплаты и дополнительно будет отправлен на электронную почту, указанную при покупке квитанции консульского сбора.') %]<br><br>
+					</span>
+					
+				[% END %]
+				
+				<input type="hidden" name="concil_data" id="concil_data">
+				<input type="hidden" name="pvc_data" id="pvc_data">
+				<table width="100%">
+				[% IF ( concil_full_free != 1 ) %]
+					<tr>
+					<td>&nbsp;</td>
+					<td>&nbsp;</td>
+					<td><span class="ltl_text">[% langreq('Номер PVC после покупки квитации') %]</span></td>
+					</tr>
+					
+					[% FOREACH person IN concil %]
+						<tr><td valign="top">[% person.FName %] [% person.LName %]</td>
+						[% IF (person.ConcilPayCode == 6) %]
+							<td valign="top" colspan="2"><span class="ltl_text">[% person.ConcilOnlinePay %]</span></td>
+						[% ELSE %]
+							<td valign="top"><span class="ltl_text">[% person.ConcilOnlinePay %]</span></td>
+							<td valign="top"><input type="text" id="pvc_number_[% person.ID %]" name="pvc_number_[% person.ID %]" style="width:90%" onkeyup="onlyoneneed([% person.ID %]);"><br><span class="exam_span_gen">[% langreq('пример: ABCD1234') %]</span></td>
+						[% END %]
+						</tr>
+					[% END %]
+				</table><br>
+				
+				<span class="ltl_text">
+					[% langreq('Оплаченную квитанцию консульского сбора <b>нельзя обменять или вернуть</b>, поэтому будьте, пожалуйста, особенно внимательны в вопросе их покупки.') %]
+				</span><br><br>
+				[% END %]
 			
 				<span class="files_uploaded">
 					<input type="checkbox" value="1" name="concil_free_warning" id="concil_free_warning">
@@ -1276,33 +1316,51 @@
 	
 	}
 
+	function onlyoneneed(id) {
+	
+		$('#concil_number_' + id).prop('disabled', ( $('#pvc_number_' + id).val() != '' ? true : false ) );
+		$('#pvc_number_' + id).prop('disabled', ( $('#concil_number_' + id).val() != '' ? true : false ) );
+	}
+
 	function concilpay() {
 
 		var concils = '';
-		var concils_ok = 1;
-	
+		var pvcs = '';
+
 		[% FOREACH person IN concil %]
 		
 			[% IF ( person.ConcilPayCode != 6 ) %]
 		
-				var concil = $( '#concil_number_[% person.ID %]' ).val()
+				var concil = $( '#concil_number_[% person.ID %]' ).val();
+				var pvc = $( '#pvc_number_[% person.ID %]' ).val();
 
-				if ( concil == "" ) {
+				if ( ( concil == "" ) && ( pvc == "") ) {
 					window.open( '[% concil_url %]' );
 					return;
 				}
-				else if ( concil.match( /^202\d[^\d]?\d{8}$/ ) )
+				else if ( ( concil != "" ) && concil.match( /^202\d[^\d]?\d{8}$/ ) ) {
 					concils += '[% person.ID %]:' + concil + '|';
-				else {
+				}
+				else if ( concil != "" ) {
 					showErrorTip( "Проверьте правильность ввода номера квитанции консульского сбора", 'concil_number_[% person.ID %]' );
 					return false;
 				}
-				
+				else if ( ( pvc != "" ) && pvc.match( /^(\d|\w){8}$/ ) ) {
+					pvcs += '[% person.ID %]:' + pvc + '|';
+				}
+				else if ( pvc != "" ) {
+					showErrorTip( "Проверьте правильность ввода номера PVC", 'pvc_number_[% person.ID %]' );
+					return false;
+				}
+				else {
+					showErrorTip( "Проверьте правильность ввода данных", 'concil_number_[% person.ID %]' );
+					return false;
+				}
 			[% END %]
 		[% END %]
 		
 		$( '#concil_data' ).val( concils );
-
+		$( '#pvc_data' ).val( pvcs );
 			
 		if ( !$( '#concil_free_warning' ).prop( 'checked' ) ) {
 			showErrorTip( "Вы должны подтвердить своё ознакомление с условиями", 'concil_free_warning' );
@@ -1310,8 +1368,6 @@
 		}
 	
 		go_button( 'online_app', 'consular_pay' );
-		
-		
 	}
 	
 	function sms_sign() {
