@@ -58,6 +58,8 @@ sub autoinfopage
 	
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
 	
+	return calc( @_ ) if /^calc$/i;
+	
 	return $self->print_agreement() if /^print_doc$/i;
 	
 	return $self->download_checklist() if /^download_checklist$/i;
@@ -146,6 +148,30 @@ sub online_cancel
 	);
 
 	return $self->{ af }->redirect( $self->{ token } );	
+}
+
+sub calc
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $config = VCS::Site::autodata::get_settings();
+	
+	my $params = [ "service", "toindex", "fromindex", "recipientAddress",
+		"senderAddress", "typeOfCargo", "urgency", "weight", "qty" ];
+		
+	my $param_line = "login=" . $config->{ fox }->{ login } . "&password=" . $config->{ fox }->{ password };
+
+	for ( @$params ) {
+			
+		$param_line .= '&' . $_ . '=' . $self->{ vars }->getparam( $_ ) || "";
+	}
+
+	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ calc } . $param_line );
+	
+	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
+
+	print $response->decoded_content;	
 }
 
 sub online_addr_proxy
