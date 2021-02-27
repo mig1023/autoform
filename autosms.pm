@@ -26,9 +26,9 @@ sub get_phone_for_sms
 	my $self = shift;
 	
 	my $phone = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT AppPhone FROM AppData
-		JOIN AutoToken ON AppData.AppID = AutoToken.CreatedApp
-		WHERE Token = ? ORDER BY appdata.ID LIMIT 1", $self->{ token }
+		SELECT Phone FROM Appointments
+		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+		WHERE Token = ? ORDER BY appdata.ID", $self->{ token }
 	);
 	
 	return $phone;
