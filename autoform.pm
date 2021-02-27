@@ -832,7 +832,7 @@ sub init_add_param
 
 		my $app_person_in_app = $self->query( 'selallkeys', __LINE__, "
 			SELECT AutoAppData.ID as ID, CONCAT(RFName, ' ', RLName, ', ', BirthDate) as person,
-			birthdate, CURRENT_DATE() as currentdate, ServiceType
+			birthdate, CURRENT_DATE() as currentdate, ServiceType, Citizenship
 			FROM AutoToken 
 			JOIN AutoAppData ON AutoToken.AutoAppID = AutoAppData.AppID
 			WHERE AutoToken.Token = ?", $self->{ token }
@@ -848,6 +848,8 @@ sub init_add_param
 			
 			next if ( $self->age( $person->{ birthdate }, $person->{ currentdate } ) < 
 					$self->{ autoform }->{ age }->{ age_for_agreements } );
+					
+			next if ( $service == 2 ) and ( $person->{ Citizenship } != 70 );
 
 			push ( @{ $info_from_db->{ '[persons_in_app]' } }, [ $person->{ ID }, $person->{ person } ] );
 		};
