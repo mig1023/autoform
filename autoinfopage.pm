@@ -721,10 +721,10 @@ sub online_order
 	my $self = shift;
 	
 	my $config = VCS::Site::autodata::get_settings();
-
+	
 	my $sending = $self->data_for_sending();
 
-	my $data = {
+	my $data_from = {
 		'login' => $config->{ fox }->{ login }, 
 		'password' => $config->{ fox }->{ password },
 		'urgency' => $config->{ fox }->{ urgency },
@@ -746,18 +746,19 @@ sub online_order
 	
 	for ( 'takeDate', 'comment', 'sender', 'senderIndex', 'senderAddress', 'senderPhone', 'senderEMail' ) {
 				
-		$data->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
-		$data->{ $_ } =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
+		$data_from->{ $_ } = $self->{ vars }->getparam( $_ ) || "";
+		$data_from->{ $_ } =~ s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
 	}
 
-	my $response = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data );
+	my $response_from = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data_from );
 
-	my $errorInfoTMP = JSON->new->pretty->decode( $response->{ _content } );
-	my $errorInfo = $errorInfoTMP->{ errorInfo };
+	my $error_from = JSON->new->pretty->decode( $response_from->{ _content } )->{ errorInfo };
 
-	return ( undef, $errorInfo ) unless $response->is_success;
+	return ( undef, undef, $error_from ) unless $response_from->is_success;
 	
-	my $order_from = JSON->new->pretty->decode( $response->decoded_content );
+	my $order_from = JSON->new->pretty->decode( $response_from->decoded_content );
+	
+	# /////////////////////
 	
 	my $data_to = {
 		'login' => $config->{ fox }->{ login }, 
@@ -793,12 +794,16 @@ sub online_order
 		$data_to->{ $revert_fields->{ $_ } } =~
 			s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
 	}
-	
+
 	my $response_to = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data_to );
+
+	my $error_to = JSON->new->pretty->decode( $response_to->{ _content } )->{ errorInfo };
+
+	return ( undef, undef, $error_to ) unless $response_to->is_success;
 	
 	my $order_to = JSON->new->pretty->decode( $response_to->decoded_content );
 
-	return ( $order_from->{ number }, $order_to->{ number }, $errorInfo, $data->{ senderAddress } );
+	return ( $order_from->{ number }, $order_to->{ number }, $error_from, $data_from->{ senderAddress } );
 }
 
 sub offline_check_params
