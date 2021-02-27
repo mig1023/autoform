@@ -64,9 +64,10 @@ sub create_online_agreement
 	my ( $service_fee, undef ) = $self->{ af }->get_payment_price( "service" );
 
 	my $app = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT FoxAddress, FName, LName, MName, Appointments.VType, Appointments.ID,
-		SMS, Phone, Mobile, PassNum, PassDate, PassWhom, Appointments.Address,
-		AutoRemote.BankID, AutoToken.EMail, AutoRemote.ID as AutoRemoteID
+		SELECT Appointments.ID as AppID, FoxAddress, FName, LName, MName,
+		Appointments.VType, Appointments.ID, SMS, Phone, Mobile, PassNum, PassDate,
+		PassWhom, Appointments.Address,	AutoRemote.BankID, AutoRemote.PVC,
+		AutoToken.EMail, AutoRemote.ID as AutoRemoteID
 		FROM AutoToken
 		JOIN Appointments ON AutoToken.CreatedApp = Appointments.ID
 		JOIN AutoRemote ON Appointments.ID = AutoRemote.AppID
@@ -115,47 +116,41 @@ sub create_online_agreement
 		INSERT INTO DocPackOptional (DocPackID, ShippingFree, Reject, FeedbackKey, SendInfoEmail) VALUES (?, 0, 0, ?, ?)", {},
 		$doc_id, $feedback_token, $app->{ EMail }
 	);
-	my $opt_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		INSERT INTO DocComments (DocID, Login, CommentText, CommentDate) VALUES (?, ?, ?, now())", {},
 		$doc_id, 'remote_script', 'Договор сформирован автоматически системой удалённой подачи; договор был оплачен картой через платёжный шлюз'
 	);
-	my $comm_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
 
-	my @bankids_arr = split( /\|/, $app->{ BankID } );
+	my $bankids = parse_complex_data( $self, $app->{ BankID } );
 
-	my ( $apps, $bankids ) = ( {}, {} );
+	my $appdata = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT ID, RFName, RMName, RLName, PassNum, BirthDate, AppSDate
+		FROM AppData WHERE AppID = ? AND Status != 2", $app->{ AppID }
+	);
 	
-	for ( @bankids_arr ) {
+	my $docpackinfo = {};
+	
+	for ( @$appdata ) {
+
+		my $id = $bankids->{ $_->{ ID } } || " ";
 		
-		my @bankid = split( /:/, $_ );
-		
-		$apps->{ $bankid[0] } = $bankid[1];
-		
-		$bankids->{ $bankid[1] } += 1;
+		$docpackinfo->{ $id } = [] unless ref( $docpackinfo->{ $id } ) eq 'ARRAY';
+				
+		push( @{ $docpackinfo->{ $bankids->{ $_->{ ID } } } }, $_ );
 	}
 	
-	for ( keys %$bankids ) {
-		
-		my $bank_id = $_;
+	for my $info_bankid ( keys %$docpackinfo ) {
 		
 		$self->{ af }->query( 'query', __LINE__, "
 			INSERT INTO DocPackInfo (PackID, BankID, VisaCnt) VALUES (?, ?, ?)", {},
-			$doc_id, $bank_id, $bankids->{ $bank_id }
+			$doc_id, $info_bankid, scalar( @{ $docpackinfo->{ $info_bankid } } )
 		);
 		
 		my $info_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
-	
-		for ( keys %$apps ) {
-	
-			next unless $bank_id eq $apps->{ $_ };
-
-			my $ad = $self->{ af }->query( 'selallkeys', __LINE__, "
-				SELECT ID, RFName, RMName, RLName, PassNum, BirthDate, AppSDate
-				FROM AppData WHERE ID = ?", $_
-			)->[0];
-			
+		
+		for ( @{ $docpackinfo->{ $info_bankid } } ) {
+		
 			$self->{ af }->query( 'query', __LINE__, "
 				INSERT INTO DocPackList (
 					PackInfoID, CBankID, FName, LName, MName, isChild, PassNum, SDate, Login,
@@ -164,25 +159,26 @@ sub create_online_agreement
 				) VALUES (
 					?, ?, ?, ?, ?, ?, ?, ?, now(), 25, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 				)", {},
-					$info_id, $bank_id, $ad->{ RFName }, $ad->{ RMName }, $ad->{ RLName }, 0,
-					$ad->{ PassNum }, 'remote_script', $ad->{ ID }, 0, 0, ' ', ' ', 0, 0,
-					$ad->{ AppSDate }, 0, 0, $ad->{ BirthDate }, 0
+					$info_id, $info_bankid, $_->{ RFName }, $_->{ RMName }, $_->{ RLName }, 0,
+					$_->{ PassNum }, 'remote_script', $_->{ ID }, 0, 0, ' ', ' ', 0, 0,
+					$_->{ AppSDate }, 0, 0, $_->{ BirthDate }, 0
 			);
 			
 			my $secons_shift = 0;
 			
-			for ( 1, 2, 25 ) {
+			for my $sec ( 1, 2, 25 ) {
 				
 				$self->{ af }->query( 'query', __LINE__, "
 					INSERT INTO DocHistory (DocID, PassNum, Login, HDate, StatusID, BankID)
-						VALUES (?, ?, ?, DATE_ADD(now(), INTERVAL ? SECOND), ?, ?)", {},
-						$doc_id, $ad->{ PassNum }, 'remote_script', $secons_shift, $_, $bank_id
+					VALUES (?, ?, ?, DATE_ADD(now(), INTERVAL ? SECOND), ?, ?)", {},
+					$doc_id, $_->{ PassNum }, 'remote_script', $secons_shift, $sec, $info_bankid
 				);
 				
 				$secons_shift += 1;
 			};
 		}
 	}
+
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		UPDATE AutoRemote SET Agreement = ? WHERE ID = ?", {},
@@ -190,6 +186,25 @@ sub create_online_agreement
 	);
 
 	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
+}
+
+sub parse_complex_data
+# //////////////////////////////////////////////////
+{
+	my ( $self, $data ) = @_;
+	
+	my @data_arr = split( /\|/, $data );
+
+	my $data = {};
+	
+	for ( @data_arr ) {
+		
+		my @data_pair = split( /:/, $_ );
+		
+		$data->{ $data_pair[0] } = $data_pair[1];
+	}
+
+	return $data;
 }
 
 1;
