@@ -934,8 +934,7 @@
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
-			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br><br>
-			<input class="small_button" type="button" value="* [% langreq('подменить номер квитанции') %]" style="background:#FF3333;" onclick="go_button('tmp_debug');">
+			<input class="small_button" type="button" id="fox_order" name="fox_order" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="foxpay();"><br>
 		</td></tr>
 		
 	[% ELSIF online_status == 12 %]
@@ -1194,9 +1193,9 @@
 				
 				$('#selectAddr').fadeOut();
 				$('#selectedAddrText').html(ui.item.address);
-				$('#selectedAddr').fadeIn();
+				$('#selectedAddr').fadeIn();				
 				
-				var calcUrl = "[% calc_url %]login=[% login %]&password=[% pass %]&service=[% service %]";
+				var calcUrl = "/autoform/?t=[% token %]&action=calc&service=[% service %]";
 				var indexes = "&toindex=[% sending.index %]&fromindex=" + ui.item.postalcode;
 				var addresses = encodeURI("&recipientAddress=[% sending.address %]&senderAddress=" + ui.item.address);
 				var types = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&weight=[% sending.weight %]&qty=1";
