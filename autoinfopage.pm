@@ -721,7 +721,7 @@ sub online_order
 	my $self = shift;
 	
 	my $config = VCS::Site::autodata::get_settings();
-	
+
 	my $sending = $self->data_for_sending();
 
 	my $data = {
@@ -758,7 +758,7 @@ sub online_order
 	return ( undef, $errorInfo ) unless $response->is_success;
 	
 	my $order_from = JSON->new->pretty->decode( $response->decoded_content );
-
+	
 	my $data_to = {
 		'login' => $config->{ fox }->{ login }, 
 		'password' => $config->{ fox }->{ password },
@@ -793,7 +793,7 @@ sub online_order
 		$data_to->{ $revert_fields->{ $_ } } =~
 			s/[^A-Za-zАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя0-9\s\-\?\!\@\_\.\,\:\"\\\/\(\)№_]/./g;
 	}
-
+	
 	my $response_to = LWP::UserAgent->new( timeout => 30 )->post( $config->{ fox }->{ order }, $data_to );
 	
 	my $order_to = JSON->new->pretty->decode( $response_to->decoded_content );
@@ -836,12 +836,32 @@ sub offline_check_params
 		if ( $self->{ vars }->get_system->cmp_date( $end_date, $date ) > 0 );
 }
 
+sub check_concil
+# //////////////////////////////////////////////////
+{
+	my ( $self, $data, $concil ) = @_;
+	
+	my ( $id, $number ) = split( /:/, $data );
+	
+	$number =~ s/[^0-9]//g if $concil;
+	$number =~ s/[^a-z0-9]//gi unless $concil;
+
+	return undef unless $number;
+
+	return undef unless length( $number ) == ( $concil ? 12 : 8 ); 
+
+	return undef if $concil and $number !~ /^202/;
+
+	return ( $id, $number );
+}
+
 sub offline_check_consular
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
 	
 	my $consular = $self->{ vars }->getparam( "concil_data" ) || "";
+	my $pvc = $self->{ vars }->getparam( "pvc_data" ) || "";
 	
 	( undef, undef, my $concil ) = $self->calc_concil();
 	
@@ -850,24 +870,26 @@ sub offline_check_consular
 	$concils->{ $_->{ ID } } = $_->{ ConcilPayCode } for @$concil;
 	
 	my @consulars = split( /\|/, $consular );
+	my @pvcs = split( /\|/, $pvc );
 	
 	my $codes = {};
 	
 	for ( @consulars ) {
-
-		my @id_and_number = split( /:/, $_ );
 		
-		my $number = $id_and_number[1];
-		
-		$number =~ s/[^0-9]//g;
+		my ( $id, $number ) = check_concil( $self, $_, 'concil' );
 		
 		return undef unless $number;
 		
-		return undef unless length( $number ) == 12;
+		$codes->{ $id } = $number;
+	}
+	
+	for ( @pvcs ) {
+
+		my ( $id, $number ) = $self->check_concil( $_ );
 		
-		return undef unless $number =~ /^202/;
+		return undef unless $number;
 		
-		$codes->{ $id_and_number[0] } = $number;
+		$codes->{ $id } = $number;
 	}
 	
 	for ( keys %$concils ) {
@@ -880,9 +902,11 @@ sub offline_check_consular
 	}
 	
 	$consular =~ s/[^0-9\:\|]//g;
-	$consular =~ s/\|$//;
+	$pvc =~ s/[^a-z0-9\:\|]//gi;
+
+	s/\|$// for ( $consular, $pvc );
 	
-	return $consular;
+	return ( $consular, $pvc );
 }
 
 sub online_status_change
@@ -964,17 +988,18 @@ sub online_app
 			
 			return online_status_change( $self, 6 ) if $concil_full_free;
 			
-			my $consular_number = offline_check_consular( $self );
+			my ( $consular_number, $pvc ) = offline_check_consular( $self );
 			
-			if ( !$consular_number ) {
+			if ( !$consular_number && !$pvc ) {
 				
-				$error = $self->{ af }->lang( "Проверьте правильность ввода номера квитанции консульского сбора" );
+				$error = $self->{ af }->lang( "Проверьте правильность ввода данных оплаты консульского сбора" );
 			}
 			else {
 				my ( undef , $remote_id ) = get_remote_status( $self );
 				
 				$self->{ af }->query( 'query', __LINE__, "
-					UPDATE AutoRemote SET BankID = ? WHERE ID = ?", {}, $consular_number, $remote_id
+					UPDATE AutoRemote SET BankID = ?, PVC = ? WHERE ID = ?", {},
+					$consular_number, $pvc, $remote_id
 				);
 				
 				return online_status_change( $self, 6 );
