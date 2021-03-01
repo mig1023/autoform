@@ -464,7 +464,7 @@ sub payment_check
 						"quantity" 		=> $amount_quantity,
 						"price" 		=> $amount,
 						"tax" 			=> "1",
-						"text" 			=> $paymentTypes->{ $type },
+						"text" 			=> decode( 'utf8', $paymentTypes->{ $type } ),
 						"paymentMethodType" 	=> "4",
 						"paymentSubjectType" 	=> "4",
 					},
@@ -519,7 +519,7 @@ sub get_payment_price
 					
 		my $sms_price = $self->query( 'sel1', __LINE__, "
 			SELECT SMS FROM PriceRate
-			WHERE BranchID = 1 AND PriceRate.RDate <= curdate()
+			WHERE BranchID = 47 AND PriceRate.RDate <= curdate()
 			ORDER by PriceRate.ID DESC LIMIT 1;"
 		);
 		
@@ -556,7 +556,7 @@ sub get_payment_price
 			JOIN PriceList ON PriceRate.ID = PriceList.RateID
 			JOIN Appointments ON PriceList.VisaID = Appointments.VType
 			JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-			WHERE BranchID = 1 AND PriceRate.RDate <= curdate() AND Token = ?
+			WHERE BranchID = 47 AND PriceRate.RDate <= curdate() AND Token = ?
 			ORDER by PriceRate.ID DESC LIMIT 1",
 			$self->{ token }
 		);
