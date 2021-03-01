@@ -28,7 +28,7 @@ sub get_phone_for_sms
 	my $phone = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT Phone FROM Appointments
 		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-		WHERE Token = ? ORDER BY appdata.ID", $self->{ token }
+		WHERE Token = ?", $self->{ token }
 	);
 	
 	return $phone;
@@ -107,7 +107,7 @@ sub sending_sms
 		'&message=' . $message . '&recipients=' . $phone . '&sign=' . $sms_sign;
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->get( $request_url );
-	
+
 	return 0 unless $response->is_success;
 	
 	return 0 unless $response->content =~ /\"status\"\:\"success\"/;
