@@ -417,11 +417,11 @@ sub download_checklist
 	);
 	
 	my $checklist_types = {
-		1  => 'checklist_affari.pdf',
-		2  => 'checklist_affari.pdf',
-		3  => 'checklist_affari.pdf',
-		10 => 'checklist_turismo.pdf',
-		15 => 'checklist_affari.pdf',
+		1  => 'AF.pdf',
+		2  => 'CM.pdf',
+		3  => 'CM.pdf',
+		10 => 'RE.pdf',
+		15 => 'TX.pdf',
 	};
 	
 	my $file_name = $conf->{ tmp_folder } . "doc/" . $checklist_types->{ $vtype };	
@@ -880,9 +880,9 @@ sub check_concil
 	return undef unless $number;
 
 	return undef unless length( $number ) == ( $concil ? 12 : 8 ); 
-
+	
 	return undef if $concil and $number !~ /^202/;
-
+	
 	return ( $id, $number );
 }
 
