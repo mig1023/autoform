@@ -614,7 +614,7 @@
 			<div>
 				[% langreq('Пожалуйста, внимательно ознакомьтесь с договором на оказание услуги:') %]<br><br>
 			</div>
-			<div id="agreement_text" class="oferta"><br>agreement_text<br></div>
+			<div id="agreement_text" class="oferta">[% langreq('agreement_text') %]</div>
 		</td></tr>
 		
 		<tr><td colspan="2">&nbsp;<br>
