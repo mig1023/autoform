@@ -46,11 +46,10 @@ sub create_online_agreement
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		LOCK TABLES
-			DocHistory WRITE, BlackList WRITE, PriceRate WRITE, PriceList WRITE,
-			ServicesPriceRates WRITE, DocPack WRITE, DocPackInfo WRITE, DocPackList WRITE,
-			DocPackOptional WRITE, UserLog WRITE, Templates WRITE, Appointments WRITE,
-			AppData WRITE, CurRates WRITE, DocRequest WRITE, VisaTypes WRITE,
-			DocComments WRITE, AutoToken READ, AutoRemote READ"
+			DocHistory WRITE, DocPack WRITE, DocPackInfo WRITE, DocPackList WRITE,
+			DocPackOptional WRITE, UserLog WRITE, Templates WRITE,
+			Appointments WRITE, AppData WRITE, DocRequest WRITE, DocComments WRITE, AutoRemote WRITE,
+			AutoPayment READ, AutoToken READ, VisaTypes READ, PriceRate READ, PriceList READ"
 	);
 
 	my $now = $self->{ vars }->get_system->now_date();
