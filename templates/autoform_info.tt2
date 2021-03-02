@@ -786,7 +786,7 @@
 			<div>
 				[% langreq('Подписание договора об оказании услуг.') %]<br><br>
 			
-				<div id="agreement" class="oferta"><br>text_of_agreement<br></div><br>	
+				<div id="agreement" class="oferta"><br>[% langreq('agreement_text') %]<br></div><br>	
 			
 				[% langreq('Мы отправили вам SMS на телефон') %]: <b>[% sms_phone %]</b><br>
 				<span class="ltl_text">
