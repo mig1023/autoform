@@ -394,7 +394,9 @@ sub payment_prepare
 {
 	my ( $self, $app_id, $type ) = @_;
 
-	my ( $row_amount ) = $self->get_payment_price( $type );
+	my ( $price, $count ) = $self->get_payment_price( $type );
+
+	my $row_amount = $price * $count;
 
 	my $amount = decode( 'utf8', $row_amount );
 	
@@ -412,9 +414,9 @@ sub payment_prepare
 		return undef unless $order and $form_url;
 
 		$self->query( 'query', __LINE__, "
-			INSERT INTO AutoPayment (AutoID, Type, OrderNumber, Amount, OrderID, OrderLink, StartDate)
-			VALUES (?, ?, ?, ?, ?, ?, now())", {}, 
-			$app_id, $type, $order_number, $amount, $order, $form_url
+			INSERT INTO AutoPayment (AutoID, Type, OrderNumber, Price, Qnt, Amount, OrderID, OrderLink, StartDate)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, now())", {}, 
+			$app_id, $type, $order_number, $price, $count, $amount, $order, $form_url
 		);	
 	}
 
@@ -424,12 +426,12 @@ sub payment_prepare
 sub payment_check
 # //////////////////////////////////////////////////
 {
-	my ( $self, $type, $quantity ) = @_;
+	my ( $self, $type ) = @_;
 	
 	my $appIDfield = ( $type eq "check" ? "AutoToken.AutoAppID" : "AutoToken.CreatedApp");
 	
-	my ( $pay_id, $order_id, $current_pay_status, $amount, $email ) = $self->query( 'sel1', __LINE__, "
-		SELECT AutoPayment.ID, OrderID, PaymentStatus, Amount, EMail FROM AutoPayment
+	my ( $pay_id, $order_id, $current_pay_status, $price, $count, $amount, $email ) = $self->query( 'sel1', __LINE__, "
+		SELECT AutoPayment.ID, OrderID, PaymentStatus, Price, Qnt, Amount, EMail FROM AutoPayment
 		JOIN AutoToken ON AutoPayment.AutoID = $appIDfield
 		WHERE Token = ? AND AutoPayment.Type = ?", $self->{ token }, $type
 	);
@@ -451,8 +453,6 @@ sub payment_check
 			"sms" => "Услуги по оповещению (СМС сообщение)",
 		};
 		
-		my $amount_quantity = ( $quantity ? $quantity : 1 );
-		
 		my $data = {
 			"id" => $pay_id,
 			"inn" => $self->{ autoform }->{ cloud }->{ inn },
@@ -461,8 +461,8 @@ sub payment_check
 				"type" => "1",
 				"positions" => [
 					{
-						"quantity" 		=> $amount_quantity,
-						"price" 		=> $amount,
+						"quantity" 		=> $count,
+						"price" 		=> $price,
 						"tax" 			=> "1",
 						"text" 			=> decode( 'utf8', $paymentTypes->{ $type } ),
 						"paymentMethodType" 	=> "4",
@@ -473,7 +473,7 @@ sub payment_check
 					"payments" => [
 						{
 							"type" 		=> "2",
-							"amount" 	=> ( $amount * $amount_quantity ),
+							"amount" 	=> ( $price * $count ),
 						},
 					],
 					"taxationSystem" => "0",
@@ -506,6 +506,12 @@ sub get_payment_price
 
 	if ( $type eq "check" ) {
 	
+		my $service_count = $self->query( 'sel1', __LINE__, "
+			SELECT NCount FROM AutoAppointments
+			JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID
+			WHERE Token = ?", $self->{ token }
+		);
+		
 		my $payment_price = $self->query( 'sel1', __LINE__, "
 			SELECT Price FROM PriceRate
 			JOIN ServicesPriceRates ON PriceRate.ID = PriceRateID
@@ -513,7 +519,7 @@ sub get_payment_price
 			ORDER by PriceRate.ID DESC LIMIT 1",
 		);
 		
-		return $payment_price;
+		return ( $payment_price, $service_count );
 	}
 	elsif ( $type eq "sms" ) {
 					
@@ -530,7 +536,7 @@ sub get_payment_price
 			$self->{ token }
 		);
 					
-		return ( $sms_price, $app_id );
+		return ( $sms_price, 1, undef, $app_id );
 	}
 	elsif ( $type eq "concil" ) {
 		
@@ -576,7 +582,7 @@ sub get_payment_price
 			WHERE Token = ?", $self->{ token }
 		);
 	
-		return ( ( $payment_price * $service_count ), $payment_price, $vtype, $service_count, $app_id );
+		return ( $payment_price, $service_count, $vtype, $app_id );
 	}
 	elsif ( $type eq "vtype_only" ) {
 					
@@ -2577,12 +2583,17 @@ sub get_html_for_element
 	
 	if ( ( $type eq 'payment' ) or ( ( $type eq 'text' ) and ( $content =~ /\[pay_amount\]/ ) ) ) {
 
-		my $pay = $self->get_payment_price( "check" );
+		my ( $price, $count ) = $self->get_payment_price( "check" );
 
-		my $pay_text = $self->lang( 'К оплате за услугу:' );
+		my $pay = $price * $count;
+
+		my $pay_text =
+			$self->lang( "Количество заявителей: ") . $count . 
+			$self->lang( "<br>Стоимость: " ) . $price .
+			$self->lang( " руб<br><br>К оплате за услугу: <b>" ) . $pay . "</b>" ;
 					
 		$content =~ s/\[pay_text\]/$pay_text/;
-		$content =~ s/\[pay_amount\]/$pay/;
+		$content =~ s/\[pay_amount\]//;
 	}
 
 	if ( $type eq 'progress' ) {
