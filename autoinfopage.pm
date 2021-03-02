@@ -984,7 +984,9 @@ sub online_app
 		
 		( $sms_price, undef ) = $self->{ af }->get_payment_price( "sms" );
 		
-		( $service_fee, undef ) = $self->{ af }->get_payment_price( "service" );
+		( $service_fee, my $count ) = $self->{ af }->get_payment_price( "service" );
+		
+		$service_fee *= $count;
 		
 		( $concil_fee, undef ) = $self->{ af }->get_payment_price( "concil" );
 	
@@ -1039,7 +1041,7 @@ sub online_app
 	}
 	elsif ( $online_status == 6 ) {
 	
-		( $sms_price, my $app_id ) = $self->{ af }->get_payment_price( "sms" );
+		( $sms_price, undef, undef, my $app_id ) = $self->{ af }->get_payment_price( "sms" );
 		
 		$payment = $self->{ af }->payment_prepare( $app_id, 'sms' );
 		
@@ -1048,7 +1050,7 @@ sub online_app
 			
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'sms_pay' ) {
 			
-			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "sms", $service_count );
+			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "sms" );
 			
 			if ( $pay_status_ok ) {
 							
@@ -1061,14 +1063,16 @@ sub online_app
 	}
 	elsif ( $online_status == 7 ) {
 	
-		( $service_fee, $service_price, $service_type, $service_count, my $app_id ) =
+		( $service_price, $service_count, $service_type, my $app_id ) =
 			$self->{ af }->get_payment_price( "service" );
 		
+		$service_fee = $service_price * $service_count;
+
 		$payment = $self->{ af }->payment_prepare( $app_id, 'service' );
 
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'service_pay' ) {
 
-			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service", $service_count );
+			my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service" );
 			
 			if ( $pay_status_ok ) {
 			
@@ -1359,9 +1363,9 @@ sub online_app_servstatus
 {
 	my ( $self, $task, $id, $template ) = @_;
 
-	( undef, undef, undef, undef, my $count ) = $self->{ af }->get_payment_price( $self, "service" );
+	( undef, my $count ) = $self->{ af }->get_payment_price( $self, "service" );
 
-	my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service", $count );
+	my ( $pay_status_ok, $payment_error ) = $self->{ af }->payment_check( "service" );
 
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
