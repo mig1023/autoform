@@ -68,7 +68,7 @@ sub autoinfopage
 	
 	return $self->print_appdata() if /^print_a$/i;
 	
-	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status <= 12 );
+	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status <= 13 );
 	
 	return autoinfopage_entry( @_ ) if $entry;
 	
@@ -168,7 +168,7 @@ sub calc
 	}
 
 	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ calc } . $param_line );
-	
+
 	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 
 	print $response->decoded_content;	
@@ -978,8 +978,8 @@ sub online_app
 			set_remote_status( $self, 1 );
 			$online_status = 1;
 		}
-	}
-	
+	}	
+		
 	if ( $online_status == 1 ) {
 		
 		( $sms_price, undef ) = $self->{ af }->get_payment_price( "sms" );
@@ -990,8 +990,15 @@ sub online_app
 		
 		( $concil_fee, undef ) = $self->{ af }->get_payment_price( "concil" );
 	
-		return online_status_change( $self, 2 )
+		return online_status_change( $self, 13 )
 			if $self->{ vars }->getparam( 'appdata' ) eq 'confirm_app_start';
+	}
+	elsif ( $online_status == 13 ) {
+		
+		$sending = $self->data_for_sending();
+	
+		return online_status_change( $self, 2 )
+			if $self->{ vars }->getparam( 'appdata' ) eq 'confirm_addr';
 	}
 	elsif ( $online_status == 2 ) {
 		
@@ -1184,11 +1191,13 @@ sub online_app
 				$doc_id, $app_id
 			);
 		
-			return online_status_change( $self, 13 );
+			return online_status_change( $self, 14 );
 		}
 	}
+	
+	my $online_status_with_fix = ( $online_status == 13 ? 1 : $online_status );
 		
-	my $progress = $self->{ af }->get_progressbar( $online_status, VCS::Site::autodata::get_remote_progressline() );
+	my $progress = $self->{ af }->get_progressbar( $online_status_with_fix, VCS::Site::autodata::get_remote_progressline() );
 		
 	$self->{ vars }->get_system->pheader( $self->{ vars } );
 	
