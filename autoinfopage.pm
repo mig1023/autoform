@@ -1872,12 +1872,12 @@ sub get_app_file_list_by_token
 				
 				for my $file ( @{ $doc_list->{ $app }->{ files }->{ $doc } } ) {
 					
-					$comment = $file->{ comments } if $file->{ comments } and $file->{ Old };
+					$comment = $file->{ comments } if $file->{ comments };
 					
 					push( @$new_file_list, $file ) unless $file->{ Old };
 				}
 				
-				$new_file_list->[ 0 ]->{ comments } = $comment if length( $new_file_list ) > 0;
+				$new_file_list->[ 0 ]->{ comments } = $comment if length( @$new_file_list ) > 0;
 				
 				$doc_list->{ $app }->{ files }->{ $doc } = $new_file_list;
 			}
@@ -1904,7 +1904,7 @@ sub get_app_file_list_by_token
 			
 			$file->{ file_ord } = $empty->{ id }; 
 
-			$file->{ DocID } = "empty_" . $empty->{ id };
+			$file->{ DocID } = "empty_" . $empty->{ id } . "_" . $app;
 			
 			$file->{ DocType } = $empty->{ id }; 
 
