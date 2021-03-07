@@ -419,7 +419,7 @@
 						[% IF (page.CheckStatus == 1) %]</b>[% END %]
 						&nbsp;
 						[% IF ((page.CheckStatus == 1) && !closed_app) %]
-							<input type="file" id="upfile_[% page.DocType %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %] )"/>
+							<input type="file" id="upfile_[% page.DocType %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %], [% page.DocID %]  )"/>
 							<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
 							<span class="ltl_text">[% langreq('или') %]</span>
 							<span class="ltl_link" onclick="insist([% person.key %], [% page.DocType %]);">[% langreq('оставить как есть') %]</span>
@@ -456,7 +456,7 @@
 			[% IF ( (file.0.multiple != 1) && (file.0.CheckStatus == 1) && !closed_app) %]
 				<tr class="files_uploaded"><td colspan="5">
 					[% IF (file.0.form_auto != 1) %]
-						<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %] )"/>
+						<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %], [% file.0.DocID %] )"/>
 						<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">
 						[% IF (file.0.no_file_yet == 1) %][% langreq('загрузить') %][% ELSE %][% langreq('заменить') %][% END %]
 						</span>
@@ -632,7 +632,7 @@
 				<br><br>
 				[% langreq('Стоимость доставки туда и обратно') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
 				<span class="ltl_text">
-					[% langreq('Это примерный расчёт, цена компании курьерской доставки может незначительно отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br>
+					[% langreq('Это примерный расчёт, цена курьерской доставки может отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br>
 				</span>
 				<div id="selectedTimes" style="display:none;">
 					[% langreq('Приблизительный срок доставки') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span><br>
@@ -667,7 +667,7 @@
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" value="&#9665; [% langreq('Отказаться') %]" onclick="go_button('online_cancel');">
 			&nbsp;
-			<input class="small_button" type="button" id="fox_order_check" name="fox_order_check" value="[% langreq('Далее') %] &#9655;" onclick="go_button('online_app', 'confirm_addr');"><br>
+			<input class="small_button" type="button" id="fox_order" name="fox_order" disabled value="[% langreq('Далее') %] &#9655;" onclick="go_button('online_app', 'confirm_addr');"><br>
 		</td></tr>	
 	
 	[% ELSIF online_status == 2 %]
@@ -877,7 +877,7 @@
 				[% langreq('Скачайте опись документов:') %]&nbsp;<a target="_blank" class="dotted_link_big" href="/autoform/?t=[% token %]&action=download_checklist">[% langreq('Опись документов') %]</a><br><br>
 				
 				<span class="ltl_text">
-					[% langreq('<b>Обратите внимание</b>, что Вы <b>обязательно должны</b> заполнить опись, указав все прилагаемые Вами документы, подписать её, указать дату передачи документов курьеру, а также указать галочки, что подтверждаете полноту предоставленных документов и проинформированы о последствиях предоставления несоответствующих требованиям документов. Вы обязательно должны <b>вложить заполненную опись в пакет передаваемых курьеру документов</b>.') %]<br>
+					[% langreq('Обратите внимание, что Вы <b>обязательно</b> должны заполнить опись <b>на каждого заявителя</b>, указав все прилагаемые Вами документы, подписать её, указать дату передачи документов курьеру, а также указать галочки, что подтверждаете полноту предоставленных документов и проинформированы о последствиях предоставления несоответствующих требованиям документов. Вы обязательно должны <b>вложить заполненную опись в пакет передаваемых курьеру документов</b>.') %]<br>
 				</span><br>
 				
 				[% langreq('Скачайте анкеты для всех заявителей:') %]<br>
@@ -924,7 +924,7 @@
 			<div id="selectedAddrParams" style="display:none;font-size:9pt;"><br>
 				[% langreq('Стоимость доставки туда и обратно') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
 				<span class="ltl_text">
-					[% langreq('Это примерный расчёт, цена компании курьерской доставки может незначительно отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br>
+					[% langreq('Это примерный расчёт, цена курьерской доставки может отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br>
 				</span>
 				<div id="selectedTimes" style="display:none;">
 					[% langreq('Приблизительный срок доставки') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span><br>
@@ -1149,7 +1149,7 @@
 		alert( line );
 	}
 
-	function upload( doc_id, upfile_field, app_id ) {
+	function upload( doc_id, upfile_field, app_id, file_id ) {
 	
 		var file = document.getElementById(upfile_field).files[0];
 		
@@ -1172,7 +1172,7 @@
 			return error_upload( '[% langreq('У файла недопустимый графический формат') %]', doc_id );
 		}
 		
-		var addr = '?t=[% token %]&filename='+file.name+'&appdata=' + app_id + '&type=' + doc_id + '&replace=1';
+		var addr = '?t=[% token %]&filename='+file.name+'&appdata=' + app_id + '&type=' + doc_id + '&replace=1&fid=' + file_id;
 		var ajaxData = new FormData();
 		ajaxData.append('file', file);
 		
