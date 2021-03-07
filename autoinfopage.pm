@@ -299,7 +299,7 @@ sub get_infopage
 		$title = 1;
 	}
 	else {
-		$app_list = $self->get_app_file_list_by_token( $self->{ token }, $app_info->{ VType } );
+		$app_list = $self->get_app_file_list_by_token( $self->{ token }, $app_info->{ VType }, 'without_old' );
 
 		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
 		
@@ -789,7 +789,7 @@ sub online_order
 	my $data_to = {
 		'login' => $config->{ fox }->{ login }, 
 		'password' => $config->{ fox }->{ password },
-		'urgency' => $config->{ fox }->{ urgency },
+		'urgency' => $config->{ fox }->{ urgency_back },
 		'typeOfCargo' => $config->{ fox }->{ cargo },
 		'cargoDescription' => $config->{ fox }->{ description },
 		
@@ -1211,6 +1211,7 @@ sub online_app
 		'calc_url'	=> $self->{ autoform }->{ fox }->{ calc },
 		'fox_pay_url'	=> $self->{ autoform }->{ fox }->{ pay },
 		'urgency' 	=> $self->{ autoform }->{ fox }->{ urgency }, 
+		'urgency_back' 	=> $self->{ autoform }->{ fox }->{ urgency_back }, 
 		'cargo' 	=> $self->{ autoform }->{ fox }->{ cargo },
 		'login' 	=> $self->{ autoform }->{ fox }->{ login },
 		'pass' 		=> $self->{ autoform }->{ fox }->{ password },
@@ -1744,12 +1745,13 @@ sub set_new_appdate
 sub get_app_file_list_by_token
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token, $visa_type ) = @_;
+	my ( $self, $token, $visa_type, $without_old ) = @_;
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
-		SELECT AppData.ID, DocUploaded.ID as DocID, AppData.FName, AppData.LName, AppData.BirthDate,
-		DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext, DocUploaded.CheckStatus,
-		Token, AppData.ConcilOnlinePay, AppData.CheckDocComment, AppData.BlockOnlineApp
+		SELECT AppData.ID, DocUploaded.ID as DocID, Old, AppData.FName, AppData.LName,
+		AppData.BirthDate, DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext,
+		DocUploaded.CheckStatus, Token, AppData.ConcilOnlinePay, AppData.CheckDocComment,
+		AppData.BlockOnlineApp
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
@@ -1832,7 +1834,7 @@ sub get_app_file_list_by_token
 		
 		my $file = {};
 
-		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID' );
+		$file->{ $_ } = $app->{ $_ } for ( 'DocType', 'Name', 'Ext', 'CheckStatus', 'DocID', 'Old' );
 		
 		$file->{ file_ord } = $app->{ DocType }; 		
 
@@ -1857,7 +1859,31 @@ sub get_app_file_list_by_token
 			$doc_list->{ $app->{ ID } }->{ files }->{ $file->{ DocType } } = [ $file ];
 		}
 	}
+
+	if ( $without_old ) {
 		
+		for my $app ( keys %$doc_list ) {
+			
+			for my $doc ( keys %{ $doc_list->{ $app }->{ files } } ) {
+				
+				my $comment = undef;
+				
+				my $new_file_list = [];
+				
+				for my $file ( @{ $doc_list->{ $app }->{ files }->{ $doc } } ) {
+					
+					$comment = $file->{ comments } if $file->{ comments } and $file->{ Old };
+					
+					push( @$new_file_list, $file ) unless $file->{ Old };
+				}
+				
+				$new_file_list->[ 0 ]->{ comments } = $comment if length( $new_file_list ) > 0;
+				
+				$doc_list->{ $app }->{ files }->{ $doc } = $new_file_list;
+			}
+		}
+	}
+
 	my $visa_type = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT VType FROM AutoToken
 		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
