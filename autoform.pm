@@ -4874,21 +4874,42 @@ sub upload_file
 		
 		my $conf = $self->{ vars }->getConfig('general');
 
-		my ( $existing_id, $folder ) = $self->query( 'sel1', __LINE__, "
-			SELECT ID, Folder FROM DocUploaded
+		my ( $existing_id, $folder, $md5prev ) = $self->query( 'sel1', __LINE__, "
+			SELECT ID, Folder, MD5 FROM DocUploaded
 			WHERE AppDataID = ? AND DocType = ? AND ID = ?",
 			$appdata_id, $doc_type, $file_id
 		);
-		
-		$self->query( 'query', __LINE__, "
-			UPDATE DocUploaded SET Old = 1 WHERE ID = ?", {}, $existing_id
-		);
-		
+
 		$self->query( 'query', __LINE__, "
 			INSERT INTO DocUploaded (AppDataID, AutoToken, DocType, MD5, UploadDate, Folder, Name, Ext)
 			VALUES (?, ?, ?, ?, now(), ?, ?, ?)",
 			{}, $appdata_id, $token_id, $doc_type, $md5, $date_name, $filename, $ext
 		);
+		
+		my $new_id = $self->query( 'sel1', __LINE__, "
+			SELECT last_insert_id()"
+		) || 0;
+		
+		if ( $md5prev ) {
+			
+			$self->query( 'query', __LINE__, "
+				UPDATE DocUploaded SET Old = 1 WHERE ID = ?", {}, $existing_id
+			);
+		}
+		else {
+			my $comment_id = $self->query( 'sel1', __LINE__, "
+				SELECT ID FROM DocUploadedComment WHERE DocID = ?", $existing_id
+			);
+			
+			$self->query( 'query', __LINE__, "
+				UPDATE DocUploadedComment SET DocID = ? WHERE ID = ?", {}, $new_id, $comment_id
+			);
+			
+			$self->query( 'query', __LINE__, "
+				DELETE FROM DocUploaded WHERE ID = ?", {}, $existing_id
+			);
+		}
+		
 		
 		$self->query( 'query', __LINE__, "
 			INSERT INTO DocUploadedLog (AppID, DocID, LogDate, Login, LogType, LogText)
