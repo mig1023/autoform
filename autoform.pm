@@ -4868,18 +4868,26 @@ sub upload_file
 	
 	if ( $replace ) {
 		
+		my $file_id = $self->param( 'fid' ) || 0;
+	
+		$file_id =~ s/[^0-9]//g;
+		
 		my $conf = $self->{ vars }->getConfig('general');
 
 		my ( $existing_id, $folder ) = $self->query( 'sel1', __LINE__, "
 			SELECT ID, Folder FROM DocUploaded
-			WHERE AppDataID = ? AND DocType = ?", $appdata_id, $doc_type
+			WHERE AppDataID = ? AND DocType = ? AND ID = ?",
+			$appdata_id, $doc_type, $file_id
 		);
 		
-		# unlink $conf->{ tmp_folder } . 'doc/' . $folder . $md5;
+		$self->query( 'query', __LINE__, "
+			UPDATE DocUploaded SET Old = 1 WHERE ID = ?", {}, $existing_id
+		);
 		
 		$self->query( 'query', __LINE__, "
-			UPDATE DocUploaded SET MD5 = ?, UploadDate = now(), Folder =?, Name = ?, Ext = ?, CheckStatus = 0 WHERE ID = ?", {},
-			$md5, $date_name, $filename, $ext, $existing_id
+			INSERT INTO DocUploaded (AppDataID, AutoToken, DocType, MD5, UploadDate, Folder, Name, Ext)
+			VALUES (?, ?, ?, ?, now(), ?, ?, ?)",
+			{}, $appdata_id, $token_id, $doc_type, $md5, $date_name, $filename, $ext
 		);
 		
 		$self->query( 'query', __LINE__, "
