@@ -62,8 +62,12 @@ sub get_settings
 			payment => '',
 		},
 		
-		fox => {
+		dadata => {
 			addr => '',
+			token => '',
+		},
+		
+		fox => {
 			calc => '',
 			order => '',
 			pay => '',

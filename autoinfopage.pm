@@ -182,9 +182,20 @@ sub online_addr_proxy
 	my $addr = $self->{ vars }->getparam( "addr" ) || "";
 	
 	my $config = VCS::Site::autodata::get_settings();
-
-	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ addr } . $addr );
 	
+	my $ua = LWP::UserAgent->new( timeout => 30 );
+
+	my $request = HTTP::Request->new( 'POST', $config->{ dadata }->{ addr } );
+	
+	$request->header('Content-Type' => 'application/json');
+	$request->header('Accept' => 'application/json');
+	
+	$request->header('Authorization' => "Token " . $config->{ dadata }->{ token } );
+	
+	$request->content( JSON->new->pretty->encode( { query => $addr } ) );
+	
+	my $response = $ua->request( $request );
+
 	$self->{ vars }->get_system->pheaderJSON( $self->{ vars } );
 
 	print $response->decoded_content;
