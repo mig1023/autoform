@@ -1253,17 +1253,25 @@ sub get_autoform_content
 		
 		my ( $pay_status_ok, $payment_error ) =  $self->payment_check( "check" );
 		
-		( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step ) if $pay_status_ok;
+		if ( $pay_status_ok ) {
+			
+			( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
+			
+			my $link = "/autoform/?t=" . $self->{ token };
 		
-		$last_error = "payment_container|$payment_error" unless $pay_status_ok;
+			$self->send_warning( "Новая проверка документов оплачена", "Ссылка на запись: $link" );
+		}
+		else {
+			$last_error = "payment_container|$payment_error";
+		}
 	};
 	
 	$step = $self->get_back( $step ) if ( $action eq 'back' ) and ( $step > 1 );
 	
-	my $page = $self->get_content_rules( $step, 'full' );
+	my $currentPage = $self->get_content_rules( $step, 'full' );
 	
 	( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
-		if ( $action eq 'forward' ) and ( $step < $max_step ) and ( !$page->[ 0 ]->{ check_payment_strict } );
+		if ( $action eq 'forward' ) and ( $step < $max_step ) and ( !$currentPage->[ 0 ]->{ check_payment_strict } );
 
 	$step = $self->get_service( $action, $step ) if $action =~ /(appointment|checkdoc|remoteapp)/;
 	
@@ -1277,8 +1285,10 @@ sub get_autoform_content
 	
 	$step = $self->set_step_by_content( '[list_of_applicants]' ) if $action eq 'tolist';
 	
-	my $back = ( $action eq 'back' ? 'back' : '' );
+	my $page = $self->get_content_rules( $step, 'full' );
 	
+	my $back = ( $action eq 'back' ? 'back' : '' );
+
 	if ( !$last_error and ( exists $page->[ 0 ]->{ relation } ) ) {
 	
 		( $step, $page ) = $self->check_relation( $step, $page, $back );
@@ -1340,7 +1350,7 @@ sub check_relation
 # //////////////////////////////////////////////////
 {
 	my ( $self, $step, $page, $moonwalk ) = @_;
-
+ 
 	my $skip_this_page;
 	
 	my $at_least_one_page_skipped = 0;
@@ -4282,6 +4292,18 @@ sub send_link
 	return $self->query( 'query', __LINE__, "
 		UPDATE AutoToken SET LinkSended = now() WHERE Token = ?", {}, $self->{ token }
 	);
+}
+
+sub send_warning
+# //////////////////////////////////////////////////
+{
+	my ( $self, $subject, $body ) = @_;
+
+	my $emails = [
+		'',
+	];
+	
+	$self->{ vars }->get_system->send_mail( $self->{ vars }, $_, $subject, $body, 1 ) for ( @$emails );
 }
 
 sub send_app_confirm
