@@ -2640,6 +2640,7 @@ sub get_content_rules_hash
 				page_ord => 3100,
 				progress => 10,
 				page_db_id => 400032,
+				check_payment_strict => 1,
 			},
 			{
 				type => 'payment',

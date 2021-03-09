@@ -1257,11 +1257,13 @@ sub get_autoform_content
 		
 		$last_error = "payment_container|$payment_error" unless $pay_status_ok;
 	};
-
+	
 	$step = $self->get_back( $step ) if ( $action eq 'back' ) and ( $step > 1 );
 	
+	my $page = $self->get_content_rules( $step, 'full' );
+	
 	( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
-		if ( $action eq 'forward' ) and ( $step < $max_step );
+		if ( $action eq 'forward' ) and ( $step < $max_step ) and ( !$page->[ 0 ]->{ check_payment_strict } );
 
 	$step = $self->get_service( $action, $step ) if $action =~ /(appointment|checkdoc|remoteapp)/;
 	
@@ -1274,8 +1276,6 @@ sub get_autoform_content
 	( $step, $last_error ) = $self->check_all_is_prepared( $last_error ) if $action eq 'tofinish';
 	
 	$step = $self->set_step_by_content( '[list_of_applicants]' ) if $action eq 'tolist';
-	
-	my $page = $self->get_content_rules( $step, 'full' );
 	
 	my $back = ( $action eq 'back' ? 'back' : '' );
 	
