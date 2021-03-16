@@ -399,7 +399,11 @@
 				[% ELSIF (file.0.CheckStatus == 1) %]
 					<span class="err_doc">[% langreq('некорректен') %]</span>
 				[% ELSE %]
+					[% IF checked_app %]
+					<span class="err_doc">[% langreq('ждёт отправку на проверку') %]</span>
+					[% ELSE %]
 					<span class="nope_doc">[% langreq('ждёт проверки') %]</span>
+					[% END %]
 				[% END %]
 			[% ELSE %]
 				&nbsp;
@@ -418,11 +422,13 @@
 							[% langreq('Страница') %] [% k %]
 						[% IF (page.CheckStatus == 1) %]</b>[% END %]
 						&nbsp;
-						[% IF ((page.CheckStatus == 1) && !closed_app) %]
-							<input type="file" id="upfile_[% page.DocType %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %], [% page.DocID %]  )"/>
-							<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
-							<span class="ltl_text">[% langreq('или') %]</span>
-							<span class="ltl_link" onclick="insist([% person.key %], [% page.DocType %]);">[% langreq('оставить как есть') %]</span>
+						[% IF checked_app %]
+							[% IF ((page.CheckStatus == 1) && !closed_app) %]
+								<input type="file" id="upfile_[% page.DocType %]" class="hidden" name="upfile_[% page.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% page.DocType %]', 'upfile_[% page.DocType %]', [% person.key %], [% page.DocID %]  )"/>
+								<span class="ltl_link" id="upfile_button_[% page.DocType %]" onclick="javascript:document.getElementById('upfile_[% page.DocType %]').click();">[% langreq('заменить') %]</span>
+								<span class="ltl_text">[% langreq('или') %]</span>
+								<span class="ltl_link" onclick="insist([% person.key %], [% page.DocType %]);">[% langreq('оставить как есть') %]</span>
+							[% END %]
 						[% END %]
 						</td>
 					<td class="m_right">
@@ -433,7 +439,11 @@
 					[% ELSIF (page.CheckStatus == 1) %]
 						<span class="err_doc">[% langreq('некорректен') %]</span>
 					[% ELSE %]
+						[% IF checked_app %]
+						<span class="err_doc">[% langreq('ждёт отправку на проверку') %]</span>
+						[% ELSE %]
 						<span class="nope_doc">[% langreq('ждёт проверки') %]</span>
+						[% END %]
 					[% END %]
 					</td>
 					</tr>
@@ -455,16 +465,18 @@
 			
 			[% IF ( (file.0.multiple != 1) && (file.0.CheckStatus == 1) && !closed_app) %]
 				<tr class="files_uploaded"><td colspan="5">
-					[% IF (file.0.form_auto != 1) %]
-						<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %], [% file.0.DocID %] )"/>
-						<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">
-						[% IF (file.0.no_file_yet == 1) %][% langreq('загрузить') %][% ELSE %][% langreq('заменить') %][% END %]
-						</span>
-					[% ELSE %]
-						<span class="show_replace_option ltl_link" id="edit_[% file.0.DocType %]" onclick="go_button('edit', '[% person.key %]');">[% langreq('редактировать') %]</span>
+					[% IF checked_app %]
+						[% IF (file.0.form_auto != 1) %]
+							<input type="file" id="upfile_[% file.0.DocType %]" class="hidden" name="upfile_[% file.0.DocType %]" accept=".png,.jpg,.jpeg,.pdf,.tif,.tiff,.pdf" capture="camera" onchange="upload('[% file.0.DocType %]', 'upfile_[% file.0.DocType %]', [% person.key %], [% file.0.DocID %] )"/>
+							<span class="show_replace_option ltl_link" id="upfile_button_[% file.0.DocType %]" onclick="javascript:document.getElementById('upfile_[% file.0.DocType %]').click();">
+							[% IF (file.0.no_file_yet == 1) %][% langreq('загрузить') %][% ELSE %][% langreq('заменить') %][% END %]
+							</span>
+						[% ELSE %]
+							<span class="show_replace_option ltl_link" id="edit_[% file.0.DocType %]" onclick="go_button('edit', '[% person.key %]');">[% langreq('редактировать') %]</span>
+						[% END %]
+						<span class="show_other_option ltl_text">[% langreq('или') %]</span>
+						<span class="show_other_option ltl_link" onclick="insist([% person.key %], [% file.0.DocType %]);">[% langreq('оставить как есть') %]</span><br><br>
 					[% END %]
-					<span class="show_other_option ltl_text">[% langreq('или') %]</span>
-					<span class="show_other_option ltl_link" onclick="insist([% person.key %], [% file.0.DocType %]);">[% langreq('оставить как есть') %]</span><br><br>
 				</td></tr>
 			[% END %]
 		[% END %]
@@ -478,7 +490,15 @@
 	
 	[% IF not_checked_yet %]
 		<tr><td>&nbsp;</td></tr>
+	
 	[% ELSIF (!closed_app) %]
+	
+		[% IF replaced_files %]
+		<tr>
+		<td colspan="2"><input class="big_button button_spacer" type="button" value="[% langreq('Отправить документы на повторную проверку') %]" onclick="re_check_app();"><br></td>
+		</tr>
+		[% END %]
+	
 		<tr>
 		<td colspan="2"><input class="big_button button_spacer" type="button" value="[% langreq('Завершить обслуживание') %]" onclick="close_app();"><br></td>
 		</tr>
@@ -598,8 +618,12 @@
 					[% langreq('10. Оплачиваете <b>доставку</b> (цена на доставку определяется компанией-партнёром) на сайте курьерской службы.') %]<br>
 					[% langreq('11. В выбранный день с Вами <b>свяжется курьерская служба</b> и уточнит время передачи документов.') %]
 				</span><br><br>
+				
+				<span class="files_uploaded">
 				[% langreq('<b>Обратите внимание</b>, что воспользоваться услугой можно <u><b>только</u></b> в том случае, если Вы сдавали биометрию (отпечатки пальцев) <b>за последние 59 месяцев</b>, если Вам сдавать их не нужно или Вы подаете на визу категории D.') %]<br><br>
+				[% langreq('Пожалуйста, обратите внимание, что Консульством установлен минимальный срок рассмотрения визового заявления - <b>от 8 рабочих дней</b>. Данный период рассмотрения не включает в себя сроки предварительной проверки документов онлайн, оформления Вами заявки на услугу Дистанционной подачи, доставки Комплекта документов в Визовый центр и Готовых паспортов обратно Заявителю') %].<br><br>
 				[% langreq('Документы проверенные ранее, были проверены <b>по актуальности на день проверки</b>, что не гарантирует их актуальности на день подачи. Вы должны самостоятельно контролировать этот момент. Так же вы обязательно должны проверить, что приложите <b>все документы по описи</b>.') %]
+				</span>
 			</div>
 		</td></tr>
 		
@@ -649,13 +673,8 @@
 				<b>[% langreq('Пожалуйста, попробуйте через некоторое время ещё раз.') %]</b>
 			</div>
 			
-			<div id="selectedAddrIncomplete" style="display:none;font-size:9pt;"><br>
-				[% langreq('Выбран неполный адрес.') %]<br>
-				<b>[% langreq('Пожалуйста, проследите, чтобы адрес содержал улицу, дом и квартиру доставки.') %]</b>
-			</div>
-			
 			<div id="selectedAddrFail" style="display:none;font-size:9pt;"><br>
-				[% langreq('Доставка по этому адресу не осуществляется или выбран неполный адрес') %]
+				[% langreq('К сожалению, доставка по этому адресу <b>не осуществляется</b>') %]
 			</div>
 			
 			<div id="selectedAddrPriceLoad" style="display:none;font-size:9pt;"><br>
@@ -963,12 +982,7 @@
 				[% langreq('В настоящий момент нет доступа к сервису службы доставки.') %]<br>
 				<b>[% langreq('Пожалуйста, попробуйте через некоторое время ещё раз.') %]</b>
 			</div>
-			
-			<div id="selectedAddrIncomplete" style="display:none;font-size:9pt;"><br>
-				[% langreq('Выбран неполный адрес.') %]<br>
-				<b>[% langreq('Пожалуйста, проследите, чтобы адрес содержал улицу, дом и квартиру доставки.') %]</b>
-			</div>
-			
+
 			<div id="selectedAddrFail" style="display:none;font-size:9pt;"><br>
 				[% langreq('Доставка по этому адресу не осуществляется или выбран неполный адрес') %]
 			</div>
@@ -1187,7 +1201,7 @@
 			
 				if (data.indexOf('ok')+1) {
 				
-					alert( '[% langreq('Файл успешно заменён!\nПожалуйста, дождитесь его проверки нашим сотрудником!') %]' );
+					alert( '[% langreq('Файл успешно заменён!\nВнесите все необходимые изменения, после чего нажмите "Отправить на повторную проверку"!\nЕсли в проверке нет необходимости, то выберите "Завершить обслуживание".') %]' );
 					location.reload();
 				}
 				else if (data.indexOf('already')+1) {
@@ -1234,7 +1248,7 @@
 					}
 				},
 				success: function( data ) {
-					response( data, $.map( function( item ) {
+					response( data.suggestions, $.map( function( item ) {
 						return {
 							value: item,
 						}
@@ -1246,99 +1260,95 @@
 		minLength:5,
 		select: function( event, ui ) {
 
-			if ((ui.item.room == "") || (ui.item.postalcode == "")) {
-				$('#selectedAddrIncomplete').fadeIn();
-				$('#fox_order').prop('disabled', true);
-			}
-			else {
-				hideAnotherFields();
-				
-				$('#selectAddr').fadeOut();
-				$('#selectedAddrText').html(ui.item.address);
-				$('#selectedAddr').fadeIn();				
-				
-				var calcUrl = "/autoform/?t=[% token %]&action=calc&service=[% service %]";
-				var indexes = "&toindex=[% sending.index %]&fromindex=" + ui.item.postalcode;
-				var addresses = encodeURI("&recipientAddress=[% sending.address %]&senderAddress=" + ui.item.address);
-				var types = "&typeOfCargo=[% cargo %]&urgency=[% urgency %]&weight=[% sending.weight %]&qty=1";
-				
-				$('#selectedAddrPriceLoad').fadeIn();
+			hideAnotherFields();
+			
+			$('#selectAddr').fadeOut();
+			$('#selectedAddrText').html(ui.item.unrestricted_value);
+			$('#selectedAddr').fadeIn();				
+			
+			var calcUrl = "/autoform/?t=[% token %]&action=calc&service=[% service %]";
+			var indexes = "&toindex=[% sending.index %]&fromindex=" + ui.item.data.postal_code;
+			var addresses = encodeURI("&recipientAddress=[% sending.address %]&senderAddress=" + ui.item.value);
+			var types = "&typeOfCargo=[% cargo %]&weight=[% sending.weight %]&qty=1";
+			var urgancy = "&urgency=[% urgency %]";
+			
+			$('#selectedAddrPriceLoad').fadeIn();
 
-				$.ajax({
-					url: calcUrl + indexes + addresses + types,
-					dataType: "json",
-					
-					error: function( data ) {
-						$('#selectedAddrError').fadeIn();
+			$.ajax({
+				url: calcUrl + indexes + addresses + types + urgancy,
+				dataType: "json",
+				
+				error: function( data ) {
+					$('#selectedAddrError').fadeIn();
+					$('#fox_order').prop('disabled', true);
+				},
+				success: function( data ) {
+				
+					if (data["tariffs"] == null) {
+						$('#selectedAddrFail').fadeIn();
+						$('#selectedAddrPriceLoad').fadeOut();
 						$('#fox_order').prop('disabled', true);
-					},
-					success: function( data ) {
-					
-						if (data["tariffs"] == null) {
-							$('#selectedAddrFail').fadeIn();
-							$('#selectedAddrPriceLoad').fadeOut();
-							$('#fox_order').prop('disabled', true);
-						}
-						else {
-							var price_from = data["tariffs"][0]["total"];
-							var time_from = data["tariffs"][0]["maxPeriod"];
-							
-							indexes = "&fromindex=[% sending.index %]&toindex=" + ui.item.postalcode;
-							addresses = encodeURI("&senderAddress=[% sending.address %]&recipientAddress=" + ui.item.address);
-						
-							$.ajax({
-								url: calcUrl + indexes + addresses + types,
-								dataType: "json",
-								
-								error: function( data ) {
-									$('#selectedAddrError').fadeIn();
-									$('#selectedAddrPriceLoad').fadeOut();
-									$('#fox_order').prop('disabled', true);
-								},
-								success: function( data ) {
-								
-									$('#selectedAddrPriceLoad').fadeOut();
-
-									if (data["tariffs"] == null) {
-										$('#selectedAddrFail').fadeIn();
-										$('#fox_order').prop('disabled', true);
-									}
-									else {
-										var price_to = data["tariffs"][0]["total"];
-										var time_to = data["tariffs"][0]["maxPeriod"];
-									
-										var priceFull = price_from + ' + ' + price_to + ' = ' + (price_from + price_to);
-									
-										$('#selectedAddrPrice').html(priceFull + ' [% langreq('руб') %]');
-										
-										$('#selectedAddrParams').fadeIn();
-										
-										if ((time_from > 0) && (time_to > 0)) {
-										
-											var timeFull = time_from + ' дней к нам + ' + time_to + ' дней обратно';
-											$('#selectedAddrTime').html(timeFull);
-											$('#selectedTimes').fadeIn();
-										}
-										
-										$('#fox_order').prop('disabled', false);
-										
-										$('#senderIndex').val(ui.item.postalcode);
-										$('#senderAddress').val(ui.item.address);
-									}
-								}
-							});
-						}
 					}
-				});
+					else {
+						var price_from = data["tariffs"][0]["total"];
+						var time_from = data["tariffs"][0]["maxPeriod"];
+						
+						indexes = "&fromindex=[% sending.index %]&toindex=" + ui.item.data.postal_code;
+						addresses = encodeURI("&senderAddress=[% sending.address %]&recipientAddress=" + ui.item.value);
+						urgancy = "&urgency=[% urgency_back %]";
+					
+						$.ajax({
+							url: calcUrl + indexes + addresses + types + urgancy,
+							dataType: "json",
+							
+							error: function( data ) {
+								$('#selectedAddrError').fadeIn();
+								$('#selectedAddrPriceLoad').fadeOut();
+								$('#fox_order').prop('disabled', true);
+							},
+							success: function( data ) {
+							
+								$('#selectedAddrPriceLoad').fadeOut();
 
-				return false;
-			}
+								if (data["tariffs"] == null) {
+									$('#selectedAddrFail').fadeIn();
+									$('#fox_order').prop('disabled', true);
+								}
+								else {
+									var price_to = data["tariffs"][0]["total"];
+									var time_to = data["tariffs"][0]["maxPeriod"];
+								
+									var priceFull = price_from + ' + ' + price_to + ' = ' + (price_from + price_to);
+								
+									$('#selectedAddrPrice').html(priceFull + ' [% langreq('руб') %]');
+									
+									$('#selectedAddrParams').fadeIn();
+									
+									if ((time_from > 0) && (time_to > 0)) {
+									
+										var timeFull = time_from + ' дней к нам + ' + time_to + ' дней обратно';
+										$('#selectedAddrTime').html(timeFull);
+										$('#selectedTimes').fadeIn();
+									}
+									
+									$('#fox_order').prop('disabled', false);
+									
+									$('#senderIndex').val(ui.item.data.postal_code);
+									$('#senderAddress').val(ui.item.value);
+								}
+							}
+						});
+					}
+				}
+			});
+
+			return false;
 		},
 	})
 	.data( "autocomplete" )._renderItem = function( ul, item ) {
 			return $( "<li></li>" )
 				.data( "item.autocomplete", item )
-				.append( "<a>" + item.address + "</a>" )
+				.append( "<a>" + item.value + "</a>" )
 				.appendTo( ul );
 	};
 
@@ -1357,7 +1367,6 @@
 		$('#selectedTimes').fadeOut();
 		$('#selectedAddrFail').fadeOut();
 		$('#selectedAddrError').fadeOut();
-		$('#selectedAddrIncomplete').fadeOut();
 	}
 	
 	
@@ -1458,6 +1467,10 @@
 	
 		if ( confirm_app_closing() )
 			go_button('close_check');
+	}
+	
+	function re_check_app() {
+		go_button('re_check_app');
 	}
 	
 	function go_app(type, app) {
