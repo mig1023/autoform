@@ -60,7 +60,7 @@ sub create_online_agreement
 
 	my ( $sms_price, undef ) = $self->{ af }->get_payment_price( "sms" );
 
-	my ( $service_fee, undef ) = $self->{ af }->get_payment_price( "service" );
+	my ( $service_fee, $count ) = $self->{ af }->get_payment_price( "service" );
 
 	my $app = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT Appointments.ID as AppID, FoxAddress, FName, LName, MName,
@@ -82,7 +82,7 @@ sub create_online_agreement
 	
 	$sms = ( $sms ? 1 : 0 );
 
-	my $dsum = $service_fee + ( $sms ? $sms_price : 0 );
+	my $dsum = ( $service_fee * $count ) + ( $sms ? $sms_price : 0 );
 
 	my $template = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT ID FROM Templates WHERE TDate <= curdate() AND isJur=0 AND CenterID=47 ORDER BY TDate DESC LIMIT 1"
