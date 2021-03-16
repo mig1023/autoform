@@ -1256,10 +1256,8 @@ sub get_autoform_content
 		if ( $pay_status_ok ) {
 			
 			( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
-			
-			my $link = "/autoform/?t=" . $self->{ token };
-		
-			$self->send_warning( "Новая проверка документов оплачена", "Ссылка на запись: $link" );
+				
+			$self->send_warning( "Новая проверка документов оплачена" );
 		}
 		else {
 			$last_error = "payment_container|$payment_error";
@@ -4297,11 +4295,13 @@ sub send_link
 sub send_warning
 # //////////////////////////////////////////////////
 {
-	my ( $self, $subject, $body ) = @_;
+	my ( $self, $subject ) = @_;
 
 	my $emails = [
 		'',
 	];
+	
+	my $body = "Автоматическое оповещение: $subject";
 	
 	$self->{ vars }->get_system->send_mail( $self->{ vars }, $_, $subject, $body, 1 ) for ( @$emails );
 }
@@ -4841,8 +4841,8 @@ sub upload_file
 
 	$self->{ token } = $self->get_token();
 
-	my ( $token_id, $appid, $created ) = $self->query( 'sel1', __LINE__, "
-		SELECT ID, AutoAppID, CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+	my ( $token_id, $appid ) = $self->query( 'sel1', __LINE__, "
+		SELECT ID, AutoAppID FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	my $appdata_id = $self->param( 'appdata' );
@@ -4952,17 +4952,6 @@ sub upload_file
 		$self->log( undef, "документы [тип $doc_type] загружен $filename.$ext", $appdata_id );
 	}
 	
-	if ( $created ) {
-		
-		my $current_status = $self->query( 'sel1', __LINE__, "
-			SELECT Status FROM Appointments WHERE ID = ?", $created
-		);
-		
-		$self->query( 'query', __LINE__, "
-			UPDATE Appointments SET Status = 10 WHERE ID = ?", {}, $created
-		) if ( $current_status == 11 )
-	}
-
 	return print 'ok';
 }
 
