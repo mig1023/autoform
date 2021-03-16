@@ -158,7 +158,7 @@ sub create_online_agreement
 				) VALUES (
 					?, ?, ?, ?, ?, ?, ?, ?, now(), 25, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 				)", {},
-					$info_id, $info_bankid, $_->{ RFName }, $_->{ RMName }, $_->{ RLName }, 0,
+					$info_id, $info_bankid, $_->{ RFName }, $_->{ RLName }, $_->{ RMName }, 0,
 					$_->{ PassNum }, 'remote_script', $_->{ ID }, 0, 0, ' ', ' ', 0, 0,
 					$_->{ AppSDate }, 0, 0, $_->{ BirthDate }, 0
 			);
