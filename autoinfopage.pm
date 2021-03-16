@@ -84,6 +84,8 @@ sub autoinfopage
 	
 	return close_check( @_ ) if /^close_check$/i;
 	
+	return re_check_app( @_ ) if /^re_check_app$/i;
+	
 	return offline_app( @_ ) if /^offline_app$/i;
 	
 	return offline_apped( @_ ) if /^offline_apped$/i;
@@ -325,7 +327,8 @@ sub get_infopage
 	$block_online_app = 1 if $date_fail;
 
 	my $closed_app = ( $app_info->{ app_status } == 12 ? 1 : 0 );
-	
+	my $checked_app = ( $app_info->{ app_status } == 11 ? 1 : 0 );
+
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> $title,
@@ -340,9 +343,10 @@ sub get_infopage
 		'lang_in_link'	=> $self->{ vars }->{ session }->{ langid } || 'ru',
 		'max_size'	=> $self->{ autoform }->{ general }->{ max_file_upload_size },
 		'closed_app'	=> $closed_app,
+		'checked_app'	=> $checked_app,
 		'not_checked_yet' => $not_checked_yet,
 		'block_online_app' => $block_online_app,
-
+		'replaced_files' => $self->get_replaced_files( $checked_app ),
 	};
 	
 	my ( $online_status, undef, $order_num_from, $order_num_to ) = get_remote_status( $self );
@@ -979,6 +983,8 @@ sub online_app
 
 	unless ( $online_status > 0 ) {
 		
+		$self->close_check( "without_redirect" );
+		
 		my ( undef, undef, $date_fail ) = $self->get_min_max_date();
 		
 		if ( $date_fail ) {
@@ -1464,6 +1470,7 @@ sub offline_app
 			and
 			Date::Calc::check_date( $3, $2, $1 )
 		) {
+			$self->close_check( "without_redirect" );
 		
 			my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
 				SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
@@ -1594,14 +1601,35 @@ sub close_check
 {
 	my ( $self, $task, $id, $template ) = @_;
 	
-	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+	my ( $token_id, $app_id ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT ID, CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
 
 	$self->{ vars }->get_system->log_action( $self->{ vars }, "checkdoc", "Завершено обслуживание", $app_id );
 	
 	$self->{ af }->query( 'query', __LINE__, "
 		UPDATE Appointments SET Status = 12 WHERE ID = ?", {}, $app_id
+	);
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE DocUploaded SET CheckStatus = 3
+		WHERE AutoToken = ? AND (CheckStatus = 0 OR CheckStatus = 1)", {}, $token_id
+	);
+	
+	$self->{ af }->redirect( $self->{ token } ) unless $task ne "without_redirect";
+}
+
+sub re_check_app
+# //////////////////////////////////////////////////
+{
+	my ( $self, $task, $id, $template ) = @_;
+	
+	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
+	);
+		
+	$self->{ af }->query( 'query', __LINE__, "
+		UPDATE Appointments SET Status = 10 WHERE ID = ?", {}, $app_id
 	);
 	
 	$self->{ af }->redirect( $self->{ token } );
@@ -1751,6 +1779,50 @@ sub set_new_appdate
 	) unless $error;
 
 	return ( $error ? $error : $new_app_id );
+}
+
+sub get_replaced_files
+# //////////////////////////////////////////////////
+{
+	my ( $self, $checked ) = @_;
+	
+	return 0 unless $checked;
+	
+	my $files = $self->{ af }->query( 'selallkeys', __LINE__, "
+		SELECT AppData.ID, DocUploaded.DocType, Old, CheckStatus
+		FROM AutoToken 
+		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
+		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
+		WHERE Token = ? AND AppData.Status = 1", $self->{ token }
+	);
+	
+	my $files_by_types = {};
+
+	for ( @$files ) {
+		
+		$files_by_types->{ $_->{ ID } } = {} unless exists $files_by_types->{ $_->{ ID } };
+		
+		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } } = { old => 0, uncheck_status => 0 }
+			unless exists $files_by_types->{ $_->{ ID } }->{ $_->{ DocType } };
+			
+		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } }->{ old } = 1 if $_->{ Old };
+		
+		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } }->{ uncheck_status } = 1 if $_->{ CheckStatus } == 0;
+	}
+	
+	my $replaced = 0;
+	
+	for my $app ( keys %$files_by_types ) {
+		for my $doc ( keys %{ $files_by_types->{ $app } } ) {
+		
+			my $doc_checked = $files_by_types->{ $app }->{ $doc };
+		
+			$replaced = 1 if $doc_checked->{ old } and $doc_checked->{ uncheck_status };
+	
+		}
+	}
+
+	return $replaced;
 }
 
 sub get_app_file_list_by_token
