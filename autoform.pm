@@ -4898,7 +4898,7 @@ sub upload_file
 
 		my ( $existing_id, $folder, $md5prev ) = $self->query( 'sel1', __LINE__, "
 			SELECT ID, Folder, MD5 FROM DocUploaded
-			WHERE AppDataID = ? AND DocType = ? AND ID = ?",
+			WHERE AppDataID = ? AND DocType = ? AND ID = ? AND Old = 0",
 			$appdata_id, $doc_type, $file_id
 		);
 
@@ -4932,11 +4932,15 @@ sub upload_file
 			);
 		}
 		
+		my $start_id = $self->query( 'sel1', __LINE__, "
+			SELECT ID FROM DocUploaded WHERE AppDataID = ? AND DocType = ? ORDER BY ID",
+			$appdata_id, $doc_type
+		);
 		
 		$self->query( 'query', __LINE__, "
 			INSERT INTO DocUploadedLog (AppID, DocID, LogDate, Login, LogType, LogText)
 			VALUES (?, ?, now(), ?, ?, ?)",
-			{}, $appdata_id, $existing_id, 'website', 1, "заявителем загружен новый файл $filename.$ext"
+			{}, $appdata_id, $start_id, 'website', 1, "заявителем загружен новый файл $filename.$ext"
 		);
 		
 		$self->log( undef, "документы [тип $doc_type] заменён $filename.$ext", $appdata_id );
