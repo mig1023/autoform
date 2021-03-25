@@ -3808,8 +3808,8 @@ sub create_new_appointment
 	
 	$self->query( 'query', __LINE__, "
 		LOCK TABLES
-		AutoAppointments READ, Appointments WRITE, AutoAppData READ, AppData WRITE,
-		AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
+		AutoAppointments READ, AutoToken READ, Appointments WRITE, AutoAppData READ,
+		AppData WRITE, AutoSchengenAppData READ, SchengenAppData WRITE, AutoSpbAlterAppData READ,
 		SpbAlterAppData WRITE, AutoSchengenExtData READ, Countries READ, DocUploaded WRITE"
 	);
 
@@ -3908,6 +3908,8 @@ sub mod_hash
 	
 	if ( $table_name eq 'AppData' ) {
 	
+		
+	
 		my $schengen_data = $self->get_hash_table( 'AutoSchengenAppData', 'ID', $sch_auto );
 		
 		if ( $schengen_data->{ HostDataType } eq 'P' ) {
@@ -3926,6 +3928,8 @@ sub mod_hash
 		$hash->{ CountryLive } = ( $hash->{ NRes } ? 1 : 0 );
 		
 		$hash->{ PrevVisa }--;
+		
+		$hash->{ AppSDate } = $self->fly_date() if $hash->{ AppSDate } eq '0000-00-00';		
 		
 		if ( VCS::Site::autodata::this_is_spb_center( $center ) ) {
 		
@@ -4052,6 +4056,21 @@ sub countries
 	return $self->query( 'sel1', __LINE__, "
 		SELECT Name FROM Countries WHERE ID = ?", $number
 	);
+}
+
+sub fly_date
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+			
+	my $flydate = $self->query( 'sel1', __LINE__, "
+		SELECT SDate
+		FROM AutoToken 
+		JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+		WHERE Token = ?", $self->{ token }
+	);
+	
+	return $flydate;
 }
 
 sub visapurpose_assembler
