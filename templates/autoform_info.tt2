@@ -498,10 +498,7 @@
 		<td colspan="2"><input class="big_button button_spacer" type="button" value="[% langreq('Отправить документы на повторную проверку') %]" onclick="re_check_app();"><br></td>
 		</tr>
 		[% END %]
-	
-		<tr>
-		<td colspan="2"><input class="big_button button_spacer" type="button" value="[% langreq('Завершить обслуживание') %]" onclick="close_app();"><br></td>
-		</tr>
+
 	[% ELSE %]
 		<tr>
 		<td colspan="2"><h2 class="finish_text_spacer">[% langreq('Услуга завершена') %]</h2></td>
@@ -516,6 +513,13 @@
 		[% END %]
 		<tr>
 			<td colspan="2"><input class="big_button button_spacer" type="button" value="[% IF (!closed_app) %][% langreq('Завершить обслуживание и записаться в Визовый центр') %][% ELSE %][% langreq('Записаться в Визовый центр') %][% END %]" onclick="go_app('offline_app'[% IF (!closed_app) %], 'close'[% END %]);"><br></td>
+		</tr>
+	[% END %]
+	
+	[% IF (!closed_app) %]
+
+		<tr>
+		<td colspan="2"><input class="big_button button_spacer" type="button" value="[% langreq('Завершить обслуживание') %]" onclick="close_app();"><br></td>
 		</tr>
 	[% END %]
 
@@ -1201,7 +1205,7 @@
 			
 				if (data.indexOf('ok')+1) {
 				
-					alert( '[% langreq('Файл успешно заменён!\nВнесите все необходимые изменения, после чего нажмите "Отправить на повторную проверку"!\nЕсли в проверке нет необходимости, то выберите "Завершить обслуживание".') %]' );
+					alert( '[% langreq('Файл успешно заменён!\nВнесите все необходимые изменения, после чего нажмите "Отправить на повторную проверку"!') %]' );
 					location.reload();
 				}
 				else if (data.indexOf('already')+1) {
@@ -1470,7 +1474,11 @@
 	}
 	
 	function re_check_app() {
-		go_button('re_check_app');
+		[% IF all_is_ok %]
+			go_button('re_check_app');
+		[% ELSE %]
+			alert('[% langreq('Необходимо заменить все некорректные файлы или настоять на текущем содержании. Пожалуйста, убедитесь, что все документы готовы к проверке.') %]');
+		[% END %]
 	}
 	
 	function go_app(type, app) {
