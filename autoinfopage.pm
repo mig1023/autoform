@@ -2023,7 +2023,7 @@ sub get_app_file_list_by_token
 						
 			$file->{ file_ord } = $tmp_id; 
 
-			$file->{ DocID } = "empty_$tmp_id";
+			$file->{ DocID } = "empty_$tmp_id" . "_$app";
 			
 			$file->{ DocType } = $tmp_id; 
 
