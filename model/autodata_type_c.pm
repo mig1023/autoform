@@ -1410,41 +1410,19 @@ sub get_content_rules_hash
 				first_elements => '2, 1, 0',
 			},
 			{
-				type => 'input',
+				type => 'free_line',
+			},
+			{
+				type => 'info',
 				name => 'apps_date',
 				label => 'Дата начала поездки',
-				comment => 'Укажите дату начала действия запрашиваемой визы',
-				example => '31.12.1900',
-				check => $standart_date_check,
-				check_logic => [
-					{
-						condition => 'now_or_later',
-						offset => '[collect_date_offset]',
-					},
-					{
-						condition => 'equal_or_earlier',
-						table => 'AppData',
-						name => 'PassDate',
-						offset => ( 10 * 365 ), # <--- 10 years
-						error => 'Дата выдачи паспорта',
-					},
-					{
-						condition => 'now_or_earlier',
-						offset => 270,
-						equality_is_also_fail => 1,
-						full_error => 'Действует ограничение на максимальную дату вылета: не более [offset] с текущей даты',
-					},
-				],
 				db => {
-					table => 'AppData',
-					name => 'AppSDate',
-				},
-				load_if_free_field => {
 					table => 'Appointments',
 					name => 'SDate',
 				},
-				special => 'datepicker, mask',
-				minimal_date => 'current',
+			},
+			{
+				type => 'free_line',
 			},
 			{
 				type => 'input',
