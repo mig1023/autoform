@@ -163,6 +163,15 @@ sub create_online_agreement
 					$_->{ AppSDate }, 0, 0, $_->{ BirthDate }, 0
 			);
 			
+			my $list_id = $self->{ af }->query( 'sel1', __LINE__, "SELECT last_insert_id()") || 0;
+			
+			$self->{ af }->query( 'query', __LINE__, "
+				INSERT INTO DocRequest (PackListID, VisaDataNumberEntries, VisaDataPurposeTravel,
+				VisaDataDuration, VisaDataMainDestination)
+				VALUES (?, 'M', 'TU', '90', 'I')", {},
+				$list_id, 
+			);
+			
 			my $secons_shift = 0;
 			
 			for my $sec ( 1, 2, 25 ) {
