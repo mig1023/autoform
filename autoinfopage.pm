@@ -328,6 +328,8 @@ sub get_infopage
 
 	my $closed_app = ( $app_info->{ app_status } == 12 ? 1 : 0 );
 	my $checked_app = ( $app_info->{ app_status } == 11 ? 1 : 0 );
+	
+	my ( $replaced, $all_is_ok ) = $self->get_replaced_files( $checked_app );
 
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
@@ -346,7 +348,8 @@ sub get_infopage
 		'checked_app'	=> $checked_app,
 		'not_checked_yet' => $not_checked_yet,
 		'block_online_app' => $block_online_app,
-		'replaced_files' => $self->get_replaced_files( $checked_app ),
+		'replaced_files' => $replaced,
+		'all_is_ok'	=> $all_is_ok,
 	};
 	
 	my ( $online_status, undef, $order_num_from, $order_num_to ) = get_remote_status( $self );
@@ -1786,7 +1789,7 @@ sub get_replaced_files
 {
 	my ( $self, $checked ) = @_;
 	
-	return 0 unless $checked;
+	return ( 0, 0 ) unless $checked;
 	
 	my $files = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.DocType, Old, CheckStatus
@@ -1797,6 +1800,8 @@ sub get_replaced_files
 	);
 	
 	my $files_by_types = {};
+	
+	my $all_is_ok = 1;
 
 	for ( @$files ) {
 		
@@ -1808,10 +1813,12 @@ sub get_replaced_files
 		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } }->{ old } = 1 if $_->{ Old };
 		
 		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } }->{ uncheck_status } = 1 if $_->{ CheckStatus } == 0;
+		
+		$all_is_ok = 0 if ( $_->{ CheckStatus } == 1 ) and !$_->{ Old };
 	}
 	
 	my $replaced = 0;
-	
+
 	for my $app ( keys %$files_by_types ) {
 		for my $doc ( keys %{ $files_by_types->{ $app } } ) {
 		
@@ -1822,7 +1829,7 @@ sub get_replaced_files
 		}
 	}
 
-	return $replaced;
+	return ( $replaced, $all_is_ok );
 }
 
 sub get_app_file_list_by_token
@@ -1865,7 +1872,7 @@ sub get_app_file_list_by_token
 		JOIN DocUploadedLog ON AppData.ID = DocUploadedLog.AppID
 		WHERE Token = ?", $token
 	);
-	
+
 	my $logs = {};
 	
 	for ( @$doc_upload_log ) {
@@ -1874,7 +1881,7 @@ sub get_app_file_list_by_token
 		
 		$logs->{ $_->{ DocID } }->{ $_->{ LogDate } } = $_->{ LogText };
 	}
-	
+
 	my $doc_comments = {};
 
 	for ( @$doc_comments_tmp ) {
