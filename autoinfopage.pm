@@ -625,10 +625,6 @@ sub change_status_if_need
 		VALUES (?, ?, now(), ?, ?, ?)",
 		{}, $appdata_id, $doc_id, 'website', 1, "заявителем внесены правки в анкету"
 	);
-	
-	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE Appointments SET Status = 10 WHERE ID = ?", {}, $app_id
-	);
 }
 
 sub edited
@@ -1802,6 +1798,8 @@ sub get_replaced_files
 	my $files_by_types = {};
 	
 	my $all_is_ok = 1;
+	
+	my $anketa_type = 9999;
 
 	for ( @$files ) {
 		
@@ -1826,6 +1824,7 @@ sub get_replaced_files
 		
 			$replaced = 1 if $doc_checked->{ old } and $doc_checked->{ uncheck_status };
 	
+			$replaced = 1 if ( $doc == $anketa_type ) and $doc_checked->{ uncheck_status };
 		}
 	}
 
@@ -1933,6 +1932,8 @@ sub get_app_file_list_by_token
 		$file->{ comments } = $doc_comments->{ $app->{ DocID } };
 	
 		$file->{ no_file_yet } = ( $file->{ Name } ? 0 : 1 );
+		
+		$file->{ ank_type } = ( $file->{ DocType } == 9999 );
 		
 		if ( exists $doc_list->{ $app->{ ID } } ) {
 			
