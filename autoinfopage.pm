@@ -66,6 +66,8 @@ sub autoinfopage
 		
 	return $self->print_appointment() if /^print$/i;
 	
+	return $self->print_fox() if /^print_fox$/i;
+	
 	return $self->print_appdata() if /^print_a$/i;
 	
 	return online_app( @_ ) if ( $online_app_status > 0 ) and ( $online_app_status <= 13 );
@@ -375,6 +377,22 @@ sub print_appointment
 	my $report = VCS::Reports::reports->new( 'VCS::Reports::reports', $self->{ vars } );
 	
 	$report->printReport( $appointment->createPDF( $app_id ), 'pdf', "appointment" );
+}
+
+sub print_fox
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $fox_num = $self->{ vars }->getparam( 'appdata' ) || "";
+	
+	$fox_num =~ s/[^0-9]//g;
+	
+	my $document = VCS::Site::autopayment::fox_pay_document( $self, $fox_num );
+
+	print "HTTP/1.1 200 Ok\nContent-Type: application/pdf name=\"fox.pdf\"\nContent-Disposition: attachment; filename=\"fox.pdf\"\n\n";
+	
+	print $document;
 }
 
 sub print_appdata
