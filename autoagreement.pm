@@ -136,7 +136,7 @@ sub create_online_agreement
 		
 		$docpackinfo->{ $id } = [] unless ref( $docpackinfo->{ $id } ) eq 'ARRAY';
 				
-		push( @{ $docpackinfo->{ $bankids->{ $_->{ ID } } } }, $_ );
+		push( @{ $docpackinfo->{ $id } }, $_ );
 	}
 	
 	for my $info_bankid ( keys %$docpackinfo ) {
