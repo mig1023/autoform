@@ -993,8 +993,8 @@ sub online_app
 		$sms_code, $concil_free, $concil_full_free ) = ( 0, 0, 0, 0, 0, 0, 0, 0, 0 );	
 		
 	my ( $service_type, $start_date, $end_date ) = ( undef, undef, undef );
-	my ( $payment, $error, $err_target, $docpack, $docnum, $app_list, $sending ) =
-		( undef, undef, undef, undef, undef, undef, undef );
+	my ( $payment, $error, $err_target, $docpack, $docnum, $app_list, $sending, $time_limit ) =
+		( undef, undef, undef, undef, undef, undef, undef, undef );
 
 	unless ( $online_status > 0 ) {
 		
@@ -1108,6 +1108,8 @@ sub online_app
 		$service_fee = $service_price * $service_count;
 
 		$payment = $self->{ af }->payment_prepare( $app_id, 'service' );
+		
+		$time_limit = $self->{ af }->get_payment_time_limit( 'service' );
 
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'service_pay' ) {
 
@@ -1281,6 +1283,7 @@ sub online_app
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
 	$tvars->{ concil } = $concil if $concil;
+	$tvars->{ time_limit } = $time_limit if $time_limit;
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
