@@ -204,15 +204,17 @@ sub fox_pay_document
 	my $config = VCS::Site::autodata::get_settings();
 	
 	my $url_param = "login=" . $config->{ fox }->{ login } . "&password=" . $config->{ fox }->{ password } .
-		"&documentType=order&number=&numberType=internalnumber&formName=Waybill";
+		"&documentType=order&number=" . $order_number . "&numberType=internalnumber&formName=Накладная";
 		
 	my $response = LWP::UserAgent->new( timeout => 30 )->get( $config->{ fox }->{ document } . $url_param );
 
 	return "" unless $response->is_success;	
 
-	my $status = JSON->new->pretty->decode( $response->decoded_content );
+	my $content = JSON->new->pretty->decode( $response->decoded_content );
 
-	return undef;
+	my $document = $content->{ List }->[ 0 ]->{ BData }->[ 0 ];
+
+	return decode_base64($document)
 }
 
 sub fox_status
