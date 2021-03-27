@@ -773,7 +773,6 @@ sub online_order
 		
 		'payer' => 1,
 		'paymentMethod' => 2,
-		'withReturn' => 'true',
 		'weight' => $sending->{ weight },
 		'cargoPackageQty' => '1',
 		
@@ -807,9 +806,8 @@ sub online_order
 		'typeOfCargo' => $config->{ fox }->{ cargo },
 		'cargoDescription' => $config->{ fox }->{ description },
 		
-		'payer' => 1,
+		'payer' => 2,
 		'paymentMethod' => 2,
-		'withReturn' => 'true',
 		'weight' => $sending->{ weight },
 		'cargoPackageQty' => '1',
 		
