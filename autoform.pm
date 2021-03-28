@@ -1200,16 +1200,14 @@ sub doc_status
 			SELECT PStatus, DocPack.Shipping, ServiceType
 			FROM AutoToken
 			JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
-			JOIN DocPack ON DocPack.ID = Appointments.PacketID
-			WHERE Token = ?", $self->{ token }
+			JOIN DocPack ON DocPack.AppID = Appointments.ID
+			WHERE Token = ? AND PStatus != 7 ORDER BY DocPack.ID DESC", $self->{ token }
 		);
 	}
 	
 	$shipping = 1 if $service == 3;
 	
 	my $public_status = {
-		25 => 1,
-		26 => 1,
 		7  => 0,
 		8  => 3,
 		9  => 3,
@@ -1222,7 +1220,20 @@ sub doc_status
 		16 => 3,
 	};
 	
-	$status = $public_status->{ $status } if exists $public_status->{ $status };
+	my $public_status_remote = {
+		7  => 0,
+		25 => 1,
+		26 => 2,
+		8  => 3,
+		9  => 3,
+		15 => 3,
+		16 => 3,
+		27 => 5,	
+	};
+	
+	$status = $public_status->{ $status } if exists $public_status->{ $status } and $service != 3;
+	
+	$status = $public_status_remote->{ $status } if exists $public_status_remote->{ $status } and $service == 3;
 	
 	my $doc_progressbar = VCS::Site::autodata::get_docstatus_progress( $service );
 	
