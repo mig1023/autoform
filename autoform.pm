@@ -1097,6 +1097,8 @@ sub get_token_and_create_new_form_if_need
 		SELECT Status FROM Appointments WHERE ID = ?", $app
 	);
 
+	return ( $token, $finished ) if ( $status == 4 ) and ( $self->param('action') eq "print_fox" );
+
 	return ( $token, $finished, 'docstatus' ) if $status == 4;
 	
 	return ( ( $status =~ /^(1|10|11|12|13)$/ ? $token : '02' ), $finished );
