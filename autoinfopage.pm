@@ -39,7 +39,7 @@ sub autoinfopage
 	$self->{ vars }->{ session }->{ langid } = $lang_param if $lang_param =~ /^(ru|en|it)$/i ;
 
 	$_ = $self->{ vars }->getparam( 'action' );
-	
+
 	s/[^a-z_]//g;
 	
 	my ( $online_app_status ) = get_remote_status( $self );
@@ -55,9 +55,9 @@ sub autoinfopage
 	return online_cancel( @_ ) if /^online_cancel$/i;
 	
 	return online_consular_fee( @_ ) if /^online_consular_fee$/i;
-	
+
 	return online_addr_proxy( @_ ) if /^online_addr_proxy$/i;
-	
+
 	return calc( @_ ) if /^calc$/i;
 	
 	return $self->print_agreement() if /^print_doc$/i;
@@ -607,16 +607,19 @@ sub get_editable_fields
 {
 	my $self = shift;
 	
-	my $center = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT CenterID	FROM Appointments
+	my ( $center, $service ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT CenterID, ServiceType FROM Appointments
 		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
 		WHERE Token = ?", $self->{ token }
 	);
 	
-	return VCS::Site::autodata_type_c_spb::get_content_edit_rules_hash()
-		if VCS::Site::autodata::this_is_spb_center( $center );
+	my $this_spb = VCS::Site::autodata::this_is_spb_center( $center );
+
+	my $fields = ( $this_spb ? VCS::Site::autodata_type_c_spb::get_content_edit_rules_hash() : VCS::Site::autodata_type_c::get_content_edit_rules_hash() );
+		
+	@$fields = grep { $_->{ name } ne "edt_apps_date" } @$fields if $service != 2;
 	
-	return VCS::Site::autodata_type_c::get_content_edit_rules_hash()
+	return $fields;
 }
 
 sub change_status_if_need
@@ -1109,7 +1112,7 @@ sub online_app
 
 		$payment = $self->{ af }->payment_prepare( $app_id, 'service' );
 		
-		$time_limit = $self->{ af }->get_payment_time_limit( 'service' );
+		#$time_limit = $self->{ af }->get_payment_time_limit( 'service' );
 
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'service_pay' ) {
 
@@ -1291,15 +1294,19 @@ sub online_app
 sub data_for_sending
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $preview ) = @_;
 	
 	my $data = {};
 
+	my $from = "Appointments JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp";
+	
+	$from = "AutoAppointments JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID" if $preview;
+	
 	my $app_count = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT COUNT(AppData.ID) FROM AppData
-		JOIN AutoToken ON AppData.AppID = AutoToken.CreatedApp
-		WHERE Token = ? AND AppData.Status != 2", $self->{ token }
+		SELECT NCount FROM $from WHERE Token = ?", $self->{ af }->{ token }
 	);
+
+	$app_count = 1 unless $app_count;
 	
 	$data->{ weight } = POSIX::ceil( $app_count / 3 ) * 0.5;
 	
@@ -1859,7 +1866,7 @@ sub get_app_file_list_by_token
 		SELECT AppData.ID, DocUploaded.ID as DocID, Old, AppData.FName, AppData.LName,
 		AppData.BirthDate, DocUploaded.DocType, DocUploaded.Name, DocUploaded.Ext,
 		DocUploaded.CheckStatus, Token, AppData.ConcilOnlinePay, AppData.CheckDocComment,
-		AppData.BlockOnlineApp
+		AppData.BlockOnlineApp, AppData.AppSDate
 		FROM AutoToken 
 		JOIN AppData ON AppData.AppID = AutoToken.CreatedApp
 		JOIN DocUploaded ON DocUploaded.AppDataID = AppData.ID
@@ -1962,7 +1969,9 @@ sub get_app_file_list_by_token
 			$doc_list->{ $app->{ ID } } = {};
 			
 			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ }
-				for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay', 'CheckDocComment', 'BlockOnlineApp' );
+				for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay', 'CheckDocComment', 'BlockOnlineApp', 'AppSDate' );
+
+			$doc_list->{ $app->{ ID } }->{ AppSDate } =~ s/(\d{4})\-(\d{2})\-(\d{2})/$3.$2.$1/;
 
 			$doc_list->{ $app->{ ID } }->{ files } = {};
 			
