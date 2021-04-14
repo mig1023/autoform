@@ -46,6 +46,8 @@ sub getContent
 	return if $self->{ vars }->af->softban_block( $self->{ vars }, $ENV{ HTTP_X_REAL_IP }, 'only_ban_test' );
 	
 	return $self->availability_responder() if /^availability_responder$/i;
+
+	return autoinfopage( @_ ) if lc( $self->param( 'action' ) ) =~ /^(online_addr_proxy|calc)$/i;
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 
@@ -704,20 +706,6 @@ sub get_mobile_api
 	return if ref( $api_response ) != /^(HASH|ARRAY)$/;
 	
 	print JSON->new->pretty->encode( $api_response );
-}
-
-sub autocheckdoc
-# //////////////////////////////////////////////////
-{
-	my ( $self, $task, $id, $template ) = @_;
-
-	my $autoinfopage = VCS::Site::autocheckdoc->new('VCS::Site::autocheckdoc', $self->{ vars } );
-	
-	$autoinfopage->{ autoform } = VCS::Site::autodata::get_settings();
-	
-	$autoinfopage->{ af } = $self;
-	
-	$autoinfopage->autocheckdoc( $task, $id, $template );
 }
 
 sub autoinfopage
@@ -2189,6 +2177,8 @@ sub get_html_page
 
 	return $self->get_list_of_app() if $page_content eq '[list_of_applicants]';
 	
+	return $self->get_check_sending_address() if $page_content eq '[check_sending_address]';
+	
 	return $self->get_doc_uploading() if $page_content eq '[doc_uploading]';	
 	
 	my $current_values = $self->get_all_values( $step, $self->get_current_table_id() );
@@ -2239,6 +2229,27 @@ sub correct_values
 	}
 	
 	return $$current_values;
+}
+
+sub get_check_sending_address
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+
+	my $autoinfopage = VCS::Site::autoinfopage->new('VCS::Site::autoinfopage', $self->{ vars } );
+	
+	$autoinfopage->{ af } = $self;
+	
+	my $content = {};
+	
+	$content->{ sending } = $autoinfopage->data_for_sending( 'preview' );
+	
+	$content->{ sending }->{ urgency } = $self->{ autoform }->{ fox }->{ urgency }, 
+	$content->{ sending }->{ urgency_back } = $self->{ autoform }->{ fox }->{ urgency_back },
+	$content->{ sending }->{ service } = $self->{ autoform }->{ fox }->{ service },	
+	$content->{ sending }->{ cargo } = $self->{ autoform }->{ fox }->{ cargo },
+
+	return ( $content, 'autoform_address_check.tt2' );
 }
 
 sub get_list_of_app
