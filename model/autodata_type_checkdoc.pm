@@ -220,7 +220,16 @@ sub get_content_rules_hash
 				special => 'datepicker, mask',
 				minimal_date => 's_date',
 			},
-		],	
+		],
+		
+		'Адрес дистанционной подачи' => [
+			{
+				page_ord => 250,
+				progress => 2,
+				page_db_id => 400035,
+				replacer => '[check_sending_address]',
+			},
+		],		
 			
 		'Список заявителей' => [
 			{
