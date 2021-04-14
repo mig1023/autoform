@@ -1,0 +1,345 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script type="text/javascript" src="[% static %]/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="[% static %]/jscript/jquery.poshytip.min.js"></script>
+<script type="text/javascript" src="[% static %]/jquery-ui.1.8.min.js"></script>
+<link href="[% static %]/jquery-ui-1.8.16.custom.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/tip-redsimple.css" rel="stylesheet" type="text/css">
+<link href="[% static %]/css/autoform.css" rel="stylesheet" type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VMS - [% langreq('Новая запись') %]</title>
+</head>
+
+<font face="arial">
+
+<center>
+<div id = "app_list_div">
+
+<script>
+
+	function isMobile() {
+		return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+	}
+
+	var mobilScreen = isMobile();
+
+	if ( mobilScreen ) {
+		$('#app_list_div').hide();
+	}
+
+</script>
+
+<form action = "[% addr %]?t=[% token %][% IF lang_in_link %]&lang=[% lang_in_link %][% END %]" method = "POST" name = "dataform">
+<input type = "hidden" value = "nothing" name = "action" id = "action">
+<input type = "hidden" value = "" name = "person" id = "person">
+<input type = "hidden" value = "[% mobile_app %]" name = "mobile_app" id = "mobile_app">
+<input type = "hidden" value = "[% biometric_data %]" name = "biometric_data" id = "biometric_data">
+
+<table id="app_list" width="100%">
+
+<tr class="mobil_hide"><td><table id="progressbar" class="progressbar_gen"><tr>[% progress %]<tr></table><br><br><br></td></tr>
+
+<tr><td align="center">
+<table width="600px" id="app_table">
+
+<tr><td class="left" colspan="5"><h2>[% langreq(title) %]</h2><br></td></tr>
+
+<tr><td colspan="5">
+
+	<div id="selectAddr">
+		[% langreq('Если Вы планируете воспользоваться услугой <b>Дистанционной подачи документов</b> — Вы можете проверить обслуживается ли ваш адрес курьерской службой и узнать ориентировочную стоимость пересылки.') %]
+		<br><br>
+		<span class="ltl_text">
+			[% langreq('Онлайн-проверка документов является неотъемлемой частью услуги по Дистанционной подаче.<br>После успешной проверки, при желании, Вы сможете оформить и оплатить заявку на данную услугу и передать Ваши документы сотруднику курьерской службы для их последующего предоставления в Консульство. ') %]
+			<br><br>
+			[% langreq('Обращаем Ваше внимание, что Генеральным Консульством установлен минимальный срок рассмотрения визового заявления — <b>от 8 рабочих дней</b>. Данный период рассмотрения не включает в себя сроки предварительной проверки документов онлайн, оформления Вами заявки на услугу Дистанционной подачи, доставки Комплекта документов в Визовый центр и Готовых паспортов обратно Заявителю.') %]
+		</span>
+		<br><br>
+		[% langreq('Начните ввод своего адреса и выберите подходящий адрес из предложенных вариантов.') %]
+		<br><br>
+		<span class="ltl_text">
+			[% langreq('Обратите внимание, что нужен <b>полный адрес</b>, обязательно включающий адрес квартиры.') %]<br>
+		</span><br>
+		
+		<input type="text" id="fox_addr" style="width:90%"><br>
+		<span class="exam_span_gen">[% langreq('пример: Москва Толмачёвский М. д 6 кв 1') %]</span>
+	</div>
+	<div id="selectedAddr" style="display:none;">
+		[% langreq('Адрес получения и доставки документов') %]:<br>
+		<span id="selectedAddrText" style="font-weight:bold;font-size:9pt;"></span>&nbsp;<a href="javascript:changeSelectedAddr()">[% langreq('проверить другой') %]</a>
+	</div>
+	<div id="selectedAddrParams" style="display:none;font-size:9pt;"><br>
+		<span style="font-size:18px;color:green;"><b>☑&nbsp;[% langreq('Доставка по этому адресу осуществляется!') %]</b></span>
+		<br><br>
+		[% langreq('Стоимость доставки туда и обратно') %]: <span id="selectedAddrPrice" style="font-weight:bold;"></span><br>
+		<span class="ltl_text">
+			[% langreq('Это примерный расчёт, цена курьерской доставки может отличаться и включать в себя дополнительные коммиссии по оплате.') %]<br>
+		</span>
+		<div id="selectedTimes" style="display:none;">
+			[% langreq('Приблизительный срок доставки') %]: <span id="selectedAddrTime" style="font-weight:bold;"></span><br>
+		</div>
+		<br>
+		
+		<input type="hidden" name="senderGeography" id="senderGeography">
+		<input type="hidden" name="senderIndex" id="senderIndex">
+		<input type="hidden" name="senderAddress" id="senderAddress">
+	</div>
+
+	<div id="selectedAddrError" style="display:none;font-size:9pt;color:red;"><br>
+		[% langreq('В настоящий момент нет доступа к сервису службы доставки.') %]<br>
+		<b>[% langreq('Пожалуйста, попробуйте через некоторое время ещё раз.') %]</b>
+	</div>
+
+	<div id="selectedAddrFail" style="display:none;font-size:9pt;"><br>
+		[% langreq('К сожалению, доставка по этому адресу <b>не осуществляется</b>') %]
+	</div>
+
+	<div id="selectedAddrPriceLoad" style="display:none;font-size:9pt;"><br>
+		<img id='tmp_img' src='[% static %]/images/autoform_wait.gif' />&nbsp;
+		[% langreq('Пожалуйста, подождите пока система проверит цену доставки...') %]
+	</div>
+
+</td></tr>
+
+
+<tr><td class="left" colspan="5">&nbsp;<br>
+	<span id="mobile_order_bottom">
+	<input class="action_button" type="button" value="&#9665; [% langreq('Назад') %]" onclick="go_button('back');">
+	</span>
+	&nbsp;
+	<span id="mobile_order_top">
+	<input class="action_button" type="button" value="[% langreq('Далее') %] &#9655;" onclick="go_button('forward');">
+	</span>
+	
+</td></tr>
+<tr><td class="left" colspan="5"><br>
+[% IF lang_in_link != 'ru' %]
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=ru"><b>Перейти на русский язык</b></a>&nbsp;
+[% END %]
+
+[% IF lang_in_link != 'en' %]
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=en"><b>Switch to English</b></a>&nbsp;
+[% END %]
+
+[% IF lang_in_link != 'it' %]
+	<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
+[% END %]
+</td></tr>
+</table>
+
+</td></tr></table>
+
+</form>
+
+<script>
+
+[% IF last_error_name %]
+	$('#[% last_error_name %]').poshytip({
+		className: 'tip-redsimple',
+		content: '[% langreq(last_error_text) %]',
+		showOn: 'none',
+		alignTo: 'target',
+		alignX: 'inner-left',
+		offsetX: 0,
+		offsetY: 5
+	});
+
+	function show_error() {
+		$('#[% last_error_name %]').poshytip('hide');
+		$('#[% last_error_name %]').poshytip('show');
+	}
+[% END %]
+
+	
+
+function edit_button(id) {
+	$('#action').val('edit');
+	$('#person').val(id);
+	document.dataform.submit();
+};
+
+function go_button(where) {
+	$('#action').val(where);
+	document.dataform.submit();
+};
+
+$(document).ready(mobileScreenCheck);
+
+function changeSelectedAddr() {
+	hideAnotherFields();
+	$('#selectAddr').fadeIn();
+}
+
+function hideAnotherFields() {
+	$('#selectedAddr').fadeOut();
+	$('#selectedAddrParams').fadeOut();
+	$('#selectedTimes').fadeOut();
+	$('#selectedAddrFail').fadeOut();
+	$('#selectedAddrError').fadeOut();
+}
+
+var ajax;
+
+$("#fox_addr").autocomplete({
+	source:function( request, response ) {
+	
+		ajax = $.ajax({
+			url: '/autoform/?t=[% token %]&action=online_addr_proxy&addr=' + $("#fox_addr").val(),
+			dataType: "json",
+			beforeSend: function() {
+				if (ajax) {
+					ajax.abort();
+				}
+			},
+			success: function( data ) {
+				response( data.suggestions, $.map( function( item ) {
+					return {
+						value: item,
+					}
+				}));
+			}
+		});
+	},
+	deferRequestBy:5000,
+	minLength:5,
+	select: function( event, ui ) {
+
+		hideAnotherFields();
+		
+		$('#selectAddr').fadeOut();
+		$('#selectedAddrText').html(ui.item.unrestricted_value);
+		$('#selectedAddr').fadeIn();				
+		
+		var calcUrl = "/autoform/?t=[% token %]&action=calc&service=[% content_text.sending.service %]";
+		var indexes = "&toindex=[% content_text.sending.index %]&fromindex=" + ui.item.data.postal_code;
+		var addresses = encodeURI("&recipientAddress=[% content_text.sending.address %]&senderAddress=" + ui.item.value);
+		var types = "&typeOfCargo=[% content_text.sending.cargo %]&weight=[% content_text.sending.weight %]&qty=1";
+		var urgancy = "&urgency=[% content_text.sending.urgency %]";
+		
+		$('#selectedAddrPriceLoad').fadeIn();
+
+		$.ajax({
+			url: calcUrl + indexes + addresses + types + urgancy,
+			dataType: "json",
+			
+			error: function( data ) {
+				$('#selectedAddrError').fadeIn();
+				$('#fox_order').prop('disabled', true);
+			},
+			success: function( data ) {
+			
+				if (data["tariffs"] == null) {
+					$('#selectedAddrFail').fadeIn();
+					$('#selectedAddrPriceLoad').fadeOut();
+					$('#fox_order').prop('disabled', true);
+				}
+				else {
+					var price_from = data["tariffs"][0]["total"];
+					var time_from = data["tariffs"][0]["maxPeriod"];
+					
+					indexes = "&fromindex=[% content_text.sending.index %]&toindex=" + ui.item.data.postal_code;
+					addresses = encodeURI("&senderAddress=[% content_text.sending.address %]&recipientAddress=" + ui.item.value);
+					urgancy = "&urgency=[% content_text.sending.urgency_back %]";
+				
+					$.ajax({
+						url: calcUrl + indexes + addresses + types + urgancy,
+						dataType: "json",
+						
+						error: function( data ) {
+							$('#selectedAddrError').fadeIn();
+							$('#selectedAddrPriceLoad').fadeOut();
+							$('#fox_order').prop('disabled', true);
+						},
+						success: function( data ) {
+						
+							$('#selectedAddrPriceLoad').fadeOut();
+
+							if (data["tariffs"] == null) {
+								$('#selectedAddrFail').fadeIn();
+								$('#fox_order').prop('disabled', true);
+							}
+							else {
+								var price_to = data["tariffs"][0]["total"];
+								var time_to = data["tariffs"][0]["maxPeriod"];
+							
+								var priceFull = price_from + ' + ' + price_to + ' = ' + (price_from + price_to);
+							
+								$('#selectedAddrPrice').html(priceFull + ' [% langreq('руб') %]');
+								
+								$('#selectedAddrParams').fadeIn();
+								
+								if ((time_from > 0) && (time_to > 0)) {
+								
+									var timeFull = time_from + ' дней к нам + ' + time_to + ' дней обратно';
+									$('#selectedAddrTime').html(timeFull);
+									$('#selectedTimes').fadeIn();
+								}
+								
+								$('#fox_order').prop('disabled', false);
+								
+								$('#senderIndex').val(ui.item.data.postal_code);
+								$('#senderAddress').val(ui.item.value);
+							}
+						}
+					});
+				}
+			}
+		});
+
+		return false;
+	},
+})
+.data( "autocomplete" )._renderItem = function( ul, item ) {
+		return $( "<li></li>" )
+			.data( "item.autocomplete", item )
+			.append( "<a>" + item.value + "</a>" )
+			.appendTo( ul );
+};
+
+
+function mobileScreenCheck() {
+
+	$('#progressbar').css( "display", ( mobilScreen ? 'none' : 'table' ) );
+	$('#app_table').attr( "width", ( mobilScreen ? '100%' : '600px' ) );
+	$('#app_list_div').css( "margin", ( mobilScreen ? '0px' : '50px' ) );
+	$('.edit_input').attr( "value", ( mobilScreen ? "\u270E" : '[% langreq('Редактировать') %]' ) );
+
+	if ( !mobilScreen ) {
+		[% IF last_error_name %]
+			show_error();
+		[% END %]
+
+		return;
+	}
+	
+	var temp_span_content = $('#mobile_order_bottom').html();
+	$('#mobile_order_bottom').html($('#mobile_order_top').html());
+	$('#mobile_order_top').html(temp_span_content);
+
+	$('#app_table').attr( "cellspacing", '10' );
+	$('.action_button').css( "height", '60px' );
+	$('.action_button').css( "width", '100%' );
+	$('.small_button').css( "height", '30px' );
+	$('.small_button').css( "width", '30px' );
+	$('#spacer').html( '<br>' );
+
+	$('.mobil_hide').css( "display", 'none' );
+
+	$('*').css( "font-size", '15px' );
+	
+	$('h2').css( "font-size", '20px' );
+	$('h2, .bold_text').css( "color", '#FF6666' );
+	
+	$('#app_list_div').show();
+
+	[% IF last_error_name %]
+		show_error();
+	[% END %]
+}
+
+</script>
+
+[% INCLUDE yandex_metrika.tt2 %]
+
+</div>
