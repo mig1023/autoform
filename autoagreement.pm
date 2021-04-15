@@ -194,6 +194,10 @@ sub create_online_agreement
 	);
 
 	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
+	
+	$agreementNo =~ s/^([0-9]{2})([0-9]{6})([0-9]{6})$/$1.$2.$3/;
+	
+	return $agreementNo;
 }
 
 sub parse_complex_data
