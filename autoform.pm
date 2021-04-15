@@ -1286,8 +1286,6 @@ sub get_autoform_content
 		if ( $pay_status_ok ) {
 			
 			( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step );
-				
-			$self->send_warning( "Новая проверка документов оплачена" );
 		}
 		else {
 			$last_error = "payment_container|$payment_error";
@@ -1664,7 +1662,14 @@ sub set_appointment_finished
 		WHERE ID = ?", {}, $ncount, $new_appid
 	);
 	
-	$self->send_checkdoc_mail( 1 ) if ( $checkdoc == 2 );
+	if ( $checkdoc == 2 ) {
+
+		$self->send_warning( "Новая ПРОВЕРКА документов", "Номер записи на проверку: $appnum" );
+		
+		$self->send_checkdoc_mail( 1 );
+	}
+	
+	
 	$self->send_app_confirm( $appnum, $new_appid ) if ( $checkdoc != 2 );
 		
 	return ( $new_appid, $appnum );
@@ -4367,15 +4372,15 @@ sub send_link
 sub send_warning
 # //////////////////////////////////////////////////
 {
-	my ( $self, $subject ) = @_;
+	my ( $self, $subject, $body ) = @_;
 
 	my $emails = [
 		'',
 	];
 	
-	my $body = "Автоматическое оповещение: $subject";
+	$body .= "<br><br>C уважением,<br>Скрипт информирования системы дистанционной подачи";
 	
-	$self->{ vars }->get_system->send_mail( $self->{ vars }, $_, $subject, $body, 1 ) for ( @$emails );
+	$self->{ vars }->get_system->send_mail( $self->{ vars }, $_, $subject, $body, 0 ) for ( @$emails );
 }
 
 sub send_app_confirm
