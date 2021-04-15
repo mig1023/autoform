@@ -1143,7 +1143,9 @@ sub online_app
 			
 				VCS::Site::autoagreement::create_online_appointment( $self );
 				
-				VCS::Site::autoagreement::create_online_agreement( $self );
+				my $agrNo = VCS::Site::autoagreement::create_online_agreement( $self );
+				
+				$self->{ af }->send_warning( "Новая ДИСТАНЦИОННАЯ ПОДАЧА документов", "Номер договора на дистанционную подачу: $agrNo" );
 			
 				return online_status_change( $self, 9 );
 			}
@@ -1509,15 +1511,11 @@ sub offline_app
 				UPDATE Appointments SET Status = 12, CenterID = ? WHERE ID = ?", {}, $new->{ center }, $app_id
 			);
 
-			$id_or_error = $self->set_new_appdate_for_checkdoc_transform( $appinfo_for_timeslots );
-
-			if ( $id_or_error =~ /^\d+$/ ) {
-				
-				$self->{ af }->query( 'query', __LINE__, "
-					INSERT INTO Appointments_tranform (Type, OldID, NewID) VALUES ('checkdoc-to-offine', ?, ?)", {},
-					$app_id, $id_or_error
-				);		
-			}
+			( $id_or_error, undef, my $app_num ) = $self->set_new_appdate_for_checkdoc_transform( $appinfo_for_timeslots );
+			
+			$app_num =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
+			
+			$self->{ af }->send_warning( "Новая ОФФЛАЙН ПОДАЧА документов", "Номер записи для подачи в ВЦ: $app_num" );
 			
 			return $self->{ af }->redirect( $self->{ token }.'&action=offline_apped' );
 		}
@@ -1556,8 +1554,6 @@ sub set_new_appdate_for_checkdoc_transform
 		WHERE Token = ?", $self->{ token }
 	);
 
-	my ( $newnum, $new_app_id );
-
 	my $urgent = VCS::Site::newapps::getUrgent( $self, $new->{ fdate }, $new->{ app_date }, $new->{ center } );
 	
 	$self->{ af }->query( 'query', __LINE__, "LOCK TABLES AutoToken WRITE, Appointments WRITE, AppData READ, Branches READ, Timeslots READ, TimeData READ, TimeSlotOverrides READ" );
@@ -1582,7 +1578,7 @@ sub set_new_appdate_for_checkdoc_transform
 	
 	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
 
-	return ( !$error1 and !$error2 ? $error1 : $new_app_id );
+	return ( $error1, $error2, $maxnum );
 }
 
 sub offline_apped
@@ -1652,10 +1648,18 @@ sub re_check_app
 	my $app_id = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT CreatedApp FROM AutoToken WHERE Token = ?", $self->{ token }
 	);
+	
+	my $app_num = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT AppNum FROM Appointments WHERE ID = ?", $app_id
+	);
 		
 	$self->{ af }->query( 'query', __LINE__, "
 		UPDATE Appointments SET Status = 10 WHERE ID = ?", {}, $app_id
 	);
+	
+	$app_num =~ s!(\d{3})(\d{4})(\d{2})(\d{2})(\d{4})!$1/$2/$3/$4/$5!;
+	
+	$self->{ af }->send_warning( "Пользователем загружены ИСПРАВЛЕННЫЕ документы", "Номер записи с новыми документами: $app_num" );
 	
 	$self->{ af }->redirect( $self->{ token } );
 }
