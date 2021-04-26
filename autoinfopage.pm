@@ -891,12 +891,26 @@ sub offline_check_params
 	
 	my $date = $self->{ vars }->getparam( 'takeDate' );
 	
+	my $appobj = VCS::Docs::appointments->new( 'VCS::Docs::appointments', $self->{ vars } );
+	
+	my $hds = $appobj->get_holidays( $self->{ vars }, 1 );
+	
+	$date =~ /(\d{2})\.(\d{2})\.(\d{4})/;
+
+	my $day_of_week = Date::Calc::Day_of_Week($3, $2, $1);
+	
+	return $self->{ af }->lang( "Невозможно оформить доставку на выходной день" )
+		if $day_of_week =~ /^(0|6)$/;
+		
+	return $self->{ af }->lang( "Невозможно оформить доставку на праздничный день" )
+		if exists $hds->{ $date };	
+		
 	my ( $start_date, $end_date ) = $self->get_min_max_date();
 	
-	return $self->{ af }->lang( "Указана дата до начала допустимого периода" )
+	return $self->{ af }->lang( "Выбрана дата до начала допустимого периода" )
 		if ( $self->{ vars }->get_system->cmp_date( $start_date, $date ) < 0 );
 		
-	return $self->{ af }->lang( "Указана дата после окончания допустимого периода" )
+	return $self->{ af }->lang( "Выбрана дата после окончания допустимого периода" )
 		if ( $self->{ vars }->get_system->cmp_date( $end_date, $date ) > 0 );
 }
 
