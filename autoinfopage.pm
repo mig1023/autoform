@@ -1112,7 +1112,7 @@ sub online_app
 
 		$payment = $self->{ af }->payment_prepare( $app_id, 'service' );
 		
-		#$time_limit = $self->{ af }->get_payment_time_limit( 'service' );
+		$time_limit = $self->{ af }->get_payment_time_limit( 'service' );
 
 		if ( $self->{ vars }->getparam( 'appdata' ) eq 'service_pay' ) {
 
@@ -1181,9 +1181,9 @@ sub online_app
 		$sending = $self->data_for_sending();
 		
 		$error = offline_check_params( $self ) if $self->{ vars }->getparam( 'appdata' ) eq 'order';
-		
-		if ( !$error and ( $self->{ vars }->getparam( 'appdata' ) eq 'order' ) ) {
 			
+		if ( !$error and ( $self->{ vars }->getparam( 'appdata' ) eq 'order' ) ) {
+	
 			( $order_num_from, $order_num_to, $error, my $address ) = $self->online_order();
 			
 			if ( !$error ) {
@@ -1288,7 +1288,12 @@ sub online_app
 	$tvars->{ service_count } = $service_count if $service_count;
 	$tvars->{ sms_price } = $sms_price if $sms_price;
 	$tvars->{ concil } = $concil if $concil;
-	$tvars->{ time_limit } = $time_limit if $time_limit;
+	
+	if ( $time_limit ) {
+		
+		my @limit = split( /-/, $time_limit );
+		$tvars->{ tlimit } = \@limit;
+	}
 	
 	$template->process( 'autoform_info.tt2', $tvars );
 }
