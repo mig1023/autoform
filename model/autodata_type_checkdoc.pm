@@ -1934,7 +1934,7 @@ sub get_content_rules_hash
 					only_if_not => {
 						table => 'AppData',
 						name => 'VisaPurpose',
-						value => '1, 7, 9',
+						value => '1, 7, 9, 10',
 					},
 				},
 				page_db_id => 400019,
