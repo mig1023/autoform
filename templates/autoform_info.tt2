@@ -860,6 +860,10 @@
 			</div>
 		</td></tr>
 		
+		<tr><td colspan="2">
+			<br><div id="pay_timer"></div>
+		</td></tr>
+		
 		<tr><td colspan="2">&nbsp;<br>
 			<input class="small_button" type="button" id="service_pay" name="service_pay" value="[% langreq('Оплатить / продолжить') %] &#9655;" onclick="servicepay();"><br>
 		</td></tr>
@@ -1609,6 +1613,46 @@ function mobileScreenCheck() {
 [% END %]
 
 [% IF ( title == 9 ) %]
+
+	[% IF ( online_status == 7 ) %]
+		
+		function timer() {
+				
+			var mskTimeOffset = 3;
+			
+			var localDate = new Date();
+			var utc = localDate.getTime() + ( localDate.getTimezoneOffset() * 60000 );
+			var nowDate = new Date( utc + ( 3600000 * mskTimeOffset ) );
+			
+			var achiveDate = new Date( [% tlimit.0 %], ( [% tlimit.1 %]-1 ), [% tlimit.2 %], [% tlimit.3 %], [% tlimit.4 %], [% tlimit.5 %] );
+			var result = ( achiveDate - nowDate ) + 1000;
+			var timer_place = document.getElementById( 'pay_timer' );
+			
+			
+			if ( result < 0 ) {
+				
+				timer_place.innerHTML = '<font color="red"><b>Время на оплату истекло</b></font>';
+				return undefined;
+			}
+			else
+			{
+				var seconds = Math.floor( ( result / 1000 ) % 60 );
+				var minutes = Math.floor( ( result / 1000 / 60 ) % 60 );
+				
+				var time_line = 'Вам необходимо произвести оплату в течение ';
+				
+				if ( minutes > 0 )
+					time_line += minutes + ' минут ';
+
+				timer_place.innerHTML = time_line + seconds + ' секунд';
+				
+				setTimeout(timer, 1000);
+			}
+		}
+		
+		window.onload = function() { timer() };
+		
+	[% END %]
 
 	function showErrorTip(what, where) {
 
