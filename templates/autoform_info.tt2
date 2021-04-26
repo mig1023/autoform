@@ -1238,7 +1238,8 @@
 		maxDate: '[% end_date %]',
 		showOn: 'both',
 		buttonImage: '[% static %]/images/1x1.png',
-		buttonImageOnly:true
+		buttonImageOnly: true,
+		beforeShowDay: $.datepicker.noWeekends
 	});
 	
 	var ajax;
