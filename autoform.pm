@@ -509,9 +509,7 @@ sub get_payment_time_limit
 	my $relation = ( $type eq "check" ? "AutoAppID" : "CreatedApp" );
 
 	my $dates = $self->query( 'selallkeys', __LINE__, "
-		SELECT
-			AutoPayment.StartDate+INTERVAL 20 MINUTE as LimitDate,
-			TIMEDIFF( AutoPayment.StartDate+INTERVAL 20 MINUTE, NOW() ) as TimeLeft
+		SELECT AutoPayment.StartDate+INTERVAL 20 MINUTE as LimitDate
 		FROM AutoToken
 		JOIN AutoPayment ON AutoToken.$relation = AutoPayment.AutoID
 		WHERE Token = ?", $self->{ token }
@@ -519,15 +517,9 @@ sub get_payment_time_limit
 
 	my $limit = $dates->[ 0 ]->{ LimitDate };
 	
-	$limit =~ s/(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}):(\d{2}):(\d{2})/$4:$5:$6 $3.$2.$1/;
+	$limit =~ s/(\d{4})\-(\d{2})\-(\d{2})\s(\d{2}):(\d{2}):(\d{2})/$1-$2-$3-$4-$5-$6/;
 
-	my $time_limit = $self->lang( "Вы должны произвести оплату до " ) . $limit;
-	
-	my @timeLeft = split( /:/, $dates->[ 0 ]->{ TimeLeft } );
-	
-	$time_limit = $self->lang( "К сожалению, время на оплату истекло (" ) . $limit . ")" if $timeLeft[0] < 0;
-
-	return $time_limit;
+	return $limit;
 }
 
 sub get_payment_price
