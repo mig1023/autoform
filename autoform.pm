@@ -2706,8 +2706,8 @@ sub get_html_for_element
 	}
 			
 	if ( $name eq 'agreements_link' ) {
-warn "$content";
-		my $link = '<a target="_blank" class="dotted_link_big" href="/autoform/?t="' . $self->{ token } . "&action=print_doc&app=auto>Договор</a>";
+
+		my $link = '<a target="_blank" class="dotted_link_big" href="/autoform/?t=' . $self->{ token } . '&action=print_doc&app=auto">Договор</a>';
 
 		$content =~ s/\[link\]/$link/;
 	}
