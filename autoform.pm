@@ -10,6 +10,7 @@ use VCS::Site::autodata_type_checkdoc;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
 use VCS::Site::autopayment;
+use VCS::Site::autosms;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -92,8 +93,16 @@ sub get_content_rules
 		
 		if ( $current_page == $page_ord ) {
 
-			for ( 'persons_in_page', 'collect_date', 'param', 'ussr_or_rf_first',
-				'primetime_spb_price', 'primetime_price' ) {
+			my $key_list = [
+				'persons_in_page',
+				'collect_date',
+				'param',
+				'ussr_or_rf_first',
+				'primetime_spb_price',
+				'primetime_price',
+			];
+
+			for ( @$key_list ) {
 			
 				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[ 0 ]->{ $_ } ? 1 : 0 );
 			}
@@ -905,7 +914,7 @@ sub init_add_param
 			ORDER by PriceRate.ID DESC LIMIT 1"
 		);
 	}
-
+	
 	if (
 		$keys->{ param }
 		or
@@ -2291,6 +2300,20 @@ sub get_list_of_app
 	return ( $content, 'autoform_list.tt2' );
 }
 
+sub get_sms_code()
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	$self->{ af } = $self;
+	
+	my $phone = $self,VCS::Site::autosms::get_phone_for_sms( $self, 'without_app' );
+
+	my $code =  VCS::Site::autosms::get_code_for_sms( $self, $phone, 'without_app' );
+
+	return $code;
+}
+
 sub get_specials_of_element
 # //////////////////////////////////////////////////
 {
@@ -2312,7 +2335,7 @@ sub get_specials_of_element
 		min_date 	=> [],
 		phone_correct	=> [],
 		multiple_select	=> [],
-		payment		=> [],
+		payment		=> [],	
 	};
 
 	my $js_rules = [];
@@ -2341,6 +2364,9 @@ sub get_specials_of_element
 			
 		push( @{ $special->{ multiple_select } }, [ $element->{ name } ] )
 			if exists $element->{ multiple_select };
+			
+		$special->{ sms_code } = $self->get_sms_code()
+			if $element->{ name } eq 'digital_signature';
 
 		next unless $element->{ check };
 			
@@ -2685,6 +2711,9 @@ sub get_html_for_element
 	if ( $type eq 'info' ) {
 	
 		$value = '—' if !$value;
+		
+		$value = '<b>' . $value . '</b>' if $element->{ font } eq "bold"; 
+		
 		$content =~ s/\[text\]/$value/;
 	}
 	
@@ -3058,7 +3087,7 @@ sub encode_data_for_db
 	$value = $self->get_prepare_line( $value, $element );
 	
 	$value = ( ( $value eq $element_name ) ? 1 : 0 )
-		if $element->{ type } =~ /checkbox|disclaimer|oferta|checklist/ and $element->{ name } ne 'edt_mezzi';
+		if $element->{ type } =~ /checkbox|disclaimer|oferta|document|checklist/ and $element->{ name } ne 'edt_mezzi';
 	
 	$value = $self->{ vars }->get_system->to_upper_case( $value ) if $element->{ format } eq 'capslock';
 	
@@ -3643,6 +3672,14 @@ sub check_logic
 					or
 				 	( ( $type eq 'less' ) and ( $value > $rule->{ offset } ) )
 				);
+		}
+		
+		if ( $rule->{ condition } =~ /^digital_signature$/ ) {
+						
+			$self->{ af } = $self;
+			
+			return $self->text_error( 32, $element )
+				unless VCS::Site::autosms::code_from_sms_is_ok( $self, $value, 'without_app' );
 		}
 	}
 }
