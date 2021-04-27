@@ -274,6 +274,8 @@ sub get_html_elements
 		
 		oferta		=> '<div id="disc" class="oferta"><br>[comment]<br></div>' .
 				'<br><input type="checkbox" value="[name]" name="[name]" id="[name]" [checked] [u]>',
+				
+		document	=> '<div id="disc" class="oferta"><br>[comment]<br></div>',
 		
 		select		=> '<select class="input_width select_gen" size = "1" ' .
 				'name="[name]" title="[comment]" id="[name]" [u]>[options]</select>',
