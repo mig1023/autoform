@@ -47,7 +47,7 @@ sub getContent
 	
 	return $self->availability_responder() if /^availability_responder$/i;
 
-	return autoinfopage( @_ ) if lc( $self->param( 'action' ) ) =~ /^(online_addr_proxy|calc)$/i;
+	return autoinfopage( @_ ) if lc( $self->param( 'action' ) ) =~ /^(online_addr_proxy|calc|print_doc)$/i;
 	
 	$self->{ autoform } = VCS::Site::autodata::get_settings();
 
@@ -5210,7 +5210,7 @@ sub redirect
 	my $param = ( $token ? '?t=' . $token : '' );
 	
 	$param .= ( $self->{ lang } ? ( $param ? '&' : '?' ) . 'lang=' . $self->{ lang } : '' );
-	
+
 	$self->{ vars }->get_system->redirect( $self->{ autoform }->{ paths }->{ addr } . $param );
 }
 
