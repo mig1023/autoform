@@ -201,8 +201,6 @@ function init_comm() {
 
 [% IF ( special.payment.0) %]
 
-	
-
 	function pay() {
 	
 		window.open('[% payment.form_url %]');
@@ -366,6 +364,7 @@ function get_date_from(date_id) {
 
 		$.get("[% vcs_tools %]get_times.htm", {
 		
+			'vtype': '[% appinfo.vtype %]',
 			'center': '[% appinfo.center %]', 
 			'persons': '[% appinfo.persons %]', 
 			'appdate':$('#app_date').val(),
@@ -636,6 +635,19 @@ function check_input( field, type, check, label ) {
 		val = $( '#' + field ).val().replace(/^\s+|\s+$/g, '');
 	}
 	
+	[% IF special.sms_code %]
+
+		if ( field == 'digital_signature') {
+		
+			var sms_code = CryptoJS.MD5( $('#digital_signature').val() );
+			
+			var sms_check = '[% special.sms_code %]';
+			
+			if ( sms_code != sms_check )
+				return show_error_tip( 'digital_signature', "[% langreq( 'Проверьте правильность введёного номера SMS' ) %]" );	
+		}
+		else
+	[% END %]
 	if ( type == 'input' ) {
 		
 		if ( /z/.test( check ) && ( val == '' ) ) {

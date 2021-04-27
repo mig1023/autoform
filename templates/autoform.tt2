@@ -26,6 +26,11 @@
 	[% IF ( special.mask.0 || (step == 2) ) %]
 		<script src="[% static %]/jquery.mask.min.js"></script>
 	[% END %]
+	
+	[% IF ( special.sms_code) %]
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+	[% END %]
 
 	[% IF javascript_check %]
 		<noscript>
@@ -138,6 +143,7 @@
 								[% IF lang_in_link != 'it' %]
 									<a class="dotted_link" href="[% addr %]?t=[% token %]&lang=it"><b>Passare all&prime;italiano</b></a>
 								[% END %]
+								&nbsp;
 							[% END %]
 							</td></tr>
 							
@@ -161,7 +167,5 @@
 
 			</div>
 		</div>
-		
-		
 	</body>
 </html>
