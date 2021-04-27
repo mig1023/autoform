@@ -23,12 +23,14 @@ sub new
 sub get_phone_for_sms
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $without_app ) = @_;
+	
+	my $relatons = "Appointments JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp";
+	
+	$relatons = "AutoAppointments JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID" if $without_app;	
 	
 	my $phone = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT Phone FROM Appointments
-		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
-		WHERE Token = ?", $self->{ token }
+		SELECT Phone FROM $relatons WHERE AutoToken.Token = ?", $self->{ token }
 	);
 	
 	return $phone;
@@ -37,13 +39,25 @@ sub get_phone_for_sms
 sub get_code_from_db
 # //////////////////////////////////////////////////
 {
-	my $self = shift;
+	my ( $self, $without_app ) = @_;
 	
-	my ( $remote_id, $sms_code ) = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT AutoRemote.ID, SMScode FROM AutoRemote
-		JOIN AutoToken ON AutoToken.CreatedApp = AutoRemote.AppID
-		WHERE Token = ?", $self->{ token }
-	);
+	my ( $remote_id, $sms_code ) = ( 0, 0 );
+	
+	if ( $without_app ) {
+
+		( $remote_id, $sms_code ) = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT DocUploadedAgreements.ID, SMScode FROM DocUploadedAgreements
+			JOIN AutoToken ON AutoToken.ID = DocUploadedAgreements.Token
+			WHERE AutoToken.Token = ?", $self->{ token }
+		);
+	}
+	else {	
+		( $remote_id, $sms_code ) = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT AutoRemote.ID, SMScode FROM AutoRemote
+			JOIN AutoToken ON AutoToken.CreatedApp = AutoRemote.AppID
+			WHERE Token = ?", $self->{ token }
+		);
+	}
 	
 	return ( $remote_id, $sms_code );
 }
@@ -51,11 +65,11 @@ sub get_code_from_db
 sub get_code_for_sms
 # //////////////////////////////////////////////////
 {
-	my ( $self, $phone ) = @_;
+	my ( $self, $phone, $without_app ) = @_;
 	
 	my $config = VCS::Site::autodata::get_settings()->{ sms };
 	
-	my ( $remote_id, $sms_code ) = get_code_from_db( $self );
+	my ( $remote_id, $sms_code ) = get_code_from_db( $self, $without_app );
 	
 	return md5_hex( $sms_code ) if $sms_code;
 	
@@ -65,8 +79,10 @@ sub get_code_for_sms
 	
 	$sms_id = sending_sms( $self, $phone, "Vash kod dogovora $new_code" ) unless $config->{ do_not_send_sms };
 		
+	my $table = ( $without_app ? "DocUploadedAgreements" : "AutoRemote" );
+		
 	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE AutoRemote SET SMScode = ?, SMSmsgID = ? WHERE ID = ?", {}, $new_code, $sms_id, $remote_id
+		UPDATE $table  SET SMScode = ?, SMSmsgID = ? WHERE ID = ?", {}, $new_code, $sms_id, $remote_id
 	);
 
 	return md5_hex( $new_code );
@@ -75,15 +91,18 @@ sub get_code_for_sms
 sub code_from_sms_is_ok
 # //////////////////////////////////////////////////
 {
-	my ( $self, $code ) = @_;
+	my ( $self, $code, $without_app ) = @_;
 	
-	my ( $remote_id, $sms_code ) = get_code_from_db( $self );
+	my ( $remote_id, $sms_code ) = get_code_from_db( $self, $without_app );
 	
 	return 0 unless $sms_code eq $code;
 	
+	my $table = ( $without_app ? "DocUploadedAgreements" : "AutoRemote" );
+	
 	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE AutoRemote SET SMSsigned = now() WHERE ID = ?", {}, $remote_id
+		UPDATE $table SET SMSsigned = now() WHERE ID = ?", {}, $remote_id
 	);
+
 	
 	return 1;
 }
