@@ -100,12 +100,10 @@ sub get_content_rules
 				'ussr_or_rf_first',
 				'primetime_spb_price',
 				'primetime_price',
+				'digital_sign_transform',
 			];
 
-			for ( @$key_list ) {
-			
-				$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[ 0 ]->{ $_ } ? 1 : 0 );
-			}
+			$keys_in_current_page->{ $_ } = ( $new_content->{ $page_ord }->[ 0 ]->{ $_ } ? 1 : 0 ) for @$key_list;
 		}
 		
 		if ( !$full && $content->{ $page }->[ 0 ]->{ replacer } ) {
@@ -124,7 +122,7 @@ sub get_content_rules
 	}
 
 	$content = ( $need_to_init ? $self->init_add_param( $new_content, $keys_in_current_page ) : $new_content );
-	
+		
 	return $content if !$current_page;
 	
 	return scalar( keys %$content ) if $current_page =~ /^length$/i;
@@ -927,6 +925,8 @@ sub init_add_param
 		$keys->{ primetime_price }
 		or
 		$keys->{ primetime_spb_price }
+		or
+		$keys->{ digital_sign_transform }
 	) {
 	
 		for my $page ( keys %$content_rules ) {
@@ -956,6 +956,24 @@ sub init_add_param
 				if ( $element->{ name } =~ /^(brhcountry|prev_сitizenship)$/ ) {
 				
 					$element->{ first_elements } = '272, 70' if $ussr_first;
+				}
+				
+				if ( $element->{ name } eq 'digital_signature' ) {
+		
+					my $sign_date = VCS::Site::autosms::get_signed( $self );
+		
+					if ( $sign_date ) {
+							
+						$element->{ type } = "text";
+						
+						$sign_date =~ s/(\d{4})\-(\d{2})\-(\d{2})/$3.$2.$1 в/;
+						
+						$element->{ label } = "Договор уже подписан Вами $sign_date.";
+						
+						delete $element->{ special };
+						
+						delete $element->{ check };
+					}
 				}
 				
 				if (
@@ -2307,11 +2325,7 @@ sub get_sms_code()
 	
 	$self->{ af } = $self;
 	
-	my $phone = VCS::Site::autosms::get_phone_for_sms( $self, 'without_app' );
-
-	my $code =  VCS::Site::autosms::get_code_for_sms( $self, $phone, 'without_app' );
-
-	return $code;
+	return VCS::Site::autosms::get_code_for_sms( $self, VCS::Site::autosms::get_phone_for_sms( $self, 'without_app' ), 'without_app' );
 }
 
 sub get_specials_of_element
@@ -2365,6 +2379,8 @@ sub get_specials_of_element
 		push( @{ $special->{ multiple_select } }, [ $element->{ name } ] )
 			if exists $element->{ multiple_select };
 			
+		next if ( $element->{ name } eq 'digital_signature' ) and VCS::Site::autosms::get_signed( $self );
+						
 		$special->{ sms_code } = $self->get_sms_code()
 			if $element->{ name } eq 'digital_signature';
 
@@ -2567,7 +2583,7 @@ sub get_html_for_element
 		
 		$content =~ s/\[close\]/$close/gi;
 	}
-	
+		
 	if ( $type =~ /^(m_)?select$/ ) {
 	
 		my $list = '';
@@ -2687,6 +2703,13 @@ sub get_html_for_element
 		my $pay = $price * $count;
 
 		$content =~ s/\[pay_amount\]/$pay/;
+	}
+			
+	if ( $name eq 'agreements_link' ) {
+warn "$content";
+		my $link = '<a target="_blank" class="dotted_link_big" href="/autoform/?t="' . $self->{ token } . "&action=print_doc&app=auto>Договор</a>";
+
+		$content =~ s/\[link\]/$link/;
 	}
 
 	if ( $type eq 'progress' ) {
@@ -3279,7 +3302,7 @@ sub check_data_from_form
 	for my $element ( @$page_content ) {
 
 		last if $first_error;
-		
+
 		$first_error = $self->check_diff_types( $element ) if $element->{ check };
 
 		$first_error = $self->check_captcha() if $element->{ type } =~ /captcha/;
@@ -3684,7 +3707,9 @@ sub check_logic
 		}
 		
 		if ( $rule->{ condition } =~ /^digital_signature$/ ) {
-						
+					
+			return undef if VCS::Site::autosms::get_signed( $self );
+					
 			$self->{ af } = $self;
 			
 			return $self->text_error( 32, $element )
