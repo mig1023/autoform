@@ -2622,7 +2622,7 @@ sub get_content_rules_hash
 			},
 		],
 		
-		'Оферта' => [
+		'Подписание договора' => [
 			{
 				page_ord => 3000,
 				progress => 10,
@@ -2630,17 +2630,40 @@ sub get_content_rules_hash
 				page_db_id => 400031,
 			},
 			{
-				type => 'oferta',
+				type => 'document',
 				name => 'oferta',
-				label_for => 'я ознакомился с офертой на оказание услуги проверки документов',
 				comment => 'oferta_text_checkdoc',
-				check => 'true',
 				full_line => 1,
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'info',
+				name => 'sms_phone',
+				label => 'Мы отправили вам SMS на телефон',
 				db => {
 					table => 'Appointments',
-					name => 'MobilPermission',
-					transfer => 'nope',
+					name => 'Phone',
 				},
+				font => 'bold',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'input',
+				name => 'digital_signature',
+				label => 'Введите присланный код',
+				comment => 'Когда вы введёте присланный код, договор будет считаться заключённым. Такая подпись считается простой электронной подписью.',
+				example => '1234',
+				check => 'zN',
+				check_logic => [
+					{
+						condition => 'digital_signature',
+					},
+				],
+				special => 'sms_code',
 			},
 		],
 			
