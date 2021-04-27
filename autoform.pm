@@ -2307,7 +2307,7 @@ sub get_sms_code()
 	
 	$self->{ af } = $self;
 	
-	my $phone = $self,VCS::Site::autosms::get_phone_for_sms( $self, 'without_app' );
+	my $phone = VCS::Site::autosms::get_phone_for_sms( $self, 'without_app' );
 
 	my $code =  VCS::Site::autosms::get_code_for_sms( $self, $phone, 'without_app' );
 
@@ -2678,6 +2678,15 @@ sub get_html_for_element
 					
 		$content =~ s/\[pay_text\]/$pay_text/;
 		$content =~ s/\[pay_amount\]//;
+	}
+	
+	if ( $type eq 'pay_confirm' ) {
+
+		my ( $price, $count ) = $self->get_payment_price( "check" );
+
+		my $pay = $price * $count;
+
+		$content =~ s/\[pay_amount\]/$pay/;
 	}
 
 	if ( $type eq 'progress' ) {

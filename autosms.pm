@@ -32,7 +32,7 @@ sub get_phone_for_sms
 	my $phone = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT Phone FROM $relatons WHERE AutoToken.Token = ?", $self->{ token }
 	);
-	
+
 	return $phone;
 }
 
@@ -82,7 +82,7 @@ sub get_code_for_sms
 	my $table = ( $without_app ? "DocUploadedAgreements" : "AutoRemote" );
 		
 	$self->{ af }->query( 'query', __LINE__, "
-		UPDATE $table  SET SMScode = ?, SMSmsgID = ? WHERE ID = ?", {}, $new_code, $sms_id, $remote_id
+		UPDATE $table SET SMScode = ?, SMSmsgID = ? WHERE ID = ?", {}, $new_code, $sms_id, $remote_id
 	);
 
 	return md5_hex( $new_code );
