@@ -419,18 +419,31 @@ sub print_agreement
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-
-	my $docpack = lc( $self->{ vars }->getparam( 'doc' ) );
 	
-	$docpack =~ s/[^0-9]//g;
-
-	return $self->{ af }->redirect( 'current' ) unless $self->{ af }->check_existing_docid_in_token( $docpack );
-
-	$self->{ vars }->{ session }->{ branches } = 47;
-
 	my $print = VCS::Docs::individuals->new( 'VCS::Docs::individuals', $self->{ vars } );
 	
-	$self->{ vars }->setparam( 'docid', $docpack );
+	my $app = lc( $self->{ vars }->getparam( 'app' ) ) || 0;
+	
+	if ( $app =~ /^auto$/ ) {
+				
+		$self->{ vars }->{ session }->{ branches } = 46;
+		
+		$self->{ vars }->setparam( 'appid_auto', 'auto' );	
+	}
+	else {
+
+		my $docpack = lc( $self->{ vars }->getparam( 'doc' ) );
+		
+		$docpack =~ s/[^0-9]//g;
+		
+		$self->{ af }->{ token } = $self->{ af }->get_token() || 0;
+
+		return $self->{ af }->redirect( 'current' ) unless $self->{ af }->check_existing_docid_in_token( $docpack );
+
+		$self->{ vars }->{ session }->{ branches } = 47;
+		
+		$self->{ vars }->setparam( 'docid', $docpack );
+	}
 	
 	$print->print_doc();
 	
