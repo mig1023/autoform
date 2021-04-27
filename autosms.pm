@@ -88,6 +88,20 @@ sub get_code_for_sms
 	return md5_hex( $new_code );
 }
 
+sub get_signed
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $sign_date = $self->query( 'sel1', __LINE__, "
+		SELECT SMSsigned FROM DocUploadedAgreements
+		JOIN AutoToken ON AutoToken.ID = DocUploadedAgreements.Token
+		WHERE AutoToken.Token = ?", $self->{ token }
+	);
+	
+	return $sign_date;
+}
+
 sub code_from_sms_is_ok
 # //////////////////////////////////////////////////
 {
