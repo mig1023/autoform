@@ -25,13 +25,26 @@ sub get_phone_for_sms
 {
 	my ( $self, $without_app ) = @_;
 	
-	my $relatons = "Appointments JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp";
+	my $phone = undef;
 	
-	$relatons = "AutoAppointments JOIN AutoToken ON AutoAppointments.ID = AutoToken.AutoAppID" if $without_app;	
-	
-	my $phone = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT Phone FROM $relatons WHERE AutoToken.Token = ?", $self->{ token }
-	);
+	if ( $without_app ) {
+		
+		my ( $app_phone, $appdata_phone ) = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT AutoAppointments.Phone, AutoAppData.AppPhone
+			FROM AutoToken
+			JOIN AutoAppointments ON AutoToken.AutoAppID = AutoAppointments.ID
+			LEFT JOIN AutoAppData ON AutoToken.AutoAppDataID = AutoAppData.ID
+			WHERE Token = ?", $self->{ token }
+		);
+		
+		$phone = ( !$appdata_phone ? $app_phone : $appdata_phone ); 
+	}
+	else {
+		$phone = $self->{ af }->query( 'sel1', __LINE__, "
+			SELECT Phone FROM Appointments JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
+			WHERE AutoToken.Token = ?", $self->{ token }
+		);
+	}
 
 	return $phone;
 }
