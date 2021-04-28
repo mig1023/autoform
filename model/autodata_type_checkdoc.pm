@@ -2643,6 +2643,10 @@ sub get_content_rules_hash
 				name => 'sms_phone',
 				label => 'Мы отправили вам SMS на телефон',
 				db => {
+					table => 'AppData',
+					name => 'AppPhone',
+				},
+				load_if_free_field => {
 					table => 'Appointments',
 					name => 'Phone',
 				},
