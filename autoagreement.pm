@@ -39,6 +39,51 @@ sub create_online_appointment
 	);
 }
 
+sub create_sms_agreements_if_need
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my ( $token_id, $already ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT AutoToken.ID, DocUploadedAgreements.ID FROM AutoToken
+		LEFT JOIN DocUploadedAgreements ON AutoToken.ID = DocUploadedAgreements.Token
+		WHERE AutoToken.Token = ?", $self->{ token }
+	);
+	
+	return if $already;
+
+	my $now = $self->{ vars }->get_system->now_date();
+	
+	my $agreementNo = $self->{ vars }->admfunc->getAgrNumber( $self->{ vars }, 46, $now );
+	
+	my $template = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT ID FROM Templates WHERE TDate <= curdate() AND isJur=0 AND CenterID=46 ORDER BY TDate DESC LIMIT 1"
+	);
+	
+	my $rate = $self->{ vars }->admfunc->getRate( $self->{ vars }, 'RUR', $now, 46 );
+	
+	$self->{ af }->query( 'query', __LINE__, "
+		INSERT INTO DocUploadedAgreements (Token, Agreement, RateID, Template) VALUES (?, ?, ?, ?)", {},
+		$token_id, $agreementNo, $rate, $template
+	);
+}
+
+sub get_sms_agreements
+# //////////////////////////////////////////////////
+{
+	my $self = shift;
+	
+	my $agreement = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT Agreement FROM AutoToken
+		JOIN DocUploadedAgreements ON AutoToken.ID = DocUploadedAgreements.Token
+		WHERE AutoToken.Token = ?", $self->{ token }
+	);
+	
+	$agreement =~ s/^([0-9]{2})([0-9]{6})([0-9]{6})$/$1.$2.$3/;
+	
+	return $agreement;
+}
+
 sub create_online_agreement
 # //////////////////////////////////////////////////
 {
