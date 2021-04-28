@@ -11,6 +11,7 @@ use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
 use VCS::Site::autopayment;
 use VCS::Site::autosms;
+use VCS::Site::autoagreement;
 
 use Data::Dumper;
 use Date::Calc qw/Add_Delta_Days/;
@@ -2325,6 +2326,8 @@ sub get_sms_code()
 	
 	$self->{ af } = $self;
 	
+	VCS::Site::autoagreement::create_sms_agreements_if_need( $self );
+	
 	return VCS::Site::autosms::get_code_for_sms( $self, VCS::Site::autosms::get_phone_for_sms( $self, 'without_app' ), 'without_app' );
 }
 
@@ -2532,6 +2535,7 @@ sub get_html_for_element
 	my ( $self, $type, $name, $value_original, $param, $uniq_code, $first_elements, $comment, $check, $element ) = @_;
 
 	my $value = ( $type eq 'input' ? $value_original : $self->lang( $value_original ) );
+
 	my $param = $self->lang( $param );
 	my $comment = $self->lang( $comment );
 	my $example = $self->lang( 'пример' );
@@ -2706,8 +2710,13 @@ sub get_html_for_element
 	}
 			
 	if ( $name eq 'agreements_link' ) {
+		
+		$self->{ af } = $self;
+		
+		my $agreement = VCS::Site::autoagreement::get_sms_agreements( $self );
 
-		my $link = '<a target="_blank" class="dotted_link_big" href="/autoform/?t=' . $self->{ token } . '&action=print_doc&app=auto">Договор</a>';
+		my $link = '<a target="_blank" class="dotted_link_big" href="/autoform/?t=' . $self->{ token } .
+			'&action=print_doc&app=auto">' . $self->lang( "Договор №") . $agreement . '</a>';
 
 		$content =~ s/\[link\]/$link/;
 	}
