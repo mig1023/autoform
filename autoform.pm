@@ -2697,15 +2697,6 @@ sub get_html_for_element
 			$self->lang( " руб<br><br>К оплате за услугу: <b>" ) . $pay . "</b>" ;
 					
 		$content =~ s/\[pay_text\]/$pay_text/;
-		$content =~ s/\[pay_amount\]//;
-	}
-	
-	if ( $type eq 'pay_confirm' ) {
-
-		my ( $price, $count ) = $self->get_payment_price( "check" );
-
-		my $pay = $price * $count;
-
 		$content =~ s/\[pay_amount\]/$pay/;
 	}
 			
