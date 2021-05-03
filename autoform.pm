@@ -1338,8 +1338,6 @@ sub get_autoform_content
 	( $step, $last_error, $appnum, $appid ) = $self->get_forward( $step )
 		if ( $action eq 'forward' ) and ( $step < $max_step ) and ( !$currentPage->[ 0 ]->{ check_payment_strict } );
 
-	$step = $self->get_service( $action, $step ) if $action =~ /(appointment|checkdoc|remoteapp)/;
-	
 	$step = $self->get_edit( $step, $appdata_id ) if ( $action eq 'edit' ) and $appdata_id;
 	
 	$self->get_delete( $appdata_id ) if ( $action eq 'delapp' ) and $appdata_id;
@@ -1567,33 +1565,6 @@ sub citizenship_check_fail
 	}
 	
 	return 0;
-}
-
-sub get_service
-# //////////////////////////////////////////////////
-{
-	my ( $self, $action, $step ) = @_;
-
-	my $service_code = {
-		'appointment' => 1,
-		'checkdoc' => 2,
-		'remoteapp' => 3,
-	};
-	
-	my $table_id = $self->get_current_table_id();
-
-	$self->query( 'query', __LINE__, "
-		UPDATE AutoToken SET ServiceType = ? WHERE Token = ?", {},
-		$service_code->{ $action },  $self->{ token }
-	);
-	
-	$self->get_app_visa_and_center( 'need_to_recached_data' );
-
-	$step = $self->get_step_by_content( 'to_start' );
-
-	$self->set_step( $step );
-	
-	return $step;
 }
 
 sub get_forward
