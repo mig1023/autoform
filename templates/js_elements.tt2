@@ -323,7 +323,10 @@ function get_date_from(date_id) {
 			$('#vtype').find('option').remove();
 			
 			$.get("[% vcs_tools %]get_vtypes.htm",
-				{ 'center': $('#center').val() }, 
+				{
+					'center': $('#center').val()
+					[% IF ( service_type == 10 ) OR ( service_vtype == 19 ) %], 'rinnuovo': 1[% END %]
+				}, 
 				function(xml) {
 					$(xml).find('node').each( function() {
 						$('#vtype').append(
