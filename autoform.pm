@@ -1150,13 +1150,12 @@ sub create_clear_form
 		$self->query( 'query', __LINE__, "
 			UPDATE AutoToken SET ServiceType = 1 WHERE Token = ?", {}, $self->{ token }
 		);
-
-		return;
 	}
-
-	$self->query( 'query', __LINE__, "
-		UPDATE AutoAppointments SET CenterID = 46 WHERE ID = ?", {}, $app_id
-	);
+	else {
+		$self->query( 'query', __LINE__, "
+			UPDATE AutoAppointments SET CenterID = 46 WHERE ID = ?", {}, $app_id
+		);
+	}
 	
 	$self->get_app_visa_and_center( 'need_to_recached_data' );
 }
@@ -4020,7 +4019,7 @@ sub mod_hash
 	$hash->{ AppID } = $appid if $appid;
 	$hash->{ SchengenAppDataID } = $schappid if $schappid;
 	$hash->{ Status } = 1 if exists $hash->{ Status };
-	
+
 	if ( $table_name eq 'AppData' ) {	
 	
 		my $schengen_data = $self->get_hash_table( 'AutoSchengenAppData', 'ID', $sch_auto );
@@ -4111,7 +4110,7 @@ sub mod_hash
 			}
 		}
 	}
-	
+
 	if ( ( $checkdoc > 1 ) and ( $table_name eq 'Appointments' ) ) {
 	
 		my ( $sec, $min, $hour, $day, $mon, $year ) = localtime( time );
@@ -4129,7 +4128,7 @@ sub mod_hash
 		
 		$hash->{ Status } = 10 if $checkdoc == 2; 
 	}
-	
+
 	if ( ( $table_name eq 'Appointments' ) and ( $hash->{ VType } == 19 ) ) {
 	
 			
@@ -4137,7 +4136,7 @@ sub mod_hash
 		
 		$hash->{ FDate } = "0000-00-00";
 	}
-	
+
 	if ( $table_name eq 'Appointments' ) {
 	
 		my $appointments = VCS::Docs::appointments->new('VCS::Docs::appointments', $self->{ vars } );
@@ -4158,14 +4157,14 @@ sub mod_hash
 			$hash->{ dwhom } = 1;
 		}
 	}
-	
+
 	delete $hash->{ $_ } for ( 'ShIndex', 'ID', 'FinishedVType', 'FinishedCenter', 'AppEMail',
 		'AppDataID', 'PrimetimeAlert', 'Copypasta' );
 	
 	if ( $checkdoc == 2 ) {
 		delete $hash->{ $_ } for ( 'PersonForAgreements', 'MobilPermission', 'RAddress' );
 	}
-		
+	
 	return $hash;
 }
 
