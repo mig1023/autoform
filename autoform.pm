@@ -7,6 +7,7 @@ use VCS::Site::autodata_type_c;
 use VCS::Site::autodata_type_c_spb;
 use VCS::Site::autodata_type_d;
 use VCS::Site::autodata_type_checkdoc;
+use VCS::Site::autodata_type_rinnuovo;
 use VCS::Site::automobile_api;
 use VCS::Site::autoinfopage;
 use VCS::Site::autopayment;
@@ -165,7 +166,11 @@ sub get_content_rules_hash_opt
 {
 	my $self = shift;
 	
+	my $vtype = $self->get_app_visa_and_center( undef, "vtype" );
+	
 	my ( $center, $visa_category, $service ) = $self->get_app_visa_and_center();
+
+	return VCS::Site::autodata_type_rinnuovo::get_content_rules_hash() if ( $vtype == 19 ) or ( $service == 10 );
 
 	return VCS::Site::autodata_type_checkdoc::get_content_rules_hash() if $service == 2;
 	
@@ -233,7 +238,7 @@ sub get_app_visa_and_center
 		$app_data->{ $_ } = undef if $app_data->{ $_ } eq 'X';
 	}
 	
-	return $vtype if $vtype;
+	return $app_data->{ vtype } if $vtype;
 	
 	return ( $app_data->{ center }, 'C', $app_data->{ service } ) if !$app_data->{ vtype };
 	
@@ -365,7 +370,9 @@ sub autoform
 	$tvars->{ error_page } = ( $page_content eq '' ? 'error' : '' );
 
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
+	
 	$tvars->{ service_type } = $self->get_current_service();
+	$tvars->{ service_vtype } = $self->get_current_service( undef, 'vtype' );
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
@@ -819,7 +826,7 @@ sub init_add_param
 		
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
-				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
+				'[centers_from_db_rinnuovo]' => 'SELECT ID, BName FROM Branches WHERE ID = 1',
 				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID in (1, 15, 2, 3, 10)',
 				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU, Schengen FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
@@ -844,11 +851,14 @@ sub init_add_param
 			$self->cached( 'autoform_addparam', $info_from_db );
 		}
 		
-		$_->[ 1 ] = $self->get_lang_if_exist( $_->[ 1 ], 'mobname', $_->[ 0 ] )
-			for @{ $info_from_db->{ '[centers_from_db]' } };
+		for my $center_table ( "[centers_from_db]", "[centers_from_db_rinnuovo]" ) {
+			
+			$_->[ 1 ] = $self->get_lang_if_exist( $_->[ 1 ], 'mobname', $_->[ 0 ] )
+				for @{ $info_from_db->{ $center_table } };
+		}
 	
 		$_->[ 1 ] = $self->get_lang_if_exist( $_->[ 1 ], 'visaname', $_->[ 0 ] )
-			for @{ $info_from_db->{ '[visas_from_db]' } };
+			for @{ $info_from_db->{  "[visas_from_db_checkdoc]" } };
 	}
 	
 	if ( $self->{ token } and $keys->{ persons_in_page } ) {
@@ -1134,6 +1144,15 @@ sub create_clear_form
 	my $checkdoc_service = $self->get_current_service();
 
 	return if $checkdoc_service <= 1;
+	
+	if ( $checkdoc_service == 10 ) {
+		
+		$self->query( 'query', __LINE__, "
+			UPDATE AutoToken SET ServiceType = 1 WHERE Token = ?", {}, $self->{ token }
+		);
+
+		return;
+	}
 
 	$self->query( 'query', __LINE__, "
 		UPDATE AutoAppointments SET CenterID = 46 WHERE ID = ?", {}, $app_id
@@ -1554,7 +1573,7 @@ sub get_service
 # //////////////////////////////////////////////////
 {
 	my ( $self, $action, $step ) = @_;
-	
+
 	my $service_code = {
 		'appointment' => 1,
 		'checkdoc' => 2,
@@ -2517,8 +2536,12 @@ sub get_progressbar_hash_opt
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
+
+	my $vtype = $self->get_app_visa_and_center( undef, "vtype" );
 	
 	my ( $center, $visa_category, $service ) = $self->get_app_visa_and_center();
+
+	return VCS::Site::autodata_type_rinnuovo::get_progressline() if ( $vtype == 19 ) or ( $service == 10 );
 	
 	return VCS::Site::autodata_type_checkdoc::get_progressline() if $service == 2;
 	
@@ -2695,7 +2718,7 @@ sub get_html_for_element
 			$self->lang( "Количество заявителей: ") . $count . 
 			$self->lang( "<br>Стоимость: " ) . $price .
 			$self->lang( " руб<br><br>К оплате за услугу: <b>" ) . $pay . "</b>" ;
-					
+
 		$content =~ s/\[pay_text\]/$pay_text/;
 		$content =~ s/\[pay_amount\]/$pay/;
 	}
@@ -4027,9 +4050,7 @@ sub mod_hash
 	$hash->{ SchengenAppDataID } = $schappid if $schappid;
 	$hash->{ Status } = 1 if exists $hash->{ Status };
 	
-	if ( $table_name eq 'AppData' ) {
-	
-		
+	if ( $table_name eq 'AppData' ) {	
 	
 		my $schengen_data = $self->get_hash_table( 'AutoSchengenAppData', 'ID', $sch_auto );
 		
@@ -4136,6 +4157,14 @@ sub mod_hash
 		$hash->{ AppDate } = "$year-$mon-$day";
 		
 		$hash->{ Status } = 10 if $checkdoc == 2; 
+	}
+	
+	if ( ( $table_name eq 'Appointments' ) and ( $hash->{ VType } == 19 ) ) {
+	
+			
+		$hash->{ SDate } = "0000-00-00";
+		
+		$hash->{ FDate } = "0000-00-00";
 	}
 	
 	if ( $table_name eq 'Appointments' ) {
@@ -4405,6 +4434,8 @@ sub send_link
 # //////////////////////////////////////////////////
 {
 	my ( $self, $email, $service ) = @_;
+	
+	$service = 1 if $service == 10;
 	
 	my $heads_texts = VCS::Site::autodata::get_link_text_head();
 	
