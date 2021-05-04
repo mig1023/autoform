@@ -457,8 +457,6 @@ sub download_checklist
 	
 	my $conf = $self->{ vars }->getConfig('general');
 	
-	my $token = $self->{ vars }->getparam( 'token' );
-	
 	my $vtype = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT VType FROM Appointments
 		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
