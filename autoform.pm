@@ -372,7 +372,7 @@ sub autoform
 	$tvars->{ urgent_allowed } = $self->urgent_allowed( $special );
 	
 	$tvars->{ service_type } = $self->get_current_service();
-	$tvars->{ service_vtype } = $self->get_current_service( undef, 'vtype' );
+	$tvars->{ service_vtype } = $self->get_app_visa_and_center( undef, 'vtype' );
 
 	( $tvars->{ last_error_name }, $tvars->{ last_error_text } ) = split( /\|/, $last_error );
 	
