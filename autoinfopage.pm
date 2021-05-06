@@ -1362,6 +1362,8 @@ sub get_min_max_date
 		JOIN AutoToken ON Appointments.ID = AutoToken.CreatedApp
 		WHERE Token = ?", $self->{ token }
 	);
+	
+	return ( undef, undef, 1 ) if $fly_date eq "0000-00-00";
 			
 	my ( $year, $month, $day ) = Date::Calc::Add_Delta_Days( split( /\-/, $fly_date ), ( $collect_days * -1 ) );
 	
