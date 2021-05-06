@@ -28,8 +28,8 @@
 	[% END %]
 	
 	[% IF ( special.sms_code) %]
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
+		<script src="[% static %]/md5.core.min.js"></script>
+		<script src="[% static %]/md5.js"></script>
 	[% END %]
 
 	[% IF javascript_check %]
