@@ -419,7 +419,7 @@ sub print_agreement
 # //////////////////////////////////////////////////
 {
 	my $self = shift;
-	
+
 	my $print = VCS::Docs::individuals->new( 'VCS::Docs::individuals', $self->{ vars } );
 	
 	my $app = lc( $self->{ vars }->getparam( 'app' ) ) || 0;
@@ -626,11 +626,19 @@ sub get_editable_fields
 	
 	my $this_spb = VCS::Site::autodata::this_is_spb_center( $center );
 
-	my $fields = ( $this_spb ? VCS::Site::autodata_type_c_spb::get_content_edit_rules_hash() : VCS::Site::autodata_type_c::get_content_edit_rules_hash() );
-		
-	@$fields = grep { $_->{ name } ne "edt_apps_date" } @$fields if $service != 2;
+	my $fields = undef;
 	
-	return $fields;
+	if ( $service == 2 ) {
+		
+		return VCS::Site::autodata_type_checkdoc::get_content_edit_rules_hash();
+	}
+	elsif ( $this_spb ) {
+	
+		return VCS::Site::autodata_type_c_spb::get_content_edit_rules_hash();
+	}
+	else {
+		return VCS::Site::autodata_type_c::get_content_edit_rules_hash();
+	}
 }
 
 sub change_status_if_need
