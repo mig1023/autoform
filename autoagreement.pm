@@ -54,8 +54,22 @@ sub create_sms_agreements_if_need
 
 	my $now = $self->{ vars }->get_system->now_date();
 	
-	my $agreementNo = $self->{ vars }->admfunc->getAgrNumber( $self->{ vars }, 46, $now );
+	$self->{ af }->query( 'query', __LINE__, "
+		LOCK TABLES DocUploadedAgreements WRITE, Templates READ, PriceRate READ, PriceList READ"
+	);
 	
+	my $maxAgr = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT MAX(Agreement) FROM DocUploadedAgreements WHERE AgrDate = ?", $now
+	);
+
+	$maxAgr =~ /(\d{2})(\d{6})(\d{6})/;
+	
+	my $maxOrder = sprintf('%06d', ( $2 ? $2 + 1 : 1 ) );
+
+	$now =~ /(\d{2})(\d{2})\-(\d{2})\-(\d{2})/;
+		
+	my $agreementNo = "46$maxOrder$3$4$2";
+
 	my $template = $self->{ af }->query( 'sel1', __LINE__, "
 		SELECT ID FROM Templates WHERE TDate <= curdate() AND isJur=0 AND CenterID=46 ORDER BY TDate DESC LIMIT 1"
 	);
@@ -63,9 +77,11 @@ sub create_sms_agreements_if_need
 	my $rate = $self->{ vars }->admfunc->getRate( $self->{ vars }, 'RUR', $now, 46 );
 	
 	$self->{ af }->query( 'query', __LINE__, "
-		INSERT INTO DocUploadedAgreements (Token, Agreement, RateID, Template) VALUES (?, ?, ?, ?)", {},
-		$token_id, $agreementNo, $rate, $template
+		INSERT INTO DocUploadedAgreements (Token, Agreement, RateID, Template, AgrDate) VALUES (?, ?, ?, ?, ?)", {},
+		$token_id, $agreementNo, $rate, $template, $now
 	);
+	
+	$self->{ af }->query( 'query', __LINE__, "UNLOCK TABLES" );
 }
 
 sub get_sms_agreements
