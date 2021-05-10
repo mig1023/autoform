@@ -826,7 +826,7 @@ sub init_add_param
 		
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
-				'[centers_from_db_rinnuovo]' => 'SELECT ID, BName FROM Branches WHERE ID = 1',
+				'[centers_from_db_rinnuovo]' => 'SELECT ID, BName FROM Branches WHERE ID in (1, 11)',
 				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID in (1, 15, 2, 3, 10)',
 				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU, Schengen FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
@@ -1862,7 +1862,7 @@ sub check_existing_id_in_token
 		JOIN $auto" . "AppData ON AutoToken.$created = $auto". "AppData.AppID
 		WHERE Token = ?", $self->{ token }
 	);
-	
+
 	for my $app ( @$list_of_app_in_token ) {
 	
 		$exist = 1 if ( $app->{ID} == $appdata_id );
