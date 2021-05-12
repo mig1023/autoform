@@ -2014,6 +2014,10 @@ sub get_app_file_list_by_token
 			
 			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ }
 				for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay', 'CheckDocComment', 'BlockOnlineApp', 'AppSDate' );
+				
+			$doc_list->{ $app->{ ID } }->{ CheckDocComment } =~ s/\n/<br><br>/g;
+			
+			$doc_list->{ $app->{ ID } }->{ CheckDocComment } =~ s/\*([^\*]+)\*/<b>$1<\/b>/g;
 
 			$doc_list->{ $app->{ ID } }->{ AppSDate } =~ s/(\d{4})\-(\d{2})\-(\d{2})/$3.$2.$1/;
 
