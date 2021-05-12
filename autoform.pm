@@ -2409,6 +2409,8 @@ sub get_html_line
 	my $content = $self->get_html_for_element( 'start_line' );
 	
 	if ( $element->{ type } =~ /^(text|pay_confirm)$/ ) {
+		
+		$element->{ label } = '<span class="ltl_text">' . $element->{ label } . '</span>' if $element->{ ltl_text_size };
 	
 		$content .= $self->get_html_for_element(
 			'text', $element->{ name }, $element->{ label }, undef, $element->{ font }
