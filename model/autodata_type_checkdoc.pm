@@ -145,6 +145,79 @@ sub get_content_rules_hash
 			},
 		],
 		
+		'Предупреждение о типах виз' => [
+			{
+				page_ord => 160,
+				progress => 1,
+				relation => {
+					only_if => {
+						table => 'Appointments',
+						name => 'VType',
+						value => '10',
+					}
+				},
+				page_db_id => 400036,
+			},
+			{
+				type => 'text',
+				name => 'reingresso_warning1',
+				label => 'Обращаем Ваше внимание, что виза Reingresso (Повторный въезд) и виза Visto Rinnuovo (продление ТУРИСТИЧЕСКОЙ визы) - это разные типы виз!',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'reingresso_warning2',
+				label => 'В рамках онлайн-проверки консультация по Visto Rinnuovo <b>не производится</b>.',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'reingresso_warning3',
+				label => 'Если Вы обращаетесь именно за визой Reingresso, нажмите <b>Далее</b>.',	
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'reingresso_warning4',
+				label => 'Для запроса визы Visto Rinnuovo необходимо явиться в Визовый центр в Москве, предварительно <a class = "dotted_link_big" target="_blank" href="/autoform/?service=rinnuovo">записавшись на прием</a>.',
+			},
+			{
+				type => 'free_line',
+			},
+			{
+				type => 'text',
+				name => 'reingresso_warning5',
+				label => 'Ответственность за неправильный выбор типа запрашиваемой визы возлагается на Заказчика услуги.',
+				ltl_text_size => 1,
+			},
+		],
+		
+		'Предупреждение' => [
+			{
+				page_ord => 175,
+				progress => 1,
+				relation => {
+					only_if => {
+						table => 'Appointments',
+						name => 'VType',
+						value => '1',
+					}
+				},
+				page_db_id => 400034,
+			},
+			{
+				type => 'text',
+				name => 'affari_warning',
+				label => 'Если вы запрашиваете Affari <b>для моделей</b> - вам необходимо обратиться напрямую в Визовый центр для подачи, онлайн-проверка документов <b>не производится</b>.',
+			},
+		],
+		
 		'Предупреждение' => [
 			{
 				page_ord => 175,
