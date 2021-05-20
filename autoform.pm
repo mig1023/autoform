@@ -826,7 +826,8 @@ sub init_add_param
 		
 			my $info_from_sql = {
 				'[centers_from_db]' => 'SELECT ID, BName FROM Branches WHERE Display = 1 AND isDeleted = 0',
-				'[centers_from_db_rinnuovo]' => 'SELECT ID, BName FROM Branches WHERE ID in (1, 11)',
+				'[centers_from_db_rinnuovo]' => 'SELECT ID, BName FROM Branches WHERE ID in (1, 11, 5, 8, 19, 9, 2)',
+				'[visas_from_db]' => 'SELECT ID, VName FROM VisaTypes WHERE OnSite = 1',
 				'[visas_from_db_checkdoc]' => 'SELECT ID, VName FROM VisaTypes WHERE ID in (1, 15, 2, 3, 10)',
 				'[brh_countries]' => 'SELECT ID, EnglishName, Ex, MemberOfEU, Schengen FROM Countries',
 				'[schengen_provincies]' => 'SELECT ID, Name FROM SchengenProvinces',
