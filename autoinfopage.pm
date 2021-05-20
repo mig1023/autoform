@@ -314,7 +314,7 @@ sub get_infopage
 		$title = 1;
 	}
 	else {
-		$app_list = $self->get_app_file_list_by_token( $self->{ token }, $app_info->{ VType }, 'without_old' );
+		$app_list = $self->get_app_file_list_by_token( $self->{ token }, $app_info->{ VType }, 'outer_request' );
 
 		$title = ( $app_info->{ ServiceType } == 2 ? 6 : 1 );
 		
@@ -331,7 +331,7 @@ sub get_infopage
 	my $closed_app = ( $app_info->{ app_status } == 12 ? 1 : 0 );
 	my $checked_app = ( $app_info->{ app_status } == 11 ? 1 : 0 );
 	
-	my ( $replaced, $all_is_ok ) = $self->get_replaced_files( $checked_app );
+	my ( $replaced, $all_is_ok ) = $self->get_replaced_files( $checked_app, $app_info->{ app_status } );
 
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
@@ -1853,7 +1853,7 @@ sub set_new_appdate
 sub get_replaced_files
 # //////////////////////////////////////////////////
 {
-	my ( $self, $checked ) = @_;
+	my ( $self, $checked, $app_status ) = @_;
 	
 	return ( 0, 0 ) unless $checked;
 	
@@ -1868,19 +1868,10 @@ sub get_replaced_files
 	my $files_by_types = {};
 	
 	my $all_is_ok = 1;
-	
-	my $anketa_type = 9999;
 
 	for ( @$files ) {
-		
-		$files_by_types->{ $_->{ ID } } = {} unless exists $files_by_types->{ $_->{ ID } };
-		
-		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } } = { old => 0, uncheck_status => 0 }
-			unless exists $files_by_types->{ $_->{ ID } }->{ $_->{ DocType } };
-			
-		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } }->{ old } = 1 if $_->{ Old };
-		
-		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } }->{ uncheck_status } = 1 if $_->{ CheckStatus } == 0;
+				
+		$files_by_types->{ $_->{ ID } }->{ $_->{ DocType } } = 1 if $_->{ CheckStatus } == 0;
 		
 		$all_is_ok = 0 if ( $_->{ CheckStatus } == 1 ) and !$_->{ Old };
 	}
@@ -1888,13 +1879,10 @@ sub get_replaced_files
 	my $replaced = 0;
 
 	for my $app ( keys %$files_by_types ) {
+		
 		for my $doc ( keys %{ $files_by_types->{ $app } } ) {
 		
-			my $doc_checked = $files_by_types->{ $app }->{ $doc };
-		
-			$replaced = 1 if $doc_checked->{ old } and $doc_checked->{ uncheck_status };
-	
-			$replaced = 1 if ( $doc == $anketa_type ) and $doc_checked->{ uncheck_status };
+			$replaced = 1 if ( $app_status == 11 ) and $files_by_types->{ $app }->{ $doc };
 		}
 	}
 
@@ -1904,7 +1892,7 @@ sub get_replaced_files
 sub get_app_file_list_by_token
 # //////////////////////////////////////////////////
 {
-	my ( $self, $token, $visa_type, $without_old ) = @_;
+	my ( $self, $token, $visa_type, $outer_request ) = @_;
 	
 	my $app_list = $self->{ af }->query( 'selallkeys', __LINE__, "
 		SELECT AppData.ID, DocUploaded.ID as DocID, Old, AppData.FName, AppData.LName,
@@ -2014,10 +2002,13 @@ sub get_app_file_list_by_token
 			
 			$doc_list->{ $app->{ ID } }->{ $_ } = $app->{ $_ }
 				for ( 'FName', 'LName', 'BirthDate', 'Token', 'ConcilOnlinePay', 'CheckDocComment', 'BlockOnlineApp', 'AppSDate' );
-				
-			$doc_list->{ $app->{ ID } }->{ CheckDocComment } =~ s/\n/<br><br>/g;
 			
-			$doc_list->{ $app->{ ID } }->{ CheckDocComment } =~ s/\*([^\*]+)\*/<b>$1<\/b>/g;
+			if ( $outer_request ) {
+				$doc_list->{ $app->{ ID } }->{ CheckDocComment } =~ s/\n/<br><br>/g;
+				$doc_list->{ $app->{ ID } }->{ CheckDocComment } =~ s/<br><br>$//;
+				
+				$doc_list->{ $app->{ ID } }->{ CheckDocComment } =~ s/\*([^\*]+)\*/<b>$1<\/b>/g;
+			}
 
 			$doc_list->{ $app->{ ID } }->{ AppSDate } =~ s/(\d{4})\-(\d{2})\-(\d{2})/$3.$2.$1/;
 
@@ -2027,7 +2018,7 @@ sub get_app_file_list_by_token
 		}
 	}
 
-	if ( $without_old ) {
+	if ( $outer_request ) {
 		
 		for my $app ( keys %$doc_list ) {
 			
