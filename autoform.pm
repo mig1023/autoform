@@ -4440,10 +4440,8 @@ sub send_warning
 # //////////////////////////////////////////////////
 {
 	my ( $self, $subject, $body ) = @_;
-
-	my $emails = [
-		'',
-	];
+	
+	my $emails = VCS::Site::autodata::get_warn_emails();
 	
 	$body .= "<br><br>C уважением,<br>Скрипт информирования системы дистанционной подачи";
 	

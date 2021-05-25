@@ -1030,6 +1030,14 @@ sub get_doc_list
 	};
 }
 
+sub get_warn_emails
+# //////////////////////////////////////////////////
+{
+	return [
+		'warn_mail@mail.com',
+	];
+};
+
 sub get_blocked_emails
 # //////////////////////////////////////////////////
 {
