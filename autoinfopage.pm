@@ -2042,8 +2042,8 @@ sub get_app_file_list_by_token
 		}
 	}
 
-	my $visa_type = $self->{ af }->query( 'sel1', __LINE__, "
-		SELECT VType FROM AutoToken
+	my ( $visa_type, $app_status ) = $self->{ af }->query( 'sel1', __LINE__, "
+		SELECT VType, Status FROM AutoToken
 		JOIN Appointments ON Appointments.ID = AutoToken.CreatedApp
 		WHERE Token = ?", $token
 	);
@@ -2098,6 +2098,8 @@ sub get_app_file_list_by_token
 			$file->{ TypeStr } = $self->{ af }->lang( "Анкета (генерируется автоматически)" );
 			
 			$file->{ form_auto } = 1;
+			
+			$file->{ CheckStatus } = 3 if ( $app_status != 10 ) && ( $app_status != 11 );
 			
 			push( @{ $doc_list->{ $app }->{ files }->{ $tmp_id } }, $file );
 		}
