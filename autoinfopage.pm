@@ -332,14 +332,18 @@ sub get_infopage
 	my $checked_app = ( $app_info->{ app_status } == 11 ? 1 : 0 );
 	
 	my ( $replaced, $all_is_ok ) = $self->get_replaced_files( $checked_app, $app_info->{ app_status } );
+	
+	my $config = VCS::Site::autodata::get_settings();
 
 	my $tvars = {
 		'langreq'	=> sub { return $self->{ vars }->getLangSesVar( @_ ) },
 		'title' 	=> $title,
-		'yandex_key'	=> $self->{ autoform }->{ yandex_map }->{ api_key },
+		'yandex_key'	=> $config->{ yandex_map }->{ api_key },
+		'google_key'	=> $config->{ google_map }->{ api_key },
+		'map_type'	=> $config->{ general }->{ maps_type },
+		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'app_info'	=> $app_info,
 		'app_list'	=> $app_list,
-		'map_in_page' 	=> $self->{ af }->get_geo_info( 'app_already_created' ),
 		'token' 	=> $self->{ token },
 		'center_msk'	=> $center_msk,
 		'vcs_tools' 	=> $self->{ af }->{ paths }->{ addr_vcs },

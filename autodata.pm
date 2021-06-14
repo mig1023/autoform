@@ -95,6 +95,10 @@ sub get_settings
 		yandex_map => {
 			api_key => '',
 		},
+				
+		google_map => {
+			api_key => '',
+		},
 		
 		captcha => {
 			public_key => '',

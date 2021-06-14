@@ -223,6 +223,8 @@
 				src="https://yandex.ru/map-widget/v1/-/[% map_in_page.code %]" class="iframe-width-100" allowfullscreen="allowfullscreen">
 			[% ELSIF map_in_page.type == 'yandexconstructor' %]
 				src="https://yandex.ru/map-widget/v1/?um=constructor%[% map_in_page.code %]&amp;lang=ru_RU&amp;scroll=true&amp;source=constructor">
+			[% ELSIF map_in_page.type == 'googleembed' %]
+				src="https://www.google.com/maps/embed/v1/place?q=place_id:[% map_in_page.code %]&key=[% google_key %]" allowfullscreen>		
 			[% ELSE %]
 				src="https://google.com/maps/embed?pb=[% map_in_page.code %]" allowfullscreen="allowfullscreen">
 			[% END %]
