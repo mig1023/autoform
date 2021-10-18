@@ -1,2 +1,2 @@
 # autoform
-Appointment system
+Flexible appointment system
